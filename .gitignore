@@ -1,0 +1,12 @@
+# Python env/cache/build
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/build/
+**/*.egg-info/
+*.pyc
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
