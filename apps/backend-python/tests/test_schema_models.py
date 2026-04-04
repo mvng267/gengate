@@ -206,6 +206,17 @@ def test_batch31_postgres_test_urls_reject_admin_url_without_database_path(monke
         _batch28_postgres_urls("gengate_batch31_missing_admin_db_segment")
 
 
+def test_batch31_postgres_test_urls_reject_admin_url_with_invalid_scheme(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("GENGATE_TEST_POSTGRES_ADMIN_URL", "mysql://root@/postgres")
+    monkeypatch.setenv(
+        "GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE",
+        "postgresql+psycopg://{admin_role}@/{database_name}",
+    )
+
+    with pytest.raises(ValueError, match="rendered Postgres admin URL"):
+        _batch28_postgres_urls("gengate_batch31_invalid_admin_scheme")
+
+
 def test_batch26_postgres_alembic_unique_constraint_round_trip() -> None:
     project_root = Path(__file__).resolve().parents[1]
     database_name = f"gengate_batch26_{uuid.uuid4().hex[:10]}"
