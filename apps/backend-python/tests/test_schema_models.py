@@ -49,6 +49,15 @@ def _batch28_postgres_urls(database_name: str) -> tuple[str, str]:
     else:
         database_url = f"postgresql+psycopg://{admin_role}@/{database_name}"
 
+    parsed_admin_url = urlsplit(admin_url)
+    admin_path = parsed_admin_url.path.strip()
+    if (
+        not admin_url
+        or parsed_admin_url.scheme not in {"postgresql", "postgresql+psycopg"}
+        or admin_path in {"", "/"}
+    ):
+        raise ValueError("Invalid rendered Postgres admin URL")
+
     parsed_database_url = urlsplit(database_url)
     database_path = parsed_database_url.path.strip()
     if (
