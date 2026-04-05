@@ -47,3 +47,13 @@ Run full backend-python test suite:
 source .venv/bin/activate
 pytest -q
 ```
+
+
+## Make targets
+
+From `apps/backend-python/`:
+
+```bash
+make test-smoke
+make test
+```
