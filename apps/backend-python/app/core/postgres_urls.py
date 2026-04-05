@@ -27,6 +27,11 @@ def validate_postgres_url_path(url: str, *, label: str) -> None:
         raise ValueError(f"Invalid rendered Postgres {label} URL")
 
 
+def validate_postgres_database_url_if_needed(url: str) -> None:
+    if urlsplit(url).scheme in {"postgresql", "postgresql+psycopg"}:
+        validate_postgres_url_path(url, label="database")
+
+
 def build_postgres_test_urls(
     database_name: str,
     *,

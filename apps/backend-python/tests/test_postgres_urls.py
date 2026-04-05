@@ -3,6 +3,7 @@ import pytest
 from app.core.postgres_urls import (
     build_postgres_test_urls,
     postgres_admin_url_from_env,
+    validate_postgres_database_url_if_needed,
     validate_postgres_url_path,
 )
 
@@ -30,6 +31,15 @@ def test_validate_postgres_url_path_accepts_single_segment() -> None:
 def test_validate_postgres_url_path_rejects_encoded_slash_segment() -> None:
     with pytest.raises(ValueError, match="rendered Postgres database URL"):
         validate_postgres_url_path("postgresql+psycopg://postgres@/gengate%2Farchive", label="database")
+
+
+def test_validate_postgres_database_url_if_needed_rejects_invalid_postgres_url() -> None:
+    with pytest.raises(ValueError, match="rendered Postgres database URL"):
+        validate_postgres_database_url_if_needed("postgresql+psycopg://postgres@/gengate%2Farchive")
+
+
+def test_validate_postgres_database_url_if_needed_skips_non_postgres_url() -> None:
+    validate_postgres_database_url_if_needed("sqlite+pysqlite:///:memory:")
 
 
 def test_build_postgres_test_urls_default_to_admin_role_and_db() -> None:

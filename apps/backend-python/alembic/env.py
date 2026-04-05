@@ -1,11 +1,9 @@
 from logging.config import fileConfig
-from urllib.parse import urlsplit
-
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from app.core.config import get_settings
-from app.core.postgres_urls import validate_postgres_url_path
+from app.core.postgres_urls import validate_postgres_database_url_if_needed
 from app.models import all_models
 from app.models.base import Base
 
@@ -22,8 +20,7 @@ target_metadata = Base.metadata
 
 
 def _validate_alembic_database_url(url: str) -> None:
-    if urlsplit(url).scheme in {"postgresql", "postgresql+psycopg"}:
-        validate_postgres_url_path(url, label="database")
+    validate_postgres_database_url_if_needed(url)
 
 
 def run_migrations_offline() -> None:
