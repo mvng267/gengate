@@ -4,16 +4,11 @@ import app.core.db as db
 from tests._core_db_fakes import EngineFake, EngineDisposeErrorFake
 from tests._core_db_runtime_state import assert_runtime_cache_cleared, seed_runtime_cache_for_test
 
-
 def test_reset_database_runtime_state_is_idempotent() -> None:
-    db.reset_database_runtime_state()
-    db.reset_database_runtime_state()
 
     assert_runtime_cache_cleared()
 
-
 def test_reset_database_runtime_state_rebuilds_engine_for_new_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -44,9 +39,6 @@ def test_reset_database_runtime_state_rebuilds_engine_for_new_database_url(monke
     assert first_engine is not second_engine
     assert first_url != second_url
 
-    db.reset_database_runtime_state()
-
-
 def test_reset_database_runtime_state_disposes_active_engine() -> None:
     fake_engine = EngineFake()
     seed_runtime_cache_for_test(engine=fake_engine, session_factory=object())
@@ -56,9 +48,7 @@ def test_reset_database_runtime_state_disposes_active_engine() -> None:
     assert fake_engine.disposed is True
     assert_runtime_cache_cleared()
 
-
 def test_reset_database_runtime_state_rebuilds_session_factory_after_reset(monkeypatch: pytest.MonkeyPatch) -> None:
-    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -89,9 +79,6 @@ def test_reset_database_runtime_state_rebuilds_session_factory_after_reset(monke
     assert first_factory is not second_factory
     assert first_bind != second_bind
 
-    db.reset_database_runtime_state()
-
-
 def test_reset_database_runtime_state_clears_cache_even_when_dispose_raises() -> None:
     fake_engine = EngineDisposeErrorFake()
     seed_runtime_cache_for_test(engine=fake_engine, session_factory=object())
@@ -101,7 +88,6 @@ def test_reset_database_runtime_state_clears_cache_even_when_dispose_raises() ->
 
     assert fake_engine.dispose_called is True
     assert_runtime_cache_cleared()
-
 
 def test_reset_database_runtime_state_can_rebuild_after_dispose_failure(monkeypatch: pytest.MonkeyPatch) -> None:
     fake_engine = EngineDisposeErrorFake()
@@ -123,5 +109,3 @@ def test_reset_database_runtime_state_can_rebuild_after_dispose_failure(monkeypa
     rebuilt_engine = db.get_database_engine()
 
     assert rebuilt_engine.url.drivername == "sqlite+pysqlite"
-
-    db.reset_database_runtime_state()

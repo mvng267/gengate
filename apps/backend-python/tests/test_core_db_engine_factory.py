@@ -3,9 +3,7 @@ import pytest
 import app.core.db as db
 from tests._core_db_runtime_state import assert_runtime_cache_cleared, assert_runtime_engine_cached
 
-
 def test_get_database_engine_rejects_encoded_slash_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -22,9 +20,7 @@ def test_get_database_engine_rejects_encoded_slash_database_url(monkeypatch: pyt
 
     assert_runtime_cache_cleared()
 
-
 def test_get_database_engine_rejects_trailing_slash_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -41,9 +37,7 @@ def test_get_database_engine_rejects_trailing_slash_database_url(monkeypatch: py
 
     assert_runtime_cache_cleared()
 
-
 def test_get_database_engine_rejects_double_leading_slash_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -60,11 +54,9 @@ def test_get_database_engine_rejects_double_leading_slash_database_url(monkeypat
 
     assert_runtime_cache_cleared()
 
-
 def test_get_database_engine_rejects_blank_database_segment_encoded_whitespace(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -81,9 +73,7 @@ def test_get_database_engine_rejects_blank_database_segment_encoded_whitespace(
 
     assert_runtime_cache_cleared()
 
-
 def test_get_database_engine_accepts_valid_postgres_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -100,9 +90,7 @@ def test_get_database_engine_accepts_valid_postgres_database_url(monkeypatch: py
     assert engine.url.drivername == "postgresql+psycopg"
     assert engine.url.database == "gengate"
 
-
 def test_get_database_engine_allows_non_postgres_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -118,11 +106,9 @@ def test_get_database_engine_allows_non_postgres_url(monkeypatch: pytest.MonkeyP
 
     assert engine.url.drivername == "sqlite+pysqlite"
 
-
 def test_get_session_factory_rejects_invalid_postgres_url_without_caching_factory(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -139,9 +125,7 @@ def test_get_session_factory_rejects_invalid_postgres_url_without_caching_factor
 
     assert_runtime_cache_cleared()
 
-
 def test_get_session_factory_caches_factory_for_valid_postgres_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -159,11 +143,9 @@ def test_get_session_factory_caches_factory_for_valid_postgres_url(monkeypatch: 
     assert first_factory is second_factory
     assert_runtime_engine_cached()
 
-
 def test_get_db_session_raises_without_creating_cache_when_database_url_invalid(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
