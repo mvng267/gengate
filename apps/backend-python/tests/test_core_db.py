@@ -353,3 +353,25 @@ def test_reset_database_runtime_state_rebuilds_session_factory_after_reset(monke
     assert first_bind != second_bind
 
     db.reset_database_runtime_state()
+
+
+class _FakeEngineWithDisposeError:
+    def __init__(self) -> None:
+        self.dispose_called = False
+
+    def dispose(self) -> None:
+        self.dispose_called = True
+        raise RuntimeError("dispose boom")
+
+
+def test_reset_database_runtime_state_clears_cache_even_when_dispose_raises() -> None:
+    fake_engine = _FakeEngineWithDisposeError()
+    db._engine = fake_engine  # type: ignore[assignment]
+    db._session_factory = object()  # type: ignore[assignment]
+
+    with pytest.raises(RuntimeError, match="dispose boom"):
+        db.reset_database_runtime_state()
+
+    assert fake_engine.dispose_called is True
+    assert db._engine is None
+    assert db._session_factory is None

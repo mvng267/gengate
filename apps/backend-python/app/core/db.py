@@ -13,11 +13,12 @@ _session_factory: sessionmaker[Session] | None = None
 def reset_database_runtime_state() -> None:
     global _engine, _session_factory
 
-    if _engine is not None:
-        _engine.dispose()
-
-    _engine = None
-    _session_factory = None
+    try:
+        if _engine is not None:
+            _engine.dispose()
+    finally:
+        _engine = None
+        _session_factory = None
 
 
 def get_database_engine() -> Engine:
