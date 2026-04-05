@@ -297,3 +297,23 @@ def test_reset_database_runtime_state_rebuilds_engine_for_new_database_url(monke
     assert first_url != second_url
 
     db.reset_database_runtime_state()
+
+
+class _FakeEngine:
+    def __init__(self) -> None:
+        self.disposed = False
+
+    def dispose(self) -> None:
+        self.disposed = True
+
+
+def test_reset_database_runtime_state_disposes_active_engine() -> None:
+    fake_engine = _FakeEngine()
+    db._engine = fake_engine  # type: ignore[assignment]
+    db._session_factory = object()  # type: ignore[assignment]
+
+    db.reset_database_runtime_state()
+
+    assert fake_engine.disposed is True
+    assert db._engine is None
+    assert db._session_factory is None
