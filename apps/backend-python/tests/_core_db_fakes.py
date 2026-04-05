@@ -5,7 +5,6 @@ These fakes are intentionally tiny and deterministic:
 - Engine fakes drive reset/dispose cache behavior.
 """
 
-
 class SessionFake:
     def __init__(self) -> None:
         self.committed = False
@@ -25,17 +24,14 @@ class SessionFake:
     def close(self) -> None:
         self.closed = True
 
-
 class SessionCommitErrorFake(SessionFake):
     def commit(self) -> None:
         raise RuntimeError("commit boom")
-
 
 class SessionRollbackErrorFake(SessionFake):
     def rollback(self) -> None:
         self.rolled_back = True
         raise RuntimeError("rollback boom")
-
 
 class SessionCommitAndRollbackErrorFake(SessionFake):
     def commit(self) -> None:
@@ -45,14 +41,12 @@ class SessionCommitAndRollbackErrorFake(SessionFake):
         self.rolled_back = True
         raise RuntimeError("rollback boom")
 
-
 class EngineFake:
     def __init__(self) -> None:
         self.disposed = False
 
     def dispose(self) -> None:
         self.disposed = True
-
 
 class EngineDisposeErrorFake:
     def __init__(self) -> None:

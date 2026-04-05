@@ -4,7 +4,6 @@ import app.core.db as db
 
 import pytest
 
-
 def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
         "markers",
@@ -19,8 +18,6 @@ def pytest_configure(config: pytest.Config) -> None:
         "GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE",
         "postgresql+psycopg:///{database_name}",
     )
-
-
 
 @pytest.fixture(autouse=True)
 def reset_core_db_runtime_state(request: pytest.FixtureRequest) -> None:
