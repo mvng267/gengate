@@ -119,3 +119,47 @@ def test_get_database_engine_allows_non_postgres_url(monkeypatch: pytest.MonkeyP
     engine = db.get_database_engine()
 
     assert engine.url.drivername == "sqlite+pysqlite"
+
+
+def test_get_session_factory_rejects_invalid_postgres_url_without_caching_factory(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    db._engine = None
+    db._session_factory = None
+
+    monkeypatch.setattr(
+        db,
+        "get_settings",
+        lambda: type(
+            "Settings",
+            (),
+            {"database_url": "postgresql+psycopg://postgres@/gengate/"},
+        )(),
+    )
+
+    with pytest.raises(ValueError, match="rendered Postgres database URL"):
+        db.get_session_factory()
+
+    assert db._engine is None
+    assert db._session_factory is None
+
+
+def test_get_session_factory_caches_factory_for_valid_postgres_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    db._engine = None
+    db._session_factory = None
+
+    monkeypatch.setattr(
+        db,
+        "get_settings",
+        lambda: type(
+            "Settings",
+            (),
+            {"database_url": "postgresql+psycopg://postgres@/gengate"},
+        )(),
+    )
+
+    first_factory = db.get_session_factory()
+    second_factory = db.get_session_factory()
+
+    assert first_factory is second_factory
+    assert db._engine is not None
