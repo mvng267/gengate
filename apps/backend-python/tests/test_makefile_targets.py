@@ -47,6 +47,14 @@ def test_backend_makefile_keeps_test_url_gate_group_contract() -> None:
     assert "tests/test_alembic_env.py" in test_url_gate_block
 
 
+def test_backend_makefile_keeps_test_schema_group_contract() -> None:
+    makefile_text = _backend_makefile_text()
+    test_schema_block = _make_variable_block(makefile_text, "TEST_SCHEMA")
+
+    assert "tests/test_schema_models.py" in test_schema_block
+    assert "$(TEST_URL_GATE)" in test_schema_block
+
+
 def test_backend_makefile_keeps_test_contracts_group_contract() -> None:
     makefile_text = _backend_makefile_text()
     test_contracts_block = _make_variable_block(makefile_text, "TEST_CONTRACTS")
