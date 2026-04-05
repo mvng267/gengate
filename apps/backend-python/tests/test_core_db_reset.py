@@ -1,6 +1,7 @@
 import pytest
 
 import app.core.db as db
+from tests._core_db_fakes import FakeEngine, FakeEngineWithDisposeError
 
 
 def test_reset_database_runtime_state_is_idempotent() -> None:
@@ -46,16 +47,8 @@ def test_reset_database_runtime_state_rebuilds_engine_for_new_database_url(monke
     db.reset_database_runtime_state()
 
 
-class _FakeEngine:
-    def __init__(self) -> None:
-        self.disposed = False
-
-    def dispose(self) -> None:
-        self.disposed = True
-
-
 def test_reset_database_runtime_state_disposes_active_engine() -> None:
-    fake_engine = _FakeEngine()
+    fake_engine = FakeEngine()
     db._engine = fake_engine  # type: ignore[assignment]
     db._session_factory = object()  # type: ignore[assignment]
 
@@ -101,17 +94,8 @@ def test_reset_database_runtime_state_rebuilds_session_factory_after_reset(monke
     db.reset_database_runtime_state()
 
 
-class _FakeEngineWithDisposeError:
-    def __init__(self) -> None:
-        self.dispose_called = False
-
-    def dispose(self) -> None:
-        self.dispose_called = True
-        raise RuntimeError("dispose boom")
-
-
 def test_reset_database_runtime_state_clears_cache_even_when_dispose_raises() -> None:
-    fake_engine = _FakeEngineWithDisposeError()
+    fake_engine = FakeEngineWithDisposeError()
     db._engine = fake_engine  # type: ignore[assignment]
     db._session_factory = object()  # type: ignore[assignment]
 
@@ -124,7 +108,7 @@ def test_reset_database_runtime_state_clears_cache_even_when_dispose_raises() ->
 
 
 def test_reset_database_runtime_state_can_rebuild_after_dispose_failure(monkeypatch: pytest.MonkeyPatch) -> None:
-    fake_engine = _FakeEngineWithDisposeError()
+    fake_engine = FakeEngineWithDisposeError()
     db._engine = fake_engine  # type: ignore[assignment]
     db._session_factory = object()  # type: ignore[assignment]
 
