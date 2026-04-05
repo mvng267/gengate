@@ -58,6 +58,7 @@ make test-policy
 make test-core-db
 make test-db-lifecycle
 make test-url-gate
+make test-contracts
 make test-fast
 make test-smoke
 make test

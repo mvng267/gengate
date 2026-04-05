@@ -1,4 +1,4 @@
-.PHONY: test test-smoke test-fast test-core-db test-policy test-url-gate test-db-lifecycle
+.PHONY: test test-smoke test-fast test-core-db test-policy test-url-gate test-db-lifecycle test-contracts
 
 # Run full backend-python test suite.
 test:
@@ -31,6 +31,21 @@ test-url-gate:
 	. .venv/bin/activate && pytest -q \
 		tests/test_postgres_urls.py \
 		tests/test_alembic_env.py
+
+# Run API/contract-heavy backend coverage.
+test-contracts:
+	. .venv/bin/activate && pytest -q \
+		tests/test_batch6_contracts.py \
+		tests/test_batch7_conversations_api.py \
+		tests/test_batch9_blocks_moment_media_reactions_api.py \
+		tests/test_batch10_sessions_api.py \
+		tests/test_friendships_api.py \
+		tests/test_locations_api.py \
+		tests/test_location_audience_api.py \
+		tests/test_messages_api.py \
+		tests/test_moments_api.py \
+		tests/test_notifications_security_api.py \
+		tests/test_profiles_api.py
 
 # Run fast gate (policy + DB lifecycle + URL gate).
 test-fast:
