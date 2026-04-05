@@ -15,7 +15,6 @@ Use marker `@pytest.mark.preserve_db_runtime_state` only when a test
 Current guard coverage for this behavior:
 - `tests/test_core_db_runtime_fixture.py`
 
-
 ## Pytest marker policy
 
 Backend tests run with `--strict-markers` (configured in `pyproject.toml`).
@@ -25,3 +24,26 @@ When adding a new custom marker:
 2. Add/adjust a guard test if marker behavior changes.
 
 This ensures marker typos fail fast in CI/local runs.
+
+## Quick smoke commands
+
+Run core DB + marker policy guard set:
+
+```bash
+source .venv/bin/activate
+pytest -q \
+  tests/test_pytest_marker_policy.py \
+  tests/test_core_db_runtime_fixture.py \
+  tests/test_core_db_engine_factory.py \
+  tests/test_core_db_session_lifecycle.py \
+  tests/test_core_db_reset.py \
+  tests/test_postgres_urls.py \
+  tests/test_alembic_env.py
+```
+
+Run full backend-python test suite:
+
+```bash
+source .venv/bin/activate
+pytest -q
+```
