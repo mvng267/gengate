@@ -84,14 +84,6 @@ def test_backend_makefile_keeps_test_schema_group_contract() -> None:
     assert "$(TEST_URL_GATE)" in test_schema_block
 
 
-def test_backend_makefile_avoids_duplicate_explicit_tests_in_schema_group() -> None:
-    makefile_text = _backend_makefile_text()
-    test_schema_block = _make_variable_block(makefile_text, "TEST_SCHEMA")
-    schema_files = _extract_explicit_test_files(test_schema_block)
-
-    assert len(schema_files) == len(set(schema_files))
-
-
 def test_backend_makefile_keeps_test_contracts_group_contract() -> None:
     makefile_text = _backend_makefile_text()
     test_contracts_block = _make_variable_block(makefile_text, "TEST_CONTRACTS")
@@ -101,6 +93,22 @@ def test_backend_makefile_keeps_test_contracts_group_contract() -> None:
     assert "tests/test_batch10_sessions_api.py" in test_contracts_block
     assert "tests/test_messages_api.py" in test_contracts_block
     assert "tests/test_profiles_api.py" in test_contracts_block
+
+
+def test_backend_makefile_keeps_critical_groups_non_empty() -> None:
+    makefile_text = _backend_makefile_text()
+
+    for group_name in ["TEST_POLICY", "TEST_URL_GATE", "TEST_CORE_DB", "TEST_CONTRACTS"]:
+        group_block = _make_variable_block(makefile_text, group_name)
+        assert _extract_explicit_test_files(group_block), f"{group_name} must stay non-empty"
+
+
+def test_backend_makefile_avoids_duplicate_explicit_tests_in_schema_group() -> None:
+    makefile_text = _backend_makefile_text()
+    test_schema_block = _make_variable_block(makefile_text, "TEST_SCHEMA")
+    schema_files = _extract_explicit_test_files(test_schema_block)
+
+    assert len(schema_files) == len(set(schema_files))
 
 
 def test_backend_makefile_avoids_duplicate_explicit_tests_in_contracts_group() -> None:
