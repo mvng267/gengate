@@ -39,6 +39,15 @@ def test_backend_makefile_keeps_test_policy_group_contract() -> None:
     assert "tests/test_core_db_runtime_fixture.py" in test_policy_block
 
 
+def test_backend_makefile_keeps_test_db_lifecycle_group_contract() -> None:
+    makefile_text = _backend_makefile_text()
+    test_db_lifecycle_block = _make_variable_block(makefile_text, "TEST_DB_LIFECYCLE")
+
+    assert "tests/test_core_db_engine_factory.py" in test_db_lifecycle_block
+    assert "tests/test_core_db_session_lifecycle.py" in test_db_lifecycle_block
+    assert "tests/test_core_db_reset.py" in test_db_lifecycle_block
+
+
 def test_backend_makefile_keeps_test_url_gate_group_contract() -> None:
     makefile_text = _backend_makefile_text()
     test_url_gate_block = _make_variable_block(makefile_text, "TEST_URL_GATE")
