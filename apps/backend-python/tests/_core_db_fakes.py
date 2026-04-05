@@ -1,4 +1,12 @@
-class FakeSession:
+"""Shared fake objects for core DB lifecycle tests.
+
+These fakes are intentionally tiny and deterministic:
+- Session fakes drive commit/rollback/close precedence behavior.
+- Engine fakes drive reset/dispose cache behavior.
+"""
+
+
+class SessionFake:
     def __init__(self) -> None:
         self.committed = False
         self.rolled_back = False
@@ -18,18 +26,18 @@ class FakeSession:
         self.closed = True
 
 
-class FakeSessionCommitError(FakeSession):
+class SessionCommitErrorFake(SessionFake):
     def commit(self) -> None:
         raise RuntimeError("commit boom")
 
 
-class FakeSessionRollbackError(FakeSession):
+class SessionRollbackErrorFake(SessionFake):
     def rollback(self) -> None:
         self.rolled_back = True
         raise RuntimeError("rollback boom")
 
 
-class FakeSessionCommitAndRollbackError(FakeSession):
+class SessionCommitAndRollbackErrorFake(SessionFake):
     def commit(self) -> None:
         raise RuntimeError("commit boom")
 
@@ -38,7 +46,7 @@ class FakeSessionCommitAndRollbackError(FakeSession):
         raise RuntimeError("rollback boom")
 
 
-class FakeEngine:
+class EngineFake:
     def __init__(self) -> None:
         self.disposed = False
 
@@ -46,7 +54,7 @@ class FakeEngine:
         self.disposed = True
 
 
-class FakeEngineWithDisposeError:
+class EngineDisposeErrorFake:
     def __init__(self) -> None:
         self.dispose_called = False
 

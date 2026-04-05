@@ -2,10 +2,10 @@ import pytest
 
 import app.core.db as db
 from tests._core_db_fakes import (
-    FakeSession,
-    FakeSessionCommitAndRollbackError,
-    FakeSessionCommitError,
-    FakeSessionRollbackError,
+    SessionFake,
+    SessionCommitAndRollbackErrorFake,
+    SessionCommitErrorFake,
+    SessionRollbackErrorFake,
 )
 
 
@@ -32,7 +32,7 @@ def test_get_db_session_yields_and_closes_for_valid_database_url(monkeypatch: py
 
 
 def test_get_db_session_commits_and_closes_on_normal_exit(monkeypatch: pytest.MonkeyPatch) -> None:
-    fake_session = FakeSession()
+    fake_session = SessionFake()
 
     monkeypatch.setattr(db, "get_session_factory", lambda: lambda: fake_session)
 
@@ -50,7 +50,7 @@ def test_get_db_session_commits_and_closes_on_normal_exit(monkeypatch: pytest.Mo
 
 
 def test_get_db_session_rolls_back_and_closes_when_consumer_raises(monkeypatch: pytest.MonkeyPatch) -> None:
-    fake_session = FakeSession()
+    fake_session = SessionFake()
 
     monkeypatch.setattr(db, "get_session_factory", lambda: lambda: fake_session)
 
@@ -66,7 +66,7 @@ def test_get_db_session_rolls_back_and_closes_when_consumer_raises(monkeypatch: 
 
 
 def test_get_db_session_rolls_back_and_closes_when_commit_raises(monkeypatch: pytest.MonkeyPatch) -> None:
-    fake_session = FakeSessionCommitError()
+    fake_session = SessionCommitErrorFake()
 
     monkeypatch.setattr(db, "get_session_factory", lambda: lambda: fake_session)
 
@@ -86,7 +86,7 @@ def test_get_db_session_rolls_back_and_closes_when_commit_raises(monkeypatch: py
 def test_get_db_session_propagates_rollback_error_with_original_exception_chained(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    fake_session = FakeSessionRollbackError()
+    fake_session = SessionRollbackErrorFake()
 
     monkeypatch.setattr(db, "get_session_factory", lambda: lambda: fake_session)
 
@@ -106,7 +106,7 @@ def test_get_db_session_propagates_rollback_error_with_original_exception_chaine
 def test_get_db_session_chains_commit_error_when_rollback_also_fails(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    fake_session = FakeSessionCommitAndRollbackError()
+    fake_session = SessionCommitAndRollbackErrorFake()
 
     monkeypatch.setattr(db, "get_session_factory", lambda: lambda: fake_session)
 
@@ -136,9 +136,9 @@ def test_get_db_session_exception_precedence_contract_guard(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     if mode == "commit":
-        fake_session = FakeSessionCommitAndRollbackError()
+        fake_session = SessionCommitAndRollbackErrorFake()
     else:
-        fake_session = FakeSessionRollbackError()
+        fake_session = SessionRollbackErrorFake()
 
     monkeypatch.setattr(db, "get_session_factory", lambda: lambda: fake_session)
 
