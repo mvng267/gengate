@@ -177,6 +177,26 @@ def test_batch29_postgres_test_urls_reject_invalid_database_url_template(monkeyp
         _batch28_postgres_urls("gengate_batch29_invalid")
 
 
+def test_batch29_postgres_test_urls_reject_malformed_format_database_url_template(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(
+        "GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE",
+        "postgresql+psycopg://{admin_role}@/{database_name}{",
+    )
+
+    with pytest.raises(ValueError, match="GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE"):
+        _batch28_postgres_urls("gengate_batch29_malformed_template")
+
+
+def test_batch29_postgres_test_urls_reject_positional_database_url_template(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(
+        "GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE",
+        "postgresql+psycopg://{0}@/{database_name}",
+    )
+
+    with pytest.raises(ValueError, match="GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE"):
+        _batch28_postgres_urls("gengate_batch29_positional_template")
+
+
 def test_batch30_postgres_test_urls_require_database_path_segment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE", "postgresql+psycopg://{database_name}@/")
 
