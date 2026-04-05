@@ -27,7 +27,7 @@ This ensures marker typos fail fast in CI/local runs.
 
 ## Quick smoke commands
 
-Run fast gate (policy + DB lifecycle + URL gate):
+Run canonical smoke gate (policy + DB lifecycle + URL gate):
 
 ```bash
 source .venv/bin/activate
@@ -60,7 +60,7 @@ make test-db-lifecycle
 make test-url-gate
 make test-schema
 make test-contracts
-make test-fast
-make test-smoke
+make test-fast  # canonical smoke gate
+make test-smoke # alias of test-fast
 make test
 ```
