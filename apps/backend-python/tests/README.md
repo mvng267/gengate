@@ -54,6 +54,7 @@ pytest -q
 From `apps/backend-python/`:
 
 ```bash
+make test-core-db
 make test-smoke
 make test
 ```
