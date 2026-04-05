@@ -450,3 +450,32 @@ def test_get_db_session_propagates_rollback_error_with_original_exception_chaine
     assert fake_session.committed is False
     assert fake_session.rolled_back is True
     assert fake_session.closed is True
+
+
+class _FakeSessionCommitAndRollbackError(_FakeSession):
+    def commit(self) -> None:
+        raise RuntimeError("commit boom")
+
+    def rollback(self) -> None:
+        self.rolled_back = True
+        raise RuntimeError("rollback boom")
+
+
+def test_get_db_session_chains_commit_error_when_rollback_also_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fake_session = _FakeSessionCommitAndRollbackError()
+
+    monkeypatch.setattr(db, "get_session_factory", lambda: lambda: fake_session)
+
+    generator = db.get_db_session()
+    next(generator)
+
+    with pytest.raises(RuntimeError, match="rollback boom") as exc_info:
+        next(generator)
+
+    assert exc_info.value.__cause__ is not None
+    assert str(exc_info.value.__cause__) == "commit boom"
+    assert fake_session.committed is False
+    assert fake_session.rolled_back is True
+    assert fake_session.closed is True
