@@ -1,6 +1,7 @@
 import pytest
 
 import app.core.db as db
+from tests._core_db_runtime_state import assert_runtime_cache_cleared, assert_runtime_engine_cached
 
 
 def test_get_database_engine_rejects_encoded_slash_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -19,7 +20,7 @@ def test_get_database_engine_rejects_encoded_slash_database_url(monkeypatch: pyt
     with pytest.raises(ValueError, match="rendered Postgres database URL"):
         db.get_database_engine()
 
-    assert db._engine is None
+    assert_runtime_cache_cleared()
 
 
 def test_get_database_engine_rejects_trailing_slash_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -38,7 +39,7 @@ def test_get_database_engine_rejects_trailing_slash_database_url(monkeypatch: py
     with pytest.raises(ValueError, match="rendered Postgres database URL"):
         db.get_database_engine()
 
-    assert db._engine is None
+    assert_runtime_cache_cleared()
 
 
 def test_get_database_engine_rejects_double_leading_slash_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -57,7 +58,7 @@ def test_get_database_engine_rejects_double_leading_slash_database_url(monkeypat
     with pytest.raises(ValueError, match="rendered Postgres database URL"):
         db.get_database_engine()
 
-    assert db._engine is None
+    assert_runtime_cache_cleared()
 
 
 def test_get_database_engine_rejects_blank_database_segment_encoded_whitespace(
@@ -78,7 +79,7 @@ def test_get_database_engine_rejects_blank_database_segment_encoded_whitespace(
     with pytest.raises(ValueError, match="rendered Postgres database URL"):
         db.get_database_engine()
 
-    assert db._engine is None
+    assert_runtime_cache_cleared()
 
 
 def test_get_database_engine_accepts_valid_postgres_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -136,8 +137,7 @@ def test_get_session_factory_rejects_invalid_postgres_url_without_caching_factor
     with pytest.raises(ValueError, match="rendered Postgres database URL"):
         db.get_session_factory()
 
-    assert db._engine is None
-    assert db._session_factory is None
+    assert_runtime_cache_cleared()
 
 
 def test_get_session_factory_caches_factory_for_valid_postgres_url(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -157,7 +157,7 @@ def test_get_session_factory_caches_factory_for_valid_postgres_url(monkeypatch: 
     second_factory = db.get_session_factory()
 
     assert first_factory is second_factory
-    assert db._engine is not None
+    assert_runtime_engine_cached()
 
 
 def test_get_db_session_raises_without_creating_cache_when_database_url_invalid(
@@ -178,5 +178,4 @@ def test_get_db_session_raises_without_creating_cache_when_database_url_invalid(
     with pytest.raises(ValueError, match="rendered Postgres database URL"):
         next(db.get_db_session())
 
-    assert db._engine is None
-    assert db._session_factory is None
+    assert_runtime_cache_cleared()

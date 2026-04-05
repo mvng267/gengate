@@ -2,14 +2,14 @@ import pytest
 
 import app.core.db as db
 from tests._core_db_fakes import EngineFake, EngineDisposeErrorFake
+from tests._core_db_runtime_state import assert_runtime_cache_cleared, seed_runtime_cache_for_test
 
 
 def test_reset_database_runtime_state_is_idempotent() -> None:
     db.reset_database_runtime_state()
     db.reset_database_runtime_state()
 
-    assert db._engine is None
-    assert db._session_factory is None
+    assert_runtime_cache_cleared()
 
 
 def test_reset_database_runtime_state_rebuilds_engine_for_new_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -49,14 +49,12 @@ def test_reset_database_runtime_state_rebuilds_engine_for_new_database_url(monke
 
 def test_reset_database_runtime_state_disposes_active_engine() -> None:
     fake_engine = EngineFake()
-    db._engine = fake_engine  # type: ignore[assignment]
-    db._session_factory = object()  # type: ignore[assignment]
+    seed_runtime_cache_for_test(engine=fake_engine, session_factory=object())
 
     db.reset_database_runtime_state()
 
     assert fake_engine.disposed is True
-    assert db._engine is None
-    assert db._session_factory is None
+    assert_runtime_cache_cleared()
 
 
 def test_reset_database_runtime_state_rebuilds_session_factory_after_reset(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -96,21 +94,18 @@ def test_reset_database_runtime_state_rebuilds_session_factory_after_reset(monke
 
 def test_reset_database_runtime_state_clears_cache_even_when_dispose_raises() -> None:
     fake_engine = EngineDisposeErrorFake()
-    db._engine = fake_engine  # type: ignore[assignment]
-    db._session_factory = object()  # type: ignore[assignment]
+    seed_runtime_cache_for_test(engine=fake_engine, session_factory=object())
 
     with pytest.raises(RuntimeError, match="dispose boom"):
         db.reset_database_runtime_state()
 
     assert fake_engine.dispose_called is True
-    assert db._engine is None
-    assert db._session_factory is None
+    assert_runtime_cache_cleared()
 
 
 def test_reset_database_runtime_state_can_rebuild_after_dispose_failure(monkeypatch: pytest.MonkeyPatch) -> None:
     fake_engine = EngineDisposeErrorFake()
-    db._engine = fake_engine  # type: ignore[assignment]
-    db._session_factory = object()  # type: ignore[assignment]
+    seed_runtime_cache_for_test(engine=fake_engine, session_factory=object())
 
     with pytest.raises(RuntimeError, match="dispose boom"):
         db.reset_database_runtime_state()
