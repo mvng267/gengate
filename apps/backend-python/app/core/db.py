@@ -53,8 +53,11 @@ def get_db_session() -> Generator[Session, None, None]:
     try:
         yield session
         session.commit()
-    except Exception:
-        session.rollback()
+    except Exception as exc:
+        try:
+            session.rollback()
+        except Exception as rollback_exc:
+            raise rollback_exc from exc
         raise
     finally:
         session.close()

@@ -432,7 +432,9 @@ class _FakeSessionRollbackError(_FakeSession):
         raise RuntimeError("rollback boom")
 
 
-def test_get_db_session_propagates_rollback_error_and_still_closes(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_get_db_session_propagates_rollback_error_with_original_exception_chained(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     fake_session = _FakeSessionRollbackError()
 
     monkeypatch.setattr(db, "get_session_factory", lambda: lambda: fake_session)
@@ -440,9 +442,11 @@ def test_get_db_session_propagates_rollback_error_and_still_closes(monkeypatch: 
     generator = db.get_db_session()
     next(generator)
 
-    with pytest.raises(RuntimeError, match="rollback boom"):
+    with pytest.raises(RuntimeError, match="rollback boom") as exc_info:
         generator.throw(RuntimeError("consumer boom"))
 
+    assert exc_info.value.__cause__ is not None
+    assert str(exc_info.value.__cause__) == "consumer boom"
     assert fake_session.committed is False
     assert fake_session.rolled_back is True
     assert fake_session.closed is True
