@@ -103,6 +103,14 @@ def test_backend_makefile_keeps_test_contracts_group_contract() -> None:
     assert "tests/test_profiles_api.py" in test_contracts_block
 
 
+def test_backend_makefile_avoids_duplicate_explicit_tests_in_contracts_group() -> None:
+    makefile_text = _backend_makefile_text()
+    test_contracts_block = _make_variable_block(makefile_text, "TEST_CONTRACTS")
+    contract_files = _extract_explicit_test_files(test_contracts_block)
+
+    assert len(contract_files) == len(set(contract_files))
+
+
 def test_backend_makefile_avoids_duplicate_explicit_tests_in_core_db_group() -> None:
     makefile_text = _backend_makefile_text()
     test_core_db_block = _make_variable_block(makefile_text, "TEST_CORE_DB")
