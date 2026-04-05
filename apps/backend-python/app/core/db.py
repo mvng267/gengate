@@ -49,6 +49,14 @@ def get_session_factory() -> sessionmaker[Session]:
 
 
 def get_db_session() -> Generator[Session, None, None]:
+    """Yield a DB session and enforce commit/rollback/close lifecycle.
+
+    - Normal completion commits then closes.
+    - Any error triggers rollback.
+    - If rollback itself fails, rollback error is raised and original error is
+      preserved as ``__cause__``.
+    """
+
     session = get_session_factory()()
     try:
         yield session
