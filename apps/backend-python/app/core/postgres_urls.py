@@ -2,6 +2,8 @@ from collections.abc import Mapping
 from urllib.parse import unquote, urlsplit
 import os
 
+_POSTGRES_SCHEMES = {"postgresql", "postgresql+psycopg"}
+
 
 def postgres_admin_url_from_env(*, environ: Mapping[str, str] | None = None) -> str:
     source = os.environ if environ is None else environ
@@ -11,28 +13,28 @@ def postgres_admin_url_from_env(*, environ: Mapping[str, str] | None = None) -> 
     return admin_url
 
 
-def validate_postgres_url_path(url: str, *, label: str) -> None:
-    parsed_url = urlsplit(url)
-    raw_path = parsed_url.path.strip()
-    decoded_path = unquote(raw_path).strip()
-    path = decoded_path or raw_path
-    segments = [segment for segment in path.split("/") if segment]
-
-    if (
-        not url
-        or parsed_url.scheme not in {"postgresql", "postgresql+psycopg"}
-        or len(segments) != 1
-        or not segments[0].strip()
-    ):
-        raise ValueError(f"Invalid rendered Postgres {label} URL")
-
-
 def postgres_url_scheme(url: str) -> str:
     return urlsplit(url).scheme
 
 
 def is_postgres_url(url: str) -> bool:
-    return postgres_url_scheme(url) in {"postgresql", "postgresql+psycopg"}
+    return postgres_url_scheme(url) in _POSTGRES_SCHEMES
+
+
+def validate_postgres_url_path(url: str, *, label: str) -> None:
+    parsed_url = urlsplit(url)
+    decoded_path = unquote(parsed_url.path)
+    decoded_segments = decoded_path.split("/")
+
+    if (
+        not url
+        or parsed_url.scheme not in _POSTGRES_SCHEMES
+        or not decoded_path.startswith("/")
+        or decoded_path.startswith("//")
+        or len(decoded_segments) != 2
+        or not decoded_segments[1].strip()
+    ):
+        raise ValueError(f"Invalid rendered Postgres {label} URL")
 
 
 def validate_postgres_database_url_if_needed(url: str) -> None:

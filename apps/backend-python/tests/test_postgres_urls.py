@@ -35,6 +35,20 @@ def test_validate_postgres_url_path_rejects_encoded_slash_segment() -> None:
         validate_postgres_url_path("postgresql+psycopg://postgres@/gengate%2Farchive", label="database")
 
 
+def test_validate_postgres_url_path_rejects_trailing_slash() -> None:
+    with pytest.raises(ValueError, match="rendered Postgres database URL"):
+        validate_postgres_url_path("postgresql://postgres@/gengate/", label="database")
+
+
+def test_validate_postgres_url_path_rejects_double_leading_slash() -> None:
+    with pytest.raises(ValueError, match="rendered Postgres database URL"):
+        validate_postgres_url_path("postgresql://postgres@//gengate", label="database")
+
+
+def test_validate_postgres_url_path_accepts_single_database_segment() -> None:
+    validate_postgres_url_path("postgresql://postgres@/gengate", label="database")
+
+
 def test_validate_postgres_database_url_if_needed_rejects_invalid_postgres_url() -> None:
     with pytest.raises(ValueError, match="rendered Postgres database URL"):
         validate_postgres_database_url_if_needed("postgresql+psycopg://postgres@/gengate%2Farchive")
