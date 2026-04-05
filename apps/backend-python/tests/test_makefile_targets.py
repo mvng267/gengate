@@ -31,6 +31,33 @@ def test_backend_makefile_keeps_test_smoke_alias_contract() -> None:
     assert "test-smoke: test-fast" in makefile_text
 
 
+def test_backend_makefile_keeps_test_policy_group_contract() -> None:
+    makefile_text = _backend_makefile_text()
+    test_policy_block = _make_variable_block(makefile_text, "TEST_POLICY")
+
+    assert "tests/test_pytest_marker_policy.py" in test_policy_block
+    assert "tests/test_core_db_runtime_fixture.py" in test_policy_block
+
+
+def test_backend_makefile_keeps_test_url_gate_group_contract() -> None:
+    makefile_text = _backend_makefile_text()
+    test_url_gate_block = _make_variable_block(makefile_text, "TEST_URL_GATE")
+
+    assert "tests/test_postgres_urls.py" in test_url_gate_block
+    assert "tests/test_alembic_env.py" in test_url_gate_block
+
+
+def test_backend_makefile_keeps_test_contracts_group_contract() -> None:
+    makefile_text = _backend_makefile_text()
+    test_contracts_block = _make_variable_block(makefile_text, "TEST_CONTRACTS")
+
+    assert "tests/test_batch6_contracts.py" in test_contracts_block
+    assert "tests/test_batch7_conversations_api.py" in test_contracts_block
+    assert "tests/test_batch10_sessions_api.py" in test_contracts_block
+    assert "tests/test_messages_api.py" in test_contracts_block
+    assert "tests/test_profiles_api.py" in test_contracts_block
+
+
 def test_backend_makefile_keeps_test_fast_composition_contract() -> None:
     makefile_text = _backend_makefile_text()
     test_fast_block = _make_variable_block(makefile_text, "TEST_FAST")
