@@ -1,4 +1,4 @@
-.PHONY: test test-smoke test-core-db test-policy
+.PHONY: test test-smoke test-core-db test-policy test-url-gate
 
 # Run full backend-python test suite.
 test:
@@ -18,6 +18,12 @@ test-core-db:
 		tests/test_core_db_session_lifecycle.py \
 		tests/test_core_db_reset.py \
 		tests/test_core_db_fake_imports.py
+
+# Run focused URL gate coverage (postgres URL parsing + alembic env gate).
+test-url-gate:
+	. .venv/bin/activate && pytest -q \
+		tests/test_postgres_urls.py \
+		tests/test_alembic_env.py
 
 # Run focused smoke suite for DB runtime state + marker policy + URL gate.
 test-smoke:

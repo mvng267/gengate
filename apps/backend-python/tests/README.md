@@ -56,6 +56,7 @@ From `apps/backend-python/`:
 ```bash
 make test-policy
 make test-core-db
+make test-url-gate
 make test-smoke
 make test
 ```
