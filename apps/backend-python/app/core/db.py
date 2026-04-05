@@ -10,15 +10,11 @@ _engine: Engine | None = None
 _session_factory: sessionmaker[Session] | None = None
 
 
-def _validate_runtime_database_url(database_url: str) -> None:
-    validate_postgres_database_url_if_needed(database_url)
-
-
 def get_database_engine() -> Engine:
     global _engine
     if _engine is None:
         settings = get_settings()
-        _validate_runtime_database_url(settings.database_url)
+        validate_postgres_database_url_if_needed(settings.database_url)
         _engine = create_engine(settings.database_url, pool_pre_ping=True, future=True)
     return _engine
 

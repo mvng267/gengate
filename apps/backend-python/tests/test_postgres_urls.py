@@ -2,7 +2,9 @@ import pytest
 
 from app.core.postgres_urls import (
     build_postgres_test_urls,
+    is_postgres_url,
     postgres_admin_url_from_env,
+    postgres_url_scheme,
     validate_postgres_database_url_if_needed,
     validate_postgres_url_path,
 )
@@ -40,6 +42,19 @@ def test_validate_postgres_database_url_if_needed_rejects_invalid_postgres_url()
 
 def test_validate_postgres_database_url_if_needed_skips_non_postgres_url() -> None:
     validate_postgres_database_url_if_needed("sqlite+pysqlite:///:memory:")
+
+
+def test_postgres_url_scheme_extracts_scheme() -> None:
+    assert postgres_url_scheme("postgresql+psycopg://postgres@/gengate") == "postgresql+psycopg"
+
+
+def test_is_postgres_url_true_for_postgresql_variants() -> None:
+    assert is_postgres_url("postgresql://postgres@/gengate")
+    assert is_postgres_url("postgresql+psycopg://postgres@/gengate")
+
+
+def test_is_postgres_url_false_for_non_postgres_scheme() -> None:
+    assert not is_postgres_url("sqlite+pysqlite:///:memory:")
 
 
 def test_build_postgres_test_urls_default_to_admin_role_and_db() -> None:
