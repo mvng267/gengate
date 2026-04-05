@@ -1,6 +1,4 @@
 from pathlib import Path
-from urllib.parse import unquote, urlsplit
-import os
 import uuid
 
 import psycopg
@@ -9,67 +7,9 @@ from alembic import command
 from alembic.config import Config
 from sqlalchemy import create_engine, inspect
 
+from app.core.postgres_urls import build_postgres_test_urls
 from app.models.base import Base
 from app.models import all_models
-
-
-def _postgres_admin_url() -> str:
-    admin_url = os.getenv("GENGATE_POSTGRES_ADMIN_URL", "postgresql:///postgres").strip()
-    if not admin_url:
-        return "postgresql:///postgres"
-    return admin_url
-
-
-
-
-def _validate_postgres_url_path(url: str, *, label: str) -> None:
-    parsed_url = urlsplit(url)
-    raw_path = parsed_url.path.strip()
-    decoded_path = unquote(raw_path).strip()
-    path = decoded_path or raw_path
-    segments = [segment for segment in path.split("/") if segment]
-    if (
-        not url
-        or parsed_url.scheme not in {"postgresql", "postgresql+psycopg"}
-        or len(segments) != 1
-        or not segments[0].strip()
-    ):
-        raise ValueError(f"Invalid rendered Postgres {label} URL")
-
-
-def _batch28_postgres_urls(database_name: str) -> tuple[str, str]:
-    admin_role = os.getenv("GENGATE_TEST_POSTGRES_ADMIN_ROLE", "postgres").strip() or "postgres"
-    admin_database = os.getenv("GENGATE_TEST_POSTGRES_ADMIN_DATABASE", "postgres").strip() or "postgres"
-
-    admin_url = os.getenv("GENGATE_TEST_POSTGRES_ADMIN_URL", "").strip()
-    if not admin_url:
-        admin_url = f"postgresql://{admin_role}@/{admin_database}"
-
-    database_url_template = os.getenv("GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE", "").strip()
-    if database_url_template:
-        if "{database_name}" not in database_url_template:
-            raise ValueError(
-                "Invalid GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE: expected placeholders "
-                "{database_name}, {admin_role}, {admin_database}"
-            )
-        try:
-            database_url = database_url_template.format(
-                database_name=database_name,
-                admin_role=admin_role,
-                admin_database=admin_database,
-            )
-        except (IndexError, KeyError, ValueError) as exc:
-            raise ValueError(
-                "Invalid GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE: expected placeholders "
-                "{database_name}, {admin_role}, {admin_database}"
-            ) from exc
-    else:
-        database_url = f"postgresql+psycopg://{admin_role}@/{database_name}"
-
-    _validate_postgres_url_path(admin_url, label="admin")
-    _validate_postgres_url_path(database_url, label="database")
-
-    return admin_url, database_url
 
 
 def test_schema_registers_expected_tables() -> None:
@@ -125,183 +65,12 @@ def test_batch27_alembic_ini_sets_os_path_separator() -> None:
     assert "path_separator = os" in alembic_source
 
 
-def test_batch27_postgres_admin_url_defaults_to_unix_socket() -> None:
-    assert _postgres_admin_url() == "postgresql:///postgres"
-
-
-def test_batch27_postgres_admin_url_strips_whitespace(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("GENGATE_POSTGRES_ADMIN_URL", "  postgresql:///postgres  ")
-
-    assert _postgres_admin_url() == "postgresql:///postgres"
-
-
-def test_batch27_postgres_admin_url_falls_back_when_blank(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("GENGATE_POSTGRES_ADMIN_URL", "   ")
-
-    assert _postgres_admin_url() == "postgresql:///postgres"
-
-
-def test_batch28_postgres_test_urls_default_to_admin_role_and_db(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("GENGATE_TEST_POSTGRES_ADMIN_ROLE", raising=False)
-    monkeypatch.delenv("GENGATE_TEST_POSTGRES_ADMIN_DATABASE", raising=False)
-    monkeypatch.delenv("GENGATE_TEST_POSTGRES_ADMIN_URL", raising=False)
-    monkeypatch.delenv("GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE", raising=False)
-
-    admin_url, database_url = _batch28_postgres_urls("gengate_batch28_default")
-
-    assert admin_url == "postgresql://postgres@/postgres"
-    assert database_url == "postgresql+psycopg://postgres@/gengate_batch28_default"
-
-
-def test_batch28_postgres_test_urls_allow_role_and_db_override(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("GENGATE_TEST_POSTGRES_ADMIN_ROLE", "gengate_admin")
-    monkeypatch.setenv("GENGATE_TEST_POSTGRES_ADMIN_DATABASE", "gengate_maintenance")
-    monkeypatch.delenv("GENGATE_TEST_POSTGRES_ADMIN_URL", raising=False)
-    monkeypatch.delenv("GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE", raising=False)
-
-    admin_url, database_url = _batch28_postgres_urls("gengate_batch28_override")
-
-    assert admin_url == "postgresql://gengate_admin@/gengate_maintenance"
-    assert database_url == "postgresql+psycopg://gengate_admin@/gengate_batch28_override"
-
-
-def test_batch29_postgres_test_urls_require_database_name_in_template(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE", "postgresql+psycopg://{admin_role}@/gengate_fixed")
-
-    with pytest.raises(ValueError, match="database_name"):
-        _batch28_postgres_urls("gengate_batch29_missing_name")
-
-
-def test_batch29_postgres_test_urls_reject_invalid_database_url_template(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE", "postgresql+psycopg://{admin_role}@/{bad_name}")
-
-    with pytest.raises(ValueError, match="GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE"):
-        _batch28_postgres_urls("gengate_batch29_invalid")
-
-
-def test_batch29_postgres_test_urls_reject_malformed_format_database_url_template(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv(
-        "GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE",
-        "postgresql+psycopg://{admin_role}@/{database_name}{",
-    )
-
-    with pytest.raises(ValueError, match="GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE"):
-        _batch28_postgres_urls("gengate_batch29_malformed_template")
-
-
-def test_batch29_postgres_test_urls_reject_positional_database_url_template(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv(
-        "GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE",
-        "postgresql+psycopg://{0}@/{database_name}",
-    )
-
-    with pytest.raises(ValueError, match="GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE"):
-        _batch28_postgres_urls("gengate_batch29_positional_template")
-
-
-def test_batch30_postgres_test_urls_require_database_path_segment(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE", "postgresql+psycopg://{database_name}@/")
-
-    with pytest.raises(ValueError, match="rendered Postgres database URL"):
-        _batch28_postgres_urls("gengate_batch30_missing_db_segment")
-
-
-def test_batch31_postgres_test_urls_reject_malformed_admin_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("GENGATE_TEST_POSTGRES_ADMIN_URL", "postgresql://")
-    monkeypatch.setenv(
-        "GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE",
-        "postgresql+psycopg://{admin_role}@/{database_name}",
-    )
-
-    with pytest.raises(ValueError, match="rendered Postgres admin URL"):
-        _batch28_postgres_urls("gengate_batch31_invalid_admin_url")
-
-
-def test_batch31_postgres_test_urls_reject_admin_url_without_database_path(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("GENGATE_TEST_POSTGRES_ADMIN_URL", "postgresql://postgres@/")
-    monkeypatch.setenv(
-        "GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE",
-        "postgresql+psycopg://{admin_role}@/{database_name}",
-    )
-
-    with pytest.raises(ValueError, match="rendered Postgres admin URL"):
-        _batch28_postgres_urls("gengate_batch31_missing_admin_db_segment")
-
-
-def test_batch31_postgres_test_urls_reject_admin_url_with_invalid_scheme(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("GENGATE_TEST_POSTGRES_ADMIN_URL", "mysql://root@/postgres")
-    monkeypatch.setenv(
-        "GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE",
-        "postgresql+psycopg://{admin_role}@/{database_name}",
-    )
-
-    with pytest.raises(ValueError, match="rendered Postgres admin URL"):
-        _batch28_postgres_urls("gengate_batch31_invalid_admin_scheme")
-
-
-def test_batch31_postgres_test_urls_reject_admin_url_without_scheme(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("GENGATE_TEST_POSTGRES_ADMIN_URL", "postgres@/postgres")
-    monkeypatch.setenv(
-        "GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE",
-        "postgresql+psycopg://{admin_role}@/{database_name}",
-    )
-
-    with pytest.raises(ValueError, match="rendered Postgres admin URL"):
-        _batch28_postgres_urls("gengate_batch31_admin_missing_scheme")
-
-
-def test_batch31_postgres_test_urls_reject_database_url_with_invalid_scheme(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE", "mysql://{admin_role}@/{database_name}")
-
-    with pytest.raises(ValueError, match="rendered Postgres database URL"):
-        _batch28_postgres_urls("gengate_batch31_database_invalid_scheme")
-
-
-def test_batch32_postgres_test_urls_reject_admin_url_with_multiple_path_segments(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("GENGATE_TEST_POSTGRES_ADMIN_URL", "postgresql://postgres@/postgres/archive")
-    monkeypatch.setenv(
-        "GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE",
-        "postgresql+psycopg://{admin_role}@/{database_name}",
-    )
-
-    with pytest.raises(ValueError, match="rendered Postgres admin URL"):
-        _batch28_postgres_urls("gengate_batch32_multi_admin_path")
-
-
-def test_batch32_postgres_test_urls_reject_database_url_with_multiple_path_segments(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv(
-        "GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE",
-        "postgresql+psycopg://{admin_role}@/{database_name}/archive",
-    )
-
-    with pytest.raises(ValueError, match="rendered Postgres database URL"):
-        _batch28_postgres_urls("gengate_batch32_multi_database_path")
-
-
-def test_batch33_postgres_url_path_validator_accepts_single_segment() -> None:
-    _validate_postgres_url_path("postgresql://postgres@/gengate", label="admin")
-    _validate_postgres_url_path("postgresql+psycopg://postgres@/gengate_test", label="database")
-
-
-def test_batch33_postgres_url_path_validator_rejects_encoded_slash_segment() -> None:
-    with pytest.raises(ValueError, match="rendered Postgres database URL"):
-        _validate_postgres_url_path("postgresql+psycopg://postgres@/gengate%2Farchive", label="database")
-
-
-def test_batch33_postgres_test_urls_reject_encoded_slash_database_path(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv(
-        "GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE",
-        "postgresql+psycopg://{admin_role}@/{database_name}%2Farchive",
-    )
-
-    with pytest.raises(ValueError, match="rendered Postgres database URL"):
-        _batch28_postgres_urls("gengate_batch33_encoded_database_path")
 
 
 def test_batch26_postgres_alembic_unique_constraint_round_trip() -> None:
     project_root = Path(__file__).resolve().parents[1]
     database_name = f"gengate_batch26_{uuid.uuid4().hex[:10]}"
-    admin_url, database_url = _batch28_postgres_urls(database_name)
+    admin_url, database_url = build_postgres_test_urls(database_name)
 
     try:
         with psycopg.connect(admin_url, autocommit=True) as admin_conn:
