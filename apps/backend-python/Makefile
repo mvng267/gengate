@@ -1,4 +1,4 @@
-.PHONY: test test-smoke test-core-db test-policy test-url-gate
+.PHONY: test test-smoke test-core-db test-policy test-url-gate test-db-lifecycle
 
 # Run full backend-python test suite.
 test:
@@ -18,6 +18,13 @@ test-core-db:
 		tests/test_core_db_session_lifecycle.py \
 		tests/test_core_db_reset.py \
 		tests/test_core_db_fake_imports.py
+
+# Run focused DB runtime lifecycle coverage (engine/factory/session/reset).
+test-db-lifecycle:
+	. .venv/bin/activate && pytest -q \
+		tests/test_core_db_engine_factory.py \
+		tests/test_core_db_session_lifecycle.py \
+		tests/test_core_db_reset.py
 
 # Run focused URL gate coverage (postgres URL parsing + alembic env gate).
 test-url-gate:
