@@ -163,3 +163,49 @@ def test_get_session_factory_caches_factory_for_valid_postgres_url(monkeypatch: 
 
     assert first_factory is second_factory
     assert db._engine is not None
+
+
+def test_get_db_session_raises_without_creating_cache_when_database_url_invalid(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    db._engine = None
+    db._session_factory = None
+
+    monkeypatch.setattr(
+        db,
+        "get_settings",
+        lambda: type(
+            "Settings",
+            (),
+            {"database_url": "postgresql+psycopg://postgres@/gengate/"},
+        )(),
+    )
+
+    with pytest.raises(ValueError, match="rendered Postgres database URL"):
+        next(db.get_db_session())
+
+    assert db._engine is None
+    assert db._session_factory is None
+
+
+def test_get_db_session_yields_and_closes_for_valid_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    db._engine = None
+    db._session_factory = None
+
+    monkeypatch.setattr(
+        db,
+        "get_settings",
+        lambda: type(
+            "Settings",
+            (),
+            {"database_url": "sqlite+pysqlite:///:memory:"},
+        )(),
+    )
+
+    generator = db.get_db_session()
+    session = next(generator)
+
+    assert session.is_active
+
+    with pytest.raises(StopIteration):
+        next(generator)
