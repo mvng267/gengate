@@ -317,3 +317,39 @@ def test_reset_database_runtime_state_disposes_active_engine() -> None:
     assert fake_engine.disposed is True
     assert db._engine is None
     assert db._session_factory is None
+
+
+
+def test_reset_database_runtime_state_rebuilds_session_factory_after_reset(monkeypatch: pytest.MonkeyPatch) -> None:
+    db.reset_database_runtime_state()
+
+    monkeypatch.setattr(
+        db,
+        "get_settings",
+        lambda: type(
+            "Settings",
+            (),
+            {"database_url": "sqlite+pysqlite:///:memory:"},
+        )(),
+    )
+    first_factory = db.get_session_factory()
+    first_bind = str(first_factory.kw["bind"].url)
+
+    db.reset_database_runtime_state()
+
+    monkeypatch.setattr(
+        db,
+        "get_settings",
+        lambda: type(
+            "Settings",
+            (),
+            {"database_url": "sqlite+pysqlite:///./tmp-session-reset.sqlite3"},
+        )(),
+    )
+    second_factory = db.get_session_factory()
+    second_bind = str(second_factory.kw["bind"].url)
+
+    assert first_factory is not second_factory
+    assert first_bind != second_bind
+
+    db.reset_database_runtime_state()
