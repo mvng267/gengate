@@ -51,19 +51,23 @@ def _batch28_postgres_urls(database_name: str) -> tuple[str, str]:
 
     parsed_admin_url = urlsplit(admin_url)
     admin_path = parsed_admin_url.path.strip()
+    admin_segments = [segment for segment in admin_path.split("/") if segment]
     if (
         not admin_url
         or parsed_admin_url.scheme not in {"postgresql", "postgresql+psycopg"}
-        or admin_path in {"", "/"}
+        or len(admin_segments) != 1
+        or not admin_segments[0].strip()
     ):
         raise ValueError("Invalid rendered Postgres admin URL")
 
     parsed_database_url = urlsplit(database_url)
     database_path = parsed_database_url.path.strip()
+    database_segments = [segment for segment in database_path.split("/") if segment]
     if (
         not database_url
         or parsed_database_url.scheme not in {"postgresql", "postgresql+psycopg"}
-        or database_path in {"", "/"}
+        or len(database_segments) != 1
+        or not database_segments[0].strip()
     ):
         raise ValueError("Invalid rendered Postgres database URL")
 
@@ -253,6 +257,27 @@ def test_batch31_postgres_test_urls_reject_database_url_with_invalid_scheme(monk
 
     with pytest.raises(ValueError, match="rendered Postgres database URL"):
         _batch28_postgres_urls("gengate_batch31_database_invalid_scheme")
+
+
+def test_batch32_postgres_test_urls_reject_admin_url_with_multiple_path_segments(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("GENGATE_TEST_POSTGRES_ADMIN_URL", "postgresql://postgres@/postgres/archive")
+    monkeypatch.setenv(
+        "GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE",
+        "postgresql+psycopg://{admin_role}@/{database_name}",
+    )
+
+    with pytest.raises(ValueError, match="rendered Postgres admin URL"):
+        _batch28_postgres_urls("gengate_batch32_multi_admin_path")
+
+
+def test_batch32_postgres_test_urls_reject_database_url_with_multiple_path_segments(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(
+        "GENGATE_TEST_POSTGRES_DATABASE_URL_TEMPLATE",
+        "postgresql+psycopg://{admin_role}@/{database_name}/archive",
+    )
+
+    with pytest.raises(ValueError, match="rendered Postgres database URL"):
+        _batch28_postgres_urls("gengate_batch32_multi_database_path")
 
 
 def test_batch26_postgres_alembic_unique_constraint_round_trip() -> None:
