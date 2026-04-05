@@ -20,6 +20,42 @@ def test_get_database_engine_rejects_encoded_slash_database_url(monkeypatch: pyt
         db.get_database_engine()
 
 
+def test_get_database_engine_rejects_trailing_slash_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    db._engine = None
+    db._session_factory = None
+
+    monkeypatch.setattr(
+        db,
+        "get_settings",
+        lambda: type(
+            "Settings",
+            (),
+            {"database_url": "postgresql+psycopg://postgres@/gengate/"},
+        )(),
+    )
+
+    with pytest.raises(ValueError, match="rendered Postgres database URL"):
+        db.get_database_engine()
+
+
+def test_get_database_engine_rejects_double_leading_slash_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    db._engine = None
+    db._session_factory = None
+
+    monkeypatch.setattr(
+        db,
+        "get_settings",
+        lambda: type(
+            "Settings",
+            (),
+            {"database_url": "postgresql+psycopg://postgres@//gengate"},
+        )(),
+    )
+
+    with pytest.raises(ValueError, match="rendered Postgres database URL"):
+        db.get_database_engine()
+
+
 def test_get_database_engine_allows_non_postgres_url(monkeypatch: pytest.MonkeyPatch) -> None:
     db._engine = None
     db._session_factory = None
