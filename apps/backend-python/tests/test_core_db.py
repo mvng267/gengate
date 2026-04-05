@@ -209,3 +209,57 @@ def test_get_db_session_yields_and_closes_for_valid_database_url(monkeypatch: py
 
     with pytest.raises(StopIteration):
         next(generator)
+
+
+class _FakeSession:
+    def __init__(self) -> None:
+        self.committed = False
+        self.rolled_back = False
+        self.closed = False
+
+    @property
+    def is_active(self) -> bool:
+        return not self.closed
+
+    def commit(self) -> None:
+        self.committed = True
+
+    def rollback(self) -> None:
+        self.rolled_back = True
+
+    def close(self) -> None:
+        self.closed = True
+
+
+def test_get_db_session_commits_and_closes_on_normal_exit(monkeypatch: pytest.MonkeyPatch) -> None:
+    fake_session = _FakeSession()
+
+    monkeypatch.setattr(db, "get_session_factory", lambda: lambda: fake_session)
+
+    generator = db.get_db_session()
+    yielded_session = next(generator)
+
+    assert yielded_session is fake_session
+
+    with pytest.raises(StopIteration):
+        next(generator)
+
+    assert fake_session.committed is True
+    assert fake_session.rolled_back is False
+    assert fake_session.closed is True
+
+
+def test_get_db_session_rolls_back_and_closes_when_consumer_raises(monkeypatch: pytest.MonkeyPatch) -> None:
+    fake_session = _FakeSession()
+
+    monkeypatch.setattr(db, "get_session_factory", lambda: lambda: fake_session)
+
+    generator = db.get_db_session()
+    next(generator)
+
+    with pytest.raises(RuntimeError, match="boom"):
+        generator.throw(RuntimeError("boom"))
+
+    assert fake_session.committed is False
+    assert fake_session.rolled_back is True
+    assert fake_session.closed is True
