@@ -1,8 +1,14 @@
-.PHONY: test test-smoke test-core-db
+.PHONY: test test-smoke test-core-db test-policy
 
 # Run full backend-python test suite.
 test:
 	. .venv/bin/activate && pytest -q
+
+# Run focused policy/fixture marker guard tests.
+test-policy:
+	. .venv/bin/activate && pytest -q \
+		tests/test_pytest_marker_policy.py \
+		tests/test_core_db_runtime_fixture.py
 
 # Run focused core DB runtime/fixture contract suite.
 test-core-db:
