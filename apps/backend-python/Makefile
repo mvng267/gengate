@@ -1,4 +1,4 @@
-.PHONY: test test-smoke test-fast test-core-db test-policy test-url-gate test-db-lifecycle test-contracts
+.PHONY: test test-smoke test-fast test-core-db test-policy test-url-gate test-db-lifecycle test-contracts test-schema
 
 # Run full backend-python test suite.
 test:
@@ -25,6 +25,13 @@ test-db-lifecycle:
 		tests/test_core_db_engine_factory.py \
 		tests/test_core_db_session_lifecycle.py \
 		tests/test_core_db_reset.py
+
+# Run focused schema/migration + URL gate coverage.
+test-schema:
+	. .venv/bin/activate && pytest -q \
+		tests/test_schema_models.py \
+		tests/test_postgres_urls.py \
+		tests/test_alembic_env.py
 
 # Run focused URL gate coverage (postgres URL parsing + alembic env gate).
 test-url-gate:
