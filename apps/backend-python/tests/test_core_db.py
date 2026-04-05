@@ -3,8 +3,7 @@ import app.core.db as db
 
 
 def test_get_database_engine_rejects_encoded_slash_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    db._engine = None
-    db._session_factory = None
+    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -23,8 +22,7 @@ def test_get_database_engine_rejects_encoded_slash_database_url(monkeypatch: pyt
 
 
 def test_get_database_engine_rejects_trailing_slash_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    db._engine = None
-    db._session_factory = None
+    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -43,8 +41,7 @@ def test_get_database_engine_rejects_trailing_slash_database_url(monkeypatch: py
 
 
 def test_get_database_engine_rejects_double_leading_slash_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    db._engine = None
-    db._session_factory = None
+    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -63,8 +60,7 @@ def test_get_database_engine_rejects_double_leading_slash_database_url(monkeypat
 
 
 def test_get_database_engine_rejects_blank_database_segment_encoded_whitespace(monkeypatch: pytest.MonkeyPatch) -> None:
-    db._engine = None
-    db._session_factory = None
+    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -83,8 +79,7 @@ def test_get_database_engine_rejects_blank_database_segment_encoded_whitespace(m
 
 
 def test_get_database_engine_accepts_valid_postgres_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    db._engine = None
-    db._session_factory = None
+    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -103,8 +98,7 @@ def test_get_database_engine_accepts_valid_postgres_database_url(monkeypatch: py
 
 
 def test_get_database_engine_allows_non_postgres_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    db._engine = None
-    db._session_factory = None
+    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -124,8 +118,7 @@ def test_get_database_engine_allows_non_postgres_url(monkeypatch: pytest.MonkeyP
 def test_get_session_factory_rejects_invalid_postgres_url_without_caching_factory(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    db._engine = None
-    db._session_factory = None
+    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -145,8 +138,7 @@ def test_get_session_factory_rejects_invalid_postgres_url_without_caching_factor
 
 
 def test_get_session_factory_caches_factory_for_valid_postgres_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    db._engine = None
-    db._session_factory = None
+    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -168,8 +160,7 @@ def test_get_session_factory_caches_factory_for_valid_postgres_url(monkeypatch: 
 def test_get_db_session_raises_without_creating_cache_when_database_url_invalid(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    db._engine = None
-    db._session_factory = None
+    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -189,8 +180,7 @@ def test_get_db_session_raises_without_creating_cache_when_database_url_invalid(
 
 
 def test_get_db_session_yields_and_closes_for_valid_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    db._engine = None
-    db._session_factory = None
+    db.reset_database_runtime_state()
 
     monkeypatch.setattr(
         db,
@@ -263,3 +253,47 @@ def test_get_db_session_rolls_back_and_closes_when_consumer_raises(monkeypatch: 
     assert fake_session.committed is False
     assert fake_session.rolled_back is True
     assert fake_session.closed is True
+
+
+
+def test_reset_database_runtime_state_is_idempotent() -> None:
+    db.reset_database_runtime_state()
+    db.reset_database_runtime_state()
+
+    assert db._engine is None
+    assert db._session_factory is None
+
+
+def test_reset_database_runtime_state_rebuilds_engine_for_new_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    db.reset_database_runtime_state()
+
+    monkeypatch.setattr(
+        db,
+        "get_settings",
+        lambda: type(
+            "Settings",
+            (),
+            {"database_url": "sqlite+pysqlite:///:memory:"},
+        )(),
+    )
+    first_engine = db.get_database_engine()
+    first_url = str(first_engine.url)
+
+    db.reset_database_runtime_state()
+
+    monkeypatch.setattr(
+        db,
+        "get_settings",
+        lambda: type(
+            "Settings",
+            (),
+            {"database_url": "sqlite+pysqlite:///./tmp-db-reset.sqlite3"},
+        )(),
+    )
+    second_engine = db.get_database_engine()
+    second_url = str(second_engine.url)
+
+    assert first_engine is not second_engine
+    assert first_url != second_url
+
+    db.reset_database_runtime_state()
