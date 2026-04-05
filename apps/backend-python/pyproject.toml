@@ -24,6 +24,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
+addopts = "--strict-markers"
 pythonpath = ["."]
 testpaths = ["tests"]
 
