@@ -401,3 +401,26 @@ def test_reset_database_runtime_state_can_rebuild_after_dispose_failure(monkeypa
     assert rebuilt_engine.url.drivername == "sqlite+pysqlite"
 
     db.reset_database_runtime_state()
+
+
+class _FakeSessionCommitError(_FakeSession):
+    def commit(self) -> None:
+        raise RuntimeError("commit boom")
+
+
+def test_get_db_session_rolls_back_and_closes_when_commit_raises(monkeypatch: pytest.MonkeyPatch) -> None:
+    fake_session = _FakeSessionCommitError()
+
+    monkeypatch.setattr(db, "get_session_factory", lambda: lambda: fake_session)
+
+    generator = db.get_db_session()
+    yielded = next(generator)
+
+    assert yielded is fake_session
+
+    with pytest.raises(RuntimeError, match="commit boom"):
+        next(generator)
+
+    assert fake_session.committed is False
+    assert fake_session.rolled_back is True
+    assert fake_session.closed is True
