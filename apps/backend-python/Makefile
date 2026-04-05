@@ -3,10 +3,12 @@
 VENV_ACTIVATE = . .venv/bin/activate
 PYTEST = $(VENV_ACTIVATE) && pytest -q
 
+# Group: marker policy + runtime reset fixture behavior.
 TEST_POLICY = \
 	tests/test_pytest_marker_policy.py \
 	tests/test_core_db_runtime_fixture.py
 
+# Group: core DB runtime internals (engine/session/reset helpers).
 TEST_CORE_DB = \
 	tests/test_core_db_runtime_fixture.py \
 	tests/test_core_db_engine_factory.py \
@@ -14,19 +16,23 @@ TEST_CORE_DB = \
 	tests/test_core_db_reset.py \
 	tests/test_core_db_fake_imports.py
 
+# Group: DB runtime lifecycle critical path.
 TEST_DB_LIFECYCLE = \
 	tests/test_core_db_engine_factory.py \
 	tests/test_core_db_session_lifecycle.py \
 	tests/test_core_db_reset.py
 
+# Group: Postgres URL validation + alembic env URL gating.
 TEST_URL_GATE = \
 	tests/test_postgres_urls.py \
 	tests/test_alembic_env.py
 
+# Group: schema/migration coverage built on URL gate checks.
 TEST_SCHEMA = \
 	tests/test_schema_models.py \
 	$(TEST_URL_GATE)
 
+# Group: API/contract-heavy backend behavior.
 TEST_CONTRACTS = \
 	tests/test_batch6_contracts.py \
 	tests/test_batch7_conversations_api.py \
@@ -40,6 +46,7 @@ TEST_CONTRACTS = \
 	tests/test_notifications_security_api.py \
 	tests/test_profiles_api.py
 
+# Lane: canonical smoke gate (policy + DB lifecycle + URL gate).
 TEST_FAST = \
 	$(TEST_POLICY) \
 	tests/test_core_db_engine_factory.py \
@@ -47,6 +54,7 @@ TEST_FAST = \
 	tests/test_core_db_reset.py \
 	$(TEST_URL_GATE)
 
+# Lane: CI-like gate (smoke + schema + contracts).
 TEST_CI = \
 	$(TEST_FAST) \
 	tests/test_schema_models.py \
@@ -80,13 +88,13 @@ test-url-gate:
 test-contracts:
 	$(PYTEST) $(TEST_CONTRACTS)
 
-# Canonical smoke gate (policy + DB lifecycle + URL gate).
+# Run canonical smoke gate (policy + DB lifecycle + URL gate).
 test-fast:
 	$(PYTEST) $(TEST_FAST)
 
 # Backward-compatible alias for the canonical smoke gate.
 test-smoke: test-fast
 
-# CI-like gate without full long-tail local suite.
+# Run CI-like gate without full long-tail local suite.
 test-ci:
 	$(PYTEST) $(TEST_CI)

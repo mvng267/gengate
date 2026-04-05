@@ -68,3 +68,12 @@ make test
 
 
 `make test-ci` runs a CI-like gate across policy + core DB lifecycle + schema/url-gate + contract/API coverage.
+
+
+## Lane map
+
+- `test-fast` (canonical smoke): `TEST_POLICY + TEST_DB_LIFECYCLE + TEST_URL_GATE`
+- `test-ci`: `TEST_FAST + TEST_SCHEMA + TEST_CONTRACTS`
+- `test-smoke`: alias của `test-fast`
+
+Xem group definitions trực tiếp trong `Makefile` để biết test file nào thuộc lane nào.
