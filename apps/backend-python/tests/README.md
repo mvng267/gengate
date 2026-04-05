@@ -62,5 +62,9 @@ make test-schema
 make test-contracts
 make test-fast  # canonical smoke gate
 make test-smoke # alias of test-fast
+make test-ci
 make test
 ```
+
+
+`make test-ci` runs a CI-like gate across policy + core DB lifecycle + schema/url-gate + contract/API coverage.
