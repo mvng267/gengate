@@ -479,3 +479,39 @@ def test_get_db_session_chains_commit_error_when_rollback_also_fails(
     assert fake_session.committed is False
     assert fake_session.rolled_back is True
     assert fake_session.closed is True
+
+
+@pytest.mark.parametrize(
+    ("mode", "expected_cause"),
+    [
+        ("consumer", "consumer boom"),
+        ("commit", "commit boom"),
+    ],
+)
+def test_get_db_session_exception_precedence_contract_guard(
+    mode: str,
+    expected_cause: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    if mode == "commit":
+        fake_session: _FakeSession = _FakeSessionCommitAndRollbackError()
+    else:
+        fake_session = _FakeSessionRollbackError()
+
+    monkeypatch.setattr(db, "get_session_factory", lambda: lambda: fake_session)
+
+    generator = db.get_db_session()
+    next(generator)
+
+    if mode == "commit":
+        with pytest.raises(RuntimeError, match="rollback boom") as exc_info:
+            next(generator)
+    else:
+        with pytest.raises(RuntimeError, match="rollback boom") as exc_info:
+            generator.throw(RuntimeError("consumer boom"))
+
+    assert exc_info.value.__cause__ is not None
+    assert str(exc_info.value.__cause__) == expected_cause
+    assert fake_session.committed is False
+    assert fake_session.rolled_back is True
+    assert fake_session.closed is True
