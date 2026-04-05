@@ -11,6 +11,12 @@ _session_factory: sessionmaker[Session] | None = None
 
 
 def reset_database_runtime_state() -> None:
+    """Reset cached SQLAlchemy engine/session factory state.
+
+    The current engine is disposed first when present. If dispose raises, the
+    error is propagated, but cached globals are still cleared via finally.
+    """
+
     global _engine, _session_factory
 
     try:

@@ -375,3 +375,29 @@ def test_reset_database_runtime_state_clears_cache_even_when_dispose_raises() ->
     assert fake_engine.dispose_called is True
     assert db._engine is None
     assert db._session_factory is None
+
+
+
+def test_reset_database_runtime_state_can_rebuild_after_dispose_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+    fake_engine = _FakeEngineWithDisposeError()
+    db._engine = fake_engine  # type: ignore[assignment]
+    db._session_factory = object()  # type: ignore[assignment]
+
+    with pytest.raises(RuntimeError, match="dispose boom"):
+        db.reset_database_runtime_state()
+
+    monkeypatch.setattr(
+        db,
+        "get_settings",
+        lambda: type(
+            "Settings",
+            (),
+            {"database_url": "sqlite+pysqlite:///:memory:"},
+        )(),
+    )
+
+    rebuilt_engine = db.get_database_engine()
+
+    assert rebuilt_engine.url.drivername == "sqlite+pysqlite"
+
+    db.reset_database_runtime_state()
