@@ -27,6 +27,19 @@ def _extract_explicit_test_files(make_block: str) -> list[str]:
     return files
 
 
+def _expanded_explicit_test_files(makefile_text: str, variable_name: str) -> list[str]:
+    variable_block = _make_variable_block(makefile_text, variable_name)
+    explicit_files = _extract_explicit_test_files(variable_block)
+
+    for raw_line in variable_block.splitlines():
+        line = raw_line.strip().rstrip("\\").strip()
+        if line.startswith("$(") and line.endswith(")"):
+            nested_variable_name = line[2:-1]
+            explicit_files.extend(_expanded_explicit_test_files(makefile_text, nested_variable_name))
+
+    return explicit_files
+
+
 def test_backend_makefile_contains_required_test_targets() -> None:
     makefile_text = _backend_makefile_text()
 
@@ -145,3 +158,12 @@ def test_backend_makefile_keeps_test_ci_composition_contract() -> None:
     assert "$(TEST_FAST)" in test_ci_block
     assert "tests/test_schema_models.py" in test_ci_block
     assert "$(TEST_CONTRACTS)" in test_ci_block
+
+
+def test_backend_makefile_avoids_duplicate_explicit_tests_after_expanding_fast_and_ci() -> None:
+    makefile_text = _backend_makefile_text()
+
+    for variable_name in ["TEST_FAST", "TEST_CI"]:
+        expanded_files = _expanded_explicit_test_files(makefile_text, variable_name)
+        assert len(expanded_files) == len(set(expanded_files))
+
