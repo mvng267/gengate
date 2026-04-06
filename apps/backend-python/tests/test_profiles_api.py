@@ -315,3 +315,42 @@ def test_register_returns_user_exists_for_duplicate_username_with_different_emai
     assert second_register.json() == {"error": {"code": "user_exists", "message": "user_exists"}}
 
     app.dependency_overrides.clear()
+
+
+def test_register_returns_user_exists_for_duplicate_email_with_different_username() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    first_register = client.post(
+        "/auth/register",
+        json={"email": "dup-email@example.com", "username": "user_a"},
+    )
+    assert first_register.status_code == 201
+
+    second_register = client.post(
+        "/auth/register",
+        json={"email": "dup-email@example.com", "username": "user_b"},
+    )
+    assert second_register.status_code == 409
+    assert second_register.json() == {"error": {"code": "user_exists", "message": "user_exists"}}
+
+    app.dependency_overrides.clear()
