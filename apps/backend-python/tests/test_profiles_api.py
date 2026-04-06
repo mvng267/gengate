@@ -678,3 +678,16 @@ def test_register_allows_trimmed_variant_when_existing_email_has_outer_whitespac
     assert trimmed_register.status_code == 201
 
     app.dependency_overrides.clear()
+
+
+def test_register_returns_validation_error_when_email_is_null() -> None:
+    client = TestClient(app)
+
+    response = client.post(
+        "/auth/register",
+        json={"email": None, "username": "null_email_user"},
+    )
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert "email" in payload["error"]["message"]
