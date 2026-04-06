@@ -54,3 +54,40 @@ def test_register_and_profile_crud_flow() -> None:
     assert get_response.json()["display_name"] == "Profile Test"
 
     app.dependency_overrides.clear()
+
+
+def test_get_profile_returns_profile_not_found_for_registered_user_without_profile() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    register_response = client.post(
+        "/auth/register",
+        json={"email": "profile-edge@example.com", "username": "profile_edge"},
+    )
+    assert register_response.status_code == 201
+    user_id = register_response.json()["id"]
+
+    get_response = client.get(f"/profiles/{user_id}")
+    assert get_response.status_code == 404
+    assert get_response.json() == {"error": {"code": "profile_not_found", "message": "profile_not_found"}}
+
+    app.dependency_overrides.clear()
