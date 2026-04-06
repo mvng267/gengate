@@ -498,3 +498,12 @@ def test_register_preserves_email_whitespace_and_allows_trimmed_variant_as_disti
     assert trimmed_register.json()["email"] == "spaced-email@example.com"
 
     app.dependency_overrides.clear()
+
+
+def test_get_profile_returns_method_not_allowed_for_empty_user_id_path_segment() -> None:
+    client = TestClient(app)
+
+    response = client.get('/profiles/')
+    assert response.status_code == 405
+    payload = response.json()
+    assert payload["detail"] == "Method Not Allowed"
