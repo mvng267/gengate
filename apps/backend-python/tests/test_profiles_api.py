@@ -435,3 +435,13 @@ def test_register_preserves_blank_username_and_blocks_exact_blank_username_dupli
     assert second_register.json() == {"error": {"code": "user_exists", "message": "user_exists"}}
 
     app.dependency_overrides.clear()
+
+
+def test_get_profile_returns_validation_error_for_non_uuid_user_id() -> None:
+    client = TestClient(app)
+
+    response = client.get('/profiles/not-a-uuid')
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert "user_id" in payload["error"]["message"]
