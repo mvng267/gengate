@@ -91,3 +91,37 @@ def test_get_profile_returns_profile_not_found_for_registered_user_without_profi
     assert get_response.json() == {"error": {"code": "profile_not_found", "message": "profile_not_found"}}
 
     app.dependency_overrides.clear()
+
+
+def test_upsert_profile_returns_user_not_found_for_nonexistent_user() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    unknown_user_id = str(uuid.uuid4())
+    upsert_response = client.post(
+        "/profiles",
+        json={"user_id": unknown_user_id, "display_name": "Ghost User", "bio": "x"},
+    )
+    assert upsert_response.status_code == 404
+    assert upsert_response.json() == {"error": {"code": "user_not_found", "message": "user_not_found"}}
+
+    app.dependency_overrides.clear()
