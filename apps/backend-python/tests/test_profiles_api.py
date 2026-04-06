@@ -691,3 +691,16 @@ def test_register_returns_validation_error_when_email_is_null() -> None:
     payload = response.json()
     assert payload["error"]["code"] == "validation_error"
     assert "email" in payload["error"]["message"]
+
+
+def test_register_returns_validation_error_for_empty_payload() -> None:
+    client = TestClient(app)
+
+    response = client.post(
+        "/auth/register",
+        json={},
+    )
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert "email" in payload["error"]["message"]
