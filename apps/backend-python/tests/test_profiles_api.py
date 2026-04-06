@@ -507,3 +507,16 @@ def test_get_profile_returns_method_not_allowed_for_empty_user_id_path_segment()
     assert response.status_code == 405
     payload = response.json()
     assert payload["detail"] == "Method Not Allowed"
+
+
+def test_upsert_profile_returns_validation_error_for_empty_user_id() -> None:
+    client = TestClient(app)
+
+    response = client.post(
+        "/profiles",
+        json={"user_id": "", "display_name": "Invalid", "bio": "x"},
+    )
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert "user_id" in payload["error"]["message"]
