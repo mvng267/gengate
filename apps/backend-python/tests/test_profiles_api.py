@@ -600,3 +600,43 @@ def test_register_returns_500_for_duplicate_empty_username_due_to_db_unique_cons
     assert second_register.text == "Internal Server Error"
 
     app.dependency_overrides.clear()
+
+
+def test_register_allows_case_variant_emails_as_distinct_users() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    first_register = client.post(
+        "/auth/register",
+        json={"email": "CaseVariant@example.com", "username": "case_variant_a"},
+    )
+    assert first_register.status_code == 201
+    assert first_register.json()["email"] == "CaseVariant@example.com"
+
+    second_register = client.post(
+        "/auth/register",
+        json={"email": "casevariant@example.com", "username": "case_variant_b"},
+    )
+    assert second_register.status_code == 201
+    assert second_register.json()["email"] == "casevariant@example.com"
+
+    app.dependency_overrides.clear()
