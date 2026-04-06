@@ -640,3 +640,41 @@ def test_register_allows_case_variant_emails_as_distinct_users() -> None:
     assert second_register.json()["email"] == "casevariant@example.com"
 
     app.dependency_overrides.clear()
+
+
+def test_register_allows_trimmed_variant_when_existing_email_has_outer_whitespace() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    spaced_register = client.post(
+        "/auth/register",
+        json={"email": "  dup-space@example.com  ", "username": "dup_space_a"},
+    )
+    assert spaced_register.status_code == 201
+
+    trimmed_register = client.post(
+        "/auth/register",
+        json={"email": "dup-space@example.com", "username": "dup_space_b"},
+    )
+    assert trimmed_register.status_code == 201
+
+    app.dependency_overrides.clear()
