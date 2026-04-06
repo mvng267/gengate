@@ -458,3 +458,43 @@ def test_upsert_profile_returns_validation_error_for_non_uuid_user_id() -> None:
     payload = response.json()
     assert payload["error"]["code"] == "validation_error"
     assert "user_id" in payload["error"]["message"]
+
+
+def test_register_preserves_email_whitespace_and_allows_trimmed_variant_as_distinct_user() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    spaced_register = client.post(
+        "/auth/register",
+        json={"email": "  spaced-email@example.com  ", "username": "spaced_mail_user"},
+    )
+    assert spaced_register.status_code == 201
+    assert spaced_register.json()["email"] == "  spaced-email@example.com  "
+
+    trimmed_register = client.post(
+        "/auth/register",
+        json={"email": "spaced-email@example.com", "username": "trimmed_mail_user"},
+    )
+    assert trimmed_register.status_code == 201
+    assert trimmed_register.json()["email"] == "spaced-email@example.com"
+
+    app.dependency_overrides.clear()
