@@ -520,3 +520,43 @@ def test_upsert_profile_returns_validation_error_for_empty_user_id() -> None:
     payload = response.json()
     assert payload["error"]["code"] == "validation_error"
     assert "user_id" in payload["error"]["message"]
+
+
+def test_register_allows_null_username_for_multiple_distinct_emails() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    first_register = client.post(
+        "/auth/register",
+        json={"email": "null-username-a@example.com", "username": None},
+    )
+    assert first_register.status_code == 201
+    assert first_register.json()["username"] is None
+
+    second_register = client.post(
+        "/auth/register",
+        json={"email": "null-username-b@example.com", "username": None},
+    )
+    assert second_register.status_code == 201
+    assert second_register.json()["username"] is None
+
+    app.dependency_overrides.clear()
