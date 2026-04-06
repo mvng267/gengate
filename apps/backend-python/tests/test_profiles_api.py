@@ -354,3 +354,44 @@ def test_register_returns_user_exists_for_duplicate_email_with_different_usernam
     assert second_register.json() == {"error": {"code": "user_exists", "message": "user_exists"}}
 
     app.dependency_overrides.clear()
+
+
+def test_upsert_profile_accepts_minimal_payload_with_only_user_id() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    register_response = client.post(
+        "/auth/register",
+        json={"email": "profile-minimal@example.com", "username": "profile_minimal"},
+    )
+    assert register_response.status_code == 201
+    user_id = register_response.json()["id"]
+
+    upsert_response = client.post("/profiles", json={"user_id": user_id})
+    assert upsert_response.status_code == 201
+    body = upsert_response.json()
+    assert body["user_id"] == user_id
+    assert body["display_name"] is None
+    assert body["bio"] is None
+    assert body["avatar_url"] is None
+
+    app.dependency_overrides.clear()
