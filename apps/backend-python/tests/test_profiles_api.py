@@ -704,3 +704,34 @@ def test_register_returns_validation_error_for_empty_payload() -> None:
     payload = response.json()
     assert payload["error"]["code"] == "validation_error"
     assert "email" in payload["error"]["message"]
+
+
+def test_get_profile_accepts_hyphenless_uuid_user_id_and_returns_profile_not_found() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    hyphenless_uuid = "123e4567e89b12d3a456426614174000"
+    response = client.get(f"/profiles/{hyphenless_uuid}")
+    assert response.status_code == 404
+    assert response.json() == {"error": {"code": "profile_not_found", "message": "profile_not_found"}}
+
+    app.dependency_overrides.clear()
