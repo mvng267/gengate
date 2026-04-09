@@ -735,3 +735,43 @@ def test_get_profile_accepts_hyphenless_uuid_user_id_and_returns_profile_not_fou
     assert response.json() == {"error": {"code": "profile_not_found", "message": "profile_not_found"}}
 
     app.dependency_overrides.clear()
+
+
+def test_register_allows_whitespace_only_email_once_and_blocks_exact_duplicate() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    first_register = client.post(
+        "/auth/register",
+        json={"email": "   ", "username": "space_only_email_user_a"},
+    )
+    assert first_register.status_code == 201
+    assert first_register.json()["email"] == "   "
+
+    second_register = client.post(
+        "/auth/register",
+        json={"email": "   ", "username": "space_only_email_user_b"},
+    )
+    assert second_register.status_code == 409
+    assert second_register.json() == {"error": {"code": "user_exists", "message": "user_exists"}}
+
+    app.dependency_overrides.clear()
