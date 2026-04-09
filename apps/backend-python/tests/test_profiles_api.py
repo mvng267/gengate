@@ -775,3 +775,34 @@ def test_register_allows_whitespace_only_email_once_and_blocks_exact_duplicate()
     assert second_register.json() == {"error": {"code": "user_exists", "message": "user_exists"}}
 
     app.dependency_overrides.clear()
+
+
+def test_get_profile_returns_profile_not_found_for_nil_uuid() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    nil_uuid = "00000000-0000-0000-0000-000000000000"
+    response = client.get(f"/profiles/{nil_uuid}")
+    assert response.status_code == 404
+    assert response.json() == {"error": {"code": "profile_not_found", "message": "profile_not_found"}}
+
+    app.dependency_overrides.clear()
