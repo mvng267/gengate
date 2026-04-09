@@ -10,15 +10,19 @@ class AuthService:
         if existing_email is not None:
             return existing_email, False
 
-        if username:
-            existing_username = user_repository.get_by_username(db, username)
+        normalized_username = username
+        if normalized_username == "":
+            normalized_username = None
+
+        if normalized_username:
+            existing_username = user_repository.get_by_username(db, normalized_username)
             if existing_username is not None:
                 return existing_username, False
 
         user = user_repository.create(
             db,
             email=email,
-            username=username,
+            username=normalized_username,
             status="active",
             password_hash=None,
             email_verified_at=None,

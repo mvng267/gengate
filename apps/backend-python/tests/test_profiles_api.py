@@ -562,7 +562,7 @@ def test_register_allows_null_username_for_multiple_distinct_emails() -> None:
     app.dependency_overrides.clear()
 
 
-def test_register_returns_500_for_duplicate_empty_username_due_to_db_unique_constraint() -> None:
+def test_register_normalizes_empty_username_to_null_and_allows_multiple_distinct_emails() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
         connect_args={"check_same_thread": False},
@@ -583,21 +583,21 @@ def test_register_returns_500_for_duplicate_empty_username_due_to_db_unique_cons
             db.close()
 
     app.dependency_overrides[get_db_session] = override_db_session
-    client = TestClient(app, raise_server_exceptions=False)
+    client = TestClient(app)
 
     first_register = client.post(
         "/auth/register",
         json={"email": "empty-username-a@example.com", "username": ""},
     )
     assert first_register.status_code == 201
-    assert first_register.json()["username"] == ""
+    assert first_register.json()["username"] is None
 
     second_register = client.post(
         "/auth/register",
         json={"email": "empty-username-b@example.com", "username": ""},
     )
-    assert second_register.status_code == 500
-    assert second_register.text == "Internal Server Error"
+    assert second_register.status_code == 201
+    assert second_register.json()["username"] is None
 
     app.dependency_overrides.clear()
 
