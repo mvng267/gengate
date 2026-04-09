@@ -460,7 +460,7 @@ def test_upsert_profile_returns_validation_error_for_non_uuid_user_id() -> None:
     assert "user_id" in payload["error"]["message"]
 
 
-def test_register_preserves_email_whitespace_and_allows_trimmed_variant_as_distinct_user() -> None:
+def test_register_normalizes_email_by_trimming_and_lowercasing() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
         connect_args={"check_same_thread": False},
@@ -483,19 +483,12 @@ def test_register_preserves_email_whitespace_and_allows_trimmed_variant_as_disti
     app.dependency_overrides[get_db_session] = override_db_session
     client = TestClient(app)
 
-    spaced_register = client.post(
+    register_response = client.post(
         "/auth/register",
-        json={"email": "  spaced-email@example.com  ", "username": "spaced_mail_user"},
+        json={"email": "  Case-Trim@Example.COM  ", "username": "normalized_mail_user"},
     )
-    assert spaced_register.status_code == 201
-    assert spaced_register.json()["email"] == "  spaced-email@example.com  "
-
-    trimmed_register = client.post(
-        "/auth/register",
-        json={"email": "spaced-email@example.com", "username": "trimmed_mail_user"},
-    )
-    assert trimmed_register.status_code == 201
-    assert trimmed_register.json()["email"] == "spaced-email@example.com"
+    assert register_response.status_code == 201
+    assert register_response.json()["email"] == "case-trim@example.com"
 
     app.dependency_overrides.clear()
 
@@ -602,7 +595,7 @@ def test_register_normalizes_empty_username_to_null_and_allows_multiple_distinct
     app.dependency_overrides.clear()
 
 
-def test_register_allows_case_variant_emails_as_distinct_users() -> None:
+def test_register_blocks_case_variant_emails_after_normalization() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
         connect_args={"check_same_thread": False},
@@ -630,19 +623,19 @@ def test_register_allows_case_variant_emails_as_distinct_users() -> None:
         json={"email": "CaseVariant@example.com", "username": "case_variant_a"},
     )
     assert first_register.status_code == 201
-    assert first_register.json()["email"] == "CaseVariant@example.com"
+    assert first_register.json()["email"] == "casevariant@example.com"
 
     second_register = client.post(
         "/auth/register",
         json={"email": "casevariant@example.com", "username": "case_variant_b"},
     )
-    assert second_register.status_code == 201
-    assert second_register.json()["email"] == "casevariant@example.com"
+    assert second_register.status_code == 409
+    assert second_register.json() == {"error": {"code": "user_exists", "message": "user_exists"}}
 
     app.dependency_overrides.clear()
 
 
-def test_register_allows_trimmed_variant_when_existing_email_has_outer_whitespace() -> None:
+def test_register_blocks_trimmed_variant_when_existing_email_has_outer_whitespace() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
         connect_args={"check_same_thread": False},
@@ -670,12 +663,14 @@ def test_register_allows_trimmed_variant_when_existing_email_has_outer_whitespac
         json={"email": "  dup-space@example.com  ", "username": "dup_space_a"},
     )
     assert spaced_register.status_code == 201
+    assert spaced_register.json()["email"] == "dup-space@example.com"
 
     trimmed_register = client.post(
         "/auth/register",
         json={"email": "dup-space@example.com", "username": "dup_space_b"},
     )
-    assert trimmed_register.status_code == 201
+    assert trimmed_register.status_code == 409
+    assert trimmed_register.json() == {"error": {"code": "user_exists", "message": "user_exists"}}
 
     app.dependency_overrides.clear()
 
@@ -737,44 +732,17 @@ def test_get_profile_accepts_hyphenless_uuid_user_id_and_returns_profile_not_fou
     app.dependency_overrides.clear()
 
 
-def test_register_allows_whitespace_only_email_once_and_blocks_exact_duplicate() -> None:
-    engine = create_engine(
-        "sqlite+pysqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    Base.metadata.create_all(bind=engine)
-    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
-
-    def override_db_session():
-        db = testing_session_local()
-        try:
-            yield db
-            db.commit()
-        except Exception:
-            db.rollback()
-            raise
-        finally:
-            db.close()
-
-    app.dependency_overrides[get_db_session] = override_db_session
+def test_register_rejects_whitespace_only_email_after_normalization() -> None:
     client = TestClient(app)
 
-    first_register = client.post(
+    response = client.post(
         "/auth/register",
         json={"email": "   ", "username": "space_only_email_user_a"},
     )
-    assert first_register.status_code == 201
-    assert first_register.json()["email"] == "   "
-
-    second_register = client.post(
-        "/auth/register",
-        json={"email": "   ", "username": "space_only_email_user_b"},
-    )
-    assert second_register.status_code == 409
-    assert second_register.json() == {"error": {"code": "user_exists", "message": "user_exists"}}
-
-    app.dependency_overrides.clear()
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert "email_required" in payload["error"]["message"]
 
 
 def test_get_profile_returns_profile_not_found_for_nil_uuid() -> None:
