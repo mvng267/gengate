@@ -806,3 +806,48 @@ def test_get_profile_returns_profile_not_found_for_nil_uuid() -> None:
     assert response.json() == {"error": {"code": "profile_not_found", "message": "profile_not_found"}}
 
     app.dependency_overrides.clear()
+
+
+def test_upsert_profile_accepts_empty_avatar_url_and_persists_it() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    register_response = client.post(
+        "/auth/register",
+        json={"email": "empty-avatar@example.com", "username": "empty_avatar_user"},
+    )
+    assert register_response.status_code == 201
+    user_id = register_response.json()["id"]
+
+    upsert_response = client.post(
+        "/profiles",
+        json={"user_id": user_id, "avatar_url": ""},
+    )
+    assert upsert_response.status_code == 201
+    body = upsert_response.json()
+    assert body["avatar_url"] == ""
+
+    get_response = client.get(f"/profiles/{user_id}")
+    assert get_response.status_code == 200
+    assert get_response.json()["avatar_url"] == ""
+
+    app.dependency_overrides.clear()
