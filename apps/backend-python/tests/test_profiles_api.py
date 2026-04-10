@@ -773,6 +773,68 @@ def test_upsert_profile_accepts_minimal_payload_with_only_user_id() -> None:
     app.dependency_overrides.clear()
 
 
+def test_upsert_profile_create_path_sets_only_provided_fields_for_newly_registered_user() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    register_response = client.post(
+        "/auth/register",
+        json={"email": "profile-create-path@example.com", "username": "profile_create_path"},
+    )
+    assert register_response.status_code == 201
+    user_id = register_response.json()["id"]
+
+    upsert_response = client.post(
+        "/profiles",
+        json={
+            "user_id": user_id,
+            "display_name": "First-time Display Name",
+        },
+    )
+    assert upsert_response.status_code == 201
+    body = upsert_response.json()
+    assert body["user_id"] == user_id
+    assert body["display_name"] == "First-time Display Name"
+    assert body["bio"] is None
+    assert body["avatar_url"] is None
+
+    get_response = client.get(f"/profiles/{user_id}")
+    assert get_response.status_code == 200
+    persisted = get_response.json()
+    assert persisted["id"] == body["id"]
+    assert persisted["display_name"] == "First-time Display Name"
+    assert persisted["bio"] is None
+    assert persisted["avatar_url"] is None
+
+    session = testing_session_local()
+    try:
+        profile_count = session.scalar(select(func.count()).select_from(Profile))
+        assert profile_count == 1
+    finally:
+        session.close()
+
+    app.dependency_overrides.clear()
+
+
 def test_register_normalizes_whitespace_only_username_to_null_and_allows_multiple_distinct_emails() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
