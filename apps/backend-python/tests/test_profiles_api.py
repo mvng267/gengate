@@ -195,6 +195,58 @@ def test_upsert_profile_updates_existing_profile_instead_of_creating_duplicate()
     app.dependency_overrides.clear()
 
 
+def test_upsert_profile_preserves_whitespace_in_display_name_and_bio() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    register_response = client.post(
+        "/auth/register",
+        json={"email": "profile-whitespace-fields@example.com", "username": "profile_ws_fields"},
+    )
+    assert register_response.status_code == 201
+    user_id = register_response.json()["id"]
+
+    upsert_response = client.post(
+        "/profiles",
+        json={
+            "user_id": user_id,
+            "display_name": "  Name With Spaces  ",
+            "bio": "  Bio With Spaces  ",
+        },
+    )
+    assert upsert_response.status_code == 201
+    body = upsert_response.json()
+    assert body["display_name"] == "  Name With Spaces  "
+    assert body["bio"] == "  Bio With Spaces  "
+
+    get_response = client.get(f"/profiles/{user_id}")
+    assert get_response.status_code == 200
+    persisted = get_response.json()
+    assert persisted["display_name"] == "  Name With Spaces  "
+    assert persisted["bio"] == "  Bio With Spaces  "
+
+    app.dependency_overrides.clear()
+
+
 def test_get_profile_returns_profile_not_found_for_unknown_user_id() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
