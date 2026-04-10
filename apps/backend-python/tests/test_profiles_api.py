@@ -828,6 +828,19 @@ def test_register_rejects_whitespace_only_email_after_normalization() -> None:
     assert "email_required" in payload["error"]["message"]
 
 
+def test_register_rejects_email_with_internal_space() -> None:
+    client = TestClient(app)
+
+    response = client.post(
+        "/auth/register",
+        json={"email": "first last@example.com", "username": "internal_space_email_user"},
+    )
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert "email_invalid_format" in payload["error"]["message"]
+
+
 def test_get_profile_returns_profile_not_found_for_nil_uuid() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",

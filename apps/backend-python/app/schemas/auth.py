@@ -1,6 +1,9 @@
 from pydantic import BaseModel, field_validator
 
 
+EMAIL_INTERNAL_WHITESPACE_CHARS = (" ", "\t", "\n", "\r", "\v", "\f")
+
+
 class RegisterRequest(BaseModel):
     email: str
     username: str | None = None
@@ -11,6 +14,8 @@ class RegisterRequest(BaseModel):
         normalized = value.strip().lower()
         if normalized == "":
             raise ValueError("email_required")
+        if any(char in normalized for char in EMAIL_INTERNAL_WHITESPACE_CHARS):
+            raise ValueError("email_invalid_format")
         if len(normalized) > 320:
             raise ValueError("email_too_long")
         return normalized
