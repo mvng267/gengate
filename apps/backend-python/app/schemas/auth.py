@@ -17,8 +17,10 @@ class RegisterRequest(BaseModel):
 
     @field_validator("username")
     @classmethod
-    def validate_username_length(cls, value: str | None) -> str | None:
+    def normalize_and_validate_username(cls, value: str | None) -> str | None:
         if value is None:
+            return None
+        if value.strip() == "":
             return None
         if len(value) > 50:
             raise ValueError("username_too_long")

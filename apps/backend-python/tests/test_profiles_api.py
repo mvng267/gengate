@@ -407,7 +407,7 @@ def test_upsert_profile_accepts_minimal_payload_with_only_user_id() -> None:
     app.dependency_overrides.clear()
 
 
-def test_register_preserves_blank_username_and_blocks_exact_blank_username_duplicates() -> None:
+def test_register_normalizes_whitespace_only_username_to_null_and_allows_multiple_distinct_emails() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
         connect_args={"check_same_thread": False},
@@ -435,14 +435,14 @@ def test_register_preserves_blank_username_and_blocks_exact_blank_username_dupli
         json={"email": "blank-username-a@example.com", "username": "   "},
     )
     assert first_register.status_code == 201
-    assert first_register.json()["username"] == "   "
+    assert first_register.json()["username"] is None
 
     second_register = client.post(
         "/auth/register",
         json={"email": "blank-username-b@example.com", "username": "   "},
     )
-    assert second_register.status_code == 409
-    assert second_register.json() == {"error": {"code": "user_exists", "message": "user_exists"}}
+    assert second_register.status_code == 201
+    assert second_register.json()["username"] is None
 
     app.dependency_overrides.clear()
 
