@@ -11,6 +11,8 @@ class RegisterRequest(BaseModel):
         normalized = value.strip().lower()
         if normalized == "":
             raise ValueError("email_required")
+        if len(normalized) > 320:
+            raise ValueError("email_too_long")
         return normalized
 
 
