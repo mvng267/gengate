@@ -841,6 +841,32 @@ def test_register_rejects_email_with_internal_space() -> None:
     assert "email_invalid_format" in payload["error"]["message"]
 
 
+def test_register_rejects_email_with_internal_tab() -> None:
+    client = TestClient(app)
+
+    response = client.post(
+        "/auth/register",
+        json={"email": "first\tlast@example.com", "username": "internal_tab_email_user"},
+    )
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert "email_invalid_format" in payload["error"]["message"]
+
+
+def test_register_rejects_email_with_internal_newline() -> None:
+    client = TestClient(app)
+
+    response = client.post(
+        "/auth/register",
+        json={"email": "first\nlast@example.com", "username": "internal_newline_email_user"},
+    )
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert "email_invalid_format" in payload["error"]["message"]
+
+
 def test_get_profile_returns_profile_not_found_for_nil_uuid() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
