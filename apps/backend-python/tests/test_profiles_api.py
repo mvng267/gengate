@@ -577,6 +577,83 @@ def test_upsert_profile_updates_avatar_only_and_preserves_existing_text_fields()
     app.dependency_overrides.clear()
 
 
+def test_upsert_profile_sequential_partial_updates_preserve_untouched_fields() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    register_response = client.post(
+        "/auth/register",
+        json={"email": "profile-seq-partial@example.com", "username": "profile_seq_partial"},
+    )
+    assert register_response.status_code == 201
+    user_id = register_response.json()["id"]
+
+    first_upsert = client.post(
+        "/profiles",
+        json={
+            "user_id": user_id,
+            "display_name": "Sequential User",
+            "bio": "initial bio",
+            "avatar_url": "https://example.com/initial.png",
+        },
+    )
+    assert first_upsert.status_code == 201
+
+    avatar_only_upsert = client.post(
+        "/profiles",
+        json={
+            "user_id": user_id,
+            "avatar_url": "https://example.com/avatar-only.png",
+        },
+    )
+    assert avatar_only_upsert.status_code == 201
+    avatar_only_body = avatar_only_upsert.json()
+    assert avatar_only_body["display_name"] == "Sequential User"
+    assert avatar_only_body["bio"] == "initial bio"
+    assert avatar_only_body["avatar_url"] == "https://example.com/avatar-only.png"
+
+    bio_only_upsert = client.post(
+        "/profiles",
+        json={
+            "user_id": user_id,
+            "bio": "updated bio only",
+        },
+    )
+    assert bio_only_upsert.status_code == 201
+    bio_only_body = bio_only_upsert.json()
+    assert bio_only_body["display_name"] == "Sequential User"
+    assert bio_only_body["bio"] == "updated bio only"
+    assert bio_only_body["avatar_url"] == "https://example.com/avatar-only.png"
+
+    get_response = client.get(f"/profiles/{user_id}")
+    assert get_response.status_code == 200
+    persisted = get_response.json()
+    assert persisted["display_name"] == "Sequential User"
+    assert persisted["bio"] == "updated bio only"
+    assert persisted["avatar_url"] == "https://example.com/avatar-only.png"
+
+    app.dependency_overrides.clear()
+
+
 def test_register_returns_user_exists_for_duplicate_username_with_different_email() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
