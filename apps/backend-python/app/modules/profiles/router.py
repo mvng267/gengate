@@ -12,6 +12,8 @@ router = APIRouter(prefix="/profiles", tags=["profiles"])
 
 @router.post("", response_model=ProfileResponse, status_code=status.HTTP_201_CREATED)
 def upsert_profile(payload: ProfileUpsertRequest, db: Session = Depends(get_db_session)) -> ProfileResponse:
+    provided_fields = payload.model_fields_set
+
     try:
         profile = profile_service.upsert_profile(
             db,
@@ -19,6 +21,9 @@ def upsert_profile(payload: ProfileUpsertRequest, db: Session = Depends(get_db_s
             display_name=payload.display_name,
             bio=payload.bio,
             avatar_url=payload.avatar_url,
+            display_name_provided="display_name" in provided_fields,
+            bio_provided="bio" in provided_fields,
+            avatar_url_provided="avatar_url" in provided_fields,
         )
     except ValueError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="user_not_found")

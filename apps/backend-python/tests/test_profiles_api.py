@@ -438,8 +438,6 @@ def test_upsert_profile_updates_avatar_only_and_preserves_existing_text_fields()
         "/profiles",
         json={
             "user_id": user_id,
-            "display_name": "Avatar User",
-            "bio": "unchanged bio",
             "avatar_url": "https://example.com/second.png",
         },
     )
@@ -450,6 +448,13 @@ def test_upsert_profile_updates_avatar_only_and_preserves_existing_text_fields()
     assert second_profile["display_name"] == "Avatar User"
     assert second_profile["bio"] == "unchanged bio"
     assert second_profile["avatar_url"] == "https://example.com/second.png"
+
+    get_response = client.get(f"/profiles/{user_id}")
+    assert get_response.status_code == 200
+    persisted = get_response.json()
+    assert persisted["display_name"] == "Avatar User"
+    assert persisted["bio"] == "unchanged bio"
+    assert persisted["avatar_url"] == "https://example.com/second.png"
 
     app.dependency_overrides.clear()
 

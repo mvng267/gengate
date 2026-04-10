@@ -15,6 +15,9 @@ class ProfileService:
         display_name: str | None,
         bio: str | None,
         avatar_url: str | None,
+        display_name_provided: bool = True,
+        bio_provided: bool = True,
+        avatar_url_provided: bool = True,
     ) -> Profile:
         user = user_repository.get(db, user_id)
         if user is None:
@@ -25,15 +28,18 @@ class ProfileService:
             profile = profile_repository.create(
                 db,
                 user_id=user_id,
-                display_name=display_name,
-                bio=bio,
-                avatar_url=avatar_url,
+                display_name=display_name if display_name_provided else None,
+                bio=bio if bio_provided else None,
+                avatar_url=avatar_url if avatar_url_provided else None,
             )
             return profile
 
-        profile.display_name = display_name
-        profile.bio = bio
-        profile.avatar_url = avatar_url
+        if display_name_provided:
+            profile.display_name = display_name
+        if bio_provided:
+            profile.bio = bio
+        if avatar_url_provided:
+            profile.avatar_url = avatar_url
         db.flush()
         db.refresh(profile)
         return profile
