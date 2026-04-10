@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from sqlalchemy.orm import Session
 
 from app.models.users import User
@@ -25,7 +27,7 @@ class AuthService:
             username=normalized_username,
             status="active",
             password_hash=None,
-            email_verified_at=None,
+            email_verified_at=datetime.now(timezone.utc),
         )
         return user, True
 

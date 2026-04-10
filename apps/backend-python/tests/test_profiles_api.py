@@ -39,8 +39,18 @@ def test_register_and_profile_crud_flow() -> None:
         json={"email": "profile-test@example.com", "username": "profile_test"},
     )
     assert register_response.status_code == 201
-    user_id = register_response.json()["id"]
+    register_body = register_response.json()
+    user_id = register_body["id"]
     uuid.UUID(user_id)
+    assert register_body["email"] == "profile-test@example.com"
+
+    session = testing_session_local()
+    try:
+        registered_user = session.get(all_models[1], uuid.UUID(user_id))
+        assert registered_user is not None
+        assert registered_user.email_verified_at is not None
+    finally:
+        session.close()
 
     upsert_response = client.post(
         "/profiles",
