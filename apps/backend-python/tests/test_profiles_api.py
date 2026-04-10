@@ -725,6 +725,19 @@ def test_register_returns_validation_error_when_email_exceeds_max_length_after_n
     assert "email_too_long" in payload["error"]["message"]
 
 
+def test_register_returns_validation_error_when_username_exceeds_max_length() -> None:
+    client = TestClient(app)
+
+    response = client.post(
+        "/auth/register",
+        json={"email": "too-long-username@example.com", "username": "u" * 51},
+    )
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert "username_too_long" in payload["error"]["message"]
+
+
 def test_get_profile_accepts_hyphenless_uuid_user_id_and_returns_profile_not_found() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",

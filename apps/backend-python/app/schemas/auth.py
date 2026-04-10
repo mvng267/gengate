@@ -15,6 +15,15 @@ class RegisterRequest(BaseModel):
             raise ValueError("email_too_long")
         return normalized
 
+    @field_validator("username")
+    @classmethod
+    def validate_username_length(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        if len(value) > 50:
+            raise ValueError("username_too_long")
+        return value
+
 
 class RegisterResponse(BaseModel):
     id: str
