@@ -1320,3 +1320,82 @@ def test_upsert_profile_accepts_empty_avatar_url_and_persists_it() -> None:
     assert get_response.json()["avatar_url"] == ""
 
     app.dependency_overrides.clear()
+
+
+def test_upsert_profile_preserves_empty_avatar_across_display_name_and_bio_only_updates() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    register_response = client.post(
+        "/auth/register",
+        json={"email": "empty-avatar-followup@example.com", "username": "empty_avatar_followup"},
+    )
+    assert register_response.status_code == 201
+    user_id = register_response.json()["id"]
+
+    first_upsert = client.post(
+        "/profiles",
+        json={
+            "user_id": user_id,
+            "display_name": "Before name",
+            "bio": "Before bio",
+            "avatar_url": "",
+        },
+    )
+    assert first_upsert.status_code == 201
+    first_body = first_upsert.json()
+    assert first_body["avatar_url"] == ""
+
+    display_name_only_upsert = client.post(
+        "/profiles",
+        json={
+            "user_id": user_id,
+            "display_name": "After name",
+        },
+    )
+    assert display_name_only_upsert.status_code == 201
+    display_name_only_body = display_name_only_upsert.json()
+    assert display_name_only_body["display_name"] == "After name"
+    assert display_name_only_body["bio"] == "Before bio"
+    assert display_name_only_body["avatar_url"] == ""
+
+    bio_only_upsert = client.post(
+        "/profiles",
+        json={
+            "user_id": user_id,
+            "bio": "After bio",
+        },
+    )
+    assert bio_only_upsert.status_code == 201
+    bio_only_body = bio_only_upsert.json()
+    assert bio_only_body["display_name"] == "After name"
+    assert bio_only_body["bio"] == "After bio"
+    assert bio_only_body["avatar_url"] == ""
+
+    get_response = client.get(f"/profiles/{user_id}")
+    assert get_response.status_code == 200
+    persisted = get_response.json()
+    assert persisted["display_name"] == "After name"
+    assert persisted["bio"] == "After bio"
+    assert persisted["avatar_url"] == ""
+
+    app.dependency_overrides.clear()
