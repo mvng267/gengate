@@ -1,14 +1,15 @@
 import uuid
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.db import get_db_session
 from app.main import app
-from app.models.base import Base
 from app.models import all_models
+from app.models.base import Base
+from app.models.profiles import Profile
 
 
 def test_register_and_profile_crud_flow() -> None:
@@ -191,6 +192,68 @@ def test_upsert_profile_updates_existing_profile_instead_of_creating_duplicate()
     assert fetched_profile["id"] == first_profile["id"]
     assert fetched_profile["display_name"] == "Second Name"
     assert fetched_profile["bio"] == "second"
+
+    app.dependency_overrides.clear()
+
+
+def test_upsert_profile_is_idempotent_for_same_payload_without_unintended_mutation() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    register_response = client.post(
+        "/auth/register",
+        json={"email": "profile-idempotent@example.com", "username": "profile_idempotent"},
+    )
+    assert register_response.status_code == 201
+    user_id = register_response.json()["id"]
+
+    payload = {
+        "user_id": user_id,
+        "display_name": "Idempotent Name",
+        "bio": "Idempotent Bio",
+        "avatar_url": "https://example.com/idempotent.png",
+    }
+
+    first_upsert = client.post("/profiles", json=payload)
+    assert first_upsert.status_code == 201
+    first_profile = first_upsert.json()
+
+    second_upsert = client.post("/profiles", json=payload)
+    assert second_upsert.status_code == 201
+    second_profile = second_upsert.json()
+
+    assert second_profile == first_profile
+
+    get_response = client.get(f"/profiles/{user_id}")
+    assert get_response.status_code == 200
+    persisted = get_response.json()
+    assert persisted == first_profile
+
+    session = testing_session_local()
+    try:
+        profile_count = session.scalar(select(func.count()).select_from(Profile))
+        assert profile_count == 1
+    finally:
+        session.close()
 
     app.dependency_overrides.clear()
 
