@@ -20,11 +20,13 @@ class RegisterRequest(BaseModel):
     def normalize_and_validate_username(cls, value: str | None) -> str | None:
         if value is None:
             return None
-        if value.strip() == "":
+
+        normalized = value.strip()
+        if normalized == "":
             return None
-        if len(value) > 50:
+        if len(normalized) > 50:
             raise ValueError("username_too_long")
-        return value
+        return normalized
 
 
 class RegisterResponse(BaseModel):

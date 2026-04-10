@@ -738,6 +738,52 @@ def test_register_returns_validation_error_when_username_exceeds_max_length() ->
     assert "username_too_long" in payload["error"]["message"]
 
 
+def test_register_rejects_username_exceeding_max_length_after_trim() -> None:
+    client = TestClient(app)
+
+    response = client.post(
+        "/auth/register",
+        json={"email": "too-long-trimmed-username@example.com", "username": f" {'u' * 51} "},
+    )
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert "username_too_long" in payload["error"]["message"]
+
+
+def test_register_trims_username_before_persisting() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    register_response = client.post(
+        "/auth/register",
+        json={"email": "trim-username@example.com", "username": "  trimmed_user  "},
+    )
+    assert register_response.status_code == 201
+    assert register_response.json()["username"] == "trimmed_user"
+
+    app.dependency_overrides.clear()
+
+
 def test_get_profile_accepts_hyphenless_uuid_user_id_and_returns_profile_not_found() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
