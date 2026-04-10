@@ -304,6 +304,63 @@ def test_upsert_profile_updates_display_name_and_bio_to_empty_strings_instead_of
     app.dependency_overrides.clear()
 
 
+def test_upsert_profile_updates_display_name_and_bio_to_null_when_explicitly_provided() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    register_response = client.post(
+        "/auth/register",
+        json={"email": "profile-null-fields@example.com", "username": "profile_null_fields"},
+    )
+    assert register_response.status_code == 201
+    user_id = register_response.json()["id"]
+
+    first_upsert = client.post(
+        "/profiles",
+        json={"user_id": user_id, "display_name": "Before", "bio": "Before bio"},
+    )
+    assert first_upsert.status_code == 201
+    first_profile = first_upsert.json()
+
+    second_upsert = client.post(
+        "/profiles",
+        json={"user_id": user_id, "display_name": None, "bio": None},
+    )
+    assert second_upsert.status_code == 201
+    second_profile = second_upsert.json()
+
+    assert second_profile["id"] == first_profile["id"]
+    assert second_profile["display_name"] is None
+    assert second_profile["bio"] is None
+
+    get_response = client.get(f"/profiles/{user_id}")
+    assert get_response.status_code == 200
+    persisted = get_response.json()
+    assert persisted["display_name"] is None
+    assert persisted["bio"] is None
+
+    app.dependency_overrides.clear()
+
+
 def test_get_profile_returns_profile_not_found_for_unknown_user_id() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
