@@ -19,3 +19,4 @@
 - Blocker: repo hiện chưa có `apps/web-nextjs` và `apps/ios-swift`; 2 lane mới sẽ bootstrap từ đầu theo spec/tasklist
 - Next: chờ output từ 3 worker theo platform
 - Backend lane update (pikamen): added `/profiles` contract test for `bio: null` with omitted `display_name` + `avatar_url` (preserve omitted fields, including empty-string values); verify `./.venv/bin/pytest -q tests/test_profiles_api.py -k "updates_bio_to_null_and_preserves_omitted_display_name_and_avatar_url"` ✅ (2 passed), full file ✅ (47 passed)
+- Web lane update (pikachu): bootstrapped `apps/web-nextjs` Next.js App Router foundation with shared shell + placeholder routes (`/login`, `/feed`, `/inbox`, `/location`, `/profile`), env/config + API client stub, and README run notes; verify `cd apps/web-nextjs && npm run verify` ✅.
