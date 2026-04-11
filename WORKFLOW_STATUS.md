@@ -11,7 +11,7 @@
   - `./.venv/bin/pytest -q tests/test_profiles_api.py -k "clears_avatar_with_null_and_preserves_omitted_text_fields"` ✅ (1 passed)
   - `./.venv/bin/pytest -q tests/test_profiles_api.py` ✅ (44 passed)
 - Git:
-  - latest pushed: `09e365f` on `origin/main`
-  - working tree: dirty (ready to commit)
+  - latest pushed: `d8f46ff` on `origin/main`
+  - working tree: clean
 - Blocker: none
-- Next: commit + push scope batch 29 đầu tiên
+- Next: chờ scope kế tiếp của batch 29
