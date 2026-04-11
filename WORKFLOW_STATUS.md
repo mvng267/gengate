@@ -1,18 +1,21 @@
 # GenGate Workflow Status
 
 - Batch: 29
-- Worker: pikamen
-- Scope: khóa contract `/profiles` khi gửi `bio: null` nhưng omit `display_name` + `avatar_url`, hai field omit phải được preserve
-- Status: pushed
+- Worker: team
+- Scope: 3-lane theo platform — backend `/profiles`, web foundation `apps/web-nextjs`, iOS foundation `apps/ios-swift`
+- Status: dispatched_parallel
 - Files:
-  - apps/backend-python/tests/test_profiles_api.py
+  - apps/backend-python/**
+  - apps/web-nextjs/**
+  - apps/ios-swift/**
+  - TEAM_DISPATCH.md
   - WORKFLOW_STATUS.md
 - Test:
-  - `./.venv/bin/pytest -q tests/test_profiles_api.py -k "bio_to_null_and_preserves_omitted_display_name_and_avatar_url"` ✅ (1 passed)
-  - `./.venv/bin/pytest -q tests/test_profiles_api.py` ✅ (46 passed)
+  - backend baseline trước khi mở 3 lane: `./.venv/bin/pytest -q tests/test_profiles_api.py` ✅ (45 passed)
 - Git:
-  - latest pushed test commit: `6f1b94f` on `origin/main`
-  - latest workflow commit: `e0cd02e` on `origin/main`
-  - working tree: dirty (`TEAM_DISPATCH.md`, `WORKFLOW_STATUS.md`)
-- Blocker: none
-- Next: chờ scope kế tiếp của batch 29
+  - latest pushed backend feature commit: `b15041f`
+  - latest workflow commit: `e0cd02e`
+  - working tree: dispatch update only
+- Blocker: repo hiện chưa có `apps/web-nextjs` và `apps/ios-swift`; 2 lane mới sẽ bootstrap từ đầu theo spec/tasklist
+- Next: chờ output từ 3 worker theo platform
+- Backend lane update (pikamen): added `/profiles` contract test for `bio: null` with omitted `display_name` + `avatar_url` (preserve omitted fields, including empty-string values); verify `./.venv/bin/pytest -q tests/test_profiles_api.py -k "updates_bio_to_null_and_preserves_omitted_display_name_and_avatar_url"` ✅ (2 passed), full file ✅ (47 passed)
