@@ -609,6 +609,73 @@ def test_upsert_profile_updates_display_name_to_null_and_preserves_omitted_bio_a
     app.dependency_overrides.clear()
 
 
+def test_upsert_profile_updates_bio_to_null_and_preserves_omitted_display_name_and_avatar_url() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    register_response = client.post(
+        "/auth/register",
+        json={
+            "email": "profile-bio-null-omitted-display-avatar@example.com",
+            "username": "profile_bio_null_omitted_display_avatar",
+        },
+    )
+    assert register_response.status_code == 201
+    user_id = register_response.json()["id"]
+
+    first_upsert = client.post(
+        "/profiles",
+        json={
+            "user_id": user_id,
+            "display_name": "Keep Name",
+            "bio": "Before bio",
+            "avatar_url": "https://example.com/keep-avatar.png",
+        },
+    )
+    assert first_upsert.status_code == 201
+    first_profile = first_upsert.json()
+
+    second_upsert = client.post(
+        "/profiles",
+        json={"user_id": user_id, "bio": None},
+    )
+    assert second_upsert.status_code == 201
+    second_profile = second_upsert.json()
+
+    assert second_profile["id"] == first_profile["id"]
+    assert second_profile["display_name"] == "Keep Name"
+    assert second_profile["bio"] is None
+    assert second_profile["avatar_url"] == "https://example.com/keep-avatar.png"
+
+    get_response = client.get(f"/profiles/{user_id}")
+    assert get_response.status_code == 200
+    persisted = get_response.json()
+    assert persisted["display_name"] == "Keep Name"
+    assert persisted["bio"] is None
+    assert persisted["avatar_url"] == "https://example.com/keep-avatar.png"
+
+    app.dependency_overrides.clear()
+
+
 def test_get_profile_returns_profile_not_found_for_unknown_user_id() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
