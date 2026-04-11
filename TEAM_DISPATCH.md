@@ -6,24 +6,22 @@
 - Mục tiêu: chia scope hẹp, không đạp nhau, ưu tiên chốt batch nhanh.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 28
-- Trục công việc: profiles contract locking
+- Batch workflow chính thức hiện tại: 29
+- Trục công việc: profiles contract locking, one-lane nhanh để giữ mốc sạch sau khi batch 28 đã chốt.
 
 ## Worker slices
 
 ### pikamen
-- Scope đã chốt: upsert create path cho user mới register chưa có profile; commit `ff14b7b`.
-- Trạng thái: done.
+- Vai trò: coding owner cho scope chính.
+- Scope mới batch 29: khóa contract khi `/profiles` nhận `avatar_url: null` để clear avatar nhưng vẫn preserve `display_name` + `bio` nếu hai field đó bị omit.
+- Trạng thái hiện tại: dispatch_now.
 
 ### pikachu
-- Scope đang chốt: display_name max length validation + verify long bio vẫn được persist.
-- Trạng thái: verify_then_push.
+- Trạng thái: idle.
 
 ### pikame
-- Scope đã chốt: invalid UUID get-profile 422 contract; commit `d8f79e3`.
-- Trạng thái: done.
+- Trạng thái: idle.
 
 ## Conflict rule
-- Mỗi worker chỉ làm scope được giao.
-- Không tự mở scope mới nếu coordinator chưa ghi rõ scope tiếp theo.
-- Sau khi lane `pikachu` push xong, coordinator phải quyết định ngay: khép batch 28 hay mở scope hẹp kế tiếp.
+- Batch 29 mở bằng một scope hẹp, một worker duy nhất để giữ nhịp nhanh và mốc batch rõ.
+- Chỉ mở lại multi-lane nếu scope mới tách file đủ sạch.

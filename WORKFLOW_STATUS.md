@@ -1,18 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 28
-- Worker: team
-- Scope: profiles contract locking — upsert create path + invalid UUID 422 + long display_name validation
-- Status: pushed_partial_sync
+- Batch: 29
+- Worker: pikamen
+- Scope: khóa contract `/profiles` khi gửi `avatar_url: null` để clear avatar nhưng vẫn preserve `display_name` + `bio`
+- Status: dispatched
 - Files:
-  - apps/backend-python/app/schemas/profiles.py
   - apps/backend-python/tests/test_profiles_api.py
   - WORKFLOW_STATUS.md
 - Test:
-  - `./.venv/bin/pytest -q tests/test_profiles_api.py -k "display_name_exceeds_max_length or accepts_very_long_bio"` ✅ (2 passed)
-  - `./.venv/bin/pytest -q tests/test_profiles_api.py` ✅ (43 passed)
+  - baseline trước khi mở batch 29: `./.venv/bin/pytest -q tests/test_profiles_api.py` ✅ (43 passed)
 - Git:
-  - latest pushed before this sync: `d8f79e3`
-  - repo code currently prepared for next commit/push
+  - latest pushed: `09e365f` on `origin/main`
 - Blocker: none
-- Next: chốt lane `pikachu` (display_name max_length), push sync, rồi quyết định có khép batch 28 hay mở scope kế tiếp
+- Next: chờ run batch 29 scope đầu tiên từ `pikamen`
