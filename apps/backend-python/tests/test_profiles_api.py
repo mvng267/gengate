@@ -640,6 +640,70 @@ def test_upsert_profile_updates_avatar_only_and_preserves_existing_text_fields()
     app.dependency_overrides.clear()
 
 
+def test_upsert_profile_clears_avatar_with_null_and_preserves_omitted_text_fields() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    register_response = client.post(
+        "/auth/register",
+        json={"email": "profile-avatar-null@example.com", "username": "profile_avatar_null"},
+    )
+    assert register_response.status_code == 201
+    user_id = register_response.json()["id"]
+
+    first_upsert = client.post(
+        "/profiles",
+        json={
+            "user_id": user_id,
+            "display_name": "Avatar Null User",
+            "bio": "keep bio",
+            "avatar_url": "https://example.com/original.png",
+        },
+    )
+    assert first_upsert.status_code == 201
+
+    clear_avatar_upsert = client.post(
+        "/profiles",
+        json={
+            "user_id": user_id,
+            "avatar_url": None,
+        },
+    )
+    assert clear_avatar_upsert.status_code == 201
+    clear_avatar_body = clear_avatar_upsert.json()
+    assert clear_avatar_body["display_name"] == "Avatar Null User"
+    assert clear_avatar_body["bio"] == "keep bio"
+    assert clear_avatar_body["avatar_url"] is None
+
+    get_response = client.get(f"/profiles/{user_id}")
+    assert get_response.status_code == 200
+    persisted = get_response.json()
+    assert persisted["display_name"] == "Avatar Null User"
+    assert persisted["bio"] == "keep bio"
+    assert persisted["avatar_url"] is None
+
+    app.dependency_overrides.clear()
+
+
 def test_upsert_profile_sequential_partial_updates_preserve_untouched_fields() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
