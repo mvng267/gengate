@@ -1,17 +1,18 @@
 # GenGate Workflow Status
 
 - Batch: 28
-- Worker: pikamen
-- Scope: khóa contract upsert create path (user mới register, chưa có profile)
-- Status: pushed
+- Worker: team
+- Scope: profiles contract locking — upsert create path + invalid UUID 422 + long display_name validation
+- Status: pushed_partial_sync
 - Files:
+  - apps/backend-python/app/schemas/profiles.py
   - apps/backend-python/tests/test_profiles_api.py
   - WORKFLOW_STATUS.md
 - Test:
-  - `./.venv/bin/pytest tests/test_profiles_api.py -k "upsert_profile_create_path_sets_only_provided_fields_for_newly_registered_user or upsert_profile_accepts_minimal_payload_with_only_user_id"` ✅ (2 passed)
-  - `./.venv/bin/pytest tests/test_profiles_api.py` ✅ (41 passed)
+  - `./.venv/bin/pytest -q tests/test_profiles_api.py -k "display_name_exceeds_max_length or accepts_very_long_bio"` ✅ (2 passed)
+  - `./.venv/bin/pytest -q tests/test_profiles_api.py` ✅ (43 passed)
 - Git:
-  - branch: `main`
-  - target: `origin/main`
+  - latest pushed before this sync: `d8f79e3`
+  - repo code currently prepared for next commit/push
 - Blocker: none
-- Next: chờ coordinator giao scope kế tiếp
+- Next: chốt lane `pikachu` (display_name max_length), push sync, rồi quyết định có khép batch 28 hay mở scope kế tiếp

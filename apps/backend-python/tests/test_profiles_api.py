@@ -310,6 +310,69 @@ def test_upsert_profile_preserves_whitespace_in_display_name_and_bio() -> None:
     app.dependency_overrides.clear()
 
 
+def test_upsert_profile_returns_validation_error_when_display_name_exceeds_max_length() -> None:
+    client = TestClient(app)
+
+    response = client.post(
+        "/profiles",
+        json={"user_id": str(uuid.uuid4()), "display_name": "n" * 121, "bio": "x"},
+    )
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert "display_name" in payload["error"]["message"]
+    assert "120" in payload["error"]["message"]
+
+
+def test_upsert_profile_accepts_very_long_bio_and_persists_it() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    register_response = client.post(
+        "/auth/register",
+        json={"email": "profile-long-bio@example.com", "username": "profile_long_bio"},
+    )
+    assert register_response.status_code == 201
+    user_id = register_response.json()["id"]
+
+    long_bio = "b" * 10000
+    upsert_response = client.post(
+        "/profiles",
+        json={"user_id": user_id, "display_name": "Long Bio User", "bio": long_bio},
+    )
+    assert upsert_response.status_code == 201
+    body = upsert_response.json()
+    assert body["display_name"] == "Long Bio User"
+    assert body["bio"] == long_bio
+
+    get_response = client.get(f"/profiles/{user_id}")
+    assert get_response.status_code == 200
+    persisted = get_response.json()
+    assert persisted["display_name"] == "Long Bio User"
+    assert persisted["bio"] == long_bio
+
+    app.dependency_overrides.clear()
+
+
 def test_upsert_profile_updates_display_name_and_bio_to_empty_strings_instead_of_null() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
