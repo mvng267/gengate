@@ -315,6 +315,10 @@ export async function restorePersistedSession(): Promise<RestoreSessionResult> {
   }
 }
 
+export async function refreshPersistedSession(): Promise<RestoreSessionResult> {
+  return restorePersistedSession();
+}
+
 export function getLoginRedirectPath() {
   return DEFAULT_LOGIN_REDIRECT;
 }

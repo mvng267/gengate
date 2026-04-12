@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import {
   logoutPersistedSession,
   readPersistedAuthSession,
+  refreshPersistedSession,
   restorePersistedSession,
 } from "@/lib/auth/client";
 
@@ -33,6 +34,7 @@ export function AuthenticatedRouteShell({
   const router = useRouter();
   const pathname = usePathname();
   const [restoreState, setRestoreState] = useState<RestoreState>({ status: "checking" });
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -103,6 +105,28 @@ export function AuthenticatedRouteShell({
     );
   }
 
+  async function handleRefreshSession() {
+    setIsRefreshing(true);
+    const result = await refreshPersistedSession();
+    if (result.ok) {
+      setRestoreState({
+        status: "authenticated",
+        message: "Persisted session đã được re-check thủ công với backend auth shell.",
+        email: result.session.session.email,
+        sessionId: result.session.session.session_id,
+        sessionStatus: result.session.session.session_status,
+        expiresInSeconds: result.session.session.expires_in_seconds,
+      });
+    } else {
+      setRestoreState({
+        status: "signed-out",
+        message: `${result.message} Đang chuyển sang login để xác thực lại.`,
+      });
+      router.replace(`/login?next=${encodeURIComponent(pathname || "/feed")}`);
+    }
+    setIsRefreshing(false);
+  }
+
   return (
     <section>
       <h1>{title}</h1>
@@ -119,6 +143,9 @@ export function AuthenticatedRouteShell({
       <p>
         <strong>Expiry:</strong> {restoreState.expiresInSeconds}s remaining
       </p>
+      <button type="button" onClick={() => void handleRefreshSession()} disabled={isRefreshing}>
+        {isRefreshing ? "Refreshing session..." : "Refresh session"}
+      </button>
       <button
         type="button"
         onClick={() => {

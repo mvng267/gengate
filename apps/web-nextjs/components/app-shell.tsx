@@ -4,7 +4,11 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
-import { readPersistedAuthSession, restorePersistedSession } from "@/lib/auth/client";
+import {
+  readPersistedAuthSession,
+  refreshPersistedSession,
+  restorePersistedSession,
+} from "@/lib/auth/client";
 
 type AppShellProps = {
   children: ReactNode;
@@ -21,6 +25,17 @@ const navItems = [
 export function AppShell({ children }: AppShellProps) {
   const [sessionLabel, setSessionLabel] = useState("Guest");
   const [sessionMeta, setSessionMeta] = useState<string>("No active persisted session");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  function applySignedOutState(message = "Persisted session unavailable") {
+    setSessionLabel("Guest");
+    setSessionMeta(message);
+  }
+
+  function applyRestoredState(email: string, sessionStatus: string, expiresInSeconds: number) {
+    setSessionLabel(email);
+    setSessionMeta(`${sessionStatus} · expires in ${expiresInSeconds}s`);
+  }
 
   useEffect(() => {
     let isMounted = true;
@@ -41,13 +56,13 @@ export function AppShell({ children }: AppShellProps) {
       }
 
       if (result.ok) {
-        setSessionLabel(result.session.session.email);
-        setSessionMeta(
-          `${result.session.session.session_status} · expires in ${result.session.session.expires_in_seconds}s`,
+        applyRestoredState(
+          result.session.session.email,
+          result.session.session.session_status,
+          result.session.session.expires_in_seconds,
         );
       } else {
-        setSessionLabel("Guest");
-        setSessionMeta("Persisted session unavailable");
+        applySignedOutState();
       }
     }
 
@@ -58,12 +73,37 @@ export function AppShell({ children }: AppShellProps) {
     };
   }, []);
 
+  async function handleRefreshSession() {
+    setIsRefreshing(true);
+    const localSession = readPersistedAuthSession();
+    if (!localSession) {
+      applySignedOutState("No local session to refresh");
+      setIsRefreshing(false);
+      return;
+    }
+
+    const result = await refreshPersistedSession();
+    if (result.ok) {
+      applyRestoredState(
+        result.session.session.email,
+        result.session.session.session_status,
+        result.session.session.expires_in_seconds,
+      );
+    } else {
+      applySignedOutState(result.message);
+    }
+    setIsRefreshing(false);
+  }
+
   return (
     <>
       <header>
         <strong>GenGate • Web</strong>
         <div>Session: {sessionLabel}</div>
         <div>Status: {sessionMeta}</div>
+        <button type="button" onClick={() => void handleRefreshSession()} disabled={isRefreshing}>
+          {isRefreshing ? "Refreshing session..." : "Refresh session"}
+        </button>
         <nav aria-label="Primary">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href}>
