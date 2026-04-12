@@ -4,7 +4,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db_session
-from app.schemas.auth import LoginRequest, LoginResponse, RegisterRequest, RegisterResponse
+from app.schemas.auth import (
+    LoginRequest,
+    LoginResponse,
+    RefreshSessionRequest,
+    RegisterRequest,
+    RegisterResponse,
+    SessionSnapshotResponse,
+)
 from app.schemas.security import (
     DeviceCreateRequest,
     DeviceKeyCreateRequest,
@@ -59,6 +66,61 @@ def login(payload: LoginRequest, db: Session = Depends(get_db_session)) -> Login
         expires_at=auth_session.expires_at,
         token_type="bearer",
         bootstrap_mode=bootstrap_mode,
+    )
+
+
+@router.post("/refresh", response_model=LoginResponse)
+def refresh_session(
+    payload: RefreshSessionRequest,
+    db: Session = Depends(get_db_session),
+) -> LoginResponse:
+    try:
+        user, device, auth_session, refresh_token = auth_service.refresh_session(
+            db,
+            refresh_token=payload.refresh_token,
+        )
+    except ValueError as exc:
+        detail = str(exc)
+        if detail in {"session_not_found", "session_revoked", "session_expired"}:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
+
+    return LoginResponse(
+        user_id=user.id,
+        email=user.email,
+        device_id=device.id,
+        session_id=auth_session.id,
+        refresh_token=refresh_token,
+        expires_at=auth_session.expires_at,
+        token_type="bearer",
+        bootstrap_mode="refresh_token",
+    )
+
+
+@router.post("/session", response_model=SessionSnapshotResponse)
+def get_session_snapshot(
+    payload: RefreshSessionRequest,
+    db: Session = Depends(get_db_session),
+) -> SessionSnapshotResponse:
+    try:
+        user, device, auth_session = auth_service.get_session_snapshot(
+            db,
+            refresh_token=payload.refresh_token,
+        )
+    except ValueError as exc:
+        detail = str(exc)
+        if detail in {"session_not_found", "session_revoked", "session_expired"}:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
+
+    return SessionSnapshotResponse(
+        user_id=user.id,
+        email=user.email,
+        device_id=device.id,
+        session_id=auth_session.id,
+        expires_at=auth_session.expires_at,
+        token_type="bearer",
+        session_status="active",
     )
 
 

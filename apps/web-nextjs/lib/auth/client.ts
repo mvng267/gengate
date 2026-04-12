@@ -1,37 +1,141 @@
 import { apiRequest } from "@/lib/api/client";
 import { env } from "@/lib/config/env";
 
-import type { AuthLoginInput, AuthLoginResult, BackendLoginPayload } from "./types";
+import type {
+  AuthLoginInput,
+  AuthLoginResult,
+  BackendLoginPayload,
+  BackendSessionSnapshot,
+  RestoreSessionResult,
+  StoredAuthSession,
+} from "./types";
 
 const DEFAULT_LOGIN_REDIRECT = "/feed";
+const AUTH_SESSION_STORAGE_KEY = "gengate.auth.session";
 
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object";
+}
+
 function isBackendLoginPayload(value: unknown): value is BackendLoginPayload {
-  if (!value || typeof value !== "object") {
+  if (!isRecord(value)) {
     return false;
   }
 
-  const payload = value as Partial<BackendLoginPayload>;
   return (
-    typeof payload.user_id === "string" &&
-    typeof payload.email === "string" &&
-    typeof payload.device_id === "string" &&
-    typeof payload.session_id === "string" &&
-    typeof payload.refresh_token === "string" &&
-    typeof payload.expires_at === "string" &&
-    typeof payload.token_type === "string" &&
-    typeof payload.bootstrap_mode === "string"
+    typeof value.user_id === "string" &&
+    typeof value.email === "string" &&
+    typeof value.device_id === "string" &&
+    typeof value.session_id === "string" &&
+    typeof value.refresh_token === "string" &&
+    typeof value.expires_at === "string" &&
+    typeof value.token_type === "string" &&
+    typeof value.bootstrap_mode === "string"
   );
 }
 
+function isBackendSessionSnapshot(value: unknown): value is BackendSessionSnapshot {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    typeof value.user_id === "string" &&
+    typeof value.email === "string" &&
+    typeof value.device_id === "string" &&
+    typeof value.session_id === "string" &&
+    typeof value.expires_at === "string" &&
+    typeof value.token_type === "string" &&
+    typeof value.session_status === "string"
+  );
+}
+
+function canUseBrowserStorage() {
+  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+}
+
+export function persistAuthSession(payload: BackendLoginPayload): StoredAuthSession | null {
+  const session: StoredAuthSession = {
+    refreshToken: payload.refresh_token,
+    session: {
+      user_id: payload.user_id,
+      email: payload.email,
+      device_id: payload.device_id,
+      session_id: payload.session_id,
+      expires_at: payload.expires_at,
+      token_type: payload.token_type,
+      session_status: "active",
+    },
+  };
+
+  if (canUseBrowserStorage()) {
+    window.localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(session));
+  }
+
+  return session;
+}
+
+export function clearPersistedAuthSession() {
+  if (canUseBrowserStorage()) {
+    window.localStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
+  }
+}
+
+export function readPersistedAuthSession(): StoredAuthSession | null {
+  if (!canUseBrowserStorage()) {
+    return null;
+  }
+
+  const raw = window.localStorage.getItem(AUTH_SESSION_STORAGE_KEY);
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) {
+      return null;
+    }
+
+    const refreshToken = parsed.refreshToken;
+    const session = parsed.session;
+    if (typeof refreshToken !== "string" || !isBackendSessionSnapshot(session)) {
+      return null;
+    }
+
+    return {
+      refreshToken,
+      session,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function fetchSessionSnapshot(refreshToken: string) {
+  const response = await apiRequest(env.authSessionPath, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      refresh_token: refreshToken,
+    }),
+  });
+
+  return response;
+}
+
 /**
- * Thin auth boundary for batch 30 web shell.
+ * Thin auth boundary for batch 31 web shell.
  *
- * Backend contract currently expects: email + platform + device_name.
- * Password is still captured in UI shell but intentionally not sent yet.
+ * Backend contract now supports:
+ * - POST /auth/login => issue refresh token + session metadata
+ * - POST /auth/session => validate persisted refresh token for shell restore
  */
 export async function loginWithEmailPassword(
   input: AuthLoginInput,
@@ -59,17 +163,19 @@ export async function loginWithEmailPassword(
         return {
           ok: false,
           reason: "invalid-response",
-          message: "Backend login response thiếu field theo auth shell contract hiện tại.",
+          message: "Backend login response thiếu field theo auth/session contract hiện tại.",
         };
       }
+
+      persistAuthSession(data);
 
       return {
         ok: true,
         mode: "backend",
         message:
-          "Đăng nhập shell thành công theo contract backend hiện tại. Session persistence thật sẽ nối ở batch sau.",
+          "Đăng nhập shell thành công và đã lưu refresh/session tối thiểu ở web client.",
         redirectTo: DEFAULT_LOGIN_REDIRECT,
-        sessionStatus: "pending-contract",
+        sessionStatus: "persisted",
         payload: data,
       };
     }
@@ -95,6 +201,66 @@ export async function loginWithEmailPassword(
       reason: "network-error",
       message: "Không thể kết nối auth endpoint từ web client.",
       details: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+export async function restorePersistedSession(): Promise<RestoreSessionResult> {
+  const stored = readPersistedAuthSession();
+  if (!stored) {
+    return {
+      ok: false,
+      reason: "missing",
+      message: "Chưa có session local để restore.",
+    };
+  }
+
+  try {
+    const response = await fetchSessionSnapshot(stored.refreshToken);
+    if (response.ok) {
+      const data: unknown = await response.json();
+      if (!isBackendSessionSnapshot(data)) {
+        clearPersistedAuthSession();
+        return {
+          ok: false,
+          reason: "invalid-response",
+          message: "Backend session snapshot response thiếu field cần thiết.",
+        };
+      }
+
+      const nextSession: StoredAuthSession = {
+        refreshToken: stored.refreshToken,
+        session: data,
+      };
+      if (canUseBrowserStorage()) {
+        window.localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(nextSession));
+      }
+      return {
+        ok: true,
+        session: nextSession,
+        source: "storage",
+      };
+    }
+
+    if (response.status === 401) {
+      clearPersistedAuthSession();
+      return {
+        ok: false,
+        reason: "unauthorized",
+        message: "Refresh token cũ không còn hợp lệ; đã xóa session local.",
+      };
+    }
+
+    return {
+      ok: false,
+      reason: "invalid-response",
+      message: `Session restore failed with status ${response.status}.`,
+    };
+  } catch {
+    return {
+      ok: false,
+      reason: "network-error",
+      message: "Không thể kiểm tra session đã lưu với backend.",
     };
   }
 }

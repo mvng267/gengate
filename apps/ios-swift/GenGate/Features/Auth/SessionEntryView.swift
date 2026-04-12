@@ -7,19 +7,19 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 30 · iOS auth shell")
+            Text("Batch 31 · iOS auth/session shell")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
 
             switch sessionStore.authState {
-            case .signedOut, .signingIn:
+            case .signedOut, .signingIn, .restoring:
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Login placeholder")
+                    Text("Login + restore shell")
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Flow này chỉ dựng session/login shell an toàn. Khi backend auth contract chốt, màn này sẽ map sang API thật.")
+                    Text("Flow này gọi backend auth shell thật ở mức tối thiểu: login sẽ lưu refresh token local, app mở lại sẽ thử restore bằng /auth/session.")
                         .foregroundStyle(.secondary)
 
                     TextField("Email", text: $sessionStore.emailDraft)
@@ -37,12 +37,21 @@ struct SessionEntryView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
 
                     Button {
-                        sessionStore.signInPlaceholder()
+                        Task {
+                            await sessionStore.signIn()
+                        }
                     } label: {
-                        Text(sessionStore.authState == .signingIn ? "Signing in..." : "Enter app shell")
+                        Text(primaryActionTitle(for: sessionStore.authState))
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
+                    .disabled(sessionStore.authState == .signingIn || sessionStore.authState == .restoring)
+
+                    if let statusMessage = sessionStore.statusMessage {
+                        Text(statusMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
             case let .authenticated(userSession):
@@ -55,8 +64,22 @@ struct SessionEntryView: View {
                     Text(userSession.email)
                         .foregroundStyle(.secondary)
 
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("session_id: \(userSession.sessionID)")
+                        Text("device_id: \(userSession.deviceID)")
+                        Text("session_status: \(userSession.sessionStatus)")
+                    }
+                    .font(.footnote.monospaced())
+                    .foregroundStyle(.secondary)
+
                     Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell để nối với backend auth/session sau.")
                         .foregroundStyle(.secondary)
+
+                    if let statusMessage = sessionStore.statusMessage {
+                        Text(statusMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
 
                     Button("Sign out") {
                         sessionStore.signOut()
@@ -69,5 +92,16 @@ struct SessionEntryView: View {
         }
         .padding(20)
         .navigationTitle("Session")
+    }
+
+    private func primaryActionTitle(for authState: AppSessionStore.AuthState) -> String {
+        switch authState {
+        case .restoring:
+            return "Restoring session..."
+        case .signingIn:
+            return "Signing in..."
+        case .signedOut, .authenticated:
+            return "Login + persist session"
+        }
     }
 }

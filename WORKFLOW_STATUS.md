@@ -1,29 +1,35 @@
 # GenGate Workflow Status
 
-- Batch: 30
+- Batch: 31
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 30 đã salvage trực tiếp trong repo cho 3 lane quanh auth/login vertical slice đầu tiên — backend auth/session shell, web login shell wiring, iOS login/session placeholder wiring
-- Status: pushed
+- Scope: batch 31 auth/session persistence slice — thêm backend refresh/session snapshot contract và nối web/iOS shell vào persisted refresh token restore tối thiểu
+- Status: verify
 - Files:
-  - apps/backend-python/**
-  - apps/web-nextjs/**
-  - apps/ios-swift/**
-  - TEAM_DISPATCH.md
+  - apps/backend-python/app/modules/auth/router.py
+  - apps/backend-python/app/repositories/sessions.py
+  - apps/backend-python/app/schemas/auth.py
+  - apps/backend-python/app/services/auth.py
+  - apps/backend-python/tests/test_auth_api.py
+  - apps/web-nextjs/app/login/page.tsx
+  - apps/web-nextjs/lib/auth/client.ts
+  - apps/web-nextjs/lib/auth/types.ts
+  - apps/web-nextjs/lib/config/env.ts
+  - apps/ios-swift/GenGate/App/GenGateApp.swift
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
-  - batch 30 backend salvage: `./.venv/bin/pytest -q tests/test_auth_api.py` ✅ (2 passed)
-  - batch 30 web salvage: `cd apps/web-nextjs && npm run verify` ✅
-  - batch 30 iOS salvage: `cd apps/ios-swift && swift build` ✅
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅ (3 passed)
+  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - base batch 29 backend commit: `e1e4026`
-  - base batch 29 web commit: `b3700f5`
-  - base batch 29 iOS commit: `37a4e87`
-  - working tree: batch 30 salvage code đã verify xanh; đang chốt push batch 30
+  - latest commit: `17626f3` — `batch30: scaffold auth shells across backend web ios`
+  - working tree: bẩn đúng theo batch 31 slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: ghi handoff batch 31 với scope hẹp tiếp theo bám auth/session vertical slice
+- Next: commit batch 31 slice này; sau đó nối app shell gating/redirect thật dựa trên persisted session state
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 30 salvage update:
-  - Backend lane: thêm auth login/session shell (`/auth/login`) + schema/service wiring + `tests/test_auth_api.py`; verify ✅
-  - Web lane (handoff sang `pikachu-web`): thay `app/login/page.tsx` bằng login shell thật, giữ auth client/env stub an toàn; verify ✅
-  - iOS lane (handoff sang `pikame-ios`): thêm `AppSessionStore`, `SessionEntryView`, root tab gating theo auth state, update `GenGateApp.swift`; verify `swift build` ✅
+- Batch 31 update:
+  - Backend lane: thêm `POST /auth/session` để restore snapshot và `POST /auth/refresh` để rotate refresh token/session; verify ✅
+  - Web lane: login page nay persist refresh token + restore session preview từ local storage qua backend snapshot contract; verify ✅
+  - iOS lane: `AppSessionStore` nay login/restore với backend shell thật, persist local session vào `UserDefaults`, app boot tự restore; verify ✅

@@ -8,6 +8,9 @@ struct GenGateApp: App {
         WindowGroup {
             RootTabView()
                 .environment(sessionStore)
+                .task {
+                    await sessionStore.restorePersistedSession()
+                }
         }
     }
 }

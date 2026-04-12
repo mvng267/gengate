@@ -46,7 +46,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **batch 29 xong, mở batch 30**.
+- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đang làm batch 31**.
 
 ## Reporting hard rule
 
@@ -85,19 +85,47 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Mỗi nhịp nên ưu tiên thay đổi nhỏ nhưng giúp đóng batch nhanh hơn.
 - Báo cáo/WORKFLOW_STATUS ghi ngắn gọn, không văn dài.
 
+## Current batch slice
+
+- Batch workflow chính thức hiện tại: **31**
+- Scope hiện tại: thêm refresh/session snapshot contract backend và persist/restore session tối thiểu cho web + iOS shell.
+- Trạng thái hiện tại: **verify**
+- File đã đụng:
+  - `apps/backend-python/app/modules/auth/router.py`
+  - `apps/backend-python/app/repositories/sessions.py`
+  - `apps/backend-python/app/schemas/auth.py`
+  - `apps/backend-python/app/services/auth.py`
+  - `apps/backend-python/tests/test_auth_api.py`
+  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/web-nextjs/lib/auth/client.ts`
+  - `apps/web-nextjs/lib/auth/types.ts`
+  - `apps/web-nextjs/lib/config/env.ts`
+  - `apps/ios-swift/GenGate/App/GenGateApp.swift`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
+- Test-verify:
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ 3 passed
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
+- Git mốc gần nhất:
+  - commit gần nhất đã chốt: `17626f3` — `batch30: scaffold auth shells across backend web ios`
+  - working tree hiện tại: bẩn đúng theo batch 31 slice, chưa commit
+- Blocker nếu có:
+  - none
+- Bước kế tiếp:
+  - commit batch 31 slice này; kế tiếp nối app shell gating/redirect thật dựa trên persisted session state
+
 ## Batch handoff note
 
-- Batch vừa xong: **29**
-- Commit cuối đã push:
-  - backend: `e1e4026` — `test(profiles): lock bio null preserve omitted display/avatar`
-  - web: `b3700f5` — `bootstrap web-nextjs foundation shell`
-  - iOS: `37a4e87` — `batch29 ios: bootstrap swift foundation skeleton`
+- Batch vừa xong: **30**
+- Commit cuối đã chốt:
+  - team: `17626f3` — `batch30: scaffold auth shells across backend web ios`
 - Test-verify cuối:
-  - backend focused: `./.venv/bin/pytest -q tests/test_profiles_api.py -k "updates_bio_to_null_and_preserves_omitted_display_name_and_avatar_url"` → 2 passed
-  - backend full file: `./.venv/bin/pytest -q tests/test_profiles_api.py` → 47 passed
+  - backend: `./.venv/bin/pytest -q tests/test_auth_api.py` → 2 passed
   - web: `cd apps/web-nextjs && npm run verify` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - chưa có blocker code rõ ràng; iOS mới ở mức foundation skeleton, chưa có verify/runtime note tương đương web/backend
-- Batch kế tiếp: **30**
-- Scope hẹp đầu tiên của batch 30:
-  - scaffold backend auth/session shell trong `apps/backend-python` để tạo trục tích hợp đầu tiên cho web/iOS foundation
+  - chưa có blocker verify; auth/login vẫn mới ở mức shell/stub, chưa đi tiếp refresh/session lifecycle thật
+- Batch kế tiếp: **31**
+- Scope hẹp đầu tiên của batch 31:
+  - nối tiếp auth/session vertical slice bằng refresh/session persistence contract tối thiểu giữa backend + web/iOS shell

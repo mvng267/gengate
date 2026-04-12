@@ -1,8 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { getLoginRedirectPath, loginWithEmailPassword } from "@/lib/auth/client";
+import {
+  clearPersistedAuthSession,
+  getLoginRedirectPath,
+  loginWithEmailPassword,
+  readPersistedAuthSession,
+  restorePersistedSession,
+} from "@/lib/auth/client";
 
 const initialForm = {
   email: "",
@@ -24,13 +30,65 @@ function buildStatusClass(tone: "neutral" | "success" | "error") {
 export default function LoginPage() {
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(true);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusTone, setStatusTone] = useState<"neutral" | "success" | "error">("neutral");
   const [sessionPreview, setSessionPreview] = useState<string | null>(null);
 
   const loginCta = useMemo(() => {
-    return isSubmitting ? "Đang thử đăng nhập..." : "Thử login shell";
+    if (isSubmitting) {
+      return "Đang thử đăng nhập...";
+    }
+
+    return "Đăng nhập + lưu session";
   }, [isSubmitting]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function restore() {
+      const localSession = readPersistedAuthSession();
+      if (!localSession) {
+        if (isMounted) {
+          setIsRestoring(false);
+        }
+        return;
+      }
+
+      const result = await restorePersistedSession();
+      if (!isMounted) {
+        return;
+      }
+
+      if (result.ok) {
+        setStatusTone("success");
+        setStatusMessage(
+          `Đã restore session local hợp lệ cho ${result.session.session.email}. Điều hướng đích dự kiến: ${getLoginRedirectPath()}`,
+        );
+        setSessionPreview(
+          [
+            `user_id: ${result.session.session.user_id}`,
+            `session_id: ${result.session.session.session_id}`,
+            `device_id: ${result.session.session.device_id}`,
+            `token_type: ${result.session.session.token_type}`,
+            `session_status: ${result.session.session.session_status}`,
+          ].join("\n"),
+        );
+      } else if (result.reason !== "missing") {
+        setStatusTone("error");
+        setStatusMessage(result.message);
+        setSessionPreview(null);
+      }
+
+      setIsRestoring(false);
+    }
+
+    void restore();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -53,6 +111,7 @@ export default function LoginPage() {
           `device_id: ${result.payload.device_id}`,
           `token_type: ${result.payload.token_type}`,
           `bootstrap_mode: ${result.payload.bootstrap_mode}`,
+          `session_status: ${result.sessionStatus}`,
         ].join("\n"),
       );
     } else {
@@ -64,25 +123,33 @@ export default function LoginPage() {
     setIsSubmitting(false);
   }
 
+  function handleClearSession() {
+    clearPersistedAuthSession();
+    setStatusTone("neutral");
+    setStatusMessage("Đã xóa session local đã lưu trên web shell.");
+    setSessionPreview(null);
+  }
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-start">
       <section className="flex-1 space-y-4">
         <span className="inline-flex rounded-full border border-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-          Batch 30 · Web auth shell
+          Batch 31 · Web session persistence shell
         </span>
         <h1 className="text-4xl font-black tracking-tight text-black">
-          Login shell đã nối vào backend auth/session shell.
+          Login shell đã lưu và restore session tối thiểu với backend auth contract.
         </h1>
         <p className="max-w-2xl text-base leading-7 text-neutral-700">
-          Màn này giữ đúng contract backend hiện tại: gửi <code>email</code> + <code>platform</code> + <code>device_name</code>,
-          nhận về payload session shell để bám vertical slice.
+          Màn này vẫn dùng login shell hiện tại nhưng nay giữ refresh token ở local storage và gọi
+          <code> /auth/session </code>
+          để restore state khi reload app.
         </p>
         <ul className="space-y-2 text-sm text-neutral-700">
           <li>• Password/OTP vẫn là placeholder trên UI, chưa dùng cho API ở batch này.</li>
           <li>
-            • Path login mặc định là <code>/auth/login</code>, có thể override bằng <code>NEXT_PUBLIC_AUTH_LOGIN_PATH</code>.
+            • Path login mặc định là <code>/auth/login</code>, session snapshot mặc định là <code>/auth/session</code>.
           </li>
-          <li>• Sau khi login OK, hướng điều hướng mặc định là <code>/feed</code>.</li>
+          <li>• Sau khi login OK, shell đã có nền cho redirect/gating thật ở batch sau.</li>
         </ul>
       </section>
 
@@ -120,17 +187,26 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isRestoring}
             className="w-full border-2 border-black bg-black px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#facc15] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loginCta}
+            {isRestoring ? "Đang restore session..." : loginCta}
           </button>
         </form>
+
+        <button
+          type="button"
+          onClick={handleClearSession}
+          className="mt-3 w-full border-2 border-black bg-white px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] text-black transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#d4d4d4]"
+        >
+          Xóa session local
+        </button>
 
         <div className="mt-5 border-2 border-dashed border-black p-4 text-sm leading-6">
           <div className="font-semibold">Status</div>
           <p className={buildStatusClass(statusTone)}>
-            {statusMessage ?? "Chưa submit. UI shell này dùng để verify wiring và chờ batch session persistence tiếp theo."}
+            {statusMessage ??
+              "Chưa submit. Batch 31 shell này ưu tiên verify đường login → lưu refresh token → restore session tối thiểu."}
           </p>
 
           {sessionPreview ? (

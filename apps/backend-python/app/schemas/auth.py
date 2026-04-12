@@ -84,3 +84,27 @@ class LoginResponse(BaseModel):
     expires_at: datetime
     token_type: str
     bootstrap_mode: str
+
+
+class RefreshSessionRequest(BaseModel):
+    refresh_token: str
+
+    @field_validator("refresh_token")
+    @classmethod
+    def validate_refresh_token(cls, value: str) -> str:
+        normalized = value.strip()
+        if normalized == "":
+            raise ValueError("refresh_token_required")
+        if len(normalized) > 255:
+            raise ValueError("refresh_token_too_long")
+        return normalized
+
+
+class SessionSnapshotResponse(BaseModel):
+    user_id: uuid.UUID
+    email: str
+    device_id: uuid.UUID
+    session_id: uuid.UUID
+    expires_at: datetime
+    token_type: str
+    session_status: str

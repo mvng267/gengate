@@ -6,26 +6,88 @@ import Observation
 final class AppSessionStore {
     enum AuthState: Equatable {
         case signedOut
+        case restoring
         case signingIn
         case authenticated(UserSession)
     }
 
-    struct UserSession: Equatable {
+    struct UserSession: Codable, Equatable {
         let userID: String
-        let displayName: String
         let email: String
+        let deviceID: String
+        let sessionID: String
+        let refreshToken: String
+        let expiresAt: String
+        let tokenType: String
+        let sessionStatus: String
 
-        static let preview = UserSession(
-            userID: "batch30-user",
-            displayName: "GenGate Tester",
-            email: "batch30@example.com"
-        )
+        var displayName: String {
+            email.isEmpty ? "GenGate Tester" : email
+        }
     }
+
+    private struct LoginResponse: Decodable {
+        let user_id: String
+        let email: String
+        let device_id: String
+        let session_id: String
+        let refresh_token: String
+        let expires_at: String
+        let token_type: String
+        let bootstrap_mode: String
+    }
+
+    private struct SessionSnapshotResponse: Decodable {
+        let user_id: String
+        let email: String
+        let device_id: String
+        let session_id: String
+        let expires_at: String
+        let token_type: String
+        let session_status: String
+    }
+
+    private struct StoredSession: Codable {
+        let userSession: UserSession
+    }
+
+    private enum SessionError: LocalizedError {
+        case invalidBaseURL
+        case invalidResponse
+        case unauthorized
+        case network(String)
+
+        var errorDescription: String? {
+            switch self {
+            case .invalidBaseURL:
+                return "Thiếu backend base URL hợp lệ cho auth shell."
+            case .invalidResponse:
+                return "Backend auth/session response thiếu field cần thiết."
+            case .unauthorized:
+                return "Session đã lưu không còn hợp lệ."
+            case let .network(message):
+                return message
+            }
+        }
+    }
+
+    private let sessionDefaultsKey = "gengate.app.session"
+    private let backendBaseURL: URL?
+    private let sessionStore: UserDefaults
 
     var authState: AuthState = .signedOut
     var selectedTab: AppTab = .session
     var emailDraft: String = ""
     var passwordDraft: String = ""
+    var statusMessage: String?
+
+    init(
+        backendBaseURL: URL? = URL(string: "http://127.0.0.1:8000"),
+        sessionStore: UserDefaults = .standard
+    ) {
+        self.backendBaseURL = backendBaseURL
+        self.sessionStore = sessionStore
+    }
 
     var isAuthenticated: Bool {
         if case .authenticated = authState {
@@ -34,20 +96,158 @@ final class AppSessionStore {
         return false
     }
 
-    func signInPlaceholder() {
+    func restorePersistedSession() async {
+        guard let persisted = loadPersistedSession() else {
+            authState = .signedOut
+            statusMessage = nil
+            return
+        }
+
+        authState = .restoring
+        do {
+            let snapshot = try await requestSessionSnapshot(refreshToken: persisted.refreshToken)
+            let restored = UserSession(
+                userID: snapshot.user_id,
+                email: snapshot.email,
+                deviceID: snapshot.device_id,
+                sessionID: snapshot.session_id,
+                refreshToken: persisted.refreshToken,
+                expiresAt: snapshot.expires_at,
+                tokenType: snapshot.token_type,
+                sessionStatus: snapshot.session_status
+            )
+            persist(session: restored)
+            authState = .authenticated(restored)
+            selectedTab = .feed
+            statusMessage = "Đã restore session từ backend auth shell."
+        } catch {
+            clearPersistedSession()
+            authState = .signedOut
+            selectedTab = .session
+            statusMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+    }
+
+    func signIn() async {
         authState = .signingIn
-        let normalizedEmail = emailDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-        let displayName = normalizedEmail.isEmpty ? "GenGate Tester" : normalizedEmail
-        authState = .authenticated(
-            UserSession(userID: "batch30-user", displayName: displayName, email: normalizedEmail)
-        )
-        selectedTab = .feed
+        statusMessage = nil
+
+        do {
+            let response = try await requestLogin(email: emailDraft)
+            let session = UserSession(
+                userID: response.user_id,
+                email: response.email,
+                deviceID: response.device_id,
+                sessionID: response.session_id,
+                refreshToken: response.refresh_token,
+                expiresAt: response.expires_at,
+                tokenType: response.token_type,
+                sessionStatus: "active"
+            )
+            persist(session: session)
+            passwordDraft = ""
+            authState = .authenticated(session)
+            selectedTab = .feed
+            statusMessage = "Đăng nhập shell thành công và đã lưu session local trên iOS shell."
+        } catch {
+            authState = .signedOut
+            statusMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
     }
 
     func signOut() {
+        clearPersistedSession()
         authState = .signedOut
         passwordDraft = ""
+        statusMessage = "Đã xóa session local trên iOS shell."
         selectedTab = .session
+    }
+
+    private func requestLogin(email: String) async throws -> LoginResponse {
+        let normalizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !normalizedEmail.isEmpty else {
+            throw SessionError.network("Email là bắt buộc để gọi auth shell.")
+        }
+
+        let url = try makeURL(path: "/auth/login")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: [
+            "email": normalizedEmail,
+            "platform": "ios",
+            "device_name": "GenGate iOS Shell"
+        ])
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw SessionError.invalidResponse
+        }
+        guard httpResponse.statusCode == 200 else {
+            throw SessionError.network("Login request failed with status \(httpResponse.statusCode).")
+        }
+
+        do {
+            return try JSONDecoder().decode(LoginResponse.self, from: data)
+        } catch {
+            throw SessionError.invalidResponse
+        }
+    }
+
+    private func requestSessionSnapshot(refreshToken: String) async throws -> SessionSnapshotResponse {
+        let url = try makeURL(path: "/auth/session")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: [
+            "refresh_token": refreshToken
+        ])
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw SessionError.invalidResponse
+        }
+
+        if httpResponse.statusCode == 401 {
+            throw SessionError.unauthorized
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            throw SessionError.network("Session restore failed with status \(httpResponse.statusCode).")
+        }
+
+        do {
+            return try JSONDecoder().decode(SessionSnapshotResponse.self, from: data)
+        } catch {
+            throw SessionError.invalidResponse
+        }
+    }
+
+    private func makeURL(path: String) throws -> URL {
+        guard let backendBaseURL, let url = URL(string: path, relativeTo: backendBaseURL) else {
+            throw SessionError.invalidBaseURL
+        }
+        return url
+    }
+
+    private func persist(session: UserSession) {
+        let container = StoredSession(userSession: session)
+        guard let data = try? JSONEncoder().encode(container) else {
+            return
+        }
+        sessionStore.set(data, forKey: sessionDefaultsKey)
+    }
+
+    private func loadPersistedSession() -> UserSession? {
+        guard let data = sessionStore.data(forKey: sessionDefaultsKey),
+              let container = try? JSONDecoder().decode(StoredSession.self, from: data) else {
+            return nil
+        }
+        return container.userSession
+    }
+
+    private func clearPersistedSession() {
+        sessionStore.removeObject(forKey: sessionDefaultsKey)
     }
 }
 
