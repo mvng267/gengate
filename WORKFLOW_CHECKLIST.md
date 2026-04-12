@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đang làm batch 35**.
+- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đã chốt xong batch 35**.
 
 ## Reporting hard rule
 
@@ -89,33 +89,37 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **35**
-- Scope hiện tại: iOS session invalidation feedback slice — làm rõ expired/revoked persisted-session và logout messaging trên Session screen.
-- Trạng thái hiện tại: **verify**
+- Scope hiện tại: batch 35 complete — chốt feedback polish cho expired/revoked session và logout state trên cả web + iOS.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
+  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/web-nextjs/components/authenticated-route-shell.tsx`
   - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
   - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `6921247` — `batch35: polish web session invalidation feedback`
-  - working tree hiện tại: bẩn đúng theo batch 35 iOS session invalidation feedback slice, chưa commit
+  - commit đã chốt:
+    - `6921247` — `batch35: polish web session invalidation feedback`
+    - `2a1aec5` — `batch35: polish ios session invalidation feedback`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó có thể chốt batch 35 complete nếu không cần thêm auth/session invalidation parity nhỏ nào nữa
+  - mở batch 36 với 1 scope hẹp mới bám auth vertical slice thật sự còn thiếu nhất; ưu tiên phần backend/web/iOS nào giúp tiến gần E2E hơn thay vì polish tiếp
 
 ## Batch handoff note
 
-- Batch vừa xong: **34**
+- Batch vừa xong: **35**
 - Commit cuối đã chốt:
-  - `c9fd9ff` — `batch34: add web manual session refresh`
-  - `ac02a9c` — `batch34: add ios manual session refresh`
-  - `1569b55` — `batch34: mark workflow complete`
+  - `6921247` — `batch35: polish web session invalidation feedback`
+  - `2a1aec5` — `batch35: polish ios session invalidation feedback`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - batch 34 đã chốt; batch 35 đang polish session invalidation feedback để expired/revoked/logout states bớt mơ hồ hơn
-- Batch kế tiếp: **35**
-- Scope hẹp đầu tiên của batch 35:
-  - thêm expired-session/logout feedback rõ hơn ở web login shell hoặc protected route để session invalidation ít mơ hồ hơn
+  - không còn blocker của batch 35; auth/session invalidation feedback parity ở web + iOS đã ổn hơn, nhưng auth vertical slice tổng thể vẫn còn thiếu các bước E2E sâu hơn ở batch sau
+- Batch kế tiếp: **36**
+- Scope hẹp đầu tiên của batch 36:
+  - chọn 1 missing auth/session vertical step có tác động E2E rõ nhất, tránh quay lại polish thuần UI
