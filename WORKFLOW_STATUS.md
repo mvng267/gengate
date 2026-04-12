@@ -2,22 +2,38 @@
 
 - Batch: 33
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 33 iOS session-status UI slice — hiển thị continuity metadata (`session_status`, `expires_in_seconds`) ở Session screen + root banner để parity với web
-- Status: verify
+- Scope: batch 33 session-status visibility — chốt parity backend/web/iOS cho continuity metadata (`session_status`, `expires_in_seconds`) trong auth/session UX shell
+- Status: complete
 - Files:
+  - apps/backend-python/app/modules/auth/router.py
+  - apps/backend-python/app/schemas/auth.py
+  - apps/backend-python/app/services/auth.py
+  - apps/backend-python/tests/test_auth_api.py
+  - apps/web-nextjs/lib/auth/types.ts
+  - apps/web-nextjs/lib/auth/client.ts
+  - apps/web-nextjs/components/app-shell.tsx
+  - apps/web-nextjs/app/login/page.tsx
+  - apps/web-nextjs/components/authenticated-route-shell.tsx
   - apps/ios-swift/GenGate/App/RootTabView.swift
   - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅ (4 passed)
+  - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `82c8a27` — `batch33: show web session status metadata`
-  - working tree: bẩn đúng theo batch 33 iOS session-status UI slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `02be2c1` — `batch33: show ios session status metadata`
+  - batch 33 commits:
+    - `283f8b3` — `batch32: add auth session continuity metadata` (foundation feeding batch 33 UI parity)
+    - `82c8a27` — `batch33: show web session status metadata`
+    - `02be2c1` — `batch33: show ios session status metadata`
+  - working tree: bẩn đúng theo workflow-only batch 33 closure update (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit slice này; sau đó có thể cân nhắc chốt batch 33 nếu không cần thêm parity/UI work nhỏ nào nữa
+- Next: mở batch 34 bằng 1 scope hẹp end-to-end hơn cho auth/session UX; ưu tiên thêm explicit session refresh action/state trên web hoặc iOS shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 33 update:
-  - iOS lane: session model nay giữ `expires_in_seconds` + `session_status` từ backend continuity metadata
-  - iOS lane: Session screen + root banner nay hiển thị status summary và expiry để auth state rõ hơn, tương đương hướng web
+- Batch 33 outcome:
+  - Backend continuity metadata giờ trả rõ `session_status` + `expires_in_seconds`
+  - Web shell/login/protected route giờ hiển thị session status + expiry
+  - iOS Session screen/root banner giờ hiển thị session status + expiry

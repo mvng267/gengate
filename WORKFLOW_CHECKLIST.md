@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đang làm batch 33**.
+- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đã chốt xong batch 33**.
 
 ## Reporting hard rule
 
@@ -89,34 +89,37 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **33**
-- Scope hiện tại: iOS session-status UI slice — hiển thị continuity metadata (`session_status`, `expires_in_seconds`) ở Session screen + root banner để parity với web.
-- Trạng thái hiện tại: **verify**
+- Scope hiện tại: batch 33 closure — xác nhận parity session-status visibility đã đủ trên backend/web/iOS và chốt workflow complete.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/App/RootTabView.swift`
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
-  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
+  - `WORKFLOW_STATUS.md`
+  - `WORKFLOW_CHECKLIST.md`
 - Test-verify:
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ 4 passed
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `82c8a27` — `batch33: show web session status metadata`
-  - working tree hiện tại: bẩn đúng theo batch 33 iOS session-status slice, chưa commit
+  - commit gần nhất đã chốt: `02be2c1` — `batch33: show ios session status metadata`
+  - working tree hiện tại: bẩn đúng theo workflow-only batch 33 closure update, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó cân nhắc chốt batch 33 complete nếu không cần thêm UI/session parity nhỏ nào nữa
+  - mở batch 34 với 1 scope hẹp end-to-end hơn cho auth/session UX; ưu tiên explicit refresh-session action/state ở web hoặc iOS shell
 
 ## Batch handoff note
 
-- Batch vừa xong: **32**
+- Batch vừa xong: **33**
 - Commit cuối đã chốt:
+  - `82c8a27` — `batch33: show web session status metadata`
+  - `02be2c1` — `batch33: show ios session status metadata`
+- Foundation liên quan vừa dùng lại:
   - `283f8b3` — `batch32: add auth session continuity metadata`
-  - `100b47e` — `batch32: mark workflow complete`
 - Test-verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → 4 passed
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - batch 32 auth UX/resume slice đã chốt; batch 33 chuyển sang product-facing session state visibility
-- Batch kế tiếp: **33**
-- Scope hẹp đầu tiên của batch 33:
-  - dùng continuity metadata mới để hiển thị session expiry/status rõ hơn trên web shell/login/protected route
+  - chưa có blocker rõ ràng; auth shell đã show session state tốt hơn nhưng chưa có explicit manual refresh UX
+- Batch kế tiếp: **34**
+- Scope hẹp đầu tiên của batch 34:
+  - thêm 1 manual refresh-session action/state nhỏ trên web shell hoặc iOS Session screen để người dùng chủ động re-check persisted session
