@@ -2,25 +2,22 @@
 
 - Batch: 31
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 31 web auth-gated shell slice — dùng persisted session state để khóa/mở route shell và hiển thị session context ở app shell
+- Scope: batch 31 iOS auth-gated shell slice — hiển thị session restore context ở root/tab shell và chặn route shell bằng auth placeholder khi chưa có persisted session
 - Status: verify
 - Files:
-  - apps/web-nextjs/app/feed/page.tsx
-  - apps/web-nextjs/app/inbox/page.tsx
-  - apps/web-nextjs/app/location/page.tsx
-  - apps/web-nextjs/app/page.tsx
-  - apps/web-nextjs/app/profile/page.tsx
-  - apps/web-nextjs/components/app-shell.tsx
-  - apps/web-nextjs/components/authenticated-route-shell.tsx
+  - apps/ios-swift/GenGate/App/RootTabView.swift
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Core/UI/AuthGatePlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
-  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `51bec27` — `batch31: wire refresh session persistence shells`
-  - working tree: bẩn đúng theo batch 31 web gating slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `a3afeef` — `batch31: gate web shells on persisted session`
+  - working tree: bẩn đúng theo batch 31 iOS gating slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit web gating slice này; sau đó nối iOS root/tab gating hiển thị session restore state tương đương web app shell
+- Next: commit iOS gating slice này; sau đó cân nhắc chốt batch 31 hoặc nối backend/web/iOS logout/revoke contract tối thiểu nếu cần thêm 1 nhịp để hoàn tất lifecycle cơ bản
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 31 update:
-  - Web lane: feed/inbox/location/profile route shell nay tự check persisted session qua backend snapshot contract; app shell header hiển thị session context tối thiểu; verify ✅
+  - iOS lane: root tab shell nay có session banner (`Guest` / restoring / signed-in email), route chưa auth sẽ hiện auth gate placeholder thay vì chỉ disable tab mơ hồ; verify ✅

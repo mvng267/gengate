@@ -14,40 +14,59 @@ struct RootTabView: View {
             .tag(AppTab.session)
 
             NavigationStack {
-                FeedPlaceholderView()
+                protectedTabContent(
+                    title: "Feed",
+                    summary: "Friends-only moment feed UI and data loading are pending."
+                ) {
+                    FeedPlaceholderView()
+                }
             }
             .tabItem {
                 Label("Feed", systemImage: "house")
             }
             .tag(AppTab.feed)
-            .disabled(!sessionStore.isAuthenticated)
 
             NavigationStack {
-                InboxPlaceholderView()
+                protectedTabContent(
+                    title: "Inbox",
+                    summary: "1:1 encrypted messaging thread list and composer are pending."
+                ) {
+                    InboxPlaceholderView()
+                }
             }
             .tabItem {
                 Label("Inbox", systemImage: "message")
             }
             .tag(AppTab.inbox)
-            .disabled(!sessionStore.isAuthenticated)
 
             NavigationStack {
-                LocationPlaceholderView()
+                protectedTabContent(
+                    title: "Location",
+                    summary: "Snapshot sharing controls and viewer permissions UI are pending."
+                ) {
+                    LocationPlaceholderView()
+                }
             }
             .tabItem {
                 Label("Location", systemImage: "location")
             }
             .tag(AppTab.location)
-            .disabled(!sessionStore.isAuthenticated)
 
             NavigationStack {
-                ProfilePlaceholderView()
+                protectedTabContent(
+                    title: "Profile",
+                    summary: "Profile edit form, privacy settings, and recent moments are pending."
+                ) {
+                    ProfilePlaceholderView()
+                }
             }
             .tabItem {
                 Label("Profile", systemImage: "person")
             }
             .tag(AppTab.profile)
-            .disabled(!sessionStore.isAuthenticated)
+        }
+        .overlay(alignment: .top) {
+            sessionStatusBanner
         }
     }
 
@@ -62,5 +81,33 @@ struct RootTabView: View {
                 }
             }
         )
+    }
+
+    @ViewBuilder
+    private func protectedTabContent<Content: View>(
+        title: String,
+        summary: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        if sessionStore.isAuthenticated {
+            content()
+        } else {
+            AuthGatePlaceholderView(title: title, summary: summary)
+        }
+    }
+
+    private var sessionStatusBanner: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Session: \(sessionStore.sessionIndicatorLabel)")
+                .font(.caption)
+                .fontWeight(.semibold)
+            Text(sessionStore.authGateMessage)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(.thinMaterial)
     }
 }

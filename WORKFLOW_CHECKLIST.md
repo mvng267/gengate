@@ -88,25 +88,22 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **31**
-- Scope hiện tại: web auth-gated shell dùng persisted session state để khóa/mở route shell và hiển thị session context ở app shell.
+- Scope hiện tại: iOS auth-gated shell hiển thị session restore context ở root/tab shell và dùng auth placeholder cho route chưa có persisted session.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/app/feed/page.tsx`
-  - `apps/web-nextjs/app/inbox/page.tsx`
-  - `apps/web-nextjs/app/location/page.tsx`
-  - `apps/web-nextjs/app/page.tsx`
-  - `apps/web-nextjs/app/profile/page.tsx`
-  - `apps/web-nextjs/components/app-shell.tsx`
-  - `apps/web-nextjs/components/authenticated-route-shell.tsx`
+  - `apps/ios-swift/GenGate/App/RootTabView.swift`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Core/UI/AuthGatePlaceholderView.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `51bec27` — `batch31: wire refresh session persistence shells`
-  - working tree hiện tại: bẩn đúng theo web gating slice, chưa commit
+  - commit gần nhất đã chốt: `a3afeef` — `batch31: gate web shells on persisted session`
+  - working tree hiện tại: bẩn đúng theo iOS gating slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit web gating slice này; kế tiếp nối iOS root/tab gating hiển thị session restore state tương đương web app shell
+  - commit iOS gating slice này; kế tiếp cân nhắc chốt batch 31 hoặc nối logout/revoke contract tối thiểu để hoàn tất auth/session lifecycle cơ bản
 
 ## Batch handoff note
 

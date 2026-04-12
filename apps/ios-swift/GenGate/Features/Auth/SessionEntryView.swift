@@ -47,6 +47,14 @@ struct SessionEntryView: View {
                     .buttonStyle(.borderedProminent)
                     .disabled(sessionStore.authState == .signingIn || sessionStore.authState == .restoring)
 
+                    Text("Session indicator: \(sessionStore.sessionIndicatorLabel)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
+                    Text(sessionStore.authGateMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+
                     if let statusMessage = sessionStore.statusMessage {
                         Text(statusMessage)
                             .font(.footnote)
@@ -73,6 +81,14 @@ struct SessionEntryView: View {
                     .foregroundStyle(.secondary)
 
                     Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell để nối với backend auth/session sau.")
+                        .foregroundStyle(.secondary)
+
+                    Text("Session indicator: \(sessionStore.sessionIndicatorLabel)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
+                    Text(sessionStore.authGateMessage)
+                        .font(.footnote)
                         .foregroundStyle(.secondary)
 
                     if let statusMessage = sessionStore.statusMessage {

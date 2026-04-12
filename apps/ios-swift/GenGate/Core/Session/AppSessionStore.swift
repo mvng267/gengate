@@ -81,6 +81,32 @@ final class AppSessionStore {
     var passwordDraft: String = ""
     var statusMessage: String?
 
+    var sessionIndicatorLabel: String {
+        switch authState {
+        case .signedOut:
+            return "Guest"
+        case .restoring:
+            return "Restoring…"
+        case .signingIn:
+            return "Signing in…"
+        case let .authenticated(userSession):
+            return userSession.email
+        }
+    }
+
+    var authGateMessage: String {
+        switch authState {
+        case .signedOut:
+            return "Chưa có persisted session hợp lệ."
+        case .restoring:
+            return "Đang kiểm tra persisted session với backend auth shell."
+        case .signingIn:
+            return "Đang gọi backend auth shell để tạo session."
+        case .authenticated:
+            return "Persisted session hợp lệ. Route shell iOS đã có thể mở."
+        }
+    }
+
     init(
         backendBaseURL: URL? = URL(string: "http://127.0.0.1:8000"),
         sessionStore: UserDefaults = .standard
