@@ -2,20 +2,20 @@
 
 - Batch: 40
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 40 web auth E2E shell — make login screen exercise login → restore/refresh persisted session → logout from one screen
+- Scope: batch 40 iOS auth E2E shell framing — align Session screen copy/control labels to the real login → restore/refresh → logout flow
 - Status: verify
 - Files:
-  - apps/web-nextjs/app/login/page.tsx
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
-  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `07068a6` — `batch39: mark workflow complete`
-  - working tree: bẩn đúng theo batch 40 web auth E2E shell slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `94d56b4` — `batch40: add web auth e2e shell`
+  - working tree: bẩn đúng theo batch 40 iOS auth E2E shell framing slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit slice này; sau đó cân nhắc thêm 1 batch 40 parity slice cho iOS manual refresh control hoặc chốt nếu muốn giữ batch 40 chỉ ở web leverage path
+- Next: commit slice này; sau đó cân nhắc chốt batch 40 nếu web+iOS framing/control parity đã đủ, hoặc chọn 1 auth E2E data/UX slice hẹp kế tiếp có leverage cao hơn
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 40 update:
-  - Web login shell nay có manual refresh action để test explicit refresh-token rotation thay vì chỉ restore ngầm lúc load
-  - Một màn duy nhất giờ có thể chạy tay đủ vòng login → restore/refresh persisted session → logout với backend feedback rõ ràng
+  - iOS Session screen nay phản ánh đúng mục tiêu auth E2E shell thay vì còn copy batch-39 logout parity
+  - manual refresh control label/copy đã align với flow login → restore/refresh persisted session → logout

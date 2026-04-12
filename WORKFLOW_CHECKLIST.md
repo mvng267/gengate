@@ -89,19 +89,19 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **40**
-- Scope hiện tại: web auth E2E shell — make login screen exercise login → restore/refresh persisted session → logout from one screen.
+- Scope hiện tại: iOS auth E2E shell framing — align Session screen copy/control labels to the real login → restore/refresh → logout flow.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `07068a6` — `batch39: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 40 web auth E2E shell slice, chưa commit
+  - commit gần nhất đã chốt: `94d56b4` — `batch40: add web auth e2e shell`
+  - working tree hiện tại: bẩn đúng theo batch 40 iOS auth E2E shell framing slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó cân nhắc thêm 1 batch 40 parity slice cho iOS manual refresh control hoặc chốt nếu muốn giữ batch 40 chỉ ở web leverage path
+  - commit slice này; sau đó cân nhắc chốt batch 40 nếu web+iOS framing/control parity đã đủ, hoặc chọn 1 auth E2E data/UX slice hẹp kế tiếp có leverage cao hơn
 
 ## Batch handoff note
 

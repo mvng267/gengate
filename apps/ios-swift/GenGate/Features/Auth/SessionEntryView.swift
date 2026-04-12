@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 39 · iOS logout feedback parity")
+            Text("Batch 40 · iOS auth E2E shell")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -15,11 +15,11 @@ struct SessionEntryView: View {
             switch sessionStore.authState {
             case .signedOut, .signingIn, .restoring:
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Register + logout feedback shell")
+                    Text("Register + auth loop shell")
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Flow này vẫn giữ register/login/restore/refresh như hiện tại, nhưng khi logout thì UI nay sẽ hiện rõ revoke/detail thật từ backend thay vì chỉ báo logout chung chung.")
+                    Text("Batch 40 ưu tiên cho chạy tay đủ vòng register/login, restore hoặc manual refresh persisted session, rồi logout với feedback thật từ backend ngay trên màn Session.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -69,7 +69,7 @@ struct SessionEntryView: View {
                             await sessionStore.refreshPersistedSession()
                         }
                     } label: {
-                        Text(sessionStore.isRefreshingSession ? "Refreshing session..." : "Refresh persisted session")
+                        Text(sessionStore.isRefreshingSession ? "Refreshing session..." : "Manual refresh persisted session")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
@@ -119,7 +119,7 @@ struct SessionEntryView: View {
                     .font(.footnote.monospaced())
                     .foregroundStyle(.secondary)
 
-                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell để nối với backend auth/session sau.")
+                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ có thể chạy tay đủ flow login → restore/refresh persisted session → logout để nối auth/session với backend rõ hơn.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -157,7 +157,7 @@ struct SessionEntryView: View {
                             await sessionStore.refreshPersistedSession()
                         }
                     } label: {
-                        Text(sessionStore.isRefreshingSession ? "Refreshing session..." : "Refresh persisted session")
+                        Text(sessionStore.isRefreshingSession ? "Refreshing session..." : "Manual refresh persisted session")
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(sessionStore.isRefreshingSession)
