@@ -89,21 +89,22 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **32**
-- Scope hiện tại: iOS auth redirect/resume slice — khi user chạm tab cần auth mà chưa có session hợp lệ, app quay về Session tab và giữ pending destination để mở đúng tab đó sau login/restore.
+- Scope hiện tại: backend session continuity slice — auth login/refresh/session/logout responses nay trả thêm `session_status` + `expires_in_seconds` để web/iOS resume flow phân biệt rõ session state hiện tại.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/App/RootTabView.swift`
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
-  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
+  - `apps/backend-python/app/modules/auth/router.py`
+  - `apps/backend-python/app/schemas/auth.py`
+  - `apps/backend-python/app/services/auth.py`
+  - `apps/backend-python/tests/test_auth_api.py`
 - Test-verify:
-  - `cd apps/ios-swift && swift build` → ✅ pass
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ 4 passed
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `b1e8ffb` — `batch32: add web auth redirects`
-  - working tree hiện tại: bẩn đúng theo batch 32 iOS redirect/resume slice, chưa commit
+  - commit gần nhất đã chốt: `e2da4ba` — `batch32: add ios auth redirect resume`
+  - working tree hiện tại: bẩn đúng theo batch 32 backend continuity slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó chọn 1 nhịp hẹp tiếp theo của batch 32, ưu tiên backend refresh-in-use path
+  - commit slice này; sau đó cân nhắc chốt batch 32 complete nếu không cần thêm auth UX scope nhỏ nào nữa
 
 ## Batch handoff note
 

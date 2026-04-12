@@ -2,22 +2,23 @@
 
 - Batch: 32
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 32 iOS auth redirect/resume slice — khi user chạm tab cần auth mà chưa có session hợp lệ, app quay về Session tab và giữ pending destination để mở đúng tab đó sau login/restore
+- Scope: batch 32 backend session continuity slice — auth login/refresh/session/logout responses nay trả thêm `session_status` + `expires_in_seconds` để web/iOS resume flow phân biệt rõ session state hiện tại
 - Status: verify
 - Files:
-  - apps/ios-swift/GenGate/App/RootTabView.swift
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
+  - apps/backend-python/app/modules/auth/router.py
+  - apps/backend-python/app/schemas/auth.py
+  - apps/backend-python/app/services/auth.py
+  - apps/backend-python/tests/test_auth_api.py
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅ (4 passed)
 - Git:
-  - latest commit: `b1e8ffb` — `batch32: add web auth redirects`
-  - working tree: bẩn đúng theo batch 32 iOS auth redirect/resume slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `e2da4ba` — `batch32: add ios auth redirect resume`
+  - working tree: bẩn đúng theo batch 32 backend session continuity slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit slice này; sau đó chọn 1 lane batch 32 tiếp theo, ưu tiên backend refresh-in-use path để hỗ trợ app/web resume continuity rõ hơn
+- Next: commit slice này; sau đó có thể cân nhắc chốt batch 32 vì web redirect + iOS redirect/resume + backend continuity metadata đã nối thành 1 vòng auth UX rõ hơn
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 32 update:
-  - iOS lane: tap vào tab protected khi chưa authenticated sẽ không chỉ bị khóa mơ hồ mà chuyển về Session tab kèm pending destination rõ ràng
-  - iOS lane: sau login hoặc restore session thành công, app tự mở tab protected đã yêu cầu trước đó; fallback mặc định vẫn là Feed
+  - Backend lane: login/refresh/session/logout responses nay có `session_status` + `expires_in_seconds` để client đọc continuity state nhất quán hơn
+  - Backend lane: focused auth API tests đã cover các field mới và vẫn xanh

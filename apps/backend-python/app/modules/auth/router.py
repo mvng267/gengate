@@ -64,8 +64,10 @@ def login(payload: LoginRequest, db: Session = Depends(get_db_session)) -> Login
         session_id=auth_session.id,
         refresh_token=refresh_token,
         expires_at=auth_session.expires_at,
+        expires_in_seconds=auth_service.get_expires_in_seconds(auth_session),
         token_type="bearer",
         bootstrap_mode=bootstrap_mode,
+        session_status=auth_service.get_session_status(auth_session),
     )
 
 
@@ -92,8 +94,10 @@ def refresh_session(
         session_id=auth_session.id,
         refresh_token=refresh_token,
         expires_at=auth_session.expires_at,
+        expires_in_seconds=auth_service.get_expires_in_seconds(auth_session),
         token_type="bearer",
         bootstrap_mode="refresh_token",
+        session_status=auth_service.get_session_status(auth_session),
     )
 
 
@@ -119,8 +123,9 @@ def get_session_snapshot(
         device_id=device.id,
         session_id=auth_session.id,
         expires_at=auth_session.expires_at,
+        expires_in_seconds=auth_service.get_expires_in_seconds(auth_session),
         token_type="bearer",
-        session_status="active",
+        session_status=auth_service.get_session_status(auth_session),
     )
 
 
@@ -146,8 +151,9 @@ def logout_session(
         device_id=auth_session.device_id,
         session_id=auth_session.id,
         expires_at=auth_session.expires_at,
+        expires_in_seconds=auth_service.get_expires_in_seconds(auth_session),
         token_type="bearer",
-        session_status="revoked",
+        session_status=auth_service.get_session_status(auth_session),
     )
 
 

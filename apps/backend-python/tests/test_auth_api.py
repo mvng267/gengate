@@ -67,6 +67,8 @@ def test_auth_login_creates_session_shell_for_existing_user() -> None:
     assert payload["refresh_token"]
     assert payload["token_type"] == "bearer"
     assert payload["bootstrap_mode"] == "password_stub"
+    assert payload["session_status"] == "active"
+    assert payload["expires_in_seconds"] > 0
 
     clear_overrides()
 
@@ -120,6 +122,7 @@ def test_auth_refresh_rotates_session_and_session_snapshot_reads_active_session(
     assert session_payload["device_id"] == login_payload["device_id"]
     assert session_payload["session_id"] == login_payload["session_id"]
     assert session_payload["session_status"] == "active"
+    assert session_payload["expires_in_seconds"] > 0
 
     refresh_response = client.post(
         "/auth/refresh",
@@ -132,6 +135,8 @@ def test_auth_refresh_rotates_session_and_session_snapshot_reads_active_session(
     assert refresh_payload["session_id"] != login_payload["session_id"]
     assert refresh_payload["refresh_token"] != login_payload["refresh_token"]
     assert refresh_payload["bootstrap_mode"] == "refresh_token"
+    assert refresh_payload["session_status"] == "active"
+    assert refresh_payload["expires_in_seconds"] > 0
 
     stale_refresh_response = client.post(
         "/auth/session",
@@ -179,6 +184,7 @@ def test_auth_logout_revokes_current_session() -> None:
     assert logout_response.status_code == 200
     assert logout_response.json()["session_status"] == "revoked"
     assert logout_response.json()["session_id"] == login_payload["session_id"]
+    assert logout_response.json()["expires_in_seconds"] > 0
 
     post_logout_session = client.post(
         "/auth/session",

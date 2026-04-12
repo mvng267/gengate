@@ -82,8 +82,10 @@ class LoginResponse(BaseModel):
     session_id: uuid.UUID
     refresh_token: str
     expires_at: datetime
+    expires_in_seconds: int
     token_type: str
     bootstrap_mode: str
+    session_status: str
 
 
 class RefreshSessionRequest(BaseModel):
@@ -106,5 +108,6 @@ class SessionSnapshotResponse(BaseModel):
     device_id: uuid.UUID
     session_id: uuid.UUID
     expires_at: datetime
+    expires_in_seconds: int
     token_type: str
     session_status: str

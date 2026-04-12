@@ -1,4 +1,5 @@
 import secrets
+import math
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
@@ -15,6 +16,20 @@ SESSION_LIFETIME_DAYS = 30
 
 
 class AuthService:
+    def get_session_status(self, auth_session: AuthSession) -> str:
+        if auth_session.revoked_at is not None:
+            return "revoked"
+        if self._is_session_expired(auth_session.expires_at):
+            return "expired"
+        return "active"
+
+    def get_expires_in_seconds(self, auth_session: AuthSession) -> int:
+        normalized_expires_at = auth_session.expires_at
+        if normalized_expires_at.tzinfo is None:
+            normalized_expires_at = normalized_expires_at.replace(tzinfo=timezone.utc)
+        delta = normalized_expires_at - datetime.now(timezone.utc)
+        return max(0, math.floor(delta.total_seconds()))
+
     def register_user(self, db: Session, email: str, username: str | None) -> tuple[User, bool]:
         existing_email = user_repository.get_by_email(db, email)
         if existing_email is not None:
@@ -76,9 +91,10 @@ class AuthService:
         existing_session = session_repository.get_by_refresh_token_hash(db, refresh_token)
         if existing_session is None:
             raise ValueError("session_not_found")
-        if existing_session.revoked_at is not None:
+        session_status = self.get_session_status(existing_session)
+        if session_status == "revoked":
             raise ValueError("session_revoked")
-        if self._is_session_expired(existing_session.expires_at):
+        if session_status == "expired":
             raise ValueError("session_expired")
 
         user = user_repository.get(db, existing_session.user_id)
@@ -122,9 +138,10 @@ class AuthService:
         auth_session = session_repository.get_by_refresh_token_hash(db, refresh_token)
         if auth_session is None:
             raise ValueError("session_not_found")
-        if auth_session.revoked_at is not None:
+        session_status = self.get_session_status(auth_session)
+        if session_status == "revoked":
             raise ValueError("session_revoked")
-        if self._is_session_expired(auth_session.expires_at):
+        if session_status == "expired":
             raise ValueError("session_expired")
         return auth_session
 
