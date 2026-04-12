@@ -2,22 +2,21 @@
 
 - Batch: 38
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 38 web expired-session feedback parity — surface backend 401 detail from `/auth/session` and `/auth/refresh` in login shell
+- Scope: batch 38 iOS expired-session feedback parity — surface backend 401 detail from `/auth/session` and `/auth/refresh` in Session screen
 - Status: verify
 - Files:
-  - apps/web-nextjs/lib/auth/types.ts
-  - apps/web-nextjs/lib/auth/client.ts
-  - apps/web-nextjs/app/login/page.tsx
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
-  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `4c28168` — `batch37: mark workflow complete`
-  - working tree: bẩn đúng theo batch 38 web expired-session feedback parity slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `9d5e36e` — `batch38: surface web session failure detail`
+  - working tree: bẩn đúng theo batch 38 iOS expired-session feedback parity slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit slice này; sau đó cân nhắc parity tương ứng cho iOS Session screen hoặc chọn 1 backend/web/iOS auth E2E slice hẹp kế tiếp có leverage cao hơn
+- Next: commit slice này; sau đó cân nhắc chốt batch 38 nếu web+iOS feedback parity đã đủ outcome của batch, hoặc chọn 1 auth E2E slice hẹp kế tiếp có leverage cao hơn
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 38 update:
-  - Web restore/refresh failure nay giữ lại backend detail thật như `session_expired` hoặc `session_revoked`
-  - Login shell copy/status đã phản ánh đúng mục tiêu expired-session feedback parity
+  - Web restore/refresh failure đã surface backend detail thật như `session_expired` hoặc `session_revoked`
+  - iOS Session screen nay cũng surface backend detail thật cho unauthorized restore/refresh thay vì chỉ báo generic invalid-session text

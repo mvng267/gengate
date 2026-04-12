@@ -89,21 +89,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **38**
-- Scope hiện tại: web expired-session feedback parity — surface backend 401 detail from `/auth/session` and `/auth/refresh` in login shell.
+- Scope hiện tại: iOS expired-session feedback parity — surface backend 401 detail from `/auth/session` and `/auth/refresh` in Session screen.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/lib/auth/types.ts`
-  - `apps/web-nextjs/lib/auth/client.ts`
-  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `4c28168` — `batch37: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 38 web expired-session feedback parity slice, chưa commit
+  - commit gần nhất đã chốt: `9d5e36e` — `batch38: surface web session failure detail`
+  - working tree hiện tại: bẩn đúng theo batch 38 iOS expired-session feedback parity slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó cân nhắc parity tương ứng cho iOS Session screen hoặc chọn 1 backend/web/iOS auth E2E slice hẹp kế tiếp có leverage cao hơn
+  - commit slice này; sau đó cân nhắc chốt batch 38 nếu web+iOS feedback parity đã đủ outcome của batch, hoặc chọn 1 auth E2E slice hẹp kế tiếp có leverage cao hơn
 
 ## Batch handoff note
 

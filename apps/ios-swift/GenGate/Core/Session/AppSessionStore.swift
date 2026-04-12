@@ -69,7 +69,7 @@ final class AppSessionStore {
     private enum SessionError: LocalizedError {
         case invalidBaseURL
         case invalidResponse
-        case unauthorized
+        case unauthorized(detail: String?)
         case network(String)
 
         var errorDescription: String? {
@@ -78,7 +78,10 @@ final class AppSessionStore {
                 return "Thiếu backend base URL hợp lệ cho auth shell."
             case .invalidResponse:
                 return "Backend auth/session response thiếu field cần thiết."
-            case .unauthorized:
+            case let .unauthorized(detail):
+                if let detail, !detail.isEmpty {
+                    return "Session đã hết hạn hoặc bị revoke (\(detail)). Local session đã được xóa; hãy đăng nhập lại."
+                }
                 return "Session đã hết hạn hoặc bị revoke. Local session đã được xóa; hãy đăng nhập lại."
             case let .network(message):
                 return message
@@ -204,8 +207,13 @@ final class AppSessionStore {
             clearPersistedSession()
             authState = .signedOut
             selectedTab = .session
-            if let sessionError = error as? SessionError, case .unauthorized = sessionError {
-                statusMessage = "Session đã hết hạn hoặc bị revoke. Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
+            if let sessionError = error as? SessionError,
+               case let .unauthorized(detail) = sessionError {
+                if let detail, !detail.isEmpty {
+                    statusMessage = "Session đã hết hạn hoặc bị revoke (\(detail)). Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
+                } else {
+                    statusMessage = "Session đã hết hạn hoặc bị revoke. Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
+                }
             } else {
                 statusMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             }
@@ -250,8 +258,13 @@ final class AppSessionStore {
             clearPersistedSession()
             authState = .signedOut
             selectedTab = .session
-            if let sessionError = error as? SessionError, case .unauthorized = sessionError {
-                statusMessage = "Session đã hết hạn hoặc bị revoke. Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
+            if let sessionError = error as? SessionError,
+               case let .unauthorized(detail) = sessionError {
+                if let detail, !detail.isEmpty {
+                    statusMessage = "Session đã hết hạn hoặc bị revoke (\(detail)). Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
+                } else {
+                    statusMessage = "Session đã hết hạn hoặc bị revoke. Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
+                }
             } else {
                 statusMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             }
@@ -412,6 +425,15 @@ final class AppSessionStore {
         }
     }
 
+    private func readErrorDetail(from data: Data) -> String? {
+        guard let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let detail = object["detail"] as? String,
+              !detail.isEmpty else {
+            return nil
+        }
+        return detail
+    }
+
     private func requestRefreshSession(refreshToken: String) async throws -> LoginResponse {
         let url = try makeURL(path: "/auth/refresh")
         var request = URLRequest(url: url)
@@ -427,7 +449,7 @@ final class AppSessionStore {
         }
 
         if httpResponse.statusCode == 401 {
-            throw SessionError.unauthorized
+            throw SessionError.unauthorized(detail: readErrorDetail(from: data))
         }
 
         guard httpResponse.statusCode == 200 else {
@@ -456,7 +478,7 @@ final class AppSessionStore {
         }
 
         if httpResponse.statusCode == 401 {
-            throw SessionError.unauthorized
+            throw SessionError.unauthorized(detail: readErrorDetail(from: data))
         }
 
         guard httpResponse.statusCode == 200 else {
