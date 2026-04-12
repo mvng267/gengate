@@ -119,7 +119,7 @@ export function AuthenticatedRouteShell({
     if (result.ok) {
       setRestoreState({
         status: "authenticated",
-        message: "Persisted session đã được re-check thủ công với backend auth shell.",
+        message: "Persisted session đã được refresh thật với backend auth shell và local refresh token đã được rotate.",
         email: result.session.session.email,
         sessionId: result.session.session.session_id,
         sessionStatus: result.session.session.session_status,

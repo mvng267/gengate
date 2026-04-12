@@ -180,6 +180,20 @@ async function fetchSessionSnapshot(refreshToken: string) {
   return response;
 }
 
+async function fetchRefreshSession(refreshToken: string) {
+  const response = await apiRequest(env.authRefreshPath, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      refresh_token: refreshToken,
+    }),
+  });
+
+  return response;
+}
+
 /**
  * Thin auth boundary for web auth shell.
  *
@@ -316,7 +330,65 @@ export async function restorePersistedSession(): Promise<RestoreSessionResult> {
 }
 
 export async function refreshPersistedSession(): Promise<RestoreSessionResult> {
-  return restorePersistedSession();
+  const stored = readPersistedAuthSession();
+  if (!stored) {
+    return {
+      ok: false,
+      reason: "missing",
+      message: "Chưa có session local để refresh.",
+    };
+  }
+
+  try {
+    const response = await fetchRefreshSession(stored.refreshToken);
+    if (response.ok) {
+      const data: unknown = await response.json();
+      if (!isBackendLoginPayload(data)) {
+        clearPersistedAuthSession();
+        return {
+          ok: false,
+          reason: "invalid-response",
+          message: "Backend refresh response thiếu field theo auth/session contract hiện tại.",
+        };
+      }
+
+      const nextSession = persistAuthSession(data);
+      if (!nextSession) {
+        return {
+          ok: false,
+          reason: "invalid-response",
+          message: "Không thể lưu rotated refresh/session state vào local storage.",
+        };
+      }
+
+      return {
+        ok: true,
+        session: nextSession,
+        source: "storage",
+      };
+    }
+
+    if (response.status === 401) {
+      clearPersistedAuthSession();
+      return {
+        ok: false,
+        reason: "unauthorized",
+        message: "Manual refresh cho thấy refresh token cũ không còn hợp lệ; đã xóa session local.",
+      };
+    }
+
+    return {
+      ok: false,
+      reason: "invalid-response",
+      message: `Session refresh failed with status ${response.status}.`,
+    };
+  } catch {
+    return {
+      ok: false,
+      reason: "network-error",
+      message: "Không thể refresh session đã lưu với backend.",
+    };
+  }
 }
 
 export function getLoginRedirectPath() {

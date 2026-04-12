@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đã chốt xong batch 35**.
+- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đang làm batch 36**.
 
 ## Reporting hard rule
 
@@ -88,26 +88,22 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **35**
-- Scope hiện tại: batch 35 complete — chốt feedback polish cho expired/revoked session và logout state trên cả web + iOS.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **36**
+- Scope hiện tại: web refresh-token rotation slice — manual refresh ở protected route nay gọi thật `/auth/refresh` thay vì chỉ re-check `/auth/session`.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/web-nextjs/lib/auth/client.ts`
+  - `apps/web-nextjs/lib/config/env.ts`
   - `apps/web-nextjs/components/authenticated-route-shell.tsx`
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
-  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit đã chốt:
-    - `6921247` — `batch35: polish web session invalidation feedback`
-    - `2a1aec5` — `batch35: polish ios session invalidation feedback`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `79e34ce` — `batch35: mark workflow complete`
+  - working tree hiện tại: bẩn đúng theo batch 36 web refresh-token rotation slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch 36 với 1 scope hẹp mới bám auth vertical slice thật sự còn thiếu nhất; ưu tiên phần backend/web/iOS nào giúp tiến gần E2E hơn thay vì polish tiếp
+  - commit slice này; sau đó nếu cần parity thì nối iOS manual refresh sang `/auth/refresh` để rotate token thật thay vì chỉ snapshot-check
 
 ## Batch handoff note
 
@@ -115,11 +111,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Commit cuối đã chốt:
   - `6921247` — `batch35: polish web session invalidation feedback`
   - `2a1aec5` — `batch35: polish ios session invalidation feedback`
+  - `79e34ce` — `batch35: mark workflow complete`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - không còn blocker của batch 35; auth/session invalidation feedback parity ở web + iOS đã ổn hơn, nhưng auth vertical slice tổng thể vẫn còn thiếu các bước E2E sâu hơn ở batch sau
+  - batch 35 đã chốt; batch 36 bắt đầu chuyển từ UX polish sang auth/session vertical step có tác động E2E hơn
 - Batch kế tiếp: **36**
 - Scope hẹp đầu tiên của batch 36:
-  - chọn 1 missing auth/session vertical step có tác động E2E rõ nhất, tránh quay lại polish thuần UI
+  - dùng backend `/auth/refresh` thật cho web manual refresh để persisted session có token rotation thật, không chỉ snapshot check
