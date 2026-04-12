@@ -1,22 +1,23 @@
 # GenGate Workflow Status
 
-- Batch: 37
+- Batch: 38
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 37 closure — chốt self-serve onboarding parity tối thiểu cho web + iOS
-- Status: complete
+- Scope: batch 38 web expired-session feedback parity — surface backend 401 detail from `/auth/session` and `/auth/refresh` in login shell
+- Status: verify
 - Files:
+  - apps/web-nextjs/lib/auth/types.ts
+  - apps/web-nextjs/lib/auth/client.ts
+  - apps/web-nextjs/app/login/page.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `4d94d26` — `batch37: add ios self-serve register flow`
-  - working tree: sạch trước nhịp workflow-only close này
+  - latest commit: `4c28168` — `batch37: mark workflow complete`
+  - working tree: bẩn đúng theo batch 38 web expired-session feedback parity slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 38 với 1 auth E2E slice hẹp có leverage cao nhất; ứng viên tốt là backend/web/iOS logout or expired-session parity polish, hoặc 1 backend contract step giúp onboarding/session path hoàn chỉnh hơn
+- Next: commit slice này; sau đó cân nhắc parity tương ứng cho iOS Session screen hoặc chọn 1 backend/web/iOS auth E2E slice hẹp kế tiếp có leverage cao hơn
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 37 outcome:
-  - Web login shell đã có self-serve register action trên nền `/auth/register` + `/auth/login`
-  - iOS Session screen đã có self-serve register action rồi chain sang login
-  - Cả web và iOS đều có persisted session local sau login, restore bằng `/auth/session`, manual refresh bằng `/auth/refresh`
+- Batch 38 update:
+  - Web restore/refresh failure nay giữ lại backend detail thật như `session_expired` hoặc `session_revoked`
+  - Login shell copy/status đã phản ánh đúng mục tiêu expired-session feedback parity

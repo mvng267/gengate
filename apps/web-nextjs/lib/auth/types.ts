@@ -64,4 +64,5 @@ export type RestoreSessionResult =
       ok: false;
       reason: "missing" | "unauthorized" | "network-error" | "invalid-response";
       message: string;
+      backendDetail?: string;
     };

@@ -174,19 +174,18 @@ export default function LoginPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-start">
       <section className="flex-1 space-y-4">
         <span className="inline-flex rounded-full border border-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-          Batch 37 · Web self-serve register shell
+          Batch 38 · Web expired-session feedback parity
         </span>
         <h1 className="text-4xl font-black tracking-tight text-black">
-          Web shell nay cho user mới tự tạo account tối thiểu rồi vào auth/session flow ngay.
+          Web shell nay hiện rõ hơn lý do session cũ bị backend từ chối thay vì chỉ báo lỗi chung chung.
         </h1>
         <p className="max-w-2xl text-base leading-7 text-neutral-700">
-          Màn này vẫn dùng auth shell hiện tại nhưng nay user mới có thể tự gọi <code> /auth/register </code>
-          rồi đăng nhập ngay để lấy persisted session local, sau đó redirect về route được yêu cầu bằng query <code>next</code>.
+          Màn này giữ nguyên auth shell hiện tại, nhưng restore/refresh failure từ backend giờ sẽ surface detail như <code>session_expired</code> hoặc <code>session_revoked</code> để debug và UX parity tốt hơn.
         </p>
         <ul className="space-y-2 text-sm text-neutral-700">
           <li>• Password/OTP vẫn là placeholder trên UI, chưa dùng cho API ở batch này.</li>
           <li>
-            • Flow mới: <code>/auth/register</code> → <code>/auth/login</code> → persisted session local → redirect về route đích.
+            • Nếu backend trả <code>401</code> từ <code>/auth/session</code> hoặc <code>/auth/refresh</code>, UI nay sẽ giữ lại detail thật thay vì chỉ báo invalid-session chung.
           </li>
           <li>• Redirect đích mặc định vẫn là <code>/feed</code> nếu không có <code>?next=...</code> hợp lệ.</li>
         </ul>
@@ -295,7 +294,7 @@ export default function LoginPage() {
           <div className="font-semibold">Status</div>
           <p className={buildStatusClass(statusTone)}>
             {statusMessage ??
-              "Chưa submit. Batch 37 shell này ưu tiên cho user mới tự register rồi đi thẳng vào auth/session flow."}
+              "Chưa submit. Batch 38 shell này ưu tiên surface đúng backend reason khi session cũ bị expire/revoke."}
           </p>
 
           {statusMessage?.includes("đăng nhập lại") ? (

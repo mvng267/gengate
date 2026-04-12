@@ -22,6 +22,19 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object";
 }
 
+async function readErrorDetail(response: Response): Promise<string | undefined> {
+  try {
+    const data: unknown = await response.json();
+    if (isRecord(data) && typeof data.detail === "string") {
+      return data.detail;
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+}
+
 function isBackendLoginPayload(value: unknown): value is BackendLoginPayload {
   if (!isRecord(value)) {
     return false;
@@ -369,11 +382,14 @@ export async function restorePersistedSession(): Promise<RestoreSessionResult> {
     }
 
     if (response.status === 401) {
+      const backendDetail = await readErrorDetail(response);
       clearPersistedAuthSession();
+      const suffix = backendDetail ? ` (${backendDetail})` : "";
       return {
         ok: false,
         reason: "unauthorized",
-        message: "Refresh token cũ không còn hợp lệ; đã xóa session local.",
+        message: `Refresh token cũ không còn hợp lệ${suffix}; đã xóa session local.`,
+        backendDetail,
       };
     }
 
@@ -431,11 +447,14 @@ export async function refreshPersistedSession(): Promise<RestoreSessionResult> {
     }
 
     if (response.status === 401) {
+      const backendDetail = await readErrorDetail(response);
       clearPersistedAuthSession();
+      const suffix = backendDetail ? ` (${backendDetail})` : "";
       return {
         ok: false,
         reason: "unauthorized",
-        message: "Manual refresh cho thấy refresh token cũ không còn hợp lệ; đã xóa session local.",
+        message: `Manual refresh cho thấy refresh token cũ không còn hợp lệ${suffix}; đã xóa session local.`,
+        backendDetail,
       };
     }
 
