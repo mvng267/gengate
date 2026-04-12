@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đang làm batch 36**.
+- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đã chốt xong batch 36**.
 
 ## Reporting hard rule
 
@@ -89,33 +89,38 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **36**
-- Scope hiện tại: iOS refresh-token rotation slice — manual refresh ở Session screen nay gọi thật `/auth/refresh` thay vì chỉ re-check `/auth/session`.
-- Trạng thái hiện tại: **verify**
+- Scope hiện tại: batch 36 complete — chốt refresh-token rotation parity cho manual refresh trên cả web + iOS.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
+  - `apps/web-nextjs/lib/auth/client.ts`
+  - `apps/web-nextjs/lib/config/env.ts`
+  - `apps/web-nextjs/components/authenticated-route-shell.tsx`
   - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
   - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `50efee4` — `batch36: rotate web session on manual refresh`
-  - working tree hiện tại: bẩn đúng theo batch 36 iOS refresh-token rotation slice, chưa commit
+  - commit đã chốt:
+    - `50efee4` — `batch36: rotate web session on manual refresh`
+    - `4355d13` — `batch36: rotate ios session on manual refresh`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó có thể chốt batch 36 complete nếu không cần thêm auth/session rotation parity nhỏ nào nữa
+  - mở batch 37 với 1 scope hẹp mới bám auth vertical slice thật sự còn thiếu nhất; ưu tiên bước E2E tiếp theo thay vì polish messaging/rotation đã chốt xong
 
 ## Batch handoff note
 
-- Batch vừa xong: **35**
+- Batch vừa xong: **36**
 - Commit cuối đã chốt:
-  - `6921247` — `batch35: polish web session invalidation feedback`
-  - `2a1aec5` — `batch35: polish ios session invalidation feedback`
-  - `79e34ce` — `batch35: mark workflow complete`
+  - `50efee4` — `batch36: rotate web session on manual refresh`
+  - `4355d13` — `batch36: rotate ios session on manual refresh`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - batch 35 đã chốt; batch 36 bắt đầu chuyển từ UX polish sang auth/session vertical step có tác động E2E hơn
-- Batch kế tiếp: **36**
-- Scope hẹp đầu tiên của batch 36:
-  - dùng backend `/auth/refresh` thật cho web manual refresh để persisted session có token rotation thật, không chỉ snapshot check
+  - không còn blocker của batch 36; manual refresh token rotation parity ở web + iOS đã chốt, nhưng auth vertical slice tổng thể vẫn còn thiếu bước E2E kế tiếp ở batch sau
+- Batch kế tiếp: **37**
+- Scope hẹp đầu tiên của batch 37:
+  - chọn 1 missing auth/session vertical step có tác động E2E rõ nhất sau khi rotation parity đã xong

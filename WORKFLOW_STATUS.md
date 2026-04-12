@@ -2,21 +2,28 @@
 
 - Batch: 36
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 36 iOS refresh-token rotation slice — manual refresh ở Session screen nay gọi thật `/auth/refresh` thay vì chỉ re-check `/auth/session`
-- Status: verify
+- Scope: batch 36 complete — chốt refresh-token rotation parity cho manual refresh trên cả web + iOS
+- Status: complete
 - Files:
+  - apps/web-nextjs/lib/auth/client.ts
+  - apps/web-nextjs/lib/config/env.ts
+  - apps/web-nextjs/components/authenticated-route-shell.tsx
   - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
+  - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `50efee4` — `batch36: rotate web session on manual refresh`
-  - working tree: bẩn đúng theo batch 36 iOS refresh-token rotation slice + workflow files (chưa commit ở nhịp này)
+  - latest commits:
+    - `50efee4` — `batch36: rotate web session on manual refresh`
+    - `4355d13` — `batch36: rotate ios session on manual refresh`
+  - working tree: sạch
 - Blocker: none
-- Next: commit slice này; sau đó có thể cân nhắc chốt batch 36 complete nếu không cần thêm auth/session rotation parity nhỏ nào nữa
+- Next: mở batch 37 với 1 scope hẹp mới bám auth vertical slice thật sự còn thiếu nhất; ưu tiên bước E2E tiếp theo thay vì polish messaging/rotation đã chốt xong
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 36 update:
-  - iOS manual refresh nay dùng backend refresh contract thật để rotate refresh token + session id
-  - Startup restore vẫn dùng `/auth/session` để snapshot-check persisted session hiện có
+- Batch 36 outcome:
+  - Web manual refresh nay dùng `/auth/refresh` thật để rotate refresh token + session id và persist local state mới
+  - iOS manual refresh nay dùng `/auth/refresh` thật để rotate refresh token + session id và persist local state mới
+  - Startup restore ở web/iOS vẫn giữ snapshot-check semantics tách biệt với manual refresh
