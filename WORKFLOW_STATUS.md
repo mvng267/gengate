@@ -1,26 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 39
+- Batch: 40
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 39 logout feedback parity complete — web + iOS surface backend revoke/detail from `/auth/logout`
-- Status: complete
+- Scope: batch 40 web auth E2E shell — make login screen exercise login → restore/refresh persisted session → logout from one screen
+- Status: verify
 - Files:
-  - apps/web-nextjs/lib/auth/client.ts
   - apps/web-nextjs/app/login/page.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `f5e3d5a` — `batch39: surface ios logout detail`
-  - working tree: sạch
+  - latest commit: `07068a6` — `batch39: mark workflow complete`
+  - working tree: bẩn đúng theo batch 40 web auth E2E shell slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 40 với 1 auth E2E slice hẹp có leverage cao hơn; ưu tiên chọn 1 flow thật nối login → persisted session restore/refresh → logout qua backend trên 1 client
+- Next: commit slice này; sau đó cân nhắc thêm 1 batch 40 parity slice cho iOS manual refresh control hoặc chốt nếu muốn giữ batch 40 chỉ ở web leverage path
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 39 outcome:
-  - Web logout nay surface revoke/detail thật từ backend success/401 path thay vì generic logout text
-  - iOS logout nay cũng surface session_status/detail thật từ backend success/401 path thay vì generic logout text
-  - Batch 39 auth feedback parity cho logout đã đủ trên 2 client hiện có
+- Batch 40 update:
+  - Web login shell nay có manual refresh action để test explicit refresh-token rotation thay vì chỉ restore ngầm lúc load
+  - Một màn duy nhất giờ có thể chạy tay đủ vòng login → restore/refresh persisted session → logout với backend feedback rõ ràng

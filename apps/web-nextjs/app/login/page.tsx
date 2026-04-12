@@ -9,6 +9,7 @@ import {
   loginWithEmailPassword,
   logoutPersistedSession,
   readPersistedAuthSession,
+  refreshPersistedSession,
   registerAndLoginWithEmailPassword,
   restorePersistedSession,
 } from "@/lib/auth/client";
@@ -37,6 +38,7 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusTone, setStatusTone] = useState<"neutral" | "success" | "error">("neutral");
@@ -174,19 +176,17 @@ export default function LoginPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-start">
       <section className="flex-1 space-y-4">
         <span className="inline-flex rounded-full border border-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-          Batch 39 · Web logout feedback parity
+          Batch 40 · Web auth E2E shell
         </span>
         <h1 className="text-4xl font-black tracking-tight text-black">
-          Web shell nay hiện rõ hơn revoke/logout outcome thật từ backend thay vì chỉ báo logout chung chung.
+          Web shell nay cho chạy tay đủ vòng login → restore/refresh persisted session → logout trên cùng một màn.
         </h1>
         <p className="max-w-2xl text-base leading-7 text-neutral-700">
-          Màn này giữ nguyên auth shell hiện tại, nhưng logout từ backend giờ sẽ surface detail thật như <code>revoked</code>, hoặc lý do session đã không còn hợp lệ, để logout UX parity tốt hơn.
+          Batch 40 ưu tiên 1 flow thật trên web: đăng nhập, restore session local với backend, manual refresh để rotate refresh token, rồi logout với feedback nhất quán end-to-end.
         </p>
         <ul className="space-y-2 text-sm text-neutral-700">
           <li>• Password/OTP vẫn là placeholder trên UI, chưa dùng cho API ở batch này.</li>
-          <li>
-            • Nếu backend trả success/401 từ <code>/auth/logout</code>, UI nay sẽ giữ lại revoke/detail thật thay vì chỉ báo logout chung chung.
-          </li>
+          <li>• Web shell nay có nút manual refresh để test explicit refresh-token rotation thay vì chỉ restore ngầm lúc load trang.</li>
           <li>• Redirect đích mặc định vẫn là <code>/feed</code> nếu không có <code>?next=...</code> hợp lệ.</li>
         </ul>
       </section>
@@ -225,7 +225,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={isSubmitting || isRegistering || isRestoring || isLoggingOut}
+            disabled={isSubmitting || isRegistering || isRestoring || isLoggingOut || isRefreshing}
             className="w-full border-2 border-black bg-black px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#facc15] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isRestoring ? "Đang restore session..." : loginCta}
@@ -265,7 +265,7 @@ export default function LoginPage() {
               setIsRegistering(false);
             })();
           }}
-          disabled={isSubmitting || isRegistering || isRestoring || isLoggingOut}
+          disabled={isSubmitting || isRegistering || isRestoring || isLoggingOut || isRefreshing}
           className="mt-3 w-full border-2 border-black bg-yellow-300 px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] text-black transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#000] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isRegistering ? "Đang tạo account..." : "Tạo account + đăng nhập"}
@@ -274,9 +274,50 @@ export default function LoginPage() {
         <button
           type="button"
           onClick={() => {
+            void (async () => {
+              setIsRefreshing(true);
+              setStatusMessage(null);
+              setSessionPreview(null);
+
+              const result = await refreshPersistedSession();
+              if (result.ok) {
+                setStatusTone("success");
+                setStatusMessage("Đã manual refresh session với backend và rotate refresh token local.");
+                setSessionPreview(
+                  [
+                    `user_id: ${result.session.session.user_id}`,
+                    `session_id: ${result.session.session.session_id}`,
+                    `device_id: ${result.session.session.device_id}`,
+                    `token_type: ${result.session.session.token_type}`,
+                    `session_status: ${result.session.session.session_status}`,
+                    `expires_in_seconds: ${result.session.session.expires_in_seconds}`,
+                  ].join("\n"),
+                );
+              } else {
+                setStatusTone(result.reason === "unauthorized" ? "neutral" : "error");
+                setStatusMessage(
+                  result.reason === "unauthorized"
+                    ? `${result.message} Hãy đăng nhập lại để tạo session mới.`
+                    : result.message,
+                );
+                setSessionPreview(null);
+              }
+
+              setIsRefreshing(false);
+            })();
+          }}
+          disabled={isSubmitting || isRegistering || isRestoring || isLoggingOut || isRefreshing}
+          className="mt-3 w-full border-2 border-black bg-white px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] text-black transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#d4d4d4] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isRefreshing ? "Đang refresh session..." : "Refresh persisted session"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
             void handleLogout();
           }}
-          disabled={isSubmitting || isRegistering || isRestoring || isLoggingOut}
+          disabled={isSubmitting || isRegistering || isRestoring || isLoggingOut || isRefreshing}
           className="mt-3 w-full border-2 border-black bg-white px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] text-black transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#d4d4d4] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLoggingOut ? "Đang logout..." : "Logout + revoke session"}
@@ -294,7 +335,7 @@ export default function LoginPage() {
           <div className="font-semibold">Status</div>
           <p className={buildStatusClass(statusTone)}>
             {statusMessage ??
-              "Chưa submit. Batch 39 shell này ưu tiên surface đúng backend logout/revoke outcome thay vì generic logout text."}
+              "Chưa submit. Batch 40 shell này ưu tiên cho chạy tay đủ flow login → restore/refresh persisted session → logout qua backend."}
           </p>
 
           {statusMessage?.includes("đăng nhập lại") ? (
