@@ -89,20 +89,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **35**
-- Scope hiện tại: web expired-session/logout feedback slice — làm rõ unauthorized/expired-session và logout messaging trên login shell + protected route.
+- Scope hiện tại: iOS session invalidation feedback slice — làm rõ expired/revoked persisted-session và logout messaging trên Session screen.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/app/login/page.tsx`
-  - `apps/web-nextjs/components/authenticated-route-shell.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `1569b55` — `batch34: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 35 web expired-session/logout feedback slice, chưa commit
+  - commit gần nhất đã chốt: `6921247` — `batch35: polish web session invalidation feedback`
+  - working tree hiện tại: bẩn đúng theo batch 35 iOS session invalidation feedback slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó nếu cần parity thì thêm feedback polish tương tự ở iOS Session screen cho expired/revoked session
+  - commit slice này; sau đó có thể chốt batch 35 complete nếu không cần thêm auth/session invalidation parity nhỏ nào nữa
 
 ## Batch handoff note
 

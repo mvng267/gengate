@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 34 · iOS manual refresh shell")
+            Text("Batch 35 · iOS session invalidation feedback")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -79,7 +79,13 @@ struct SessionEntryView: View {
                     if let statusMessage = sessionStore.statusMessage {
                         Text(statusMessage)
                             .font(.footnote)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(statusMessage.contains("đăng nhập lại") ? .orange : .secondary)
+
+                        if statusMessage.contains("hết hạn") || statusMessage.contains("revoke") {
+                            Text("Local persisted session cũ đã được xóa để tránh restore lặp lại state không còn hợp lệ.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
 
@@ -126,7 +132,13 @@ struct SessionEntryView: View {
                     if let statusMessage = sessionStore.statusMessage {
                         Text(statusMessage)
                             .font(.footnote)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(statusMessage.contains("đăng nhập lại") ? .orange : .secondary)
+
+                        if statusMessage.contains("hết hạn") || statusMessage.contains("revoke") {
+                            Text("Local persisted session cũ đã được xóa để tránh restore lặp lại state không còn hợp lệ.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
 
                     Button {

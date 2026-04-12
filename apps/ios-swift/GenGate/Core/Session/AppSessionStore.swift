@@ -72,7 +72,7 @@ final class AppSessionStore {
             case .invalidResponse:
                 return "Backend auth/session response thiếu field cần thiết."
             case .unauthorized:
-                return "Session đã lưu không còn hợp lệ."
+                return "Session đã hết hạn hoặc bị revoke. Local session đã được xóa; hãy đăng nhập lại."
             case let .network(message):
                 return message
             }
@@ -196,7 +196,11 @@ final class AppSessionStore {
             clearPersistedSession()
             authState = .signedOut
             selectedTab = .session
-            statusMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            if let sessionError = error as? SessionError, case .unauthorized = sessionError {
+                statusMessage = "Session đã hết hạn hoặc bị revoke. Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
+            } else {
+                statusMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            }
         }
 
         isRefreshingSession = false
@@ -242,7 +246,7 @@ final class AppSessionStore {
         clearPersistedSession()
         authState = .signedOut
         passwordDraft = ""
-        statusMessage = "Đã revoke session hiện tại và xóa session local trên iOS shell."
+        statusMessage = "Đã logout, revoke session hiện tại, và xóa session local trên iOS shell."
         pendingProtectedTab = nil
         selectedTab = .session
     }

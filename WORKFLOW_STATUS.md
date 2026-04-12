@@ -2,21 +2,21 @@
 
 - Batch: 35
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 35 web expired-session/logout feedback slice — làm rõ unauthorized/expired-session và logout messaging trên login shell + protected route
+- Scope: batch 35 iOS session invalidation feedback slice — làm rõ expired/revoked persisted-session và logout messaging trên Session screen
 - Status: verify
 - Files:
-  - apps/web-nextjs/app/login/page.tsx
-  - apps/web-nextjs/components/authenticated-route-shell.tsx
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
-  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `1569b55` — `batch34: mark workflow complete`
-  - working tree: bẩn đúng theo batch 35 web expired-session/logout feedback slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `6921247` — `batch35: polish web session invalidation feedback`
+  - working tree: bẩn đúng theo batch 35 iOS session invalidation feedback slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit slice này; sau đó nếu muốn parity thì thêm feedback polish tương tự ở iOS Session screen cho expired/revoked session
+- Next: commit slice này; sau đó có thể cân nhắc chốt batch 35 complete nếu không cần thêm auth/session invalidation parity nhỏ nào nữa
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 35 update:
-  - Web login shell nay phân biệt rõ unauthorized restore bằng message yêu cầu đăng nhập lại
-  - Protected route nay show hint rõ hơn khi session đã hết hạn/bị revoke hoặc vừa logout
+  - iOS unauthorized restore/refresh nay hiện message rõ hơn: session đã hết hạn hoặc bị revoke, local session đã bị xóa, cần đăng nhập lại
+  - Session screen nay show hint rõ hơn khi local persisted session cũ đã bị loại bỏ
