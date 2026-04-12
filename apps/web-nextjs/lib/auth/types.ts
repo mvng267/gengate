@@ -10,8 +10,10 @@ export type BackendLoginPayload = {
   session_id: string;
   refresh_token: string;
   expires_at: string;
+  expires_in_seconds: number;
   token_type: string;
   bootstrap_mode: string;
+  session_status: string;
 };
 
 export type BackendSessionSnapshot = {
@@ -20,6 +22,7 @@ export type BackendSessionSnapshot = {
   device_id: string;
   session_id: string;
   expires_at: string;
+  expires_in_seconds: number;
   token_type: string;
   session_status: string;
 };

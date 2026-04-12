@@ -1,35 +1,25 @@
 # GenGate Workflow Status
 
-- Batch: 32
+- Batch: 33
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 32 complete — auth UX/resume continuity đã nối rõ hơn giữa backend + web + iOS sau batch 31 contract tối thiểu
-- Status: complete
+- Scope: batch 33 web session-status UI slice — hiển thị continuity metadata (`session_status`, `expires_in_seconds`) ngay trên web shell/login/protected route để auth state bớt mơ hồ
+- Status: verify
 - Files:
+  - apps/web-nextjs/lib/auth/types.ts
+  - apps/web-nextjs/lib/auth/client.ts
+  - apps/web-nextjs/components/app-shell.tsx
   - apps/web-nextjs/app/login/page.tsx
   - apps/web-nextjs/components/authenticated-route-shell.tsx
-  - apps/ios-swift/GenGate/App/RootTabView.swift
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
-  - apps/backend-python/app/modules/auth/router.py
-  - apps/backend-python/app/schemas/auth.py
-  - apps/backend-python/app/services/auth.py
-  - apps/backend-python/tests/test_auth_api.py
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅ (4 passed)
 - Git:
-  - batch 32 commits:
-    - `b1e8ffb` — `batch32: add web auth redirects`
-    - `e2da4ba` — `batch32: add ios auth redirect resume`
-    - `283f8b3` — `batch32: add auth session continuity metadata`
-  - working tree: sạch
+  - latest commit: `100b47e` — `batch32: mark workflow complete`
+  - working tree: bẩn đúng theo batch 33 web session-status UI slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 33 với scope mới; không làm thêm code trong batch 32
+- Next: commit slice này; sau đó chọn 1 nhịp hẹp tiếp theo của batch 33, ưu tiên iOS session-status/expiry UI để parity với web
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 32 result:
-  - Web lane: protected route redirect thật bằng `?next=...` + login redirect ngược lại route đích sau restore/login thành công
-  - iOS lane: pending protected tab được giữ và tự mở lại sau restore/login; Session tab nay là điểm redirect rõ ràng khi user chưa auth
-  - Backend lane: auth responses trả `session_status` + `expires_in_seconds` để client đọc continuity state nhất quán hơn
+- Batch 33 update:
+  - Web lane: app shell nay hiển thị session status summary thay vì chỉ email/Guest
+  - Web lane: login page + protected route shell nay show `expires_in_seconds` cùng `session_status` từ backend continuity metadata

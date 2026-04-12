@@ -86,6 +86,7 @@ export default function LoginPage() {
             `device_id: ${result.session.session.device_id}`,
             `token_type: ${result.session.session.token_type}`,
             `session_status: ${result.session.session.session_status}`,
+            `expires_in_seconds: ${result.session.session.expires_in_seconds}`,
           ].join("\n"),
         );
         setIsRestoring(false);
@@ -126,7 +127,8 @@ export default function LoginPage() {
           `device_id: ${result.payload.device_id}`,
           `token_type: ${result.payload.token_type}`,
           `bootstrap_mode: ${result.payload.bootstrap_mode}`,
-          `session_status: ${result.sessionStatus}`,
+          `session_status: ${result.payload.session_status}`,
+          `expires_in_seconds: ${result.payload.expires_in_seconds}`,
         ].join("\n"),
       );
     } else {

@@ -20,6 +20,7 @@ const navItems = [
 
 export function AppShell({ children }: AppShellProps) {
   const [sessionLabel, setSessionLabel] = useState("Guest");
+  const [sessionMeta, setSessionMeta] = useState<string>("No active persisted session");
 
   useEffect(() => {
     let isMounted = true;
@@ -29,6 +30,7 @@ export function AppShell({ children }: AppShellProps) {
       if (!localSession) {
         if (isMounted) {
           setSessionLabel("Guest");
+          setSessionMeta("No active persisted session");
         }
         return;
       }
@@ -40,8 +42,12 @@ export function AppShell({ children }: AppShellProps) {
 
       if (result.ok) {
         setSessionLabel(result.session.session.email);
+        setSessionMeta(
+          `${result.session.session.session_status} · expires in ${result.session.session.expires_in_seconds}s`,
+        );
       } else {
         setSessionLabel("Guest");
+        setSessionMeta("Persisted session unavailable");
       }
     }
 
@@ -57,6 +63,7 @@ export function AppShell({ children }: AppShellProps) {
       <header>
         <strong>GenGate • Web</strong>
         <div>Session: {sessionLabel}</div>
+        <div>Status: {sessionMeta}</div>
         <nav aria-label="Primary">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href}>

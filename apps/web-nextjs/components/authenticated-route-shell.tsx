@@ -23,6 +23,7 @@ type RestoreState =
       email: string;
       sessionId: string;
       sessionStatus: string;
+      expiresInSeconds: number;
     };
 
 export function AuthenticatedRouteShell({
@@ -61,6 +62,7 @@ export function AuthenticatedRouteShell({
           email: result.session.session.email,
           sessionId: result.session.session.session_id,
           sessionStatus: result.session.session.session_status,
+          expiresInSeconds: result.session.session.expires_in_seconds,
         });
         return;
       }
@@ -113,6 +115,9 @@ export function AuthenticatedRouteShell({
       </p>
       <p>
         <strong>Session:</strong> {restoreState.sessionId} ({restoreState.sessionStatus})
+      </p>
+      <p>
+        <strong>Expiry:</strong> {restoreState.expiresInSeconds}s remaining
       </p>
       <button
         type="button"

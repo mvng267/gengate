@@ -33,8 +33,10 @@ function isBackendLoginPayload(value: unknown): value is BackendLoginPayload {
     typeof value.session_id === "string" &&
     typeof value.refresh_token === "string" &&
     typeof value.expires_at === "string" &&
+    typeof value.expires_in_seconds === "number" &&
     typeof value.token_type === "string" &&
-    typeof value.bootstrap_mode === "string"
+    typeof value.bootstrap_mode === "string" &&
+    typeof value.session_status === "string"
   );
 }
 
@@ -49,6 +51,7 @@ function isBackendSessionSnapshot(value: unknown): value is BackendSessionSnapsh
     typeof value.device_id === "string" &&
     typeof value.session_id === "string" &&
     typeof value.expires_at === "string" &&
+    typeof value.expires_in_seconds === "number" &&
     typeof value.token_type === "string" &&
     typeof value.session_status === "string"
   );
@@ -67,8 +70,9 @@ export function persistAuthSession(payload: BackendLoginPayload): StoredAuthSess
       device_id: payload.device_id,
       session_id: payload.session_id,
       expires_at: payload.expires_at,
+      expires_in_seconds: payload.expires_in_seconds,
       token_type: payload.token_type,
-      session_status: "active",
+      session_status: payload.session_status,
     },
   };
 
@@ -177,10 +181,10 @@ async function fetchSessionSnapshot(refreshToken: string) {
 }
 
 /**
- * Thin auth boundary for batch 31 web shell.
+ * Thin auth boundary for web auth shell.
  *
  * Backend contract now supports:
- * - POST /auth/login => issue refresh token + session metadata
+ * - POST /auth/login => issue refresh token + session continuity metadata
  * - POST /auth/session => validate persisted refresh token for shell restore
  */
 export async function loginWithEmailPassword(
