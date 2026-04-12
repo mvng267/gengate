@@ -1,29 +1,24 @@
 # GenGate Workflow Status
 
-- Batch: 36
+- Batch: 37
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 36 complete — chốt refresh-token rotation parity cho manual refresh trên cả web + iOS
-- Status: complete
+- Scope: batch 37 web self-serve register slice — user mới có thể gọi `/auth/register` rồi đăng nhập ngay từ login shell
+- Status: verify
 - Files:
-  - apps/web-nextjs/lib/auth/client.ts
   - apps/web-nextjs/lib/config/env.ts
-  - apps/web-nextjs/components/authenticated-route-shell.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
+  - apps/web-nextjs/lib/auth/types.ts
+  - apps/web-nextjs/lib/auth/client.ts
+  - apps/web-nextjs/app/login/page.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commits:
-    - `50efee4` — `batch36: rotate web session on manual refresh`
-    - `4355d13` — `batch36: rotate ios session on manual refresh`
-  - working tree: sạch
+  - latest commit: `0c032a1` — `batch36: mark workflow complete`
+  - working tree: bẩn đúng theo batch 37 web self-serve register slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 37 với 1 scope hẹp mới bám auth vertical slice thật sự còn thiếu nhất; ưu tiên bước E2E tiếp theo thay vì polish messaging/rotation đã chốt xong
+- Next: commit slice này; sau đó nếu muốn parity thì cân nhắc nối iOS shell với register flow tối thiểu hoặc chọn E2E auth step kế tiếp có leverage lớn hơn
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 36 outcome:
-  - Web manual refresh nay dùng `/auth/refresh` thật để rotate refresh token + session id và persist local state mới
-  - iOS manual refresh nay dùng `/auth/refresh` thật để rotate refresh token + session id và persist local state mới
-  - Startup restore ở web/iOS vẫn giữ snapshot-check semantics tách biệt với manual refresh
+- Batch 37 update:
+  - Web login shell nay có self-serve register action trên nền `/auth/register` + `/auth/login`
+  - User mới có thể tự tạo account tối thiểu rồi đi thẳng vào persisted session flow mà không cần seed sẵn user ngoài UI

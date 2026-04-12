@@ -4,6 +4,7 @@ import { env } from "@/lib/config/env";
 import type {
   AuthLoginInput,
   AuthLoginResult,
+  AuthRegisterInput,
   BackendLoginPayload,
   BackendSessionSnapshot,
   RestoreSessionResult,
@@ -55,6 +56,21 @@ function isBackendSessionSnapshot(value: unknown): value is BackendSessionSnapsh
     typeof value.token_type === "string" &&
     typeof value.session_status === "string"
   );
+}
+
+async function registerWithEmail(email: string, username: string) {
+  const response = await apiRequest(env.authRegisterPath, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      username,
+    }),
+  });
+
+  return response;
 }
 
 function canUseBrowserStorage() {
@@ -264,6 +280,52 @@ export async function loginWithEmailPassword(
       ok: false,
       reason: "network-error",
       message: "Không thể kết nối auth endpoint từ web client.",
+      details: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+export async function registerAndLoginWithEmailPassword(
+  input: AuthRegisterInput,
+): Promise<AuthLoginResult> {
+  const email = normalizeEmail(input.email);
+  const username = input.username?.trim() || email.split("@")[0] || "gengate_user";
+
+  void input.password;
+
+  try {
+    const registerResponse = await registerWithEmail(email, username);
+    if (!registerResponse.ok) {
+      if (registerResponse.status === 409) {
+        return {
+          ok: false,
+          reason: "conflict",
+          message: "Email này đã tồn tại. Hãy đăng nhập bằng session shell hiện có.",
+        };
+      }
+
+      if (registerResponse.status === 404 || registerResponse.status === 501) {
+        return {
+          ok: false,
+          reason: "not-implemented",
+          message: "Backend register endpoint chưa implement xong theo auth shell contract hiện tại.",
+        };
+      }
+
+      return {
+        ok: false,
+        reason: "invalid-response",
+        message: `Register request failed with status ${registerResponse.status}.`,
+        details: registerResponse.statusText,
+      };
+    }
+
+    return await loginWithEmailPassword({ email, password: input.password });
+  } catch (error) {
+    return {
+      ok: false,
+      reason: "network-error",
+      message: "Không thể kết nối register endpoint từ web client.",
       details: error instanceof Error ? error.message : String(error),
     };
   }

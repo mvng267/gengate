@@ -3,6 +3,12 @@ export type AuthLoginInput = {
   password: string;
 };
 
+export type AuthRegisterInput = {
+  email: string;
+  password: string;
+  username?: string;
+};
+
 export type BackendLoginPayload = {
   user_id: string;
   email: string;
@@ -43,7 +49,7 @@ export type AuthLoginResult =
     }
   | {
       ok: false;
-      reason: "not-implemented" | "network-error" | "invalid-response";
+      reason: "not-implemented" | "network-error" | "invalid-response" | "conflict";
       message: string;
       details?: string;
     };

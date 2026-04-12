@@ -9,6 +9,7 @@ import {
   loginWithEmailPassword,
   logoutPersistedSession,
   readPersistedAuthSession,
+  registerAndLoginWithEmailPassword,
   restorePersistedSession,
 } from "@/lib/auth/client";
 
@@ -34,6 +35,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -172,20 +174,19 @@ export default function LoginPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-start">
       <section className="flex-1 space-y-4">
         <span className="inline-flex rounded-full border border-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-          Batch 32 · Web auth redirect shell
+          Batch 37 · Web self-serve register shell
         </span>
         <h1 className="text-4xl font-black tracking-tight text-black">
-          Login shell nay redirect thật về route đích sau khi restore hoặc đăng nhập thành công.
+          Web shell nay cho user mới tự tạo account tối thiểu rồi vào auth/session flow ngay.
         </h1>
         <p className="max-w-2xl text-base leading-7 text-neutral-700">
-          Màn này vẫn dùng login shell hiện tại nhưng nay giữ refresh token ở local storage, gọi
-          <code> /auth/session </code>
-          để restore state khi reload app, rồi redirect về route được yêu cầu bằng query <code>next</code>.
+          Màn này vẫn dùng auth shell hiện tại nhưng nay user mới có thể tự gọi <code> /auth/register </code>
+          rồi đăng nhập ngay để lấy persisted session local, sau đó redirect về route được yêu cầu bằng query <code>next</code>.
         </p>
         <ul className="space-y-2 text-sm text-neutral-700">
           <li>• Password/OTP vẫn là placeholder trên UI, chưa dùng cho API ở batch này.</li>
           <li>
-            • Path login mặc định là <code>/auth/login</code>, session snapshot mặc định là <code>/auth/session</code>.
+            • Flow mới: <code>/auth/register</code> → <code>/auth/login</code> → persisted session local → redirect về route đích.
           </li>
           <li>• Redirect đích mặc định vẫn là <code>/feed</code> nếu không có <code>?next=...</code> hợp lệ.</li>
         </ul>
@@ -225,7 +226,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={isSubmitting || isRestoring || isLoggingOut}
+            disabled={isSubmitting || isRegistering || isRestoring || isLoggingOut}
             className="w-full border-2 border-black bg-black px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#facc15] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isRestoring ? "Đang restore session..." : loginCta}
@@ -235,9 +236,48 @@ export default function LoginPage() {
         <button
           type="button"
           onClick={() => {
+            void (async () => {
+              setIsRegistering(true);
+              setStatusMessage(null);
+              setSessionPreview(null);
+
+              const result = await registerAndLoginWithEmailPassword(form);
+              if (result.ok) {
+                setStatusTone("success");
+                setStatusMessage(`Tạo account shell + đăng nhập thành công. Đang chuyển tới ${nextPath}`);
+                setSessionPreview(
+                  [
+                    `user_id: ${result.payload.user_id}`,
+                    `session_id: ${result.payload.session_id}`,
+                    `device_id: ${result.payload.device_id}`,
+                    `token_type: ${result.payload.token_type}`,
+                    `bootstrap_mode: ${result.payload.bootstrap_mode}`,
+                    `session_status: ${result.payload.session_status}`,
+                    `expires_in_seconds: ${result.payload.expires_in_seconds}`,
+                  ].join("\n"),
+                );
+                setIsRegistering(false);
+                router.replace(nextPath);
+                return;
+              }
+
+              setStatusTone(result.reason === "conflict" ? "neutral" : "error");
+              setStatusMessage(result.message);
+              setIsRegistering(false);
+            })();
+          }}
+          disabled={isSubmitting || isRegistering || isRestoring || isLoggingOut}
+          className="mt-3 w-full border-2 border-black bg-yellow-300 px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] text-black transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#000] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isRegistering ? "Đang tạo account..." : "Tạo account + đăng nhập"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
             void handleLogout();
           }}
-          disabled={isSubmitting || isRestoring || isLoggingOut}
+          disabled={isSubmitting || isRegistering || isRestoring || isLoggingOut}
           className="mt-3 w-full border-2 border-black bg-white px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] text-black transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#d4d4d4] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLoggingOut ? "Đang logout..." : "Logout + revoke session"}
@@ -255,7 +295,7 @@ export default function LoginPage() {
           <div className="font-semibold">Status</div>
           <p className={buildStatusClass(statusTone)}>
             {statusMessage ??
-              "Chưa submit. Batch 35 shell này ưu tiên làm rõ expired-session/logout feedback giữa login và protected route."}
+              "Chưa submit. Batch 37 shell này ưu tiên cho user mới tự register rồi đi thẳng vào auth/session flow."}
           </p>
 
           {statusMessage?.includes("đăng nhập lại") ? (

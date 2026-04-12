@@ -1,4 +1,5 @@
 const DEFAULT_API_BASE_URL = "http://localhost:8000";
+const DEFAULT_AUTH_REGISTER_PATH = "/auth/register";
 const DEFAULT_AUTH_LOGIN_PATH = "/auth/login";
 const DEFAULT_AUTH_REFRESH_PATH = "/auth/refresh";
 const DEFAULT_AUTH_SESSION_PATH = "/auth/session";
@@ -11,6 +12,8 @@ function readOptionalEnv(value: string | undefined) {
 
 export const env = {
   apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL,
+  authRegisterPath:
+    readOptionalEnv(process.env.NEXT_PUBLIC_AUTH_REGISTER_PATH) ?? DEFAULT_AUTH_REGISTER_PATH,
   authLoginPath:
     readOptionalEnv(process.env.NEXT_PUBLIC_AUTH_LOGIN_PATH) ?? DEFAULT_AUTH_LOGIN_PATH,
   authRefreshPath:
