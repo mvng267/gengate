@@ -89,23 +89,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **33**
-- Scope hiện tại: web session-status UI slice — hiển thị continuity metadata (`session_status`, `expires_in_seconds`) ngay trên web shell/login/protected route để auth state bớt mơ hồ.
+- Scope hiện tại: iOS session-status UI slice — hiển thị continuity metadata (`session_status`, `expires_in_seconds`) ở Session screen + root banner để parity với web.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/lib/auth/types.ts`
-  - `apps/web-nextjs/lib/auth/client.ts`
-  - `apps/web-nextjs/components/app-shell.tsx`
-  - `apps/web-nextjs/app/login/page.tsx`
-  - `apps/web-nextjs/components/authenticated-route-shell.tsx`
+  - `apps/ios-swift/GenGate/App/RootTabView.swift`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `100b47e` — `batch32: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 33 web session-status slice, chưa commit
+  - commit gần nhất đã chốt: `82c8a27` — `batch33: show web session status metadata`
+  - working tree hiện tại: bẩn đúng theo batch 33 iOS session-status slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó chọn 1 nhịp hẹp tiếp theo của batch 33, ưu tiên iOS session-status/expiry UI để parity với web
+  - commit slice này; sau đó cân nhắc chốt batch 33 complete nếu không cần thêm UI/session parity nhỏ nào nữa
 
 ## Batch handoff note
 

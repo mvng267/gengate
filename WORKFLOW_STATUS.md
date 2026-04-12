@@ -2,24 +2,22 @@
 
 - Batch: 33
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 33 web session-status UI slice — hiển thị continuity metadata (`session_status`, `expires_in_seconds`) ngay trên web shell/login/protected route để auth state bớt mơ hồ
+- Scope: batch 33 iOS session-status UI slice — hiển thị continuity metadata (`session_status`, `expires_in_seconds`) ở Session screen + root banner để parity với web
 - Status: verify
 - Files:
-  - apps/web-nextjs/lib/auth/types.ts
-  - apps/web-nextjs/lib/auth/client.ts
-  - apps/web-nextjs/components/app-shell.tsx
-  - apps/web-nextjs/app/login/page.tsx
-  - apps/web-nextjs/components/authenticated-route-shell.tsx
+  - apps/ios-swift/GenGate/App/RootTabView.swift
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
-  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `100b47e` — `batch32: mark workflow complete`
-  - working tree: bẩn đúng theo batch 33 web session-status UI slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `82c8a27` — `batch33: show web session status metadata`
+  - working tree: bẩn đúng theo batch 33 iOS session-status UI slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit slice này; sau đó chọn 1 nhịp hẹp tiếp theo của batch 33, ưu tiên iOS session-status/expiry UI để parity với web
+- Next: commit slice này; sau đó có thể cân nhắc chốt batch 33 nếu không cần thêm parity/UI work nhỏ nào nữa
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 33 update:
-  - Web lane: app shell nay hiển thị session status summary thay vì chỉ email/Guest
-  - Web lane: login page + protected route shell nay show `expires_in_seconds` cùng `session_status` từ backend continuity metadata
+  - iOS lane: session model nay giữ `expires_in_seconds` + `session_status` từ backend continuity metadata
+  - iOS lane: Session screen + root banner nay hiển thị status summary và expiry để auth state rõ hơn, tương đương hướng web

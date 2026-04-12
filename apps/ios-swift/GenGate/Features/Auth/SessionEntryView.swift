@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 31 · iOS auth/session shell")
+            Text("Batch 33 · iOS session status shell")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -57,6 +57,10 @@ struct SessionEntryView: View {
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
 
+                    Text("Status: \(sessionStore.sessionStatusSummary)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
                     Text(sessionStore.authGateMessage)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -82,6 +86,7 @@ struct SessionEntryView: View {
                         Text("session_id: \(userSession.sessionID)")
                         Text("device_id: \(userSession.deviceID)")
                         Text("session_status: \(userSession.sessionStatus)")
+                        Text("expires_in_seconds: \(userSession.expiresInSeconds)")
                     }
                     .font(.footnote.monospaced())
                     .foregroundStyle(.secondary)
@@ -96,6 +101,10 @@ struct SessionEntryView: View {
                     }
 
                     Text("Session indicator: \(sessionStore.sessionIndicatorLabel)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
+                    Text("Status: \(sessionStore.sessionStatusSummary)")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
 

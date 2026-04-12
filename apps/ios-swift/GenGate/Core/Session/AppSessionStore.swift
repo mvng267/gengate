@@ -18,11 +18,16 @@ final class AppSessionStore {
         let sessionID: String
         let refreshToken: String
         let expiresAt: String
+        let expiresInSeconds: Int
         let tokenType: String
         let sessionStatus: String
 
         var displayName: String {
             email.isEmpty ? "GenGate Tester" : email
+        }
+
+        var statusSummary: String {
+            "\(sessionStatus) · expires in \(expiresInSeconds)s"
         }
     }
 
@@ -33,8 +38,10 @@ final class AppSessionStore {
         let session_id: String
         let refresh_token: String
         let expires_at: String
+        let expires_in_seconds: Int
         let token_type: String
         let bootstrap_mode: String
+        let session_status: String
     }
 
     private struct SessionSnapshotResponse: Decodable {
@@ -43,6 +50,7 @@ final class AppSessionStore {
         let device_id: String
         let session_id: String
         let expires_at: String
+        let expires_in_seconds: Int
         let token_type: String
         let session_status: String
     }
@@ -92,6 +100,19 @@ final class AppSessionStore {
             return "Signing in…"
         case let .authenticated(userSession):
             return userSession.email
+        }
+    }
+
+    var sessionStatusSummary: String {
+        switch authState {
+        case .signedOut:
+            return "No active persisted session"
+        case .restoring:
+            return "Checking persisted session…"
+        case .signingIn:
+            return "Creating session…"
+        case let .authenticated(userSession):
+            return userSession.statusSummary
         }
     }
 
@@ -147,6 +168,7 @@ final class AppSessionStore {
                 sessionID: snapshot.session_id,
                 refreshToken: persisted.refreshToken,
                 expiresAt: snapshot.expires_at,
+                expiresInSeconds: snapshot.expires_in_seconds,
                 tokenType: snapshot.token_type,
                 sessionStatus: snapshot.session_status
             )
@@ -177,8 +199,9 @@ final class AppSessionStore {
                 sessionID: response.session_id,
                 refreshToken: response.refresh_token,
                 expiresAt: response.expires_at,
+                expiresInSeconds: response.expires_in_seconds,
                 tokenType: response.token_type,
-                sessionStatus: "active"
+                sessionStatus: response.session_status
             )
             persist(session: session)
             passwordDraft = ""
