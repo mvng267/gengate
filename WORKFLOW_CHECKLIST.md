@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đã chốt xong batch 34**.
+- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đang làm batch 35**.
 
 ## Reporting hard rule
 
@@ -88,22 +88,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **34**
-- Scope hiện tại: batch 34 closure — xác nhận manual refresh-session UX đã đủ parity trên web/iOS và chốt workflow complete.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **35**
+- Scope hiện tại: web expired-session/logout feedback slice — làm rõ unauthorized/expired-session và logout messaging trên login shell + protected route.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `WORKFLOW_STATUS.md`
-  - `WORKFLOW_CHECKLIST.md`
+  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/web-nextjs/components/authenticated-route-shell.tsx`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `ac02a9c` — `batch34: add ios manual session refresh`
-  - working tree hiện tại: bẩn đúng theo workflow-only batch 34 closure update, chưa commit
+  - commit gần nhất đã chốt: `1569b55` — `batch34: mark workflow complete`
+  - working tree hiện tại: bẩn đúng theo batch 35 web expired-session/logout feedback slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch 35 với 1 scope hẹp end-to-end hơn cho auth/session UX; ưu tiên expired-session/logout feedback polish hoặc refresh CTA parity ngay trên login shell
+  - commit slice này; sau đó nếu cần parity thì thêm feedback polish tương tự ở iOS Session screen cho expired/revoked session
 
 ## Batch handoff note
 
@@ -111,11 +110,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Commit cuối đã chốt:
   - `c9fd9ff` — `batch34: add web manual session refresh`
   - `ac02a9c` — `batch34: add ios manual session refresh`
+  - `1569b55` — `batch34: mark workflow complete`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - chưa có blocker rõ ràng; auth shell nay có manual re-check nhưng expired-session/logout feedback còn có thể polish thêm
+  - batch 34 đã chốt; batch 35 đang polish session invalidation feedback để expired/revoked/logout states bớt mơ hồ hơn
 - Batch kế tiếp: **35**
 - Scope hẹp đầu tiên của batch 35:
   - thêm expired-session/logout feedback rõ hơn ở web login shell hoặc protected route để session invalidation ít mơ hồ hơn

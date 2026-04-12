@@ -95,8 +95,12 @@ export default function LoginPage() {
       }
 
       if (result.reason !== "missing") {
-        setStatusTone("error");
-        setStatusMessage(result.message);
+        setStatusTone(result.reason === "unauthorized" ? "neutral" : "error");
+        setStatusMessage(
+          result.reason === "unauthorized"
+            ? `${result.message} Hãy đăng nhập lại để tạo session mới.`
+            : result.message,
+        );
         setSessionPreview(null);
       }
 
@@ -147,8 +151,12 @@ export default function LoginPage() {
   async function handleLogout() {
     setIsLoggingOut(true);
     const result = await logoutPersistedSession();
-    setStatusTone(result.ok ? "success" : "error");
-    setStatusMessage(result.message);
+    setStatusTone(result.ok ? "neutral" : "error");
+    setStatusMessage(
+      result.ok
+        ? `${result.message} Bạn có thể đăng nhập lại bất cứ lúc nào.`
+        : result.message,
+    );
     setSessionPreview(null);
     setIsLoggingOut(false);
   }
@@ -247,8 +255,14 @@ export default function LoginPage() {
           <div className="font-semibold">Status</div>
           <p className={buildStatusClass(statusTone)}>
             {statusMessage ??
-              "Chưa submit. Batch 32 shell này ưu tiên verify redirect flow thật giữa login và protected route."}
+              "Chưa submit. Batch 35 shell này ưu tiên làm rõ expired-session/logout feedback giữa login và protected route."}
           </p>
+
+          {statusMessage?.includes("đăng nhập lại") ? (
+            <p className="mt-2 text-xs text-neutral-600">
+              Persisted session cũ đã bị loại bỏ khỏi local storage để tránh restore lặp lại sai state.
+            </p>
+          ) : null}
 
           {sessionPreview ? (
             <pre className="mt-3 overflow-x-auto border border-black bg-neutral-100 p-3 text-xs text-black">

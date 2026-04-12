@@ -1,30 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 34
+- Batch: 35
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 34 manual refresh-session UX — chốt parity web/iOS cho explicit persisted-session re-check trên auth shell
-- Status: complete
+- Scope: batch 35 web expired-session/logout feedback slice — làm rõ unauthorized/expired-session và logout messaging trên login shell + protected route
+- Status: verify
 - Files:
-  - apps/web-nextjs/lib/auth/client.ts
-  - apps/web-nextjs/components/app-shell.tsx
+  - apps/web-nextjs/app/login/page.tsx
   - apps/web-nextjs/components/authenticated-route-shell.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `ac02a9c` — `batch34: add ios manual session refresh`
-  - batch 34 commits:
-    - `c9fd9ff` — `batch34: add web manual session refresh`
-    - `ac02a9c` — `batch34: add ios manual session refresh`
-  - working tree: bẩn đúng theo workflow-only batch 34 closure update (chưa commit ở nhịp này)
+  - latest commit: `1569b55` — `batch34: mark workflow complete`
+  - working tree: bẩn đúng theo batch 35 web expired-session/logout feedback slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 35 với 1 scope hẹp end-to-end hơn cho auth/session UX; ưu tiên thêm explicit logout/expired-session feedback polish hoặc refresh CTA parity ở login shell
+- Next: commit slice này; sau đó nếu muốn parity thì thêm feedback polish tương tự ở iOS Session screen cho expired/revoked session
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 34 outcome:
-  - Web shell + protected route nay có action `Refresh session`
-  - iOS Session screen nay có action `Refresh persisted session`
-  - Persisted session state có thể được re-check thủ công thay vì chỉ auto-restore lúc mount/startup
+- Batch 35 update:
+  - Web login shell nay phân biệt rõ unauthorized restore bằng message yêu cầu đăng nhập lại
+  - Protected route nay show hint rõ hơn khi session đã hết hạn/bị revoke hoặc vừa logout

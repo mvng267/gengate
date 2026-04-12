@@ -71,7 +71,10 @@ export function AuthenticatedRouteShell({
 
       setRestoreState({
         status: "signed-out",
-        message: `${result.message} Đang chuyển sang login để xác thực lại.`,
+        message:
+          result.reason === "unauthorized"
+            ? "Session đã hết hạn hoặc bị revoke. Đang chuyển sang login để đăng nhập lại."
+            : `${result.message} Đang chuyển sang login để xác thực lại.`,
       });
       router.replace(`/login?next=${encodeURIComponent(pathname || "/feed")}`);
     }
@@ -101,6 +104,11 @@ export function AuthenticatedRouteShell({
           <strong>Access:</strong> locked bởi vì chưa có persisted session hợp lệ.
         </p>
         <p>{restoreState.message}</p>
+        {restoreState.message.includes("hết hạn") || restoreState.message.includes("revoke") ? (
+          <p>
+            <strong>Hint:</strong> Session cũ đã bị loại bỏ khỏi local storage để tránh restore lại state không còn hợp lệ.
+          </p>
+        ) : null}
       </section>
     );
   }
@@ -120,7 +128,10 @@ export function AuthenticatedRouteShell({
     } else {
       setRestoreState({
         status: "signed-out",
-        message: `${result.message} Đang chuyển sang login để xác thực lại.`,
+        message:
+          result.reason === "unauthorized"
+            ? "Manual refresh cho thấy session đã hết hạn hoặc bị revoke. Đang chuyển sang login để đăng nhập lại."
+            : `${result.message} Đang chuyển sang login để xác thực lại.`,
       });
       router.replace(`/login?next=${encodeURIComponent(pathname || "/feed")}`);
     }
@@ -152,7 +163,9 @@ export function AuthenticatedRouteShell({
           void logoutPersistedSession().then((result) => {
             setRestoreState({
               status: "signed-out",
-              message: `${result.message} Đang quay lại login.`,
+              message: result.ok
+                ? "Đã logout và xóa persisted session. Đang quay lại login để bạn có thể tạo session mới."
+                : `${result.message} Đang quay lại login.`,
             });
             router.replace(`/login?next=${encodeURIComponent(pathname || "/feed")}`);
           });
