@@ -62,6 +62,11 @@ final class AppSessionStore {
         let session_status: String
     }
 
+    private struct LogoutOutcome {
+        let sessionStatus: String?
+        let detail: String?
+    }
+
     private struct StoredSession: Codable {
         let userSession: UserSession
     }
@@ -328,15 +333,28 @@ final class AppSessionStore {
 
     func signOut() async {
         let persistedRefreshToken = loadPersistedSession()?.refreshToken
+        var logoutOutcome: LogoutOutcome?
 
         if let persistedRefreshToken {
-            _ = try? await requestLogout(refreshToken: persistedRefreshToken)
+            logoutOutcome = try? await requestLogout(refreshToken: persistedRefreshToken)
         }
 
         clearPersistedSession()
         authState = .signedOut
         passwordDraft = ""
-        statusMessage = "Đã logout, revoke session hiện tại, và xóa session local trên iOS shell."
+
+        if let logoutOutcome {
+            if let sessionStatus = logoutOutcome.sessionStatus, !sessionStatus.isEmpty {
+                statusMessage = "Đã logout, backend xác nhận session ở trạng thái \(sessionStatus), và xóa session local trên iOS shell."
+            } else if let detail = logoutOutcome.detail, !detail.isEmpty {
+                statusMessage = "Backend báo session logout không còn hợp lệ (\(detail)); local session vẫn đã được xóa trên iOS shell."
+            } else {
+                statusMessage = "Đã logout, revoke session hiện tại, và xóa session local trên iOS shell."
+            }
+        } else {
+            statusMessage = "Đã logout, revoke session hiện tại, và xóa session local trên iOS shell."
+        }
+
         pendingProtectedTab = nil
         selectedTab = .session
     }
@@ -492,7 +510,7 @@ final class AppSessionStore {
         }
     }
 
-    private func requestLogout(refreshToken: String) async throws {
+    private func requestLogout(refreshToken: String) async throws -> LogoutOutcome {
         let url = try makeURL(path: "/auth/logout")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -501,13 +519,18 @@ final class AppSessionStore {
             "refresh_token": refreshToken
         ])
 
-        let (_, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw SessionError.invalidResponse
         }
 
-        if httpResponse.statusCode == 401 || httpResponse.statusCode == 200 {
-            return
+        if httpResponse.statusCode == 200 {
+            let snapshot = try JSONDecoder().decode(SessionSnapshotResponse.self, from: data)
+            return LogoutOutcome(sessionStatus: snapshot.session_status, detail: nil)
+        }
+
+        if httpResponse.statusCode == 401 {
+            return LogoutOutcome(sessionStatus: nil, detail: readErrorDetail(from: data))
         }
 
         throw SessionError.network("Logout request failed with status \(httpResponse.statusCode).")

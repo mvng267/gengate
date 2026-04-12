@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 38 · iOS expired-session feedback parity")
+            Text("Batch 39 · iOS logout feedback parity")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -15,11 +15,11 @@ struct SessionEntryView: View {
             switch sessionStore.authState {
             case .signedOut, .signingIn, .restoring:
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Register + session feedback shell")
+                    Text("Register + logout feedback shell")
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Flow này vẫn giữ register/login/restore/refresh như hiện tại, nhưng khi backend từ chối session cũ thì UI nay sẽ hiện rõ detail như session_expired hoặc session_revoked thay vì chỉ báo chung chung.")
+                    Text("Flow này vẫn giữ register/login/restore/refresh như hiện tại, nhưng khi logout thì UI nay sẽ hiện rõ revoke/detail thật từ backend thay vì chỉ báo logout chung chung.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -92,8 +92,8 @@ struct SessionEntryView: View {
                             .font(.footnote)
                             .foregroundStyle(statusMessage.contains("đăng nhập lại") ? .orange : .secondary)
 
-                        if statusMessage.contains("session_expired") || statusMessage.contains("session_revoked") || statusMessage.contains("hết hạn") || statusMessage.contains("revoke") {
-                            Text("Local persisted session cũ đã được xóa để tránh restore lặp lại state không còn hợp lệ; detail thật từ backend cũng được surface ngay trên màn này.")
+                        if statusMessage.contains("session_expired") || statusMessage.contains("session_revoked") || statusMessage.contains("hết hạn") || statusMessage.contains("revoke") || statusMessage.contains("logout") {
+                            Text("Local persisted session cũ đã được xóa để tránh restore lặp lại state không còn hợp lệ; revoke/detail thật từ backend cũng được surface ngay trên màn này.")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -145,8 +145,8 @@ struct SessionEntryView: View {
                             .font(.footnote)
                             .foregroundStyle(statusMessage.contains("đăng nhập lại") ? .orange : .secondary)
 
-                        if statusMessage.contains("session_expired") || statusMessage.contains("session_revoked") || statusMessage.contains("hết hạn") || statusMessage.contains("revoke") {
-                            Text("Local persisted session cũ đã được xóa để tránh restore lặp lại state không còn hợp lệ; detail thật từ backend cũng được surface ngay trên màn này.")
+                        if statusMessage.contains("session_expired") || statusMessage.contains("session_revoked") || statusMessage.contains("hết hạn") || statusMessage.contains("revoke") || statusMessage.contains("logout") {
+                            Text("Local persisted session cũ đã được xóa để tránh restore lặp lại state không còn hợp lệ; revoke/detail thật từ backend cũng được surface ngay trên màn này.")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }

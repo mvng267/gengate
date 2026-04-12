@@ -2,21 +2,21 @@
 
 - Batch: 39
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 39 web logout feedback parity — surface backend revoke/detail from `/auth/logout` in login shell
+- Scope: batch 39 iOS logout feedback parity — surface backend revoke/detail from `/auth/logout` in Session screen
 - Status: verify
 - Files:
-  - apps/web-nextjs/lib/auth/client.ts
-  - apps/web-nextjs/app/login/page.tsx
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
-  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `2988ce1` — `batch38: mark workflow complete`
-  - working tree: bẩn đúng theo batch 39 web logout feedback parity slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `063a8bf` — `batch39: surface web logout detail`
+  - working tree: bẩn đúng theo batch 39 iOS logout feedback parity slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit slice này; sau đó cân nhắc parity tương ứng cho iOS logout feedback hoặc chọn 1 backend/web/iOS auth E2E slice hẹp kế tiếp có leverage cao hơn
+- Next: commit slice này; sau đó cân nhắc chốt batch 39 nếu web+iOS logout parity đã đủ, hoặc chọn 1 auth E2E slice hẹp kế tiếp có leverage cao hơn
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 39 update:
-  - Web logout nay surface revoke/detail thật từ backend success/401 path thay vì chỉ báo generic logout text
-  - Login shell copy/status đã phản ánh đúng mục tiêu logout feedback parity
+  - iOS logout nay surface session_status/detail thật từ backend success/401 path thay vì chỉ báo generic logout text
+  - Session screen copy/status đã phản ánh đúng mục tiêu logout feedback parity

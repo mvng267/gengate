@@ -89,20 +89,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **39**
-- Scope hiện tại: web logout feedback parity — surface backend revoke/detail from `/auth/logout` in login shell.
+- Scope hiện tại: iOS logout feedback parity — surface backend revoke/detail from `/auth/logout` in Session screen.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/lib/auth/client.ts`
-  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `2988ce1` — `batch38: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 39 web logout feedback parity slice, chưa commit
+  - commit gần nhất đã chốt: `063a8bf` — `batch39: surface web logout detail`
+  - working tree hiện tại: bẩn đúng theo batch 39 iOS logout feedback parity slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó cân nhắc parity tương ứng cho iOS logout feedback hoặc chọn 1 backend/web/iOS auth E2E slice hẹp kế tiếp có leverage cao hơn
+  - commit slice này; sau đó cân nhắc chốt batch 39 nếu web+iOS logout parity đã đủ, hoặc chọn 1 auth E2E slice hẹp kế tiếp có leverage cao hơn
 
 ## Batch handoff note
 
@@ -115,7 +115,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - batch 38 đã chốt; batch 39 đang siết auth parity tiếp theo quanh logout feedback để UI surface đúng revoke/detail từ backend thay vì generic logout text
+  - batch 39 đang siết auth parity tiếp theo quanh logout feedback để UI surface đúng revoke/detail từ backend thay vì generic logout text
 - Batch kế tiếp: **39**
 - Scope hẹp đầu tiên của batch 39:
   - surface backend revoke/detail từ `/auth/logout` trong web login shell để logout feedback rõ hơn
