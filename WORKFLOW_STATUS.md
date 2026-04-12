@@ -2,17 +2,29 @@
 
 - Batch: 31
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 31 auth lifecycle close-out slice — thêm logout/revoke contract tối thiểu để hoàn tất vòng login → restore → logout giữa backend + web + iOS shell
-- Status: verify
+- Scope: batch 31 complete — refresh/session persistence contract tối thiểu đã nối đủ backend + web + iOS shell cho vòng login → restore → logout
+- Status: complete
 - Files:
   - apps/backend-python/app/modules/auth/router.py
+  - apps/backend-python/app/repositories/sessions.py
+  - apps/backend-python/app/schemas/auth.py
   - apps/backend-python/app/services/auth.py
   - apps/backend-python/tests/test_auth_api.py
   - apps/web-nextjs/app/login/page.tsx
+  - apps/web-nextjs/app/feed/page.tsx
+  - apps/web-nextjs/app/inbox/page.tsx
+  - apps/web-nextjs/app/location/page.tsx
+  - apps/web-nextjs/app/page.tsx
+  - apps/web-nextjs/app/profile/page.tsx
+  - apps/web-nextjs/components/app-shell.tsx
   - apps/web-nextjs/components/authenticated-route-shell.tsx
   - apps/web-nextjs/lib/auth/client.ts
+  - apps/web-nextjs/lib/auth/types.ts
   - apps/web-nextjs/lib/config/env.ts
+  - apps/ios-swift/GenGate/App/GenGateApp.swift
+  - apps/ios-swift/GenGate/App/RootTabView.swift
   - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Core/UI/AuthGatePlaceholderView.swift
   - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
@@ -21,12 +33,16 @@
   - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `ad0db70` — `batch31: gate ios shells on persisted session`
-  - working tree: bẩn đúng theo batch 31 logout/revoke slice + workflow files (chưa commit ở nhịp này)
+  - batch 31 commits:
+    - `51bec27` — `batch31: wire refresh session persistence shells`
+    - `a3afeef` — `batch31: gate web shells on persisted session`
+    - `ad0db70` — `batch31: gate ios shells on persisted session`
+    - `e638a10` — `batch31: add logout revoke lifecycle`
+  - working tree: sạch
 - Blocker: none
-- Next: commit slice này; sau đó có thể chốt batch 31 là complete vì contract tối thiểu login/restore/logout đã nối đủ backend + web + iOS shell
+- Next: mở batch 32 với scope mới; không làm thêm code trong batch 31
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 31 update:
-  - Backend lane: thêm `POST /auth/logout` để revoke session theo refresh token; test auth file nay 4 pass; verify ✅
-  - Web lane: login shell + protected route shell nay gọi logout endpoint trước khi clear local session; verify ✅
-  - iOS lane: `signOut()` nay gọi backend logout rồi mới xóa persisted session local; verify ✅
+- Batch 31 result:
+  - Backend lane: login/refresh/session snapshot/logout contract tối thiểu đã có và verify xanh
+  - Web lane: persisted session login/restore/logout + auth-gated shell đã có và verify xanh
+  - iOS lane: persisted session login/restore/logout + auth-gated root/tab shell đã có và verify xanh
