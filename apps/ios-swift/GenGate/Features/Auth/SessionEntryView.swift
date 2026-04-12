@@ -22,6 +22,12 @@ struct SessionEntryView: View {
                     Text("Flow này gọi backend auth shell thật ở mức tối thiểu: login sẽ lưu refresh token local, app mở lại sẽ thử restore bằng /auth/session.")
                         .foregroundStyle(.secondary)
 
+                    if let pendingProtectedTab = sessionStore.pendingProtectedTab {
+                        Text("Tab đích đang chờ mở: \(pendingProtectedTab.displayName)")
+                            .font(.footnote)
+                            .fontWeight(.semibold)
+                    }
+
                     TextField("Email", text: $sessionStore.emailDraft)
 #if os(iOS)
                         .textInputAutocapitalization(.never)
@@ -82,6 +88,12 @@ struct SessionEntryView: View {
 
                     Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell để nối với backend auth/session sau.")
                         .foregroundStyle(.secondary)
+
+                    if let pendingProtectedTab = sessionStore.pendingProtectedTab {
+                        Text("Tab chờ trước đó: \(pendingProtectedTab.displayName)")
+                            .font(.footnote)
+                            .fontWeight(.semibold)
+                    }
 
                     Text("Session indicator: \(sessionStore.sessionIndicatorLabel)")
                         .font(.footnote.monospaced())

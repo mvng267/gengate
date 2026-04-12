@@ -89,20 +89,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **32**
-- Scope hiện tại: web auth redirect slice — protected web routes redirect sang login với `?next=...`, và login page redirect ngược lại route đích sau restore/login thành công.
+- Scope hiện tại: iOS auth redirect/resume slice — khi user chạm tab cần auth mà chưa có session hợp lệ, app quay về Session tab và giữ pending destination để mở đúng tab đó sau login/restore.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/app/login/page.tsx`
-  - `apps/web-nextjs/components/authenticated-route-shell.tsx`
+  - `apps/ios-swift/GenGate/App/RootTabView.swift`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `71348ea` — `batch31: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 32 web redirect slice, chưa commit
+  - commit gần nhất đã chốt: `b1e8ffb` — `batch32: add web auth redirects`
+  - working tree hiện tại: bẩn đúng theo batch 32 iOS redirect/resume slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó chọn 1 nhịp hẹp tiếp theo của batch 32 giữa iOS resume redirect/gating hoặc backend refresh-in-use path
+  - commit slice này; sau đó chọn 1 nhịp hẹp tiếp theo của batch 32, ưu tiên backend refresh-in-use path
 
 ## Batch handoff note
 

@@ -74,10 +74,10 @@ struct RootTabView: View {
         Binding(
             get: { sessionStore.selectedTab },
             set: { newValue in
-                if sessionStore.isAuthenticated || newValue == .session {
-                    sessionStore.selectedTab = newValue
-                } else {
+                if newValue == .session {
                     sessionStore.selectedTab = .session
+                } else {
+                    sessionStore.requestProtectedTab(newValue)
                 }
             }
         )

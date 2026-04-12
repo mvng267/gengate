@@ -2,21 +2,22 @@
 
 - Batch: 32
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 32 web auth redirect slice — protected web routes nay redirect sang login với `?next=...`, và login page redirect ngược lại route đích sau restore/login thành công
+- Scope: batch 32 iOS auth redirect/resume slice — khi user chạm tab cần auth mà chưa có session hợp lệ, app quay về Session tab và giữ pending destination để mở đúng tab đó sau login/restore
 - Status: verify
 - Files:
-  - apps/web-nextjs/app/login/page.tsx
-  - apps/web-nextjs/components/authenticated-route-shell.tsx
+  - apps/ios-swift/GenGate/App/RootTabView.swift
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
-  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `71348ea` — `batch31: mark workflow complete`
-  - working tree: bẩn đúng theo batch 32 web auth redirect slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `b1e8ffb` — `batch32: add web auth redirects`
+  - working tree: bẩn đúng theo batch 32 iOS auth redirect/resume slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit slice này; sau đó chọn 1 lane batch 32 tiếp theo để nối auth redirect/resume UX tương ứng trên iOS hoặc backend refresh-in-use path
+- Next: commit slice này; sau đó chọn 1 lane batch 32 tiếp theo, ưu tiên backend refresh-in-use path để hỗ trợ app/web resume continuity rõ hơn
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 32 update:
-  - Web lane: protected routes (`feed/inbox/location/profile`) không chỉ hiện locked placeholder nữa mà redirect thật sang `/login?next=<route>` khi thiếu/invalid persisted session
-  - Web lane: login shell tự redirect về route đích sau restore session hoặc login thành công; fallback mặc định vẫn là `/feed`
+  - iOS lane: tap vào tab protected khi chưa authenticated sẽ không chỉ bị khóa mơ hồ mà chuyển về Session tab kèm pending destination rõ ràng
+  - iOS lane: sau login hoặc restore session thành công, app tự mở tab protected đã yêu cầu trước đó; fallback mặc định vẫn là Feed

@@ -77,6 +77,7 @@ final class AppSessionStore {
 
     var authState: AuthState = .signedOut
     var selectedTab: AppTab = .session
+    var pendingProtectedTab: AppTab?
     var emailDraft: String = ""
     var passwordDraft: String = ""
     var statusMessage: String?
@@ -95,13 +96,20 @@ final class AppSessionStore {
     }
 
     var authGateMessage: String {
+        let pendingSuffix: String
+        if let pendingProtectedTab {
+            pendingSuffix = " Tab đích đang chờ: \(pendingProtectedTab.displayName)."
+        } else {
+            pendingSuffix = ""
+        }
+
         switch authState {
         case .signedOut:
-            return "Chưa có persisted session hợp lệ."
+            return "Chưa có persisted session hợp lệ.\(pendingSuffix)"
         case .restoring:
-            return "Đang kiểm tra persisted session với backend auth shell."
+            return "Đang kiểm tra persisted session với backend auth shell.\(pendingSuffix)"
         case .signingIn:
-            return "Đang gọi backend auth shell để tạo session."
+            return "Đang gọi backend auth shell để tạo session.\(pendingSuffix)"
         case .authenticated:
             return "Persisted session hợp lệ. Route shell iOS đã có thể mở."
         }
@@ -144,8 +152,10 @@ final class AppSessionStore {
             )
             persist(session: restored)
             authState = .authenticated(restored)
-            selectedTab = .feed
-            statusMessage = "Đã restore session từ backend auth shell."
+            let destination = pendingProtectedTab ?? .feed
+            selectedTab = destination
+            pendingProtectedTab = nil
+            statusMessage = "Đã restore session từ backend auth shell và mở tab \(destination.displayName)."
         } catch {
             clearPersistedSession()
             authState = .signedOut
@@ -173,8 +183,10 @@ final class AppSessionStore {
             persist(session: session)
             passwordDraft = ""
             authState = .authenticated(session)
-            selectedTab = .feed
-            statusMessage = "Đăng nhập shell thành công và đã lưu session local trên iOS shell."
+            let destination = pendingProtectedTab ?? .feed
+            selectedTab = destination
+            pendingProtectedTab = nil
+            statusMessage = "Đăng nhập shell thành công, đã lưu session local, và mở tab \(destination.displayName)."
         } catch {
             authState = .signedOut
             statusMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
@@ -192,7 +204,25 @@ final class AppSessionStore {
         authState = .signedOut
         passwordDraft = ""
         statusMessage = "Đã revoke session hiện tại và xóa session local trên iOS shell."
+        pendingProtectedTab = nil
         selectedTab = .session
+    }
+
+    func requestProtectedTab(_ tab: AppTab) {
+        guard tab != .session else {
+            selectedTab = .session
+            return
+        }
+
+        if isAuthenticated {
+            selectedTab = tab
+            pendingProtectedTab = nil
+            return
+        }
+
+        pendingProtectedTab = tab
+        selectedTab = .session
+        statusMessage = "Cần đăng nhập hoặc restore session để mở tab \(tab.displayName)."
     }
 
     private func requestLogin(email: String) async throws -> LoginResponse {
@@ -310,4 +340,19 @@ enum AppTab: Hashable {
     case inbox
     case location
     case profile
+
+    var displayName: String {
+        switch self {
+        case .session:
+            return "Session"
+        case .feed:
+            return "Feed"
+        case .inbox:
+            return "Inbox"
+        case .location:
+            return "Location"
+        case .profile:
+            return "Profile"
+        }
+    }
 }
