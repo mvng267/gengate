@@ -85,6 +85,52 @@ export function clearPersistedAuthSession() {
   }
 }
 
+export async function logoutPersistedSession(): Promise<{
+  ok: boolean;
+  message: string;
+}> {
+  const stored = readPersistedAuthSession();
+  if (!stored) {
+    clearPersistedAuthSession();
+    return {
+      ok: true,
+      message: "Không có persisted session để logout; local state đã sạch.",
+    };
+  }
+
+  try {
+    const response = await apiRequest(env.authLogoutPath, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        refresh_token: stored.refreshToken,
+      }),
+    });
+
+    clearPersistedAuthSession();
+
+    if (response.ok || response.status === 401) {
+      return {
+        ok: true,
+        message: "Đã revoke session hiện tại và xóa persisted session local.",
+      };
+    }
+
+    return {
+      ok: false,
+      message: `Logout request failed with status ${response.status}; local session vẫn đã được xóa.`,
+    };
+  } catch {
+    clearPersistedAuthSession();
+    return {
+      ok: false,
+      message: "Không thể gọi logout endpoint; local session vẫn đã được xóa.",
+    };
+  }
+}
+
 export function readPersistedAuthSession(): StoredAuthSession | null {
   if (!canUseBrowserStorage()) {
     return null;

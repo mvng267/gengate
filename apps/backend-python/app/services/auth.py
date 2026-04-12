@@ -102,13 +102,7 @@ class AuthService:
         return user, device, next_session, next_refresh_token
 
     def get_session_snapshot(self, db: Session, refresh_token: str) -> tuple[User, Device, AuthSession]:
-        auth_session = session_repository.get_by_refresh_token_hash(db, refresh_token)
-        if auth_session is None:
-            raise ValueError("session_not_found")
-        if auth_session.revoked_at is not None:
-            raise ValueError("session_revoked")
-        if self._is_session_expired(auth_session.expires_at):
-            raise ValueError("session_expired")
+        auth_session = self._get_active_session_by_refresh_token(db, refresh_token)
 
         user = user_repository.get(db, auth_session.user_id)
         if user is None:
@@ -119,6 +113,20 @@ class AuthService:
             raise ValueError("device_not_found")
 
         return user, device, auth_session
+
+    def logout_session(self, db: Session, refresh_token: str) -> AuthSession:
+        auth_session = self._get_active_session_by_refresh_token(db, refresh_token)
+        return session_repository.update(db, auth_session, revoked_at=datetime.now(timezone.utc))
+
+    def _get_active_session_by_refresh_token(self, db: Session, refresh_token: str) -> AuthSession:
+        auth_session = session_repository.get_by_refresh_token_hash(db, refresh_token)
+        if auth_session is None:
+            raise ValueError("session_not_found")
+        if auth_session.revoked_at is not None:
+            raise ValueError("session_revoked")
+        if self._is_session_expired(auth_session.expires_at):
+            raise ValueError("session_expired")
+        return auth_session
 
     def _find_or_create_device(
         self,

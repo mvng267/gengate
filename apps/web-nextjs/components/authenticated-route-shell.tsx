@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import {
-  clearPersistedAuthSession,
+  logoutPersistedSession,
   readPersistedAuthSession,
   restorePersistedSession,
 } from "@/lib/auth/client";
@@ -116,14 +116,15 @@ export function AuthenticatedRouteShell({
       <button
         type="button"
         onClick={() => {
-          clearPersistedAuthSession();
-          setRestoreState({
-            status: "signed-out",
-            message: "Đã xóa persisted session. Route shell bị khóa lại cho tới khi login lại.",
+          void logoutPersistedSession().then((result) => {
+            setRestoreState({
+              status: "signed-out",
+              message: result.message,
+            });
           });
         }}
       >
-        Clear persisted session
+        Logout + clear persisted session
       </button>
     </section>
   );

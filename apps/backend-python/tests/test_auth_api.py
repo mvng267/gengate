@@ -150,3 +150,43 @@ def test_auth_refresh_rotates_session_and_session_snapshot_reads_active_session(
     assert fresh_session_response.json()["session_id"] == refresh_payload["session_id"]
 
     clear_overrides()
+
+
+def test_auth_logout_revokes_current_session() -> None:
+    client = create_test_client()
+
+    register_response = client.post(
+        "/auth/register",
+        json={"email": "logout-flow@example.com", "username": "logout_flow"},
+    )
+    assert register_response.status_code == 201
+
+    login_response = client.post(
+        "/auth/login",
+        json={
+            "email": "logout-flow@example.com",
+            "platform": "ios",
+            "device_name": "Batch31 iPhone",
+        },
+    )
+    assert login_response.status_code == 200
+    login_payload = login_response.json()
+
+    logout_response = client.post(
+        "/auth/logout",
+        json={"refresh_token": login_payload["refresh_token"]},
+    )
+    assert logout_response.status_code == 200
+    assert logout_response.json()["session_status"] == "revoked"
+    assert logout_response.json()["session_id"] == login_payload["session_id"]
+
+    post_logout_session = client.post(
+        "/auth/session",
+        json={"refresh_token": login_payload["refresh_token"]},
+    )
+    assert post_logout_session.status_code == 401
+    assert post_logout_session.json() == {
+        "error": {"code": "session_revoked", "message": "session_revoked"}
+    }
+
+    clear_overrides()

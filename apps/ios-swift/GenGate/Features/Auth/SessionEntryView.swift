@@ -98,7 +98,9 @@ struct SessionEntryView: View {
                     }
 
                     Button("Sign out") {
-                        sessionStore.signOut()
+                        Task {
+                            await sessionStore.signOut()
+                        }
                     }
                     .buttonStyle(.bordered)
                 }

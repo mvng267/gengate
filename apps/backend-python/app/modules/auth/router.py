@@ -124,6 +124,33 @@ def get_session_snapshot(
     )
 
 
+@router.post("/logout", response_model=SessionSnapshotResponse)
+def logout_session(
+    payload: RefreshSessionRequest,
+    db: Session = Depends(get_db_session),
+) -> SessionSnapshotResponse:
+    try:
+        auth_session = auth_service.logout_session(
+            db,
+            refresh_token=payload.refresh_token,
+        )
+    except ValueError as exc:
+        detail = str(exc)
+        if detail in {"session_not_found", "session_revoked", "session_expired"}:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
+
+    return SessionSnapshotResponse(
+        user_id=auth_session.user_id,
+        email="",
+        device_id=auth_session.device_id,
+        session_id=auth_session.id,
+        expires_at=auth_session.expires_at,
+        token_type="bearer",
+        session_status="revoked",
+    )
+
+
 @router.post("/devices", response_model=DeviceResponse, status_code=status.HTTP_201_CREATED)
 def create_device(payload: DeviceCreateRequest, db: Session = Depends(get_db_session)) -> DeviceResponse:
     try:

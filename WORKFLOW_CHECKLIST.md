@@ -88,22 +88,29 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **31**
-- Scope hiện tại: iOS auth-gated shell hiển thị session restore context ở root/tab shell và dùng auth placeholder cho route chưa có persisted session.
+- Scope hiện tại: auth lifecycle close-out slice với logout/revoke contract tối thiểu giữa backend + web + iOS shell.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/App/RootTabView.swift`
+  - `apps/backend-python/app/modules/auth/router.py`
+  - `apps/backend-python/app/services/auth.py`
+  - `apps/backend-python/tests/test_auth_api.py`
+  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/web-nextjs/components/authenticated-route-shell.tsx`
+  - `apps/web-nextjs/lib/auth/client.ts`
+  - `apps/web-nextjs/lib/config/env.ts`
   - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
-  - `apps/ios-swift/GenGate/Core/UI/AuthGatePlaceholderView.swift`
   - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ 4 passed
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `a3afeef` — `batch31: gate web shells on persisted session`
-  - working tree hiện tại: bẩn đúng theo iOS gating slice, chưa commit
+  - commit gần nhất đã chốt: `ad0db70` — `batch31: gate ios shells on persisted session`
+  - working tree hiện tại: bẩn đúng theo logout/revoke slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit iOS gating slice này; kế tiếp cân nhắc chốt batch 31 hoặc nối logout/revoke contract tối thiểu để hoàn tất auth/session lifecycle cơ bản
+  - commit slice này; sau đó cân nhắc chốt batch 31 complete vì contract tối thiểu login/restore/logout đã nối đủ backend + web + iOS shell
 
 ## Batch handoff note
 

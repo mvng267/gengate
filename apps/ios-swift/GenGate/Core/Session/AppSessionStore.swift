@@ -181,11 +181,17 @@ final class AppSessionStore {
         }
     }
 
-    func signOut() {
+    func signOut() async {
+        let persistedRefreshToken = loadPersistedSession()?.refreshToken
+
+        if let persistedRefreshToken {
+            _ = try? await requestLogout(refreshToken: persistedRefreshToken)
+        }
+
         clearPersistedSession()
         authState = .signedOut
         passwordDraft = ""
-        statusMessage = "Đã xóa session local trên iOS shell."
+        statusMessage = "Đã revoke session hiện tại và xóa session local trên iOS shell."
         selectedTab = .session
     }
 
@@ -247,6 +253,27 @@ final class AppSessionStore {
         } catch {
             throw SessionError.invalidResponse
         }
+    }
+
+    private func requestLogout(refreshToken: String) async throws {
+        let url = try makeURL(path: "/auth/logout")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: [
+            "refresh_token": refreshToken
+        ])
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw SessionError.invalidResponse
+        }
+
+        if httpResponse.statusCode == 401 || httpResponse.statusCode == 200 {
+            return
+        }
+
+        throw SessionError.network("Logout request failed with status \(httpResponse.statusCode).")
     }
 
     private func makeURL(path: String) throws -> URL {

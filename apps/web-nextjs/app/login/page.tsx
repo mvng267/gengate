@@ -6,6 +6,7 @@ import {
   clearPersistedAuthSession,
   getLoginRedirectPath,
   loginWithEmailPassword,
+  logoutPersistedSession,
   readPersistedAuthSession,
   restorePersistedSession,
 } from "@/lib/auth/client";
@@ -30,6 +31,7 @@ function buildStatusClass(tone: "neutral" | "success" | "error") {
 export default function LoginPage() {
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusTone, setStatusTone] = useState<"neutral" | "success" | "error">("neutral");
@@ -123,6 +125,15 @@ export default function LoginPage() {
     setIsSubmitting(false);
   }
 
+  async function handleLogout() {
+    setIsLoggingOut(true);
+    const result = await logoutPersistedSession();
+    setStatusTone(result.ok ? "success" : "error");
+    setStatusMessage(result.message);
+    setSessionPreview(null);
+    setIsLoggingOut(false);
+  }
+
   function handleClearSession() {
     clearPersistedAuthSession();
     setStatusTone("neutral");
@@ -187,12 +198,23 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={isSubmitting || isRestoring}
+            disabled={isSubmitting || isRestoring || isLoggingOut}
             className="w-full border-2 border-black bg-black px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#facc15] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isRestoring ? "Đang restore session..." : loginCta}
           </button>
         </form>
+
+        <button
+          type="button"
+          onClick={() => {
+            void handleLogout();
+          }}
+          disabled={isSubmitting || isRestoring || isLoggingOut}
+          className="mt-3 w-full border-2 border-black bg-white px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] text-black transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#d4d4d4] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isLoggingOut ? "Đang logout..." : "Logout + revoke session"}
+        </button>
 
         <button
           type="button"

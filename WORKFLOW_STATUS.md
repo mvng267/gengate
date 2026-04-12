@@ -2,22 +2,31 @@
 
 - Batch: 31
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 31 iOS auth-gated shell slice — hiển thị session restore context ở root/tab shell và chặn route shell bằng auth placeholder khi chưa có persisted session
+- Scope: batch 31 auth lifecycle close-out slice — thêm logout/revoke contract tối thiểu để hoàn tất vòng login → restore → logout giữa backend + web + iOS shell
 - Status: verify
 - Files:
-  - apps/ios-swift/GenGate/App/RootTabView.swift
+  - apps/backend-python/app/modules/auth/router.py
+  - apps/backend-python/app/services/auth.py
+  - apps/backend-python/tests/test_auth_api.py
+  - apps/web-nextjs/app/login/page.tsx
+  - apps/web-nextjs/components/authenticated-route-shell.tsx
+  - apps/web-nextjs/lib/auth/client.ts
+  - apps/web-nextjs/lib/config/env.ts
   - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Core/UI/AuthGatePlaceholderView.swift
   - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅ (4 passed)
+  - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `a3afeef` — `batch31: gate web shells on persisted session`
-  - working tree: bẩn đúng theo batch 31 iOS gating slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `ad0db70` — `batch31: gate ios shells on persisted session`
+  - working tree: bẩn đúng theo batch 31 logout/revoke slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit iOS gating slice này; sau đó cân nhắc chốt batch 31 hoặc nối backend/web/iOS logout/revoke contract tối thiểu nếu cần thêm 1 nhịp để hoàn tất lifecycle cơ bản
+- Next: commit slice này; sau đó có thể chốt batch 31 là complete vì contract tối thiểu login/restore/logout đã nối đủ backend + web + iOS shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 31 update:
-  - iOS lane: root tab shell nay có session banner (`Guest` / restoring / signed-in email), route chưa auth sẽ hiện auth gate placeholder thay vì chỉ disable tab mơ hồ; verify ✅
+  - Backend lane: thêm `POST /auth/logout` để revoke session theo refresh token; test auth file nay 4 pass; verify ✅
+  - Web lane: login shell + protected route shell nay gọi logout endpoint trước khi clear local session; verify ✅
+  - iOS lane: `signOut()` nay gọi backend logout rồi mới xóa persisted session local; verify ✅
