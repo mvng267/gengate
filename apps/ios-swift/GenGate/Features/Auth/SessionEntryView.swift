@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 33 · iOS session status shell")
+            Text("Batch 34 · iOS manual refresh shell")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -52,6 +52,17 @@ struct SessionEntryView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(sessionStore.authState == .signingIn || sessionStore.authState == .restoring)
+
+                    Button {
+                        Task {
+                            await sessionStore.refreshPersistedSession()
+                        }
+                    } label: {
+                        Text(sessionStore.isRefreshingSession ? "Refreshing session..." : "Refresh persisted session")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(sessionStore.authState == .signingIn || sessionStore.authState == .restoring || sessionStore.isRefreshingSession)
 
                     Text("Session indicator: \(sessionStore.sessionIndicatorLabel)")
                         .font(.footnote.monospaced())
@@ -117,6 +128,16 @@ struct SessionEntryView: View {
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
+
+                    Button {
+                        Task {
+                            await sessionStore.refreshPersistedSession()
+                        }
+                    } label: {
+                        Text(sessionStore.isRefreshingSession ? "Refreshing session..." : "Refresh persisted session")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(sessionStore.isRefreshingSession)
 
                     Button("Sign out") {
                         Task {

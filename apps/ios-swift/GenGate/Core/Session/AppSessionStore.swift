@@ -89,6 +89,7 @@ final class AppSessionStore {
     var emailDraft: String = ""
     var passwordDraft: String = ""
     var statusMessage: String?
+    var isRefreshingSession: Bool = false
 
     var sessionIndicatorLabel: String {
         switch authState {
@@ -152,13 +153,22 @@ final class AppSessionStore {
     }
 
     func restorePersistedSession() async {
+        await refreshPersistedSession(navigateToPendingDestination: true)
+    }
+
+    func refreshPersistedSession(navigateToPendingDestination: Bool = false) async {
         guard let persisted = loadPersistedSession() else {
             authState = .signedOut
-            statusMessage = nil
+            statusMessage = "Chưa có persisted session local để refresh."
             return
         }
 
-        authState = .restoring
+        if navigateToPendingDestination {
+            authState = .restoring
+        } else {
+            isRefreshingSession = true
+        }
+
         do {
             let snapshot = try await requestSessionSnapshot(refreshToken: persisted.refreshToken)
             let restored = UserSession(
@@ -174,16 +184,22 @@ final class AppSessionStore {
             )
             persist(session: restored)
             authState = .authenticated(restored)
-            let destination = pendingProtectedTab ?? .feed
-            selectedTab = destination
-            pendingProtectedTab = nil
-            statusMessage = "Đã restore session từ backend auth shell và mở tab \(destination.displayName)."
+            if navigateToPendingDestination {
+                let destination = pendingProtectedTab ?? .feed
+                selectedTab = destination
+                pendingProtectedTab = nil
+                statusMessage = "Đã restore session từ backend auth shell và mở tab \(destination.displayName)."
+            } else {
+                statusMessage = "Đã refresh lại persisted session với backend auth shell."
+            }
         } catch {
             clearPersistedSession()
             authState = .signedOut
             selectedTab = .session
             statusMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
+
+        isRefreshingSession = false
     }
 
     func signIn() async {

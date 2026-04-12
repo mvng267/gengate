@@ -89,21 +89,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **34**
-- Scope hiện tại: web manual refresh-session slice — thêm explicit refresh action/state để user chủ động re-check persisted session với backend auth shell.
+- Scope hiện tại: iOS manual refresh-session slice — thêm explicit refresh action/state ở Session screen để user chủ động re-check persisted session với backend auth shell.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/lib/auth/client.ts`
-  - `apps/web-nextjs/components/app-shell.tsx`
-  - `apps/web-nextjs/components/authenticated-route-shell.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `38c4396` — `batch33: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 34 web manual refresh-session slice, chưa commit
+  - commit gần nhất đã chốt: `c9fd9ff` — `batch34: add web manual session refresh`
+  - working tree hiện tại: bẩn đúng theo batch 34 iOS manual refresh-session slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó nếu cần parity thì thêm manual refresh action nhỏ tương ứng ở iOS Session screen
+  - commit slice này; sau đó có thể chốt batch 34 complete nếu không cần thêm parity refresh UX nhỏ nào nữa
 
 ## Batch handoff note
 

@@ -2,22 +2,21 @@
 
 - Batch: 34
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 34 web manual refresh-session slice — thêm explicit refresh action/state để user chủ động re-check persisted session với backend auth shell
+- Scope: batch 34 iOS manual refresh-session slice — thêm explicit refresh action/state ở Session screen để user chủ động re-check persisted session với backend auth shell
 - Status: verify
 - Files:
-  - apps/web-nextjs/lib/auth/client.ts
-  - apps/web-nextjs/components/app-shell.tsx
-  - apps/web-nextjs/components/authenticated-route-shell.tsx
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
-  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `38c4396` — `batch33: mark workflow complete`
-  - working tree: bẩn đúng theo batch 34 web manual refresh-session slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `c9fd9ff` — `batch34: add web manual session refresh`
+  - working tree: bẩn đúng theo batch 34 iOS manual refresh-session slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit slice này; sau đó chọn 1 parity slice nhỏ cho iOS Session screen nếu vẫn muốn manual refresh action tương ứng
+- Next: commit slice này; sau đó có thể cân nhắc chốt batch 34 complete nếu không cần thêm manual refresh parity nhỏ nào nữa
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 34 update:
-  - Web shell nay có nút `Refresh session` để re-check persisted session on demand
-  - Protected route shell cũng có manual refresh state thay vì chỉ auto-restore lúc mount
+  - iOS Session screen nay có action `Refresh persisted session`
+  - AppSessionStore nay có explicit refresh flow riêng, không chỉ auto-restore lúc app/tab flow kích hoạt
