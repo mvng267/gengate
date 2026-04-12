@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -29,6 +30,8 @@ function buildStatusClass(tone: "neutral" | "success" | "error") {
 }
 
 export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -36,6 +39,15 @@ export default function LoginPage() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusTone, setStatusTone] = useState<"neutral" | "success" | "error">("neutral");
   const [sessionPreview, setSessionPreview] = useState<string | null>(null);
+
+  const nextPath = useMemo(() => {
+    const value = searchParams.get("next");
+    if (!value || !value.startsWith("/")) {
+      return getLoginRedirectPath();
+    }
+
+    return value;
+  }, [searchParams]);
 
   const loginCta = useMemo(() => {
     if (isSubmitting) {
@@ -65,7 +77,7 @@ export default function LoginPage() {
       if (result.ok) {
         setStatusTone("success");
         setStatusMessage(
-          `Đã restore session local hợp lệ cho ${result.session.session.email}. Điều hướng đích dự kiến: ${getLoginRedirectPath()}`,
+          `Đã restore session local hợp lệ cho ${result.session.session.email}. Đang chuyển tới ${nextPath}`,
         );
         setSessionPreview(
           [
@@ -76,7 +88,12 @@ export default function LoginPage() {
             `session_status: ${result.session.session.session_status}`,
           ].join("\n"),
         );
-      } else if (result.reason !== "missing") {
+        setIsRestoring(false);
+        router.replace(nextPath);
+        return;
+      }
+
+      if (result.reason !== "missing") {
         setStatusTone("error");
         setStatusMessage(result.message);
         setSessionPreview(null);
@@ -90,7 +107,7 @@ export default function LoginPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [nextPath, router]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -101,11 +118,7 @@ export default function LoginPage() {
     const result = await loginWithEmailPassword(form);
     if (result.ok) {
       setStatusTone("success");
-      setStatusMessage(
-        `${result.message} Điều hướng đích dự kiến: ${
-          result.redirectTo ?? getLoginRedirectPath()
-        }`,
-      );
+      setStatusMessage(`${result.message} Đang chuyển tới ${nextPath}`);
       setSessionPreview(
         [
           `user_id: ${result.payload.user_id}`,
@@ -123,6 +136,10 @@ export default function LoginPage() {
     }
 
     setIsSubmitting(false);
+
+    if (result.ok) {
+      router.replace(nextPath);
+    }
   }
 
   async function handleLogout() {
@@ -145,22 +162,22 @@ export default function LoginPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-start">
       <section className="flex-1 space-y-4">
         <span className="inline-flex rounded-full border border-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-          Batch 31 · Web session persistence shell
+          Batch 32 · Web auth redirect shell
         </span>
         <h1 className="text-4xl font-black tracking-tight text-black">
-          Login shell đã lưu và restore session tối thiểu với backend auth contract.
+          Login shell nay redirect thật về route đích sau khi restore hoặc đăng nhập thành công.
         </h1>
         <p className="max-w-2xl text-base leading-7 text-neutral-700">
-          Màn này vẫn dùng login shell hiện tại nhưng nay giữ refresh token ở local storage và gọi
+          Màn này vẫn dùng login shell hiện tại nhưng nay giữ refresh token ở local storage, gọi
           <code> /auth/session </code>
-          để restore state khi reload app.
+          để restore state khi reload app, rồi redirect về route được yêu cầu bằng query <code>next</code>.
         </p>
         <ul className="space-y-2 text-sm text-neutral-700">
           <li>• Password/OTP vẫn là placeholder trên UI, chưa dùng cho API ở batch này.</li>
           <li>
             • Path login mặc định là <code>/auth/login</code>, session snapshot mặc định là <code>/auth/session</code>.
           </li>
-          <li>• Sau khi login OK, shell đã có nền cho redirect/gating thật ở batch sau.</li>
+          <li>• Redirect đích mặc định vẫn là <code>/feed</code> nếu không có <code>?next=...</code> hợp lệ.</li>
         </ul>
       </section>
 
@@ -228,7 +245,7 @@ export default function LoginPage() {
           <div className="font-semibold">Status</div>
           <p className={buildStatusClass(statusTone)}>
             {statusMessage ??
-              "Chưa submit. Batch 31 shell này ưu tiên verify đường login → lưu refresh token → restore session tối thiểu."}
+              "Chưa submit. Batch 32 shell này ưu tiên verify redirect flow thật giữa login và protected route."}
           </p>
 
           {sessionPreview ? (

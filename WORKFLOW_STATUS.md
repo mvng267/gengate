@@ -1,48 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 31
+- Batch: 32
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 31 complete — refresh/session persistence contract tối thiểu đã nối đủ backend + web + iOS shell cho vòng login → restore → logout
-- Status: complete
+- Scope: batch 32 web auth redirect slice — protected web routes nay redirect sang login với `?next=...`, và login page redirect ngược lại route đích sau restore/login thành công
+- Status: verify
 - Files:
-  - apps/backend-python/app/modules/auth/router.py
-  - apps/backend-python/app/repositories/sessions.py
-  - apps/backend-python/app/schemas/auth.py
-  - apps/backend-python/app/services/auth.py
-  - apps/backend-python/tests/test_auth_api.py
   - apps/web-nextjs/app/login/page.tsx
-  - apps/web-nextjs/app/feed/page.tsx
-  - apps/web-nextjs/app/inbox/page.tsx
-  - apps/web-nextjs/app/location/page.tsx
-  - apps/web-nextjs/app/page.tsx
-  - apps/web-nextjs/app/profile/page.tsx
-  - apps/web-nextjs/components/app-shell.tsx
   - apps/web-nextjs/components/authenticated-route-shell.tsx
-  - apps/web-nextjs/lib/auth/client.ts
-  - apps/web-nextjs/lib/auth/types.ts
-  - apps/web-nextjs/lib/config/env.ts
-  - apps/ios-swift/GenGate/App/GenGateApp.swift
-  - apps/ios-swift/GenGate/App/RootTabView.swift
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Core/UI/AuthGatePlaceholderView.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅ (4 passed)
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - batch 31 commits:
-    - `51bec27` — `batch31: wire refresh session persistence shells`
-    - `a3afeef` — `batch31: gate web shells on persisted session`
-    - `ad0db70` — `batch31: gate ios shells on persisted session`
-    - `e638a10` — `batch31: add logout revoke lifecycle`
-  - working tree: sạch
+  - latest commit: `71348ea` — `batch31: mark workflow complete`
+  - working tree: bẩn đúng theo batch 32 web auth redirect slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 32 với scope mới; không làm thêm code trong batch 31
+- Next: commit slice này; sau đó chọn 1 lane batch 32 tiếp theo để nối auth redirect/resume UX tương ứng trên iOS hoặc backend refresh-in-use path
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 31 result:
-  - Backend lane: login/refresh/session snapshot/logout contract tối thiểu đã có và verify xanh
-  - Web lane: persisted session login/restore/logout + auth-gated shell đã có và verify xanh
-  - iOS lane: persisted session login/restore/logout + auth-gated root/tab shell đã có và verify xanh
+- Batch 32 update:
+  - Web lane: protected routes (`feed/inbox/location/profile`) không chỉ hiện locked placeholder nữa mà redirect thật sang `/login?next=<route>` khi thiếu/invalid persisted session
+  - Web lane: login shell tự redirect về route đích sau restore session hoặc login thành công; fallback mặc định vẫn là `/feed`

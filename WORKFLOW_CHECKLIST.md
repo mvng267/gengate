@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **batch 31 complete**.
+- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đang làm batch 32**.
 
 ## Reporting hard rule
 
@@ -88,57 +88,34 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **31**
-- Scope hiện tại: batch 31 đã hoàn tất refresh/session persistence contract tối thiểu giữa backend + web + iOS shell.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **32**
+- Scope hiện tại: web auth redirect slice — protected web routes redirect sang login với `?next=...`, và login page redirect ngược lại route đích sau restore/login thành công.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/backend-python/app/modules/auth/router.py`
-  - `apps/backend-python/app/repositories/sessions.py`
-  - `apps/backend-python/app/schemas/auth.py`
-  - `apps/backend-python/app/services/auth.py`
-  - `apps/backend-python/tests/test_auth_api.py`
   - `apps/web-nextjs/app/login/page.tsx`
-  - `apps/web-nextjs/app/feed/page.tsx`
-  - `apps/web-nextjs/app/inbox/page.tsx`
-  - `apps/web-nextjs/app/location/page.tsx`
-  - `apps/web-nextjs/app/page.tsx`
-  - `apps/web-nextjs/app/profile/page.tsx`
-  - `apps/web-nextjs/components/app-shell.tsx`
   - `apps/web-nextjs/components/authenticated-route-shell.tsx`
-  - `apps/web-nextjs/lib/auth/client.ts`
-  - `apps/web-nextjs/lib/auth/types.ts`
-  - `apps/web-nextjs/lib/config/env.ts`
-  - `apps/ios-swift/GenGate/App/GenGateApp.swift`
-  - `apps/ios-swift/GenGate/App/RootTabView.swift`
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
-  - `apps/ios-swift/GenGate/Core/UI/AuthGatePlaceholderView.swift`
-  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ 4 passed
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - `51bec27` — `batch31: wire refresh session persistence shells`
-  - `a3afeef` — `batch31: gate web shells on persisted session`
-  - `ad0db70` — `batch31: gate ios shells on persisted session`
-  - `e638a10` — `batch31: add logout revoke lifecycle`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `71348ea` — `batch31: mark workflow complete`
+  - working tree hiện tại: bẩn đúng theo batch 32 web redirect slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch 32 với scope mới; không tiếp tục đổi code trong batch 31
+  - commit slice này; sau đó chọn 1 nhịp hẹp tiếp theo của batch 32 giữa iOS resume redirect/gating hoặc backend refresh-in-use path
 
 ## Batch handoff note
 
 - Batch vừa xong: **31**
 - Commit cuối đã chốt:
   - `e638a10` — `batch31: add logout revoke lifecycle`
+  - `71348ea` — `batch31: mark workflow complete`
 - Test-verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → 4 passed
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - chưa có blocker cho contract tối thiểu; phần còn lại là UX/real auth product scope cho batch mới
+  - batch 31 contract tối thiểu đã xong; batch 32 chuyển sang auth UX thật và route/app resume behavior
 - Batch kế tiếp: **32**
-- Scope hẹp đầu tiên đề xuất cho batch 32:
-  - chọn 1 bước auth UX thật sau contract tối thiểu, ưu tiên redirect/gating flow rõ ràng hoặc refresh-in-use path khi app resume
+- Scope hẹp đầu tiên của batch 32:
+  - web protected-route redirect thật bằng `?next=...` và login redirect ngược lại route đích sau restore/login thành công

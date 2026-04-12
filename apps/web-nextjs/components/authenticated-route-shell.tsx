@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import {
@@ -29,6 +29,8 @@ export function AuthenticatedRouteShell({
   title,
   summary,
 }: AuthenticatedRouteShellProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [restoreState, setRestoreState] = useState<RestoreState>({ status: "checking" });
 
   useEffect(() => {
@@ -40,8 +42,9 @@ export function AuthenticatedRouteShell({
         if (isMounted) {
           setRestoreState({
             status: "signed-out",
-            message: "Chưa có persisted session. Hãy login trước để mở route shell này.",
+            message: "Chưa có persisted session. Đang chuyển sang login để mở route này.",
           });
+          router.replace(`/login?next=${encodeURIComponent(pathname || "/feed")}`);
         }
         return;
       }
@@ -64,8 +67,9 @@ export function AuthenticatedRouteShell({
 
       setRestoreState({
         status: "signed-out",
-        message: result.message,
+        message: `${result.message} Đang chuyển sang login để xác thực lại.`,
       });
+      router.replace(`/login?next=${encodeURIComponent(pathname || "/feed")}`);
     }
 
     void checkSession();
@@ -73,7 +77,7 @@ export function AuthenticatedRouteShell({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [pathname, router]);
 
   if (restoreState.status === "checking") {
     return (
@@ -93,9 +97,6 @@ export function AuthenticatedRouteShell({
           <strong>Access:</strong> locked bởi vì chưa có persisted session hợp lệ.
         </p>
         <p>{restoreState.message}</p>
-        <p>
-          <Link href="/login">Đi tới Login</Link>
-        </p>
       </section>
     );
   }
@@ -119,8 +120,9 @@ export function AuthenticatedRouteShell({
           void logoutPersistedSession().then((result) => {
             setRestoreState({
               status: "signed-out",
-              message: result.message,
+              message: `${result.message} Đang quay lại login.`,
             });
+            router.replace(`/login?next=${encodeURIComponent(pathname || "/feed")}`);
           });
         }}
       >
