@@ -2,21 +2,25 @@
 
 - Batch: 39
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 39 iOS logout feedback parity — surface backend revoke/detail from `/auth/logout` in Session screen
-- Status: verify
+- Scope: batch 39 logout feedback parity complete — web + iOS surface backend revoke/detail from `/auth/logout`
+- Status: complete
 - Files:
+  - apps/web-nextjs/lib/auth/client.ts
+  - apps/web-nextjs/app/login/page.tsx
   - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
+  - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `063a8bf` — `batch39: surface web logout detail`
-  - working tree: bẩn đúng theo batch 39 iOS logout feedback parity slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `f5e3d5a` — `batch39: surface ios logout detail`
+  - working tree: sạch
 - Blocker: none
-- Next: commit slice này; sau đó cân nhắc chốt batch 39 nếu web+iOS logout parity đã đủ, hoặc chọn 1 auth E2E slice hẹp kế tiếp có leverage cao hơn
+- Next: mở batch 40 với 1 auth E2E slice hẹp có leverage cao hơn; ưu tiên chọn 1 flow thật nối login → persisted session restore/refresh → logout qua backend trên 1 client
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 39 update:
-  - iOS logout nay surface session_status/detail thật từ backend success/401 path thay vì chỉ báo generic logout text
-  - Session screen copy/status đã phản ánh đúng mục tiêu logout feedback parity
+- Batch 39 outcome:
+  - Web logout nay surface revoke/detail thật từ backend success/401 path thay vì generic logout text
+  - iOS logout nay cũng surface session_status/detail thật từ backend success/401 path thay vì generic logout text
+  - Batch 39 auth feedback parity cho logout đã đủ trên 2 client hiện có
