@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 35 · iOS session invalidation feedback")
+            Text("Batch 36 · iOS refresh-token rotation")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -19,7 +19,7 @@ struct SessionEntryView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Flow này gọi backend auth shell thật ở mức tối thiểu: login sẽ lưu refresh token local, app mở lại sẽ thử restore bằng /auth/session.")
+                    Text("Flow này gọi backend auth shell thật ở mức tối thiểu: login sẽ lưu refresh token local, app mở lại sẽ thử restore bằng /auth/session, còn manual refresh sẽ gọi /auth/refresh để rotate token thật.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {

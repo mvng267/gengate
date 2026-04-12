@@ -89,21 +89,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **36**
-- Scope hiện tại: web refresh-token rotation slice — manual refresh ở protected route nay gọi thật `/auth/refresh` thay vì chỉ re-check `/auth/session`.
+- Scope hiện tại: iOS refresh-token rotation slice — manual refresh ở Session screen nay gọi thật `/auth/refresh` thay vì chỉ re-check `/auth/session`.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/lib/auth/client.ts`
-  - `apps/web-nextjs/lib/config/env.ts`
-  - `apps/web-nextjs/components/authenticated-route-shell.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `79e34ce` — `batch35: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 36 web refresh-token rotation slice, chưa commit
+  - commit gần nhất đã chốt: `50efee4` — `batch36: rotate web session on manual refresh`
+  - working tree hiện tại: bẩn đúng theo batch 36 iOS refresh-token rotation slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó nếu cần parity thì nối iOS manual refresh sang `/auth/refresh` để rotate token thật thay vì chỉ snapshot-check
+  - commit slice này; sau đó có thể chốt batch 36 complete nếu không cần thêm auth/session rotation parity nhỏ nào nữa
 
 ## Batch handoff note
 

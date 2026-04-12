@@ -2,22 +2,21 @@
 
 - Batch: 36
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 36 web refresh-token rotation slice — manual refresh ở protected route nay gọi thật `/auth/refresh` thay vì chỉ re-check `/auth/session`
+- Scope: batch 36 iOS refresh-token rotation slice — manual refresh ở Session screen nay gọi thật `/auth/refresh` thay vì chỉ re-check `/auth/session`
 - Status: verify
 - Files:
-  - apps/web-nextjs/lib/auth/client.ts
-  - apps/web-nextjs/lib/config/env.ts
-  - apps/web-nextjs/components/authenticated-route-shell.tsx
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
-  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `79e34ce` — `batch35: mark workflow complete`
-  - working tree: bẩn đúng theo batch 36 web refresh-token rotation slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `50efee4` — `batch36: rotate web session on manual refresh`
+  - working tree: bẩn đúng theo batch 36 iOS refresh-token rotation slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit slice này; sau đó nếu tiếp tục parity thì cân nhắc nối iOS manual refresh sang `/auth/refresh` để rotate token thật thay vì chỉ snapshot-check
+- Next: commit slice này; sau đó có thể cân nhắc chốt batch 36 complete nếu không cần thêm auth/session rotation parity nhỏ nào nữa
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 36 update:
-  - Web manual refresh nay dùng backend refresh contract thật để rotate refresh token + session id
-  - Local persisted auth session nay được cập nhật bằng payload mới từ `/auth/refresh`
+  - iOS manual refresh nay dùng backend refresh contract thật để rotate refresh token + session id
+  - Startup restore vẫn dùng `/auth/session` để snapshot-check persisted session hiện có

@@ -153,7 +153,7 @@ final class AppSessionStore {
     }
 
     func restorePersistedSession() async {
-        await refreshPersistedSession(navigateToPendingDestination: true)
+        await restoreSessionSnapshot(navigateToPendingDestination: true)
     }
 
     func refreshPersistedSession(navigateToPendingDestination: Bool = false) async {
@@ -168,6 +168,52 @@ final class AppSessionStore {
         } else {
             isRefreshingSession = true
         }
+
+        do {
+            let response = try await requestRefreshSession(refreshToken: persisted.refreshToken)
+            let refreshed = UserSession(
+                userID: response.user_id,
+                email: response.email,
+                deviceID: response.device_id,
+                sessionID: response.session_id,
+                refreshToken: response.refresh_token,
+                expiresAt: response.expires_at,
+                expiresInSeconds: response.expires_in_seconds,
+                tokenType: response.token_type,
+                sessionStatus: response.session_status
+            )
+            persist(session: refreshed)
+            authState = .authenticated(refreshed)
+            if navigateToPendingDestination {
+                let destination = pendingProtectedTab ?? .feed
+                selectedTab = destination
+                pendingProtectedTab = nil
+                statusMessage = "Đã refresh session với backend auth shell, rotate refresh token, và mở tab \(destination.displayName)."
+            } else {
+                statusMessage = "Đã refresh session thật với backend auth shell và rotate refresh token local."
+            }
+        } catch {
+            clearPersistedSession()
+            authState = .signedOut
+            selectedTab = .session
+            if let sessionError = error as? SessionError, case .unauthorized = sessionError {
+                statusMessage = "Session đã hết hạn hoặc bị revoke. Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
+            } else {
+                statusMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            }
+        }
+
+        isRefreshingSession = false
+    }
+
+    private func restoreSessionSnapshot(navigateToPendingDestination: Bool) async {
+        guard let persisted = loadPersistedSession() else {
+            authState = .signedOut
+            statusMessage = "Chưa có persisted session local để restore."
+            return
+        }
+
+        authState = .restoring
 
         do {
             let snapshot = try await requestSessionSnapshot(refreshToken: persisted.refreshToken)
@@ -190,7 +236,7 @@ final class AppSessionStore {
                 pendingProtectedTab = nil
                 statusMessage = "Đã restore session từ backend auth shell và mở tab \(destination.displayName)."
             } else {
-                statusMessage = "Đã refresh lại persisted session với backend auth shell."
+                statusMessage = "Đã restore persisted session với backend auth shell."
             }
         } catch {
             clearPersistedSession()
@@ -202,8 +248,6 @@ final class AppSessionStore {
                 statusMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             }
         }
-
-        isRefreshingSession = false
     }
 
     func signIn() async {
@@ -290,6 +334,35 @@ final class AppSessionStore {
         }
         guard httpResponse.statusCode == 200 else {
             throw SessionError.network("Login request failed with status \(httpResponse.statusCode).")
+        }
+
+        do {
+            return try JSONDecoder().decode(LoginResponse.self, from: data)
+        } catch {
+            throw SessionError.invalidResponse
+        }
+    }
+
+    private func requestRefreshSession(refreshToken: String) async throws -> LoginResponse {
+        let url = try makeURL(path: "/auth/refresh")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: [
+            "refresh_token": refreshToken
+        ])
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw SessionError.invalidResponse
+        }
+
+        if httpResponse.statusCode == 401 {
+            throw SessionError.unauthorized
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            throw SessionError.network("Session refresh failed with status \(httpResponse.statusCode).")
         }
 
         do {
