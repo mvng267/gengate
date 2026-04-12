@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 36 · iOS refresh-token rotation")
+            Text("Batch 37 · iOS self-serve register shell")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -15,11 +15,11 @@ struct SessionEntryView: View {
             switch sessionStore.authState {
             case .signedOut, .signingIn, .restoring:
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Login + restore shell")
+                    Text("Register + login shell")
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Flow này gọi backend auth shell thật ở mức tối thiểu: login sẽ lưu refresh token local, app mở lại sẽ thử restore bằng /auth/session, còn manual refresh sẽ gọi /auth/refresh để rotate token thật.")
+                    Text("Flow này gọi backend auth shell thật ở mức tối thiểu: user mới có thể tự register bằng /auth/register, sau đó login để lưu persisted session local; app mở lại vẫn restore bằng /auth/session, còn manual refresh gọi /auth/refresh để rotate token thật.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -51,7 +51,18 @@ struct SessionEntryView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(sessionStore.authState == .signingIn || sessionStore.authState == .restoring)
+                    .disabled(sessionStore.authState == .signingIn || sessionStore.authState == .restoring || sessionStore.isRegistering)
+
+                    Button {
+                        Task {
+                            await sessionStore.registerAndSignIn()
+                        }
+                    } label: {
+                        Text(sessionStore.isRegistering ? "Creating account..." : "Create account + sign in")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(sessionStore.authState == .signingIn || sessionStore.authState == .restoring || sessionStore.isRegistering)
 
                     Button {
                         Task {
@@ -62,7 +73,7 @@ struct SessionEntryView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
-                    .disabled(sessionStore.authState == .signingIn || sessionStore.authState == .restoring || sessionStore.isRefreshingSession)
+                    .disabled(sessionStore.authState == .signingIn || sessionStore.authState == .restoring || sessionStore.isRefreshingSession || sessionStore.isRegistering)
 
                     Text("Session indicator: \(sessionStore.sessionIndicatorLabel)")
                         .font(.footnote.monospaced())

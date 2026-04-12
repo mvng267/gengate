@@ -31,6 +31,13 @@ final class AppSessionStore {
         }
     }
 
+    private struct RegisterResponse: Decodable {
+        let id: String
+        let email: String
+        let username: String?
+        let status: String
+    }
+
     private struct LoginResponse: Decodable {
         let user_id: String
         let email: String
@@ -90,6 +97,7 @@ final class AppSessionStore {
     var passwordDraft: String = ""
     var statusMessage: String?
     var isRefreshingSession: Bool = false
+    var isRegistering: Bool = false
 
     var sessionIndicatorLabel: String {
         switch authState {
@@ -280,6 +288,31 @@ final class AppSessionStore {
         }
     }
 
+    func registerAndSignIn() async {
+        let normalizedEmail = emailDraft.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !normalizedEmail.isEmpty else {
+            statusMessage = "Email là bắt buộc để tạo account shell."
+            return
+        }
+
+        isRegistering = true
+        statusMessage = nil
+
+        do {
+            _ = try await requestRegister(email: normalizedEmail)
+            emailDraft = normalizedEmail
+            isRegistering = false
+            await signIn()
+            if case .authenticated = authState {
+                statusMessage = "Tạo account shell + đăng nhập thành công; persisted session local đã sẵn sàng."
+            }
+        } catch {
+            isRegistering = false
+            authState = .signedOut
+            statusMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+    }
+
     func signOut() async {
         let persistedRefreshToken = loadPersistedSession()?.refreshToken
 
@@ -310,6 +343,42 @@ final class AppSessionStore {
         pendingProtectedTab = tab
         selectedTab = .session
         statusMessage = "Cần đăng nhập hoặc restore session để mở tab \(tab.displayName)."
+    }
+
+    private func requestRegister(email: String) async throws -> RegisterResponse {
+        let normalizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !normalizedEmail.isEmpty else {
+            throw SessionError.network("Email là bắt buộc để gọi register shell.")
+        }
+
+        let usernameSeed = normalizedEmail.split(separator: "@").first.map(String.init) ?? "gengate_user"
+        let url = try makeURL(path: "/auth/register")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: [
+            "email": normalizedEmail,
+            "username": usernameSeed
+        ])
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw SessionError.invalidResponse
+        }
+
+        if httpResponse.statusCode == 409 {
+            throw SessionError.network("Email này đã tồn tại. Hãy đăng nhập bằng account shell hiện có.")
+        }
+
+        guard httpResponse.statusCode == 201 else {
+            throw SessionError.network("Register request failed with status \(httpResponse.statusCode).")
+        }
+
+        do {
+            return try JSONDecoder().decode(RegisterResponse.self, from: data)
+        } catch {
+            throw SessionError.invalidResponse
+        }
     }
 
     private func requestLogin(email: String) async throws -> LoginResponse {
