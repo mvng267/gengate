@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **batch 38 đã complete**.
+- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đang làm batch 39**.
 
 ## Reporting hard rule
 
@@ -88,22 +88,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **38**
-- Scope hiện tại: closure — chốt expired-session feedback parity tối thiểu cho web + iOS.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **39**
+- Scope hiện tại: web logout feedback parity — surface backend revoke/detail from `/auth/logout` in login shell.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `WORKFLOW_STATUS.md`
-  - `WORKFLOW_CHECKLIST.md`
+  - `apps/web-nextjs/lib/auth/client.ts`
+  - `apps/web-nextjs/app/login/page.tsx`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `83855c4` — `batch38: surface ios session failure detail`
-  - working tree hiện tại: sạch trước nhịp workflow-only close này
+  - commit gần nhất đã chốt: `2988ce1` — `batch38: mark workflow complete`
+  - working tree hiện tại: bẩn đúng theo batch 39 web logout feedback parity slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch 39 với 1 auth E2E slice hẹp có leverage cao nhất; ứng viên tốt là logout parity closure marker hoặc 1 backend contract/test step giúp auth/session path hoàn chỉnh hơn
+  - commit slice này; sau đó cân nhắc parity tương ứng cho iOS logout feedback hoặc chọn 1 backend/web/iOS auth E2E slice hẹp kế tiếp có leverage cao hơn
 
 ## Batch handoff note
 
@@ -111,11 +110,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Commit cuối đã chốt:
   - `9d5e36e` — `batch38: surface web session failure detail`
   - `83855c4` — `batch38: surface ios session failure detail`
+  - `2988ce1` — `batch38: mark workflow complete`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - không còn blocker rõ ràng cho outcome batch 38; expired-session / revoked-session feedback parity tối thiểu đã có trên cả web và iOS, nhưng vertical auth path vẫn còn space để polish logout flow hoặc backend contract/test depth
+  - batch 38 đã chốt; batch 39 đang siết auth parity tiếp theo quanh logout feedback để UI surface đúng revoke/detail từ backend thay vì generic logout text
 - Batch kế tiếp: **39**
-- Scope hẹp đầu tiên đề xuất cho batch 39:
-  - chọn 1 auth E2E parity step có leverage cao nhất giữa backend/web/iOS, ưu tiên logout parity hoặc 1 backend contract/test step nếu muốn siết path hiện có trước khi mở slice mới
+- Scope hẹp đầu tiên của batch 39:
+  - surface backend revoke/detail từ `/auth/logout` trong web login shell để logout feedback rõ hơn

@@ -71,6 +71,19 @@ function isBackendSessionSnapshot(value: unknown): value is BackendSessionSnapsh
   );
 }
 
+async function readSessionSnapshot(response: Response): Promise<BackendSessionSnapshot | undefined> {
+  try {
+    const data: unknown = await response.json();
+    if (isBackendSessionSnapshot(data)) {
+      return data;
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+}
+
 async function registerWithEmail(email: string, username: string) {
   const response = await apiRequest(env.authRegisterPath, {
     method: "POST",
@@ -121,6 +134,7 @@ export function clearPersistedAuthSession() {
 export async function logoutPersistedSession(): Promise<{
   ok: boolean;
   message: string;
+  backendDetail?: string;
 }> {
   const stored = readPersistedAuthSession();
   if (!stored) {
@@ -142,15 +156,30 @@ export async function logoutPersistedSession(): Promise<{
       }),
     });
 
-    clearPersistedAuthSession();
-
-    if (response.ok || response.status === 401) {
+    if (response.ok) {
+      const snapshot = await readSessionSnapshot(response);
+      clearPersistedAuthSession();
+      const backendDetail = snapshot?.session_status;
+      const suffix = backendDetail ? ` (${backendDetail})` : "";
       return {
         ok: true,
-        message: "Đã revoke session hiện tại và xóa persisted session local.",
+        message: `Đã revoke session hiện tại${suffix} và xóa persisted session local.`,
+        backendDetail,
       };
     }
 
+    if (response.status === 401) {
+      const backendDetail = await readErrorDetail(response);
+      clearPersistedAuthSession();
+      const suffix = backendDetail ? ` (${backendDetail})` : "";
+      return {
+        ok: true,
+        message: `Backend báo session logout không còn hợp lệ${suffix}; local session vẫn đã được xóa.`,
+        backendDetail,
+      };
+    }
+
+    clearPersistedAuthSession();
     return {
       ok: false,
       message: `Logout request failed with status ${response.status}; local session vẫn đã được xóa.`,

@@ -1,22 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 38
+- Batch: 39
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 38 closure — chốt expired-session feedback parity tối thiểu cho web + iOS
-- Status: complete
+- Scope: batch 39 web logout feedback parity — surface backend revoke/detail from `/auth/logout` in login shell
+- Status: verify
 - Files:
+  - apps/web-nextjs/lib/auth/client.ts
+  - apps/web-nextjs/app/login/page.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `83855c4` — `batch38: surface ios session failure detail`
-  - working tree: sạch trước nhịp workflow-only close này
+  - latest commit: `2988ce1` — `batch38: mark workflow complete`
+  - working tree: bẩn đúng theo batch 39 web logout feedback parity slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 39 với 1 auth E2E slice hẹp có leverage cao nhất; ứng viên tốt là logout parity closure marker hoặc 1 backend contract/test step giúp auth/session path hoàn chỉnh hơn
+- Next: commit slice này; sau đó cân nhắc parity tương ứng cho iOS logout feedback hoặc chọn 1 backend/web/iOS auth E2E slice hẹp kế tiếp có leverage cao hơn
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 38 outcome:
-  - Web restore/refresh failure đã surface backend detail thật như `session_expired` hoặc `session_revoked`
-  - iOS Session screen đã surface backend detail thật cho unauthorized restore/refresh
-  - Cả web và iOS đều không còn chỉ báo generic invalid-session text cho expired/revoked session path
+- Batch 39 update:
+  - Web logout nay surface revoke/detail thật từ backend success/401 path thay vì chỉ báo generic logout text
+  - Login shell copy/status đã phản ánh đúng mục tiêu logout feedback parity

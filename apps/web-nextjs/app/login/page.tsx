@@ -174,18 +174,18 @@ export default function LoginPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-start">
       <section className="flex-1 space-y-4">
         <span className="inline-flex rounded-full border border-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-          Batch 38 · Web expired-session feedback parity
+          Batch 39 · Web logout feedback parity
         </span>
         <h1 className="text-4xl font-black tracking-tight text-black">
-          Web shell nay hiện rõ hơn lý do session cũ bị backend từ chối thay vì chỉ báo lỗi chung chung.
+          Web shell nay hiện rõ hơn revoke/logout outcome thật từ backend thay vì chỉ báo logout chung chung.
         </h1>
         <p className="max-w-2xl text-base leading-7 text-neutral-700">
-          Màn này giữ nguyên auth shell hiện tại, nhưng restore/refresh failure từ backend giờ sẽ surface detail như <code>session_expired</code> hoặc <code>session_revoked</code> để debug và UX parity tốt hơn.
+          Màn này giữ nguyên auth shell hiện tại, nhưng logout từ backend giờ sẽ surface detail thật như <code>revoked</code>, hoặc lý do session đã không còn hợp lệ, để logout UX parity tốt hơn.
         </p>
         <ul className="space-y-2 text-sm text-neutral-700">
           <li>• Password/OTP vẫn là placeholder trên UI, chưa dùng cho API ở batch này.</li>
           <li>
-            • Nếu backend trả <code>401</code> từ <code>/auth/session</code> hoặc <code>/auth/refresh</code>, UI nay sẽ giữ lại detail thật thay vì chỉ báo invalid-session chung.
+            • Nếu backend trả success/401 từ <code>/auth/logout</code>, UI nay sẽ giữ lại revoke/detail thật thay vì chỉ báo logout chung chung.
           </li>
           <li>• Redirect đích mặc định vẫn là <code>/feed</code> nếu không có <code>?next=...</code> hợp lệ.</li>
         </ul>
@@ -294,7 +294,7 @@ export default function LoginPage() {
           <div className="font-semibold">Status</div>
           <p className={buildStatusClass(statusTone)}>
             {statusMessage ??
-              "Chưa submit. Batch 38 shell này ưu tiên surface đúng backend reason khi session cũ bị expire/revoke."}
+              "Chưa submit. Batch 39 shell này ưu tiên surface đúng backend logout/revoke outcome thay vì generic logout text."}
           </p>
 
           {statusMessage?.includes("đăng nhập lại") ? (
