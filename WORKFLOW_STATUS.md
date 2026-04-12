@@ -2,9 +2,14 @@
 
 - Batch: 32
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 32 backend session continuity slice — auth login/refresh/session/logout responses nay trả thêm `session_status` + `expires_in_seconds` để web/iOS resume flow phân biệt rõ session state hiện tại
-- Status: verify
+- Scope: batch 32 complete — auth UX/resume continuity đã nối rõ hơn giữa backend + web + iOS sau batch 31 contract tối thiểu
+- Status: complete
 - Files:
+  - apps/web-nextjs/app/login/page.tsx
+  - apps/web-nextjs/components/authenticated-route-shell.tsx
+  - apps/ios-swift/GenGate/App/RootTabView.swift
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - apps/backend-python/app/modules/auth/router.py
   - apps/backend-python/app/schemas/auth.py
   - apps/backend-python/app/services/auth.py
@@ -12,13 +17,19 @@
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
+  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅ (4 passed)
 - Git:
-  - latest commit: `e2da4ba` — `batch32: add ios auth redirect resume`
-  - working tree: bẩn đúng theo batch 32 backend session continuity slice + workflow files (chưa commit ở nhịp này)
+  - batch 32 commits:
+    - `b1e8ffb` — `batch32: add web auth redirects`
+    - `e2da4ba` — `batch32: add ios auth redirect resume`
+    - `283f8b3` — `batch32: add auth session continuity metadata`
+  - working tree: sạch
 - Blocker: none
-- Next: commit slice này; sau đó có thể cân nhắc chốt batch 32 vì web redirect + iOS redirect/resume + backend continuity metadata đã nối thành 1 vòng auth UX rõ hơn
+- Next: mở batch 33 với scope mới; không làm thêm code trong batch 32
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 32 update:
-  - Backend lane: login/refresh/session/logout responses nay có `session_status` + `expires_in_seconds` để client đọc continuity state nhất quán hơn
-  - Backend lane: focused auth API tests đã cover các field mới và vẫn xanh
+- Batch 32 result:
+  - Web lane: protected route redirect thật bằng `?next=...` + login redirect ngược lại route đích sau restore/login thành công
+  - iOS lane: pending protected tab được giữ và tự mở lại sau restore/login; Session tab nay là điểm redirect rõ ràng khi user chưa auth
+  - Backend lane: auth responses trả `session_status` + `expires_in_seconds` để client đọc continuity state nhất quán hơn

@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đang làm batch 32**.
+- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **batch 32 complete**.
 
 ## Reporting hard rule
 
@@ -89,35 +89,43 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **32**
-- Scope hiện tại: backend session continuity slice — auth login/refresh/session/logout responses nay trả thêm `session_status` + `expires_in_seconds` để web/iOS resume flow phân biệt rõ session state hiện tại.
-- Trạng thái hiện tại: **verify**
+- Scope hiện tại: batch 32 đã hoàn tất auth UX/resume continuity rõ hơn giữa backend + web + iOS.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
+  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/web-nextjs/components/authenticated-route-shell.tsx`
+  - `apps/ios-swift/GenGate/App/RootTabView.swift`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
   - `apps/backend-python/app/modules/auth/router.py`
   - `apps/backend-python/app/schemas/auth.py`
   - `apps/backend-python/app/services/auth.py`
   - `apps/backend-python/tests/test_auth_api.py`
 - Test-verify:
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
   - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ 4 passed
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `e2da4ba` — `batch32: add ios auth redirect resume`
-  - working tree hiện tại: bẩn đúng theo batch 32 backend continuity slice, chưa commit
+  - `b1e8ffb` — `batch32: add web auth redirects`
+  - `e2da4ba` — `batch32: add ios auth redirect resume`
+  - `283f8b3` — `batch32: add auth session continuity metadata`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó cân nhắc chốt batch 32 complete nếu không cần thêm auth UX scope nhỏ nào nữa
+  - mở batch 33 với scope mới; không tiếp tục đổi code trong batch 32
 
 ## Batch handoff note
 
-- Batch vừa xong: **31**
+- Batch vừa xong: **32**
 - Commit cuối đã chốt:
-  - `e638a10` — `batch31: add logout revoke lifecycle`
-  - `71348ea` — `batch31: mark workflow complete`
+  - `283f8b3` — `batch32: add auth session continuity metadata`
 - Test-verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → 4 passed
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - batch 31 contract tối thiểu đã xong; batch 32 chuyển sang auth UX thật và route/app resume behavior
-- Batch kế tiếp: **32**
-- Scope hẹp đầu tiên của batch 32:
-  - web protected-route redirect thật bằng `?next=...` và login redirect ngược lại route đích sau restore/login thành công
+  - chưa có blocker cho auth UX/resume slice; phần tiếp theo nên là batch mới với scope product-facing hơn
+- Batch kế tiếp: **33**
+- Scope hẹp đầu tiên đề xuất cho batch 33:
+  - dùng continuity metadata mới để hiển thị session expiry/status rõ hơn trên web hoặc iOS, hoặc nối một product-facing authenticated screen đầu tiên thay vì chỉ shell redirect
