@@ -2,21 +2,21 @@
 
 - Batch: 37
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 37 iOS self-serve register slice — user mới có thể tạo account từ Session screen rồi đăng nhập ngay vào persisted session flow
-- Status: verify
+- Scope: batch 37 closure — chốt self-serve onboarding parity tối thiểu cho web + iOS
+- Status: complete
 - Files:
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
+  - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `f3d293d` — `batch37: add web self-serve register flow`
-  - working tree: bẩn đúng theo batch 37 iOS self-serve register slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `4d94d26` — `batch37: add ios self-serve register flow`
+  - working tree: sạch trước nhịp workflow-only close này
 - Blocker: none
-- Next: commit slice này; sau đó cân nhắc chốt batch 37 nếu web+iOS onboarding tối thiểu đã đủ, hoặc chọn 1 auth E2E slice hẹp kế tiếp có leverage cao hơn
+- Next: mở batch 38 với 1 auth E2E slice hẹp có leverage cao nhất; ứng viên tốt là backend/web/iOS logout or expired-session parity polish, hoặc 1 backend contract step giúp onboarding/session path hoàn chỉnh hơn
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 37 update:
+- Batch 37 outcome:
   - Web login shell đã có self-serve register action trên nền `/auth/register` + `/auth/login`
-  - iOS Session screen nay cũng có self-serve register action rồi chain sang login để mở persisted session local cho user mới
+  - iOS Session screen đã có self-serve register action rồi chain sang login
+  - Cả web và iOS đều có persisted session local sau login, restore bằng `/auth/session`, manual refresh bằng `/auth/refresh`

@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đang làm batch 37**.
+- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **batch 37 đã complete**.
 
 ## Reporting hard rule
 
@@ -89,33 +89,33 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **37**
-- Scope hiện tại: iOS self-serve register slice — user mới có thể tạo account từ Session screen rồi đăng nhập ngay vào persisted session flow.
-- Trạng thái hiện tại: **verify**
+- Scope hiện tại: closure — chốt self-serve onboarding parity tối thiểu cho web + iOS.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
-  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
+  - `WORKFLOW_STATUS.md`
+  - `WORKFLOW_CHECKLIST.md`
 - Test-verify:
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `f3d293d` — `batch37: add web self-serve register flow`
-  - working tree hiện tại: bẩn đúng theo batch 37 iOS self-serve register slice, chưa commit
+  - commit gần nhất đã chốt: `4d94d26` — `batch37: add ios self-serve register flow`
+  - working tree hiện tại: sạch trước nhịp workflow-only close này
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó cân nhắc chốt batch 37 nếu web+iOS onboarding tối thiểu đã đủ, hoặc chọn 1 auth E2E slice hẹp kế tiếp có leverage cao hơn
+  - mở batch 38 với 1 auth E2E slice hẹp có leverage cao nhất; ứng viên tốt là logout / expired-session parity polish hoặc 1 backend contract step giúp onboarding/session path hoàn chỉnh hơn
 
 ## Batch handoff note
 
-- Batch vừa xong: **36**
+- Batch vừa xong: **37**
 - Commit cuối đã chốt:
-  - `50efee4` — `batch36: rotate web session on manual refresh`
-  - `4355d13` — `batch36: rotate ios session on manual refresh`
-  - `0c032a1` — `batch36: mark workflow complete`
+  - `f3d293d` — `batch37: add web self-serve register flow`
+  - `4d94d26` — `batch37: add ios self-serve register flow`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - batch 36 đã chốt; batch 37 mở self-serve onboarding path để user mới không bị kẹt ở login-only shell
-- Batch kế tiếp: **37**
-- Scope hẹp đầu tiên của batch 37:
-  - expose `/auth/register` ngay trong web login shell rồi chain sang login để mở persisted session flow cho user mới
+  - không còn blocker rõ ràng cho outcome batch 37; self-serve onboarding tối thiểu đã có trên cả web và iOS, nhưng vertical auth path vẫn còn space để polish logout / expired-session / contract parity
+- Batch kế tiếp: **38**
+- Scope hẹp đầu tiên đề xuất cho batch 38:
+  - chọn 1 auth E2E parity step có leverage cao nhất giữa backend/web/iOS, ưu tiên logout hoặc expired-session feedback parity nếu muốn siết path hiện có trước khi mở slice mới
