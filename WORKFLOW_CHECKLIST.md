@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đang làm batch 34**.
+- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đã chốt xong batch 34**.
 
 ## Reporting hard rule
 
@@ -89,36 +89,33 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **34**
-- Scope hiện tại: iOS manual refresh-session slice — thêm explicit refresh action/state ở Session screen để user chủ động re-check persisted session với backend auth shell.
-- Trạng thái hiện tại: **verify**
+- Scope hiện tại: batch 34 closure — xác nhận manual refresh-session UX đã đủ parity trên web/iOS và chốt workflow complete.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
-  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
+  - `WORKFLOW_STATUS.md`
+  - `WORKFLOW_CHECKLIST.md`
 - Test-verify:
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `c9fd9ff` — `batch34: add web manual session refresh`
-  - working tree hiện tại: bẩn đúng theo batch 34 iOS manual refresh-session slice, chưa commit
+  - commit gần nhất đã chốt: `ac02a9c` — `batch34: add ios manual session refresh`
+  - working tree hiện tại: bẩn đúng theo workflow-only batch 34 closure update, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó có thể chốt batch 34 complete nếu không cần thêm parity refresh UX nhỏ nào nữa
+  - mở batch 35 với 1 scope hẹp end-to-end hơn cho auth/session UX; ưu tiên expired-session/logout feedback polish hoặc refresh CTA parity ngay trên login shell
 
 ## Batch handoff note
 
-- Batch vừa xong: **33**
+- Batch vừa xong: **34**
 - Commit cuối đã chốt:
-  - `82c8a27` — `batch33: show web session status metadata`
-  - `02be2c1` — `batch33: show ios session status metadata`
-  - `38c4396` — `batch33: mark workflow complete`
-- Foundation liên quan vừa dùng lại:
-  - `283f8b3` — `batch32: add auth session continuity metadata`
+  - `c9fd9ff` — `batch34: add web manual session refresh`
+  - `ac02a9c` — `batch34: add ios manual session refresh`
 - Test-verify cuối:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → 4 passed
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - batch 33 đã chốt; batch 34 đang nối tiếp auth shell bằng explicit refresh UX để giảm mơ hồ khi session local đã tồn tại
-- Batch kế tiếp: **34**
-- Scope hẹp đầu tiên của batch 34:
-  - thêm 1 manual refresh-session action/state nhỏ trên web shell hoặc iOS Session screen để người dùng chủ động re-check persisted session
+  - chưa có blocker rõ ràng; auth shell nay có manual re-check nhưng expired-session/logout feedback còn có thể polish thêm
+- Batch kế tiếp: **35**
+- Scope hẹp đầu tiên của batch 35:
+  - thêm expired-session/logout feedback rõ hơn ở web login shell hoặc protected route để session invalidation ít mơ hồ hơn
