@@ -5,11 +5,11 @@ export default function HomePage() {
     <section>
       <h1>GenGate Web Foundation</h1>
       <p>
-        This is a Phase 1 starter shell. Core features are intentionally stubbed and
-        will be implemented in later batches.
+        Batch 31 đã có persisted session shell tối thiểu. Login flow hiện có thể giữ
+        session cục bộ và dùng lại để mở route shell cần auth.
       </p>
       <p>
-        Start with <Link href="/login">Login</Link> or jump to <Link href="/feed">Feed</Link>.
+        Start with <Link href="/login">Login</Link> or open <Link href="/feed">Feed</Link>.
       </p>
     </section>
   );

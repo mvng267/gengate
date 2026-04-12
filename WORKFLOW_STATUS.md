@@ -2,34 +2,25 @@
 
 - Batch: 31
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 31 auth/session persistence slice — thêm backend refresh/session snapshot contract và nối web/iOS shell vào persisted refresh token restore tối thiểu
+- Scope: batch 31 web auth-gated shell slice — dùng persisted session state để khóa/mở route shell và hiển thị session context ở app shell
 - Status: verify
 - Files:
-  - apps/backend-python/app/modules/auth/router.py
-  - apps/backend-python/app/repositories/sessions.py
-  - apps/backend-python/app/schemas/auth.py
-  - apps/backend-python/app/services/auth.py
-  - apps/backend-python/tests/test_auth_api.py
-  - apps/web-nextjs/app/login/page.tsx
-  - apps/web-nextjs/lib/auth/client.ts
-  - apps/web-nextjs/lib/auth/types.ts
-  - apps/web-nextjs/lib/config/env.ts
-  - apps/ios-swift/GenGate/App/GenGateApp.swift
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
+  - apps/web-nextjs/app/feed/page.tsx
+  - apps/web-nextjs/app/inbox/page.tsx
+  - apps/web-nextjs/app/location/page.tsx
+  - apps/web-nextjs/app/page.tsx
+  - apps/web-nextjs/app/profile/page.tsx
+  - apps/web-nextjs/components/app-shell.tsx
+  - apps/web-nextjs/components/authenticated-route-shell.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅ (3 passed)
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `17626f3` — `batch30: scaffold auth shells across backend web ios`
-  - working tree: bẩn đúng theo batch 31 slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `51bec27` — `batch31: wire refresh session persistence shells`
+  - working tree: bẩn đúng theo batch 31 web gating slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit batch 31 slice này; sau đó nối app shell gating/redirect thật dựa trên persisted session state
+- Next: commit web gating slice này; sau đó nối iOS root/tab gating hiển thị session restore state tương đương web app shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 31 update:
-  - Backend lane: thêm `POST /auth/session` để restore snapshot và `POST /auth/refresh` để rotate refresh token/session; verify ✅
-  - Web lane: login page nay persist refresh token + restore session preview từ local storage qua backend snapshot contract; verify ✅
-  - iOS lane: `AppSessionStore` nay login/restore với backend shell thật, persist local session vào `UserDefaults`, app boot tự restore; verify ✅
+  - Web lane: feed/inbox/location/profile route shell nay tự check persisted session qua backend snapshot contract; app shell header hiển thị session context tối thiểu; verify ✅

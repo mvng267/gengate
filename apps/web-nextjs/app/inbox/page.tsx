@@ -1,8 +1,8 @@
-import { RoutePlaceholder } from "@/components/route-placeholder";
+import { AuthenticatedRouteShell } from "@/components/authenticated-route-shell";
 
 export default function InboxPage() {
   return (
-    <RoutePlaceholder
+    <AuthenticatedRouteShell
       title="Inbox"
       summary="1:1 encrypted messaging thread list and composer are pending."
     />

@@ -88,32 +88,25 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **31**
-- Scope hiện tại: thêm refresh/session snapshot contract backend và persist/restore session tối thiểu cho web + iOS shell.
+- Scope hiện tại: web auth-gated shell dùng persisted session state để khóa/mở route shell và hiển thị session context ở app shell.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/backend-python/app/modules/auth/router.py`
-  - `apps/backend-python/app/repositories/sessions.py`
-  - `apps/backend-python/app/schemas/auth.py`
-  - `apps/backend-python/app/services/auth.py`
-  - `apps/backend-python/tests/test_auth_api.py`
-  - `apps/web-nextjs/app/login/page.tsx`
-  - `apps/web-nextjs/lib/auth/client.ts`
-  - `apps/web-nextjs/lib/auth/types.ts`
-  - `apps/web-nextjs/lib/config/env.ts`
-  - `apps/ios-swift/GenGate/App/GenGateApp.swift`
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
-  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
+  - `apps/web-nextjs/app/feed/page.tsx`
+  - `apps/web-nextjs/app/inbox/page.tsx`
+  - `apps/web-nextjs/app/location/page.tsx`
+  - `apps/web-nextjs/app/page.tsx`
+  - `apps/web-nextjs/app/profile/page.tsx`
+  - `apps/web-nextjs/components/app-shell.tsx`
+  - `apps/web-nextjs/components/authenticated-route-shell.tsx`
 - Test-verify:
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ 3 passed
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `17626f3` — `batch30: scaffold auth shells across backend web ios`
-  - working tree hiện tại: bẩn đúng theo batch 31 slice, chưa commit
+  - commit gần nhất đã chốt: `51bec27` — `batch31: wire refresh session persistence shells`
+  - working tree hiện tại: bẩn đúng theo web gating slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch 31 slice này; kế tiếp nối app shell gating/redirect thật dựa trên persisted session state
+  - commit web gating slice này; kế tiếp nối iOS root/tab gating hiển thị session restore state tương đương web app shell
 
 ## Batch handoff note
 

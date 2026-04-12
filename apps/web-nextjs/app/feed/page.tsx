@@ -1,8 +1,8 @@
-import { RoutePlaceholder } from "@/components/route-placeholder";
+import { AuthenticatedRouteShell } from "@/components/authenticated-route-shell";
 
 export default function FeedPage() {
   return (
-    <RoutePlaceholder
+    <AuthenticatedRouteShell
       title="Feed"
       summary="Friends-only moment feed UI and data loading are pending."
     />
