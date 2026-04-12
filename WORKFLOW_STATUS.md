@@ -1,22 +1,29 @@
 # GenGate Workflow Status
 
-- Batch: 29
-- Worker: team
-- Scope: 3-lane theo platform — backend `/profiles`, web foundation `apps/web-nextjs`, iOS foundation `apps/ios-swift`
-- Status: dispatched_parallel
+- Batch: 30
+- Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
+- Scope: batch 30 đã salvage trực tiếp trong repo cho 3 lane quanh auth/login vertical slice đầu tiên — backend auth/session shell, web login shell wiring, iOS login/session placeholder wiring
+- Status: pushed
 - Files:
   - apps/backend-python/**
   - apps/web-nextjs/**
   - apps/ios-swift/**
   - TEAM_DISPATCH.md
   - WORKFLOW_STATUS.md
+  - WORKFLOW_CHECKLIST.md
 - Test:
-  - backend baseline trước khi mở 3 lane: `./.venv/bin/pytest -q tests/test_profiles_api.py` ✅ (45 passed)
+  - batch 30 backend salvage: `./.venv/bin/pytest -q tests/test_auth_api.py` ✅ (2 passed)
+  - batch 30 web salvage: `cd apps/web-nextjs && npm run verify` ✅
+  - batch 30 iOS salvage: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest pushed backend feature commit: `b15041f`
-  - latest workflow commit: `e0cd02e`
-  - working tree: dispatch update only
-- Blocker: repo hiện chưa có `apps/web-nextjs` và `apps/ios-swift`; 2 lane mới sẽ bootstrap từ đầu theo spec/tasklist
-- Next: chờ output từ 3 worker theo platform
-- Backend lane update (pikamen): added `/profiles` contract test for `bio: null` with omitted `display_name` + `avatar_url` (preserve omitted fields, including empty-string values); verify `./.venv/bin/pytest -q tests/test_profiles_api.py -k "updates_bio_to_null_and_preserves_omitted_display_name_and_avatar_url"` ✅ (2 passed), full file ✅ (47 passed)
-- Web lane update (pikachu): bootstrapped `apps/web-nextjs` Next.js App Router foundation with shared shell + placeholder routes (`/login`, `/feed`, `/inbox`, `/location`, `/profile`), env/config + API client stub, and README run notes; verify `cd apps/web-nextjs && npm run verify` ✅.
+  - base batch 29 backend commit: `e1e4026`
+  - base batch 29 web commit: `b3700f5`
+  - base batch 29 iOS commit: `37a4e87`
+  - working tree: batch 30 salvage code đã verify xanh; đang chốt push batch 30
+- Blocker: none
+- Next: ghi handoff batch 31 với scope hẹp tiếp theo bám auth/session vertical slice
+- Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 30 salvage update:
+  - Backend lane: thêm auth login/session shell (`/auth/login`) + schema/service wiring + `tests/test_auth_api.py`; verify ✅
+  - Web lane (handoff sang `pikachu-web`): thay `app/login/page.tsx` bằng login shell thật, giữ auth client/env stub an toàn; verify ✅
+  - iOS lane (handoff sang `pikame-ios`): thêm `AppSessionStore`, `SessionEntryView`, root tab gating theo auth state, update `GenGateApp.swift`; verify `swift build` ✅

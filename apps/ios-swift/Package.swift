@@ -4,7 +4,8 @@ import PackageDescription
 let package = Package(
     name: "GenGateiOSFoundation",
     platforms: [
-        .iOS(.v17)
+        .iOS(.v17),
+        .macOS(.v14)
     ],
     products: [
         .library(
@@ -15,7 +16,10 @@ let package = Package(
     targets: [
         .target(
             name: "GenGateApp",
-            path: "GenGate"
+            path: "GenGate",
+            resources: [
+                .process("Resources/Assets.xcassets")
+            ]
         )
     ]
 )

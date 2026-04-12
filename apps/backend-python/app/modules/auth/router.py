@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db_session
-from app.schemas.auth import RegisterRequest, RegisterResponse
+from app.schemas.auth import LoginRequest, LoginResponse, RegisterRequest, RegisterResponse
 from app.schemas.security import (
     DeviceCreateRequest,
     DeviceKeyCreateRequest,
@@ -35,6 +35,30 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db_session)) ->
         email=user.email,
         username=user.username,
         status=user.status,
+    )
+
+
+@router.post("/login", response_model=LoginResponse)
+def login(payload: LoginRequest, db: Session = Depends(get_db_session)) -> LoginResponse:
+    try:
+        user, device, auth_session, refresh_token, bootstrap_mode = auth_service.login_or_create_session(
+            db,
+            email=payload.email,
+            platform=payload.platform,
+            device_name=payload.device_name,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    return LoginResponse(
+        user_id=user.id,
+        email=user.email,
+        device_id=device.id,
+        session_id=auth_session.id,
+        refresh_token=refresh_token,
+        expires_at=auth_session.expires_at,
+        token_type="bearer",
+        bootstrap_mode=bootstrap_mode,
     )
 
 

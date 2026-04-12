@@ -1,14 +1,17 @@
 import SwiftUI
 
 struct RootTabView: View {
+    @Environment(AppSessionStore.self) private var sessionStore
+
     var body: some View {
-        TabView {
+        TabView(selection: currentTabBinding) {
             NavigationStack {
-                LoginPlaceholderView()
+                SessionEntryView()
             }
             .tabItem {
-                Label("Login", systemImage: "person.badge.key")
+                Label(sessionStore.isAuthenticated ? "Session" : "Login", systemImage: sessionStore.isAuthenticated ? "person.crop.circle.badge.checkmark" : "person.badge.key")
             }
+            .tag(AppTab.session)
 
             NavigationStack {
                 FeedPlaceholderView()
@@ -16,6 +19,8 @@ struct RootTabView: View {
             .tabItem {
                 Label("Feed", systemImage: "house")
             }
+            .tag(AppTab.feed)
+            .disabled(!sessionStore.isAuthenticated)
 
             NavigationStack {
                 InboxPlaceholderView()
@@ -23,6 +28,8 @@ struct RootTabView: View {
             .tabItem {
                 Label("Inbox", systemImage: "message")
             }
+            .tag(AppTab.inbox)
+            .disabled(!sessionStore.isAuthenticated)
 
             NavigationStack {
                 LocationPlaceholderView()
@@ -30,6 +37,8 @@ struct RootTabView: View {
             .tabItem {
                 Label("Location", systemImage: "location")
             }
+            .tag(AppTab.location)
+            .disabled(!sessionStore.isAuthenticated)
 
             NavigationStack {
                 ProfilePlaceholderView()
@@ -37,6 +46,21 @@ struct RootTabView: View {
             .tabItem {
                 Label("Profile", systemImage: "person")
             }
+            .tag(AppTab.profile)
+            .disabled(!sessionStore.isAuthenticated)
         }
+    }
+
+    private var currentTabBinding: Binding<AppTab> {
+        Binding(
+            get: { sessionStore.selectedTab },
+            set: { newValue in
+                if sessionStore.isAuthenticated || newValue == .session {
+                    sessionStore.selectedTab = newValue
+                } else {
+                    sessionStore.selectedTab = .session
+                }
+            }
+        )
     }
 }

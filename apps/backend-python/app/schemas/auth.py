@@ -1,3 +1,6 @@
+import uuid
+from datetime import datetime
+
 from pydantic import BaseModel, field_validator
 
 
@@ -39,3 +42,45 @@ class RegisterResponse(BaseModel):
     email: str
     username: str | None
     status: str
+
+
+class LoginRequest(BaseModel):
+    email: str
+    platform: str
+    device_name: str
+
+    @field_validator("email")
+    @classmethod
+    def normalize_login_email(cls, value: str) -> str:
+        return RegisterRequest.normalize_email(value)
+
+    @field_validator("platform")
+    @classmethod
+    def validate_platform(cls, value: str) -> str:
+        normalized = value.strip().lower()
+        if normalized == "":
+            raise ValueError("platform_required")
+        if len(normalized) > 32:
+            raise ValueError("platform_too_long")
+        return normalized
+
+    @field_validator("device_name")
+    @classmethod
+    def validate_device_name(cls, value: str) -> str:
+        normalized = value.strip()
+        if normalized == "":
+            raise ValueError("device_name_required")
+        if len(normalized) > 128:
+            raise ValueError("device_name_too_long")
+        return normalized
+
+
+class LoginResponse(BaseModel):
+    user_id: uuid.UUID
+    email: str
+    device_id: uuid.UUID
+    session_id: uuid.UUID
+    refresh_token: str
+    expires_at: datetime
+    token_type: str
+    bootstrap_mode: str

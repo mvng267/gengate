@@ -46,7 +46,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong memory/checklist: **batch 28 xong, mở batch 29**.
+- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **batch 29 xong, mở batch 30**.
 
 ## Reporting hard rule
 
@@ -63,7 +63,11 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   3. test-verify cuối,
   4. blocker/rủi ro còn lại,
   5. batch kế tiếp + scope hẹp đầu tiên.
-- `pikamen` không được tự coi là đã sang batch mới nếu chưa thấy handoff note này trong checklist/status hoặc lệnh trực tiếp từ main agent.
+- Mỗi worker dùng **1 session cố định** theo lane; không đổi session liên tục qua từng batch.
+- Nhưng khi sang batch mới, main agent phải **clear context của session lane đó**: nhịp mới chỉ mang handoff note ngắn, không kéo full history batch trước sang.
+- Job nhắc việc nếu có phải bám đúng flow file do main agent cập nhật; worker không tự suy batch/scope ngoài file điều phối.
+- Team coding cố định hiện tại là: `pikamen` (backend), `pikachu-web` (web), `pikame-ios` (iOS). Không dùng lại lane legacy `pikachu` / `pikame`.
+- `pikamen` / `pikachu-web` / `pikame-ios` không được tự coi là đã sang batch mới nếu chưa thấy handoff note này trong checklist/status hoặc lệnh trực tiếp từ main agent.
 
 ## Status freshness rule
 
@@ -83,13 +87,17 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Batch handoff note
 
-- Batch vừa xong: **28**
-- Commit cuối đã push: `09e365f` — `test(profiles): lock display_name max length contract`
+- Batch vừa xong: **29**
+- Commit cuối đã push:
+  - backend: `e1e4026` — `test(profiles): lock bio null preserve omitted display/avatar`
+  - web: `b3700f5` — `bootstrap web-nextjs foundation shell`
+  - iOS: `37a4e87` — `batch29 ios: bootstrap swift foundation skeleton`
 - Test-verify cuối:
-  - `./.venv/bin/pytest -q tests/test_profiles_api.py -k "display_name_exceeds_max_length or accepts_very_long_bio"` → 2 passed
-  - `./.venv/bin/pytest -q tests/test_profiles_api.py` → 43 passed
+  - backend focused: `./.venv/bin/pytest -q tests/test_profiles_api.py -k "updates_bio_to_null_and_preserves_omitted_display_name_and_avatar_url"` → 2 passed
+  - backend full file: `./.venv/bin/pytest -q tests/test_profiles_api.py` → 47 passed
+  - web: `cd apps/web-nextjs && npm run verify` → pass
 - Blocker/rủi ro còn lại:
-  - không có blocker code/git; chỉ còn cần giữ kỷ luật mốc batch và tiếp tục scope hẹp
-- Batch kế tiếp: **29**
-- Scope hẹp đầu tiên của batch 29:
-  - khóa contract `/profiles` khi gửi `avatar_url: null` để clear avatar nhưng vẫn preserve `display_name` + `bio`
+  - chưa có blocker code rõ ràng; iOS mới ở mức foundation skeleton, chưa có verify/runtime note tương đương web/backend
+- Batch kế tiếp: **30**
+- Scope hẹp đầu tiên của batch 30:
+  - scaffold backend auth/session shell trong `apps/backend-python` để tạo trục tích hợp đầu tiên cho web/iOS foundation
