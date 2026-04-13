@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **118 — iOS inbox cursor-form sync hint failure-reset slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **119 — iOS inbox cursor-form sync hint empty-member reset slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **118**
-- Scope hiện tại: iOS inbox read-status UX hardening — clear sync hint when thread load fails and conversation resets.
+- Batch workflow chính thức hiện tại: **119**
+- Scope hiện tại: iOS inbox read-status UX hardening — clear sync hint when conversation members become empty.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch118 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch119 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch119 cho messaging friction tiếp theo (clear sync hint when direct conversation members become empty) trong iOS inbox shell
+  - mở batch120 cho messaging friction tiếp theo (clear stale read-cursor target message when not found in loaded rows) trong iOS inbox shell
 
 ## Batch handoff note
 
