@@ -89,19 +89,19 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **53**
-- Scope hiện tại: web restore outcome parity — restore summary now surfaces local clear recommendation alongside backend detail.
-- Trạng thái hiện tại: **verify**
+- Scope hiện tại: iOS restore outcome parity — restore summary now surfaces local clear recommendation alongside backend detail.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `ceaf1c0` — `batch52: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 53 web restore-summary parity slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `d5dfaee` — `batch53: expose restore cleanup cue`
+  - working tree hiện tại: bẩn đúng theo batch 53 iOS restore-summary parity slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit web batch-53 slice này; sau đó inspect iOS/web logout+restore+refresh summaries only where `local_clear_recommended` / backend detail cues still differ materially
+  - chốt batch 53 bằng commit iOS + workflow; sau đó clean closeout nếu chỉ còn artifact, rồi chọn seam auth/session end-to-end kế tiếp cho batch 54
 
 ## Batch handoff note
 

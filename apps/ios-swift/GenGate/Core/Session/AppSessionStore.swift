@@ -340,6 +340,7 @@ final class AppSessionStore {
                 restoreOutcomeSummary = [
                     "restore_result: local_restored_valid",
                     "backend_detail: \(snapshot.backend_detail ?? snapshot.session_status)",
+                    "local_clear_recommended: \(snapshot.local_clear_recommended ? "true" : "false")",
                     "message: Đã restore session từ backend auth shell và mở tab \(destination.displayName)."
                 ].joined(separator: "\n")
             } else {
@@ -347,6 +348,7 @@ final class AppSessionStore {
                 restoreOutcomeSummary = [
                     "restore_result: local_restored_valid",
                     "backend_detail: \(snapshot.backend_detail ?? snapshot.session_status)",
+                    "local_clear_recommended: \(snapshot.local_clear_recommended ? "true" : "false")",
                     "message: Đã restore persisted session với backend auth shell."
                 ].joined(separator: "\n")
             }

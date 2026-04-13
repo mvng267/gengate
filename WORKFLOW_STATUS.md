@@ -2,20 +2,23 @@
 
 - Batch: 53
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 53 web restore outcome parity — web shell restore summary now surfaces local clear recommendation alongside backend detail so restore cue matches the persistence/refresh framing better
-- Status: verify
+- Scope: batch 53 restore outcome parity — web + iOS shells now surface local clear recommendation alongside backend detail in restore summaries so restore cue matches refresh/persisted framing better
+- Status: complete
 - Files:
   - apps/web-nextjs/app/login/page.tsx
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `ceaf1c0` — `batch52: mark workflow complete`
-  - working tree: bẩn đúng theo batch 53 web restore-summary parity slice + workflow files (chưa commit ở nhịp này)
+  - latest committed slice before this update: `d5dfaee` — `batch53: expose restore cleanup cue`
+  - working tree: bẩn đúng theo batch 53 iOS restore-summary parity slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit web batch-53 slice này; sau đó inspect iOS/web logout+restore+refresh summaries only where `local_clear_recommended` / backend detail cues still differ materially
+- Next: chốt batch 53 bằng commit iOS + workflow; sau đó clean closeout nếu chỉ còn artifact, rồi chọn seam auth/session end-to-end kế tiếp cho batch 54
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 53 update:
-  - web restore outcome preview nay hiện `local_clear_recommended` thay vì chỉ có `backend_detail`
-  - refresh/persisted preview/restore framing trên web nay nhất quán hơn về cleanup cue
+  - web restore outcome preview nay hiện `local_clear_recommended`
+  - iOS restore outcome summary nay hiện `local_clear_recommended`
+  - restore summary parity giữa web và iOS nay đã align ở mức cleanup cue
