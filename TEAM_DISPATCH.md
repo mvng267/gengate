@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 114
-- Trục công việc: iOS inbox seam hardening — row tap sync full read-cursor form context.
+- Batch workflow chính thức hiện tại: 115
+- Trục công việc: iOS inbox seam hardening — add cursor-form sync hint gần read-cursor form.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 114 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: member row tap set đồng thời focus user + read-cursor user, và nếu có cursor thì prefill luôn read-cursor target message.
-- Trạng thái: verify_batch114_ios.
+- Scope hiện tại: batch 115 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: read-cursor section có sync hint ngắn hạn (`cursor_form_sync: ... · Ns ago`) sau khi apply context từ member row tap.
+- Trạng thái: verify_batch115_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

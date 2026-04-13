@@ -33,6 +33,8 @@ struct InboxPlaceholderView: View {
     @State private var isUpdatingReadCursor = false
     @State private var isDeletingMessage = false
     @State private var autoRefreshEnabled = false
+    @State private var lastCursorFormSyncSummary: String?
+    @State private var lastCursorFormSyncAt: Date?
 
     var body: some View {
         ScrollView {
@@ -40,7 +42,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -51,7 +53,8 @@ struct InboxPlaceholderView: View {
                         "Quick action `Jump focus user to first unread candidate` advances cursor to the earliest unread loaded message for the focus user.",
                         "In member summary, tapping a user row now sets `Read-status focus user UUID` and `Member user UUID` together (no manual paste).",
                         "Each member card now has quick action to copy its `last_read_message_id` into `Last-read message UUID` target.",
-                        "Member row tap now applies full read-cursor form context (`Read-status focus user UUID` + `Member user UUID` + optional `Last-read message UUID`)."
+                        "Member row tap now applies full read-cursor form context (`Read-status focus user UUID` + `Member user UUID` + optional `Last-read message UUID`).",
+                        "Read-cursor form now shows a brief sync hint after row tap so testers can verify which member/context was just applied."
                     ]
                 )
 
@@ -375,6 +378,12 @@ struct InboxPlaceholderView: View {
                             .background(Color.secondary.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                        if let cursorFormSyncHintText {
+                            Text(cursorFormSyncHintText)
+                                .font(.caption.monospaced())
+                                .foregroundStyle(.blue)
+                        }
+
                         Button {
                             Task {
                                 await updateReadCursor()
@@ -578,6 +587,13 @@ struct InboxPlaceholderView: View {
                                     if let cursorMessageID {
                                         readCursorTargetMessageIDDraft = cursorMessageID
                                     }
+
+                                    if let cursorMessageID {
+                                        lastCursorFormSyncSummary = "cursor_form_sync: user=\(member.userID) message=\(cursorMessageID)"
+                                    } else {
+                                        lastCursorFormSyncSummary = "cursor_form_sync: user=\(member.userID) message=(none)"
+                                    }
+                                    lastCursorFormSyncAt = Date()
                                 } label: {
                                     HStack(spacing: 8) {
                                         Text("user_id: \(member.userID)")
@@ -882,6 +898,23 @@ struct InboxPlaceholderView: View {
         isUpdatingReadCursor ||
         isDeletingMessage ||
         isLoadingRecipientDevices
+    }
+
+    private var cursorFormSyncHintText: String? {
+        guard let lastCursorFormSyncSummary else {
+            return nil
+        }
+
+        guard let lastCursorFormSyncAt else {
+            return lastCursorFormSyncSummary
+        }
+
+        let elapsed = Date().timeIntervalSince(lastCursorFormSyncAt)
+        guard elapsed <= 15 else {
+            return nil
+        }
+
+        return "\(lastCursorFormSyncSummary) · \(Int(elapsed))s ago"
     }
 
     private func prefillUserAFromCurrentSessionIfNeeded() {

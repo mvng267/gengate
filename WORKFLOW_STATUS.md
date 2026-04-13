@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 114
+- Batch: 115
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 114 iOS inbox seam hardening — member row tap now applies full read-cursor form context (user + optional cursor message)
+- Scope: batch 115 iOS inbox seam hardening — add explicit short-lived cursor-form sync indicator near read-cursor inputs
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch114 slice)
+  - latest commit: `HEAD` (local batch115 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch115 cho messaging friction tiếp theo (ví dụ show explicit row-tap sync indicator near read-cursor form fields) trong iOS inbox shell
+- Next: mở batch116 cho messaging friction tiếp theo (ví dụ show sync hint reset behavior rõ ràng khi load thread mới) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -187,6 +187,10 @@
   - member row tap now applies full read-cursor form context: set `Read-status focus user UUID`, `Member user UUID`, và nếu có thì set luôn `Last-read message UUID` từ member cursor
   - row label đổi thành `focus+cursor_form` / `set_focus+cursor_form` để phản ánh hành vi form-level sync
   - quick read-cursor actions sau row tap cần ít thao tác tay hơn vì user+message target được prefill cùng lúc
+- Batch 115 outcome:
+  - read-cursor section now shows explicit sync hint after member row tap: `cursor_form_sync: user=<id> message=<id|none> · <Ns> ago`
+  - sync hint appears near read-cursor input fields so tester can confirm context source immediately
+  - sync hint auto-expires after a short window (~15s) to avoid stale UI context lingering too long
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -196,7 +200,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, nhập recipient user để load device list (`/auth/devices/{user_id}`), chọn recipient device rồi create/list message device keys, bật `Auto refresh every 3s` để quan sát near-realtime polling, dùng quick presets để chọn read-cursor target user/message (hoặc nhập tay), chạm user row trong `Member read-cursor summary` để sync full cursor form (focus user + cursor target user + optional cursor message), hoặc bấm `Use cursor as message target` nếu chỉ muốn đổi message target, sau đó chạy `Update read cursor` / `Mark latest message as read (focus user)` / `Jump focus user to first unread candidate` và verify `last_read_by`, `read_status(<focus_user>)`, `cursor_order_hint`, `unread_behind_cursor`
+  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, nhập recipient user để load device list (`/auth/devices/{user_id}`), chọn recipient device rồi create/list message device keys, bật `Auto refresh every 3s` để quan sát near-realtime polling, dùng quick presets để chọn read-cursor target user/message (hoặc nhập tay), chạm user row trong `Member read-cursor summary` để sync full cursor form (focus user + cursor target user + optional cursor message), quan sát sync hint `cursor_form_sync: ... · Ns ago` gần form để xác nhận context vừa apply, hoặc bấm `Use cursor as message target` nếu chỉ muốn đổi message target, sau đó chạy `Update read cursor` / `Mark latest message as read (focus user)` / `Jump focus user to first unread candidate` và verify `last_read_by`, `read_status(<focus_user>)`, `cursor_order_hint`, `unread_behind_cursor`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

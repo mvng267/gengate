@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **114 — iOS inbox row-tap full cursor-form sync slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **115 — iOS inbox cursor-form sync hint slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **114**
-- Scope hiện tại: iOS inbox read-status UX hardening — row tap applies full read-cursor form context (user + optional message).
+- Batch workflow chính thức hiện tại: **115**
+- Scope hiện tại: iOS inbox read-status UX hardening — add explicit short-lived cursor-form sync hint near read-cursor form.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch114 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch115 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch115 cho messaging friction tiếp theo (show explicit row-tap sync indicator near read-cursor form fields) trong iOS inbox shell
+  - mở batch116 cho messaging friction tiếp theo (show sync hint reset behavior rõ ràng khi load thread mới) trong iOS inbox shell
 
 ## Batch handoff note
 
