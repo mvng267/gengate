@@ -13,6 +13,14 @@ export type MessageItem = {
   payload_text: string;
 };
 
+export type MessageAttachmentItem = {
+  id: string;
+  message_id: string;
+  attachment_type: string;
+  encrypted_attachment_blob: string;
+  storage_key: string | null;
+};
+
 export async function getOrCreateDirectConversation(userAId: string, userBId: string): Promise<DirectConversation> {
   const response = await apiRequest("/conversations/direct", {
     method: "POST",
@@ -68,4 +76,43 @@ export async function sendMessage(input: {
   }
 
   return (await response.json()) as MessageItem;
+}
+
+export async function createMessageAttachment(input: {
+  messageId: string;
+  attachmentType: string;
+  encryptedAttachmentBlob: string;
+  storageKey?: string;
+}): Promise<MessageAttachmentItem> {
+  const response = await apiRequest(`/messages/${encodeURIComponent(input.messageId)}/attachments`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      attachment_type: input.attachmentType,
+      encrypted_attachment_blob: input.encryptedAttachmentBlob,
+      storage_key: input.storageKey ?? null,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`message_attachment_create_failed:${response.status}`);
+  }
+
+  return (await response.json()) as MessageAttachmentItem;
+}
+
+export async function listMessageAttachments(messageId: string): Promise<MessageAttachmentItem[]> {
+  const response = await apiRequest(`/messages/${encodeURIComponent(messageId)}/attachments`);
+  if (!response.ok) {
+    throw new Error(`message_attachment_list_failed:${response.status}`);
+  }
+
+  const payload = (await response.json()) as {
+    count: number;
+    items: MessageAttachmentItem[];
+  };
+
+  return payload.items;
 }

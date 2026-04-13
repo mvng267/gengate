@@ -1,22 +1,23 @@
 # GenGate Workflow Status
 
-- Batch: 83
+- Batch: 84
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 83 web friend-request action hardening — allow creating/accepting friend requests directly from the profile friend graph shell
+- Scope: batch 84 web direct-message attachment hardening — allow creating/listing image attachments on thread messages from the inbox shell
 - Status: MVP-testable
 - Files:
-  - apps/web-nextjs/components/friend-graph-shell.tsx
-  - apps/web-nextjs/lib/friends/client.ts
+  - apps/web-nextjs/components/direct-message-shell.tsx
+  - apps/web-nextjs/lib/inbox/client.ts
+  - apps/web-nextjs/app/inbox/page.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `92c1c81` — `batch82: add dev docker mvp bootstrap`
-  - working tree: bẩn (batch 83 ready to commit)
+  - latest commit: `48559e8` — `batch83: harden web friend request actions`
+  - working tree: bẩn (batch 84 ready to commit)
 - Blocker: none
-- Next: commit batch 83 web friend-request action hardening; after that, prefer real human-test bugs or next concrete social seam friction over generic polish
+- Next: commit batch 84 web direct-message attachment hardening; after that, keep opening only real MVP seam gaps from human testing
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -72,10 +73,13 @@
 - Batch 82 handoff:
   - `92c1c81` — `batch82: add dev docker mvp bootstrap`
   - local docker startup path remains MVP-testable while batch 83 hardens direct friend-request actions in web profile flow
-- Batch 83 outcome:
-  - web friend graph shell now supports sending friend requests directly (requester=current profile user)
-  - pending requests can be accepted in-place when current profile user is the receiver
-  - this turns the highest-priority social seam into a more complete interactive test path without leaving the web shell
+- Batch 83 handoff:
+  - `48559e8` — `batch83: harden web friend request actions`
+  - friend-request create/accept web path remains MVP-testable while batch 84 hardens direct-message attachments
+- Batch 84 outcome:
+  - web inbox shell now supports creating image attachments for a selected message id
+  - inbox shell can list attachments for a selected message id using backend message-attachment contracts
+  - this makes messaging seam closer to MVP requirement (text + image attachments) without backend contract churn
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

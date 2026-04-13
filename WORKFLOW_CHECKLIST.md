@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **83 — web friend-request action hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **84 — web direct-message attachment hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,24 +89,25 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **83**
-- Scope hiện tại: web friend-request action hardening — allow creating/accepting friend requests directly from the profile friend graph shell.
+- Batch workflow chính thức hiện tại: **84**
+- Scope hiện tại: web direct-message attachment hardening — allow creating/listing image attachments on thread messages from the inbox shell.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/components/friend-graph-shell.tsx`
-  - `apps/web-nextjs/lib/friends/client.ts`
+  - `apps/web-nextjs/components/direct-message-shell.tsx`
+  - `apps/web-nextjs/lib/inbox/client.ts`
+  - `apps/web-nextjs/app/inbox/page.tsx`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `92c1c81` — `batch82: add dev docker mvp bootstrap`
-  - working tree hiện tại: bẩn (batch 83 ready to commit)
+  - commit gần nhất đã chốt: `48559e8` — `batch83: harden web friend request actions`
+  - working tree hiện tại: bẩn (batch 84 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch83 web friend-request action hardening; sau đó chỉ mở slice mới nếu có bug/friction thật từ human testing hoặc social seam cụ thể tiếp theo
+  - commit batch84 web direct-message attachment hardening; sau đó mở slice hẹp kế tiếp chỉ khi có MVP seam gap thật hoặc human-test friction cụ thể
 
 ## Batch handoff note
 

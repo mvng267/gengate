@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 83
-- Trục công việc: web friend-request action hardening — cho phép tạo/accept friend request trực tiếp từ profile friend graph shell.
+- Batch workflow chính thức hiện tại: 84
+- Trục công việc: web direct-message attachment hardening — cho phép tạo/list image attachments trực tiếp từ inbox shell.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -46,9 +46,9 @@
 - Trạng thái: idle_batch68.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: batch 83 web friend-request action hardening đã xong.
-- Kết quả gần nhất: `/profile` friend graph shell có thể create/accept friend requests trực tiếp.
-- Trạng thái: complete_batch83.
+- Scope hiện tại: batch 84 web direct-message attachment hardening đã xong.
+- Kết quả gần nhất: inbox shell có thể create/list message attachments cho thread message.
+- Trạng thái: complete_batch84.
 
 ### pikame-ios — iOS
 - Scope hiện tại: không mở iOS scope mới trong batch 70.

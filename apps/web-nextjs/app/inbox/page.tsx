@@ -26,7 +26,7 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
   return (
     <section>
       <h1>Inbox</h1>
-      <p>1:1 direct messaging shell is now wired for MVP testing.</p>
+      <p>1:1 direct messaging shell is now wired for MVP testing, including minimal image-attachment actions on messages.</p>
       <p>Use the launcher form below to prefill the two thread members before opening the direct conversation shell.</p>
 
       <form method="GET" action="/inbox" style={{ display: "grid", gap: 12, maxWidth: 720, marginBottom: 20 }}>
