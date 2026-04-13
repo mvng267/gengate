@@ -2,20 +2,23 @@
 
 - Batch: 40
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 40 iOS auth E2E shell framing — align Session screen copy/control labels to the real login → restore/refresh → logout flow
-- Status: verify
+- Scope: batch 40 auth E2E shell complete — web + iOS now frame and exercise login → restore/refresh → logout flow clearly
+- Status: complete
 - Files:
+  - apps/web-nextjs/app/login/page.tsx
   - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
+  - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `94d56b4` — `batch40: add web auth e2e shell`
-  - working tree: bẩn đúng theo batch 40 iOS auth E2E shell framing slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `bb7f576` — `batch40: align ios auth e2e shell`
+  - working tree: sạch
 - Blocker: none
-- Next: commit slice này; sau đó cân nhắc chốt batch 40 nếu web+iOS framing/control parity đã đủ, hoặc chọn 1 auth E2E data/UX slice hẹp kế tiếp có leverage cao hơn
+- Next: mở batch 41 với 1 auth E2E data/UX slice hẹp có leverage cao hơn; ưu tiên thêm 1 verify surface hoặc client-side state cue giúp flow thật dễ quan sát hơn thay vì chỉ copy/control framing
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 40 update:
-  - iOS Session screen nay phản ánh đúng mục tiêu auth E2E shell thay vì còn copy batch-39 logout parity
-  - manual refresh control label/copy đã align với flow login → restore/refresh persisted session → logout
+- Batch 40 outcome:
+  - Web login shell nay cho chạy tay đủ vòng login → restore/refresh persisted session → logout trên cùng một màn
+  - iOS Session screen nay cũng phản ánh đúng auth E2E loop tương ứng với manual refresh control rõ ràng hơn
+  - Batch 40 đã nâng auth shell từ parity/copy improvements sang 1 flow E2E dễ thao tác hơn trên cả web và iOS

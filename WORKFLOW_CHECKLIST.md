@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đang làm batch 40**.
+- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **batch 40 đã complete**.
 
 ## Reporting hard rule
 
@@ -89,32 +89,34 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **40**
-- Scope hiện tại: iOS auth E2E shell framing — align Session screen copy/control labels to the real login → restore/refresh → logout flow.
-- Trạng thái hiện tại: **verify**
+- Scope hiện tại: auth E2E shell complete — web + iOS now frame and exercise login → restore/refresh → logout flow clearly.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
+  - `apps/web-nextjs/app/login/page.tsx`
   - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `94d56b4` — `batch40: add web auth e2e shell`
-  - working tree hiện tại: bẩn đúng theo batch 40 iOS auth E2E shell framing slice, chưa commit
+  - commit gần nhất đã chốt: `bb7f576` — `batch40: align ios auth e2e shell`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó cân nhắc chốt batch 40 nếu web+iOS framing/control parity đã đủ, hoặc chọn 1 auth E2E data/UX slice hẹp kế tiếp có leverage cao hơn
+  - mở batch 41 với 1 auth E2E data/UX slice hẹp có leverage cao hơn; ưu tiên thêm 1 verify surface hoặc client-side state cue giúp flow thật dễ quan sát hơn thay vì chỉ copy/control framing
 
 ## Batch handoff note
 
-- Batch vừa xong: **39**
+- Batch vừa xong: **40**
 - Commit cuối đã chốt:
-  - `063a8bf` — `batch39: surface web logout detail`
-  - `f5e3d5a` — `batch39: surface ios logout detail`
-  - `07068a6` — `batch39: mark workflow complete`
+  - `94d56b4` — `batch40: add web auth e2e shell`
+  - `bb7f576` — `batch40: align ios auth e2e shell`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - chưa có blocker code; batch 40 chuyển trọng tâm sang 1 flow auth E2E thật trên 1 client thay vì tiếp tục copy-only parity
-- Batch kế tiếp: **40**
-- Scope hẹp đầu tiên của batch 40:
-  - chọn 1 client (ưu tiên web) và nối 1 flow thật đầy đủ login → persisted session restore/refresh → logout với feedback nhất quán end-to-end qua backend
+  - memory search tạm unavailable ở nhịp chốt batch này, nhưng repo + workflow files vẫn nhất quán và đủ để chốt trạng thái thật
+  - chưa có blocker code; next leverage nên là 1 auth E2E data/UX slice có tác động hành vi rõ hơn, không chỉ framing/copy
+- Batch kế tiếp: **41**
+- Scope hẹp đầu tiên của batch 41:
+  - thêm 1 surface quan sát state/session rõ hơn trên web hoặc iOS để auth E2E flow hiện trạng thái thật trước/sau restore/refresh/logout dễ kiểm tra hơn
