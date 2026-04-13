@@ -20,13 +20,14 @@
   - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `67e615e` — `batch48: add web refresh restore detail cues`
-  - working tree: bẩn đúng theo batch 48 iOS refresh/restore cue parity slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `128df67` — `batch48: add ios refresh restore detail cues`
+  - working tree: sạch
 - Blocker: none
-- Next: commit iOS batch-48 slice này; sau đó chốt workflow complete cho batch 48 và mở batch kế tiếp với 1 scope auth/session hẹp mới
+- Next: mở batch kế tiếp với 1 scope auth/session hẹp mới sau khi handoff note batch 48 được chốt trong checklist
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 48 update:
+- Batch 48 closeout:
   - `/auth/refresh` trả explicit `backend_detail="refresh_rotated"` + `local_clear_recommended=false`
   - `/auth/session` trả explicit `backend_detail="session_restored"` + `local_clear_recommended=false`
   - web shell đọc trực tiếp `backend_detail` + `local_clear_recommended` cho login/register-refresh/restore outcome preview
-  - iOS shell đọc trực tiếp `backend_detail` + `local_clear_recommended` cho login/refresh/restore outcome summary và copy UI đã align sang batch 48
+  - iOS shell đọc trực tiếp `backend_detail` + `local_clear_recommended` cho login/refresh/restore outcome summary
+  - batch 48 đã sạch và chốt xong ở cả 3 lane
