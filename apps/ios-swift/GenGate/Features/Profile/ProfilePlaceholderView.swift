@@ -4,12 +4,15 @@ struct ProfilePlaceholderView: View {
     @Environment(AppSessionStore.self) private var sessionStore
 
     @State private var userIDDraft: String = ""
+    @State private var receiverUserIDDraft: String = ""
     @State private var pendingRequestCount: Int?
     @State private var friendshipCount: Int?
     @State private var pendingRequestRows: [FriendRequestRow] = []
     @State private var friendshipRows: [FriendshipRow] = []
     @State private var fetchError: String?
     @State private var isLoading = false
+    @State private var isCreatingRequest = false
+    @State private var busyAcceptRequestID: String?
 
     var body: some View {
         ScrollView {
@@ -17,11 +20,11 @@ struct ProfilePlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Profile",
                     summary: "iOS native friend graph reader. Use a real user UUID to inspect pending requests and accepted friendships through the same backend contracts already used by web.",
-                    status: "Status: first native social seam is live as a read-only shell; profile editing and broader iOS domain clients are still pending.",
+                    status: "Status: native friend graph shell now supports create/accept friend-request actions; profile editing and broader iOS domain clients are still pending.",
                     bullets: [
                         "Use the Session tab first to create or restore a session if you want the protected iOS shell context.",
                         "Paste a backend user UUID below, then fetch pending requests and friendships for that user.",
-                        "This iOS slice intentionally stays read-only and only consumes existing `/friends/requests` and `/friends` contracts."
+                        "You can now create friend requests via `/friends/requests` and accept pending inbound requests via `/friends/requests/{id}/accept` directly from this tab."
                     ]
                 )
 
@@ -54,6 +57,37 @@ struct ProfilePlaceholderView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(isLoading || userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Create friend request")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+
+                        TextField("Receiver user UUID", text: $receiverUserIDDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        Button {
+                            Task {
+                                await createFriendRequest()
+                            }
+                        } label: {
+                            Text(isCreatingRequest ? "Sending friend request..." : "Send friend request")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(
+                            isCreatingRequest ||
+                            isLoading ||
+                            userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                            receiverUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        )
+                    }
 
                     Text("Session indicator: \(sessionStore.sessionIndicatorLabel)")
                         .font(.footnote.monospaced())
@@ -94,11 +128,25 @@ struct ProfilePlaceholderView: View {
                             .foregroundStyle(.secondary)
                     } else {
                         ForEach(pendingRequestRows) { row in
-                            seamRow(
-                                title: "\(row.requesterLabel) → \(row.receiverLabel)",
-                                state: "status: \(row.status)",
-                                detail: "request_id: \(row.id)"
-                            )
+                            VStack(alignment: .leading, spacing: 8) {
+                                seamRow(
+                                    title: "\(row.requesterLabel) → \(row.receiverLabel)",
+                                    state: "status: \(row.status)",
+                                    detail: "request_id: \(row.id)"
+                                )
+
+                                if row.canAccept {
+                                    Button {
+                                        Task {
+                                            await acceptFriendRequest(requestID: row.id)
+                                        }
+                                    } label: {
+                                        Text(busyAcceptRequestID == row.id ? "Accepting..." : "Accept request")
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .disabled(isLoading || busyAcceptRequestID == row.id)
+                                }
+                            }
                         }
                     }
                 }
@@ -153,7 +201,7 @@ struct ProfilePlaceholderView: View {
         userIDDraft = currentSessionUserID
     }
 
-    private func loadFriendGraph() async {
+    private func loadFriendGraph(statusMessage: String? = nil) async {
         let trimmedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedUserID.isEmpty else {
             fetchError = "User UUID là bắt buộc để load friend graph."
@@ -161,7 +209,11 @@ struct ProfilePlaceholderView: View {
         }
 
         isLoading = true
-        fetchError = nil
+        if let statusMessage {
+            fetchError = statusMessage
+        } else {
+            fetchError = nil
+        }
 
         do {
             let snapshot = try await FriendGraphAPIClient().fetchSnapshot(userID: trimmedUserID)
@@ -169,6 +221,9 @@ struct ProfilePlaceholderView: View {
             friendshipCount = snapshot.friendshipCount
             pendingRequestRows = snapshot.pendingRequests
             friendshipRows = snapshot.friendships
+            if statusMessage != nil {
+                fetchError = nil
+            }
         } catch {
             pendingRequestCount = nil
             friendshipCount = nil
@@ -178,6 +233,51 @@ struct ProfilePlaceholderView: View {
         }
 
         isLoading = false
+    }
+
+    private func createFriendRequest() async {
+        let requesterUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let receiverUserID = receiverUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !requesterUserID.isEmpty, !receiverUserID.isEmpty else {
+            fetchError = "Cần requester và receiver UUID để tạo friend request."
+            return
+        }
+
+        isCreatingRequest = true
+        fetchError = nil
+
+        do {
+            try await FriendGraphAPIClient().createFriendRequest(
+                requesterUserID: requesterUserID,
+                receiverUserID: receiverUserID
+            )
+            receiverUserIDDraft = ""
+            await loadFriendGraph(statusMessage: "Friend request created. Reloading friend graph...")
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        isCreatingRequest = false
+    }
+
+    private func acceptFriendRequest(requestID: String) async {
+        guard !requestID.isEmpty else {
+            fetchError = "Friend request id không hợp lệ."
+            return
+        }
+
+        busyAcceptRequestID = requestID
+        fetchError = nil
+
+        do {
+            try await FriendGraphAPIClient().acceptFriendRequest(requestID: requestID)
+            await loadFriendGraph(statusMessage: "Friend request accepted. Reloading friend graph...")
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        busyAcceptRequestID = nil
     }
 
     private func seamRow(title: String, state: String, detail: String) -> some View {
@@ -210,6 +310,7 @@ private struct FriendRequestRow: Identifiable {
     let status: String
     let requesterLabel: String
     let receiverLabel: String
+    let canAccept: Bool
 }
 
 private struct FriendshipRow: Identifiable {
@@ -228,6 +329,25 @@ private struct FriendGraphAPIClient {
     private struct FriendshipListResponse: Decodable {
         let count: Int
         let items: [FriendshipItem]
+    }
+
+    private struct FriendRequestCreateRequest: Encodable {
+        let requester_user_id: String
+        let receiver_user_id: String
+    }
+
+    private struct FriendRequestCreateResponse: Decodable {
+        let id: String
+        let requester_user_id: String
+        let receiver_user_id: String
+        let status: String
+    }
+
+    private struct FriendshipResponse: Decodable {
+        let id: String
+        let user_a_id: String
+        let user_b_id: String
+        let state: String
     }
 
     private struct FriendRequestItem: Decodable {
@@ -285,7 +405,8 @@ private struct FriendGraphAPIClient {
                     id: $0.id,
                     status: $0.status,
                     requesterLabel: $0.requester.username ?? $0.requester.email,
-                    receiverLabel: $0.receiver.username ?? $0.receiver.email
+                    receiverLabel: $0.receiver.username ?? $0.receiver.email,
+                    canAccept: $0.status == "pending" && $0.receiver.id == userID
                 )
             },
             friendships: friendshipsResponse.items.map {
@@ -297,6 +418,49 @@ private struct FriendGraphAPIClient {
                 )
             }
         )
+    }
+
+    func createFriendRequest(requesterUserID: String, receiverUserID: String) async throws {
+        var request = URLRequest(url: try makeURL(path: "/friends/requests"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(
+            FriendRequestCreateRequest(
+                requester_user_id: requesterUserID,
+                receiver_user_id: receiverUserID
+            )
+        )
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 201 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Friend request create failed"))
+        }
+
+        do {
+            _ = try JSONDecoder().decode(FriendRequestCreateResponse.self, from: data)
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func acceptFriendRequest(requestID: String) async throws {
+        var request = URLRequest(url: try makeURL(path: "/friends/requests/\(requestID)/accept"))
+        request.httpMethod = "POST"
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 201 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Friend request accept failed"))
+        }
+
+        do {
+            _ = try JSONDecoder().decode(FriendshipResponse.self, from: data)
+        } catch {
+            throw APIError.invalidResponse
+        }
     }
 
     private func fetchFriendRequests(userID: String) async throws -> FriendRequestListResponse {
@@ -344,6 +508,14 @@ private struct FriendGraphAPIClient {
         }
 
         return url
+    }
+
+    private func makeURL(path: String) throws -> URL {
+        guard let baseURL else {
+            throw APIError.invalidBaseURL
+        }
+
+        return baseURL.appendingPathComponent(path)
     }
 
     private func requireHTTPResponse(_ response: URLResponse) throws -> HTTPURLResponse {

@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 86
-- Trục công việc: iOS notification mutation hardening — bật read/unread toggle trực tiếp trên native notifications shell.
+- Batch workflow chính thức hiện tại: 87
+- Trục công việc: iOS profile friend-request action hardening — bật create/accept request trực tiếp trên native profile shell.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: complete_batch84.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 86 iOS notifications read/unread toggle hardening đã xong.
-- Kết quả gần nhất: native notifications shell toggle được read/unread trực tiếp trên từng row.
-- Trạng thái: complete_batch86.
+- Scope hiện tại: batch 87 iOS profile friend-request action hardening đã xong.
+- Kết quả gần nhất: native profile shell create/accept được friend request trực tiếp.
+- Trạng thái: complete_batch87.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

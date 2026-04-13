@@ -1,21 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 86
+- Batch: 87
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 86 iOS notification mutation hardening — allow toggling read/unread state directly from native notifications shell
+- Scope: batch 87 iOS profile friend-request action hardening — allow creating/accepting friend requests directly from native profile friend graph shell
 - Status: MVP-testable
 - Files:
-  - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `91f44d7` — `batch85: harden ios inbox attachment reader`
-  - working tree: bẩn (batch 86 ready to commit)
+  - latest commit: `833d1b3` — `batch86: harden ios notifications read toggle`
+  - working tree: bẩn (batch 87 ready to commit)
 - Blocker: none
-- Next: commit batch 86 iOS notification mutation hardening; after that, open only real MVP seam gaps or concrete human-test friction
+- Next: commit batch 87 iOS profile friend-request action hardening; then continue only with concrete MVP seam gaps
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -80,10 +80,13 @@
 - Batch 85 handoff:
   - `91f44d7` — `batch85: harden ios inbox attachment reader`
   - iOS inbox reader attachment metadata path remains MVP-testable while batch 86 hardens native notifications mutation controls
-- Batch 86 outcome:
-  - iOS notifications shell now toggles read/unread per row via backend PATCH contracts
-  - native notification rows reflect immediate read-state mutation without requiring full reload
-  - notification seam is now testable for both read and minimal state change flows from iOS
+- Batch 86 handoff:
+  - `833d1b3` — `batch86: harden ios notifications read toggle`
+  - iOS notifications read/unread mutation remains MVP-testable while batch 87 hardens native friend-request actions on profile shell
+- Batch 87 outcome:
+  - iOS profile friend graph shell now supports creating friend requests via `/friends/requests`
+  - iOS profile shell can accept pending inbound requests via `/friends/requests/{id}/accept`
+  - native social seam on iOS is no longer read-only for friend requests, reducing dependency on web during human tests
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
