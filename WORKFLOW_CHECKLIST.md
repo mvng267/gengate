@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **69 — iOS reader autofill hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **70 — web profile launcher hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,27 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **69**
-- Scope hiện tại: iOS reader autofill hardening — quick-fill current session user UUID into native read-only tabs to reduce manual copy/paste for human testers.
+- Batch workflow chính thức hiện tại: **70**
+- Scope hiện tại: web profile launcher hardening — add a real browser form on `/profile` so testers can launch friend-graph inspection without manual query-string editing.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
-  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
-  - `apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift`
-  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
-  - `apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift`
+  - `apps/web-nextjs/app/profile/page.tsx`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/ios-swift && swift build` → ✅ pass
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `320ec1e` — `batch68: add ios location status reader`
-  - working tree hiện tại: bẩn (batch 69 ready to commit)
+  - commit gần nhất đã chốt: `422556b` — `batch69: harden ios reader session autofill`
+  - working tree hiện tại: bẩn (batch 70 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch69 iOS reader autofill hardening; sau đó ưu tiên bug-fix/hardening từ human testing thật hoặc đúng 1 native write seam nhỏ nếu có nhu cầu rõ ràng
+  - commit batch70 web profile launcher hardening; sau đó ưu tiên bug-fix/hardening trực tiếp từ human testing hoặc đúng 1 browser UX friction slice nhỏ tiếp theo nếu thật sự đáng giá
 
 ## Batch handoff note
 

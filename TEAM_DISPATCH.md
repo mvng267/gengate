@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 69
-- Trục công việc: iOS reader autofill hardening — giảm ma sát human test bằng quick-fill current session user UUID trên các native read-only tabs.
+- Batch workflow chính thức hiện tại: 70
+- Trục công việc: web profile launcher hardening — giảm ma sát browser test bằng launcher form thật trên `/profile`, không bắt tester phải tự sửa query string tay.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -46,14 +46,14 @@
 - Trạng thái: idle_batch68.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: không mở web scope mới trong batch 68.
-- Kết quả gần nhất: `/profile` launcher batch 62 đã xong.
-- Trạng thái: idle_batch68.
+- Scope hiện tại: batch 70 `/profile` launcher hardening đã xong.
+- Kết quả gần nhất: `/profile` có GET launcher form thật và clearer pivots cho browser testing.
+- Trạng thái: complete_batch70.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 69 session-user quick-fill hardening đã xong.
-- Kết quả gần nhất: Profile / Feed / Notifications / Location readers auto-prefill từ session hiện tại; Inbox quick-fills User A từ session hiện tại.
-- Trạng thái: complete_batch69.
+- Scope hiện tại: không mở iOS scope mới trong batch 70.
+- Kết quả gần nhất: batch 69 session-user quick-fill hardening đã xong.
+- Trạng thái: idle_batch70.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

@@ -1,25 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 69
+- Batch: 70
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 69 iOS reader autofill hardening — reduce human-test friction by quick-filling current session user UUID into native read-only tabs
+- Scope: batch 70 web profile launcher hardening — reduce browser-test friction by adding a real UUID launcher form on `/profile`
 - Status: MVP-testable
 - Files:
-  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
-  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
-  - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
-  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
-  - apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift
+  - apps/web-nextjs/app/profile/page.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `320ec1e` — `batch68: add ios location status reader`
-  - working tree: bẩn (batch 69 ready to commit)
+  - latest commit: `422556b` — `batch69: harden ios reader session autofill`
+  - working tree: bẩn (batch 70 ready to commit)
 - Blocker: none
-- Next: commit batch 69 iOS reader autofill hardening; after that, prefer actual human-test bug fixes or one small native write seam only if real friction demands it
+- Next: commit batch 70 web profile launcher hardening; after that, prefer concrete human-test bug fixes or one similarly narrow browser UX hardening slice only if it materially improves MVP testing
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -33,10 +29,13 @@
 - Batch 68 handoff:
   - `320ec1e` — `batch68: add ios location status reader`
   - location status reader remains MVP-testable while batch 69 reduces human-test friction across the native reader tabs
-- Batch 69 outcome:
-  - iOS Profile / Feed / Notifications / Location tabs now auto-prefill from the current signed-in session user when available
-  - iOS Inbox tab now quick-fills User A from the current signed-in session user
-  - human testers can move from Session into multiple native reader seams with less UUID copy/paste churn
+- Batch 69 handoff:
+  - `422556b` — `batch69: harden ios reader session autofill`
+  - iOS reader autofill hardening remains MVP-testable while batch 70 reduces browser-test friction on `/profile`
+- Batch 70 outcome:
+  - web `/profile` now includes a real GET launcher form for entering a user UUID instead of requiring manual query-string editing
+  - browser testers get clearer same-session pivot guidance from Profile into Feed / Inbox / Notifications / Location
+  - this keeps the seam honest while making the MVP web test path faster for humans
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

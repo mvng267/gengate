@@ -17,24 +17,55 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
       <h1>Profile</h1>
       <p>Friend graph shell is the best launcher for inspecting one user context, then pivoting into nearby MVP seams.</p>
       <p>
-        Paste a registered user UUID into the URL as <code>?user=&lt;uuid&gt;</code>. Example: <code>/profile?user=YOUR_USER_UUID</code>
+        Use the launcher form below or paste a registered user UUID into the URL as <code>?user=&lt;uuid&gt;</code>.
       </p>
+
+      <form method="GET" action="/profile" style={{ display: "grid", gap: 12, maxWidth: 720, marginBottom: 20 }}>
+        <label htmlFor="profile-user-id">
+          Profile user UUID
+          <input
+            id="profile-user-id"
+            name="user"
+            type="text"
+            defaultValue={selectedUserId}
+            placeholder="Paste registered user UUID"
+            style={{ display: "block", width: "100%", marginTop: 8, padding: 10 }}
+          />
+        </label>
+        <button type="submit" style={{ width: "fit-content", padding: "10px 14px" }}>
+          Load friend graph shell
+        </button>
+      </form>
+
       {selectedUserId ? (
         <>
           <p>
             Active profile user: <code>{selectedUserId}</code>
           </p>
           <p>
-            Quick pivots: <Link href={`/feed`}>Feed</Link> · <Link href={`/inbox`}>Inbox</Link> ·{" "}
-            <Link href={`/notifications`}>Notifications</Link> · <Link href={`/location`}>Location</Link>
+            Quick pivots for the same browser test session: <Link href="/feed">Feed</Link> · <Link href="/inbox">Inbox</Link> ·{" "}
+            <Link href="/notifications">Notifications</Link> · <Link href="/location">Location</Link>
+          </p>
+          <p>
+            Tip: keep this UUID handy when moving into feed, inbox, notification, and location shells that still need explicit IDs.
           </p>
           <FriendGraphShell userId={selectedUserId} />
         </>
       ) : (
-        <p>
-          Provide <code>?user=&lt;uuid&gt;</code> on this route after creating users and friend requests in backend to inspect the
-          friend graph shell and unlock related quick pivots.
-        </p>
+        <>
+          <p>
+            Provide a registered user UUID to inspect the friend graph shell and unlock related quick pivots.
+          </p>
+          <ul>
+            <li>
+              Start from <Link href="/login">Login</Link> if you still need to create or restore a test session.
+            </li>
+            <li>
+              Then load one user context here before pivoting into <Link href="/feed">Feed</Link>, <Link href="/inbox">Inbox</Link>,{" "}
+              <Link href="/notifications">Notifications</Link>, and <Link href="/location">Location</Link>.
+            </li>
+          </ul>
+        </>
       )}
     </section>
   );
