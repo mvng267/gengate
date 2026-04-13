@@ -1,23 +1,23 @@
 # GenGate Workflow Status
 
-- Batch: 98
+- Batch: 99
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 98 backend messaging hardening — block attachment create/list on soft-deleted messages (`message_not_found` parity)
-- Status: MVP-testable
+- Scope: batch 99 backend messaging parity hardening — hide `/messages/{id}/device-keys` create/list when parent message is soft-deleted (`message_not_found` parity)
+- Status: verify
 - Files:
-  - apps/backend-python/app/services/message_attachments.py
+  - apps/backend-python/app/services/messages.py
   - apps/backend-python/tests/test_messages_api.py
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_messages_api.py` ✅ (12 passed)
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_messages_api.py` ✅ (13 passed)
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `b8b937a` — `batch98: block attachments on soft-deleted messages`
-  - working tree: bẩn (flow docs pending sync)
+  - latest commit: `3d5bd8f` — `batch99: add ios backend base url override controls`
+  - working tree: bẩn (batch99 backend parity + flow docs pending commit)
 - Blocker: none
-- Next: sync flow docs + push batch98; tiếp tục backend+iOS batch99 theo seam messaging/realtime friction (web paused)
+- Next: commit backend batch99 parity + flow docs; mở batch100 theo friction messaging/realtime kế tiếp (web paused)
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -125,10 +125,15 @@
 - Batch 98 outcome:
   - attachments service now treats soft-deleted parent messages as `message_not_found`
   - both `POST /messages/{id}/attachments` and `GET /messages/{id}/attachments` now return 404 for deleted messages
+- Batch 99 outcome:
+  - iOS Session tab adds editable backend base URL override for shell runs beyond localhost (`3d5bd8f`)
+  - backend message device-key create/list now return `message_not_found` when parent message is soft-deleted (same parity as attachment endpoints)
+  - regression guard added in `tests/test_messages_api.py` to ensure deleted parent cannot create/list device keys
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
   - iOS verify: `cd apps/ios-swift && swift build`
+  - iOS override path: Session tab → set "Backend base URL override" → Save backend URL → relaunch app → run Feed/Inbox/Location/Profile/Notifications against non-local backend
   - web MVP hub: `http://localhost:3000/`
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions

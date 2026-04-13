@@ -109,7 +109,7 @@ class MessageService:
         wrapped_message_key_blob: str,
     ) -> MessageDeviceKey:
         message = message_repository.get(db, message_id)
-        if message is None:
+        if message is None or message.deleted_at is not None:
             raise ValueError("message_not_found")
 
         recipient_user = user_repository.get(db, recipient_user_id)
@@ -146,7 +146,7 @@ class MessageService:
 
     def list_message_device_keys(self, db: Session, message_id: uuid.UUID) -> list[MessageDeviceKey]:
         message = message_repository.get(db, message_id)
-        if message is None:
+        if message is None or message.deleted_at is not None:
             raise ValueError("message_not_found")
         return message_device_key_repository.list_by_message(db, message_id)
 

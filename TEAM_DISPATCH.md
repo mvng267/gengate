@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 98
-- Trục công việc: backend messaging parity hardening — attachment contract for soft-deleted messages.
+- Batch workflow chính thức hiện tại: 99
+- Trục công việc: backend messaging parity hardening — `/messages/{id}/device-keys` must hide soft-deleted parent messages.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -41,9 +41,9 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: batch 98 messaging parity hardening (attachments must fail on soft-deleted parent messages).
-- Kết quả gần nhất: `/messages/{id}/attachments` create/list trả `message_not_found` khi parent message đã soft-delete.
-- Trạng thái: complete_batch98.
+- Scope hiện tại: batch 99 backend parity — chặn create/list device-keys nếu parent message đã soft-delete.
+- Kết quả gần nhất: `message_service` đã guard `deleted_at` cho cả create/list device-key paths + test hồi quy mới pass.
+- Trạng thái: verify_batch99_backend.
 
 ### pikachu-web — frontend web
 - Scope hiện tại: tạm dừng theo chỉ đạo user.
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: giữ iOS batch 97 outcome (native delete action), không mở web theo chỉ đạo pause.
-- Kết quả gần nhất: Inbox tab delete flow ổn định sau backend batch98 attachment parity.
-- Trạng thái: stable_after_batch98.
+- Scope hiện tại: đã chốt batch 99 iOS run-friction hardening (backend base URL override controls).
+- Kết quả gần nhất: commit `3d5bd8f` đã thêm persisted+validated override UI trên Session tab.
+- Trạng thái: complete_batch99_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

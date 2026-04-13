@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **98 — backend messaging attachment parity on soft-deleted messages is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **99 — backend messaging device-key parity on soft-deleted parent messages is in verify**.
 
 ## Reporting hard rule
 
@@ -89,25 +89,25 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **98**
-- Scope hiện tại: backend messaging parity — chặn attachment create/list nếu parent message đã soft-delete.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **99**
+- Scope hiện tại: backend messaging parity — chặn `/messages/{id}/device-keys` create/list nếu parent message đã soft-delete.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/backend-python/app/services/message_attachments.py`
+  - `apps/backend-python/app/services/messages.py`
   - `apps/backend-python/tests/test_messages_api.py`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_messages_api.py` → ✅ pass (12 passed)
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_messages_api.py` → ✅ pass (13 passed)
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `b8b937a` — `batch98: block attachments on soft-deleted messages`
-  - working tree hiện tại: bẩn (flow docs pending sync)
+  - commit gần nhất đã chốt: `3d5bd8f` — `batch99: add ios backend base url override controls`
+  - working tree hiện tại: bẩn (batch99 backend parity + flow docs pending commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - sync docs + push batch98; mở batch99 backend+iOS theo seam messaging/realtime friction thật (web paused)
+  - commit batch99 backend parity + flow docs; sau đó mở batch100 backend+iOS theo seam messaging/realtime friction thật (web paused)
 
 ## Batch handoff note
 

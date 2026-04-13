@@ -859,6 +859,89 @@ def test_batch24_message_device_key_duplicate_integrity_parity() -> None:
         app.dependency_overrides.clear()
 
 
+def test_batch99_device_key_endpoints_hide_soft_deleted_parent_messages() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    sender = client.post("/auth/register", json={"email": "batch99-sender@example.com", "username": "batch99_sender"})
+    recipient = client.post(
+        "/auth/register",
+        json={"email": "batch99-recipient@example.com", "username": "batch99_recipient"},
+    )
+    assert sender.status_code == 201
+    assert recipient.status_code == 201
+
+    sender_id = sender.json()["id"]
+    recipient_id = recipient.json()["id"]
+
+    recipient_device = client.post(
+        "/auth/devices",
+        json={"user_id": recipient_id, "platform": "ios", "device_name": "Batch99 Recipient iPhone"},
+    )
+    assert recipient_device.status_code == 201
+    recipient_device_id = recipient_device.json()["id"]
+
+    message = client.post(
+        "/messages",
+        json={"sender_user_id": sender_id, "payload_text": "batch99 hello"},
+    )
+    assert message.status_code == 201
+    message_id = message.json()["id"]
+
+    create_key_before_delete = client.post(
+        f"/messages/{message_id}/device-keys",
+        json={
+            "recipient_user_id": recipient_id,
+            "recipient_device_id": recipient_device_id,
+            "wrapped_message_key_blob": "batch99-pre-delete",
+        },
+    )
+    assert create_key_before_delete.status_code == 201
+
+    delete_message = client.delete(f"/messages/{message_id}")
+    assert delete_message.status_code == 200
+
+    create_key_after_delete = client.post(
+        f"/messages/{message_id}/device-keys",
+        json={
+            "recipient_user_id": recipient_id,
+            "recipient_device_id": recipient_device_id,
+            "wrapped_message_key_blob": "batch99-post-delete",
+        },
+    )
+    assert create_key_after_delete.status_code == 404
+    assert create_key_after_delete.json() == {
+        "error": {"code": "message_not_found", "message": "message_not_found"}
+    }
+
+    list_keys_after_delete = client.get(f"/messages/{message_id}/device-keys")
+    assert list_keys_after_delete.status_code == 404
+    assert list_keys_after_delete.json() == {
+        "error": {"code": "message_not_found", "message": "message_not_found"}
+    }
+
+    app.dependency_overrides.clear()
+
+
 def test_batch58_direct_conversation_thread_shell_flow() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
