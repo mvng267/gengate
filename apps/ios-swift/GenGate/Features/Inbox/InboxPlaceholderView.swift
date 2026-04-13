@@ -42,7 +42,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with user/message/focus/delete stale-target guards; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with user/message/focus/delete/attachment/device-key stale-target guards; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -62,7 +62,8 @@ struct InboxPlaceholderView: View {
                         "Manual read-cursor target message UUID is now auto-cleared when it no longer exists in loaded message rows (stale target guard).",
                         "Manual read-cursor target user UUID is now auto-cleared when it no longer belongs to current conversation members.",
                         "Manual read-status focus user UUID is now auto-cleared when it no longer belongs to current conversation members.",
-                        "Manual delete-target message UUID is now auto-cleared when it no longer exists in loaded message rows."
+                        "Manual delete-target message UUID is now auto-cleared when it no longer exists in loaded message rows.",
+                        "Manual attachment/device-key target message UUIDs are now auto-cleared when they no longer exist in loaded message rows."
                     ]
                 )
 
@@ -994,6 +995,18 @@ struct InboxPlaceholderView: View {
             if !manualDeleteMessageID.isEmpty,
                !messages.contains(where: { $0.id == manualDeleteMessageID }) {
                 messageToDeleteIDDraft = ""
+            }
+
+            let manualAttachmentTargetMessageID = attachmentTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !manualAttachmentTargetMessageID.isEmpty,
+               !messages.contains(where: { $0.id == manualAttachmentTargetMessageID }) {
+                attachmentTargetMessageIDDraft = ""
+            }
+
+            let manualDeviceKeyTargetMessageID = deviceKeyTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !manualDeviceKeyTargetMessageID.isEmpty,
+               !messages.contains(where: { $0.id == manualDeviceKeyTargetMessageID }) {
+                deviceKeyTargetMessageIDDraft = ""
             }
 
             let manualReadCursorUserID = readCursorTargetUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
