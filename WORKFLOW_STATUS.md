@@ -2,21 +2,24 @@
 
 - Batch: 42
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 42 iOS logout outcome signal — surface dedicated backend/detail result after logout to make auth loop easier to verify
-- Status: verify
+- Scope: batch 42 logout outcome signal complete — web + iOS surface dedicated backend/detail result after logout to make auth loop easier to verify
+- Status: complete
 - Files:
+  - apps/web-nextjs/app/login/page.tsx
   - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
+  - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `f75e5d3` — `batch42: add web logout outcome signal`
-  - working tree: bẩn đúng theo batch 42 iOS logout outcome signal slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `9084cc0` — `batch42: add ios logout outcome signal`
+  - working tree: sạch
 - Blocker: none
-- Next: commit slice này; sau đó cân nhắc chốt batch 42 nếu web+iOS logout outcome parity đã đủ, hoặc chọn 1 auth behavior slice hẹp tiếp theo
+- Next: mở batch 43 với 1 auth behavior slice hẹp có leverage cao hơn; ưu tiên thêm cue/surface cho restore hoặc refresh outcome để auth loop có signal verify mạnh hơn toàn vòng
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 42 update:
-  - iOS Session screen nay có panel `Logout outcome` hiển thị local clear result + backend detail sau logout
-  - Panel này giúp phân biệt rõ revoke thành công với case session đã mất hiệu lực trước đó ngay trên Session screen
+- Batch 42 outcome:
+  - Web login shell nay có panel `Logout outcome` hiển thị rõ local clear result + backend detail sau logout
+  - iOS Session screen nay cũng có panel `Logout outcome` để nhìn cùng kiểu outcome sau revoke/logout
+  - Batch 42 đã nâng auth shell behavior signal cho logout path lên mức dễ verify hơn trên cả web và iOS
