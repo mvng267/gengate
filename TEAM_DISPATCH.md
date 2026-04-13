@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 97
-- Trục công việc: backend+iOS messaging parity hardening — backend soft-delete + iOS inbox delete action.
+- Batch workflow chính thức hiện tại: 98
+- Trục công việc: backend messaging parity hardening — attachment contract for soft-deleted messages.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -41,9 +41,9 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: batch 97 messaging parity hardening (`DELETE /messages/{message_id}` soft-delete + hide deleted items).
-- Kết quả gần nhất: messages API hỗ trợ soft-delete và contract test pass (delete/get/list parity).
-- Trạng thái: complete_batch97.
+- Scope hiện tại: batch 98 messaging parity hardening (attachments must fail on soft-deleted parent messages).
+- Kết quả gần nhất: `/messages/{id}/attachments` create/list trả `message_not_found` khi parent message đã soft-delete.
+- Trạng thái: complete_batch98.
 
 ### pikachu-web — frontend web
 - Scope hiện tại: tạm dừng theo chỉ đạo user.
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 97 inbox shell hardening — thêm native delete message action.
-- Kết quả gần nhất: Inbox tab có thể delete message (mặc định message mới nhất) và reload list theo backend soft-delete contract.
-- Trạng thái: complete_batch97.
+- Scope hiện tại: giữ iOS batch 97 outcome (native delete action), không mở web theo chỉ đạo pause.
+- Kết quả gần nhất: Inbox tab delete flow ổn định sau backend batch98 attachment parity.
+- Trạng thái: stable_after_batch98.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

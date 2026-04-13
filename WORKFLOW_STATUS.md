@@ -1,29 +1,23 @@
 # GenGate Workflow Status
 
-- Batch: 97
+- Batch: 98
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 97 backend+iOS messaging parity — backend soft-delete contract for `/messages/{id}` + iOS Inbox native delete action
+- Scope: batch 98 backend messaging hardening — block attachment create/list on soft-deleted messages (`message_not_found` parity)
 - Status: MVP-testable
 - Files:
-  - apps/backend-python/app/modules/messages/router.py
-  - apps/backend-python/app/repositories/messages.py
-  - apps/backend-python/app/services/messages.py
+  - apps/backend-python/app/services/message_attachments.py
   - apps/backend-python/tests/test_messages_api.py
-  - apps/backend-python/app/services/locations.py
-  - apps/backend-python/tests/test_location_audience_api.py
-  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_messages_api.py` ✅ (12 passed)
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_location_audience_api.py` ✅ (3 passed)
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `04f4c39` — `batch97: add message soft-delete contract and ios inbox action`
+  - latest commit: `b8b937a` — `batch98: block attachments on soft-deleted messages`
   - working tree: bẩn (flow docs pending sync)
 - Blocker: none
-- Next: sync WORKFLOW_CHECKLIST/TEAM_DISPATCH cho batch97 rồi push main (tạm dừng web)
+- Next: sync flow docs + push batch98; tiếp tục backend+iOS batch99 theo seam messaging/realtime friction (web paused)
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -124,10 +118,13 @@
 - Batch 96 handoff:
   - `731c7da` — `batch96: align location audience remove missing-share parity`
   - backend location audience remove now returns `share_not_found` when parent share is missing
-- Batch 97 outcome:
-  - backend adds soft-delete contract `DELETE /messages/{message_id}` (returns `{"status":"deleted"}`)
-  - deleted messages are hidden from `GET /messages/{id}` and message lists
-  - iOS Inbox shell now has native "Delete message" action (defaults to newest loaded message)
+- Batch 97 handoff:
+  - `04f4c39` — `batch97: add message soft-delete contract and ios inbox action`
+  - backend adds soft-delete contract `DELETE /messages/{message_id}` and hides deleted messages from reads/lists
+  - iOS Inbox shell now has native "Delete message" action
+- Batch 98 outcome:
+  - attachments service now treats soft-deleted parent messages as `message_not_found`
+  - both `POST /messages/{id}/attachments` and `GET /messages/{id}/attachments` now return 404 for deleted messages
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
