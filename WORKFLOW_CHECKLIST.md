@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **139 — iOS inbox recipient-input helper-note reset slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **140 — iOS inbox empty-context-only helper-note visibility slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **139**
-- Scope hiện tại: iOS inbox read-status UX hardening — clear non-member reset-reason helper note ngay khi tester nhập recipient user mới để tránh stale explanation text.
+- Batch workflow chính thức hiện tại: **140**
+- Scope hiện tại: iOS inbox read-status UX hardening — chỉ hiển thị non-member reset-reason helper note khi recipient context đang thực sự rỗng sau auto-clear.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch139 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch140 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch140 cho messaging friction tiếp theo (chỉ hiển thị non-member reset-reason helper note khi recipient context đang thực sự rỗng sau auto-clear, tránh note xuất hiện trong context đã refill) trong iOS inbox shell
+  - mở batch141 cho messaging friction tiếp theo (khi non-member auto-clear xảy ra, show helper note chi tiết thread-member mismatch gồm recipient user id rút gọn để debug nhanh) trong iOS inbox shell
 
 ## Batch handoff note
 
