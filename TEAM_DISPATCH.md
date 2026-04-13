@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 62
-- Trục công việc: profile launcher hardening — giữ toàn bộ seams testable và làm `/profile` thành launcher tốt hơn cho friend graph + seam kế cận.
+- Batch workflow chính thức hiện tại: 63
+- Trục công việc: iOS MVP readiness hub — giữ các seams hiện có và nâng iOS shell thành bề mặt readiness/test rõ ràng thay vì đứng ở auth-only context.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -41,19 +41,19 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: không mở backend scope mới trong batch 62.
+- Scope hiện tại: không mở backend scope mới trong batch 63.
 - Kết quả gần nhất: toàn bộ MVP API seams đã có và verified green cho web consumption.
-- Trạng thái: idle_batch62.
+- Trạng thái: idle_batch63.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: batch 62 web hardening slice đã xong.
-- Kết quả gần nhất: `/profile` đã rõ hơn như UUID launcher và có quick pivots sang seams kế cận.
-- Trạng thái: complete_batch62.
+- Scope hiện tại: không mở web scope mới trong batch 63.
+- Kết quả gần nhất: `/profile` launcher batch 62 đã xong.
+- Trạng thái: idle_batch63.
 
 ### pikame-ios — iOS
-- Scope hiện tại: idle trong batch 55 slice này để tránh mở nhiều surface cùng lúc.
-- Kết quả gần nhất: iOS auth client parse structured backend error payload cho restore/refresh/logout unauthorized paths.
-- Trạng thái: idle_batch55.
+- Scope hiện tại: batch 63 iOS hardening slice đã xong.
+- Kết quả gần nhất: Profile tab đã thành MVP readiness hub thay vì placeholder chung chung.
+- Trạng thái: complete_batch63.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

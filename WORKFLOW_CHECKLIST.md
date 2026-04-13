@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **62 — profile launcher hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **63 — iOS MVP readiness hub slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,24 +89,25 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **62**
-- Scope hiện tại: profile launcher hardening — web `/profile` becomes a better UUID-driven entry point and links into related seams.
+- Batch workflow chính thức hiện tại: **63**
+- Scope hiện tại: iOS MVP readiness hub — Profile tab becomes a guided readiness/test surface for current MVP seams.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/app/profile/page.tsx`
-  - `apps/web-nextjs/components/friend-graph-shell.tsx`
+  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
+  - `apps/ios-swift/GenGate/Core/UI/FeaturePlaceholderView.swift`
+  - `apps/ios-swift/GenGate/App/RootTabView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `fdce813` — `batch61: add mvp test hub`
-  - working tree hiện tại: bẩn (batch 62 ready to commit)
+  - commit gần nhất đã chốt: `503446e` — `batch62: harden profile launcher`
+  - working tree hiện tại: bẩn (batch 63 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch62 profile launcher hardening; sau đó ưu tiên bug-fix/mobile consumption thay vì thêm web navigation polish nếu chưa có friction report mới
+  - commit batch63 iOS MVP readiness hub; sau đó ưu tiên iOS client consumption cho 1 seam đã có thay vì thêm shell copy nếu chưa có bug report mới
 
 ## Batch handoff note
 

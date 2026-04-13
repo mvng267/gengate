@@ -55,7 +55,7 @@ struct RootTabView: View {
             NavigationStack {
                 protectedTabContent(
                     title: "Profile",
-                    summary: "Profile edit form, privacy settings, and recent moments are pending."
+                    summary: "MVP readiness hub for iOS shell. Profile editing is still pending, but this tab now explains current seam coverage and recommended test flow."
                 ) {
                     ProfilePlaceholderView()
                 }

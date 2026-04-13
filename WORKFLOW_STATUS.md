@@ -1,22 +1,23 @@
 # GenGate Workflow Status
 
-- Batch: 62
+- Batch: 63
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 62 profile launcher hardening — make web `/profile` a better UUID-driven entry point and cross-link into related MVP seams
+- Scope: batch 63 iOS MVP readiness hub — turn the iOS Profile tab into a guided readiness/test surface for current MVP seams
 - Status: MVP-testable
 - Files:
-  - apps/web-nextjs/app/profile/page.tsx
-  - apps/web-nextjs/components/friend-graph-shell.tsx
+  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
+  - apps/ios-swift/GenGate/Core/UI/FeaturePlaceholderView.swift
+  - apps/ios-swift/GenGate/App/RootTabView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
-  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `fdce813` — `batch61: add mvp test hub`
-  - working tree: bẩn (batch 62 ready to commit)
+  - latest commit: `503446e` — `batch62: harden profile launcher`
+  - working tree: bẩn (batch 63 ready to commit)
 - Blocker: none
-- Next: commit batch 62 profile launcher hardening; after that, prefer targeted bug-fixes or mobile/client consumption over more web-only navigation polish unless a tester reports friction
+- Next: commit batch 63 iOS MVP readiness hub; after that, prefer real iOS client consumption of one existing seam instead of more readiness copy unless testing exposes a gap
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -27,12 +28,14 @@
 - Batch 57 handoff:
   - `4a779eb` — `batch57: wire private friend feed shell`
   - private friend feed seam remains MVP-testable while batch 58 opens direct messaging
-- Batch 62 outcome:
-  - web `/profile` now gives clearer UUID-driven launch instructions and exposes quick pivots into adjacent MVP seams
-  - friend graph shell now presents follow-on links so a tester can move from one user context into feed, inbox, notifications, and location without hunting through nav
-  - this keeps the MVP test path more coherent without opening a new feature seam
+- Batch 63 outcome:
+  - iOS Profile tab now acts as an MVP readiness hub instead of a generic placeholder
+  - native shell now clearly reports which seams are already backend/web testable and what iOS still exposes only as shell
+  - this gives humans a coherent backend/web/iOS test path without claiming unfinished native domain clients are done
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
-  - profile launcher seam: `http://localhost:3000/profile?user=<uuid>`
-  - MVP hub remains: `http://localhost:3000/`
+  - iOS verify: `cd apps/ios-swift && swift build`
+  - web MVP hub: `http://localhost:3000/`
+  - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
+  - iOS path: open Session tab first, then inspect Profile readiness hub and protected shell tabs
