@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   createNotification,
@@ -10,19 +10,34 @@ import {
   type NotificationItem,
 } from "@/lib/notifications/client";
 
+type NotificationShellProps = {
+  initialUserId?: string;
+};
+
 const initialForm = {
   userId: "",
   notificationType: "friend_request",
   payloadJson: '{"message":"Demo notification"}',
 };
 
-export function NotificationShell() {
-  const [form, setForm] = useState(initialForm);
+export function NotificationShell({ initialUserId = "" }: NotificationShellProps) {
+  const [form, setForm] = useState({
+    ...initialForm,
+    userId: initialUserId,
+  });
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [status, setStatus] = useState("Provide a real user UUID to load notifications or create a minimal notification shell item.");
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setForm((current) => ({
+      ...current,
+      userId: initialUserId,
+    }));
+    setItems([]);
+  }, [initialUserId]);
 
   async function handleLoad() {
     setIsLoading(true);
@@ -64,9 +79,7 @@ export function NotificationShell() {
     setStatus(item.read_at ? "Marking notification unread..." : "Marking notification read...");
 
     try {
-      const updated = item.read_at
-        ? await markNotificationUnread(item.id)
-        : await markNotificationRead(item.id);
+      const updated = item.read_at ? await markNotificationUnread(item.id) : await markNotificationRead(item.id);
       setItems((current) => current.map((entry) => (entry.id === updated.id ? updated : entry)));
       setStatus(`Updated notification ${updated.id} to ${updated.read_at ? "read" : "unread"}.`);
     } catch (error) {
@@ -126,8 +139,7 @@ export function NotificationShell() {
               {" · status: "}
               {item.read_at ? "read" : "unread"}
               {" · payload: "}
-              {JSON.stringify(item.payload_json)}
-              {" "}
+              {JSON.stringify(item.payload_json)} {" "}
               <button type="button" onClick={() => void toggleRead(item)} disabled={busyId === item.id}>
                 {busyId === item.id ? "Saving..." : item.read_at ? "Mark unread" : "Mark read"}
               </button>

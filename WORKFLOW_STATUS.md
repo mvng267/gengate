@@ -1,22 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 72
+- Batch: 73
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 72 web feed launcher hardening — reduce browser-test friction by adding viewer/author prefill launcher on `/feed`
+- Scope: batch 73 web notifications launcher hardening — reduce browser-test friction by adding user-context prefill launcher on `/notifications`
 - Status: MVP-testable
 - Files:
-  - apps/web-nextjs/app/feed/page.tsx
-  - apps/web-nextjs/components/moment-compose-shell.tsx
+  - apps/web-nextjs/app/notifications/page.tsx
+  - apps/web-nextjs/components/notification-shell.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `6760b2f` — `batch71: harden web inbox launcher`
-  - working tree: bẩn (batch 72 ready to commit)
+  - latest commit: `74cca73` — `batch72: harden web feed launcher`
+  - working tree: bẩn (batch 73 ready to commit)
 - Blocker: none
-- Next: commit batch 72 web feed launcher hardening; after that, prefer concrete human-test bug fixes or another similarly narrow browser friction fix only if it clearly shortens the MVP test path
+- Next: commit batch 73 web notifications launcher hardening; after that, prefer concrete human-test bug fixes or another similarly narrow browser friction fix only if it clearly shortens the MVP test path
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -39,10 +39,13 @@
 - Batch 71 handoff:
   - `6760b2f` — `batch71: harden web inbox launcher`
   - inbox launcher hardening remains MVP-testable while batch 72 reduces browser friction for moments/private-feed testing
-- Batch 72 outcome:
-  - web `/feed` now includes a real GET launcher form for Author / Viewer UUID prefill
-  - moment shell accepts query-prefilled author/viewer IDs so testers can create moments and reload private feed with less retyping
-  - this shortens the browser path for moments/feed testing while keeping the existing contracts and shell behavior honest
+- Batch 72 handoff:
+  - `74cca73` — `batch72: harden web feed launcher`
+  - feed launcher hardening remains MVP-testable while batch 73 reduces browser friction for notification testing
+- Batch 73 outcome:
+  - web `/notifications` now includes a real GET launcher form for User UUID prefill
+  - notification shell accepts query-prefilled user context so testers can load/create/toggle notifications with less retyping
+  - this shortens the browser path for notification testing while keeping the existing contracts and shell behavior honest
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

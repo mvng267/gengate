@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **72 — web feed launcher hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **73 — web notifications launcher hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,24 +89,24 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **72**
-- Scope hiện tại: web feed launcher hardening — add a real browser form on `/feed` and query-prefill author/viewer fields so testers can launch moment and private-feed checks without retyping IDs.
+- Batch workflow chính thức hiện tại: **73**
+- Scope hiện tại: web notifications launcher hardening — add a real browser form on `/notifications` and query-prefill the user field so testers can load/create/toggle notifications without retyping IDs.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/app/feed/page.tsx`
-  - `apps/web-nextjs/components/moment-compose-shell.tsx`
+  - `apps/web-nextjs/app/notifications/page.tsx`
+  - `apps/web-nextjs/components/notification-shell.tsx`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `6760b2f` — `batch71: harden web inbox launcher`
-  - working tree hiện tại: bẩn (batch 72 ready to commit)
+  - commit gần nhất đã chốt: `74cca73` — `batch72: harden web feed launcher`
+  - working tree hiện tại: bẩn (batch 73 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch72 web feed launcher hardening; sau đó ưu tiên bug-fix/hardening trực tiếp từ human testing hoặc đúng 1 browser friction slice nhỏ tiếp theo nếu thật sự rút ngắn đường test MVP
+  - commit batch73 web notifications launcher hardening; sau đó ưu tiên bug-fix/hardening trực tiếp từ human testing hoặc đúng 1 browser friction slice nhỏ tiếp theo nếu thật sự rút ngắn đường test MVP
 
 ## Batch handoff note
 

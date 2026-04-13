@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 72
-- Trục công việc: web feed launcher hardening — giảm ma sát browser test bằng launcher form author/viewer thật trên `/feed`, không bắt tester retype UUID thủ công.
+- Batch workflow chính thức hiện tại: 73
+- Trục công việc: web notifications launcher hardening — giảm ma sát browser test bằng launcher form user-context thật trên `/notifications`, không bắt tester retype UUID thủ công.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -46,9 +46,9 @@
 - Trạng thái: idle_batch68.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: batch 72 `/feed` launcher hardening đã xong.
-- Kết quả gần nhất: `/feed` có author/viewer launcher form thật và query-prefill flow cho browser testing.
-- Trạng thái: complete_batch72.
+- Scope hiện tại: batch 73 `/notifications` launcher hardening đã xong.
+- Kết quả gần nhất: `/notifications` có user launcher form thật và query-prefill flow cho browser testing.
+- Trạng thái: complete_batch73.
 
 ### pikame-ios — iOS
 - Scope hiện tại: không mở iOS scope mới trong batch 70.
