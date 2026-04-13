@@ -21,6 +21,7 @@ final class AppSessionStore {
         let expiresInSeconds: Int
         let tokenType: String
         let sessionStatus: String
+        let localClearRecommended: Bool
         let backendDetail: String?
 
         var displayName: String {
@@ -169,6 +170,8 @@ final class AppSessionStore {
             "device_id: \(persisted.deviceID)",
             "token_type: \(persisted.tokenType)",
             "session_status: \(persisted.sessionStatus)",
+            "backend_detail: \(persisted.backendDetail ?? persisted.sessionStatus)",
+            "local_clear_recommended: \(persisted.localClearRecommended ? "true" : "false")",
             "expires_in_seconds: \(persisted.expiresInSeconds)"
         ].joined(separator: "\n")
     }
@@ -241,6 +244,7 @@ final class AppSessionStore {
                 expiresInSeconds: response.expires_in_seconds,
                 tokenType: response.token_type,
                 sessionStatus: response.session_status,
+                localClearRecommended: response.local_clear_recommended,
                 backendDetail: response.backend_detail
             )
             persist(session: refreshed)
@@ -323,6 +327,7 @@ final class AppSessionStore {
                 expiresInSeconds: snapshot.expires_in_seconds,
                 tokenType: snapshot.token_type,
                 sessionStatus: snapshot.session_status,
+                localClearRecommended: snapshot.local_clear_recommended,
                 backendDetail: snapshot.backend_detail
             )
             persist(session: restored)
@@ -399,6 +404,7 @@ final class AppSessionStore {
                 expiresInSeconds: response.expires_in_seconds,
                 tokenType: response.token_type,
                 sessionStatus: response.session_status,
+                localClearRecommended: response.local_clear_recommended,
                 backendDetail: response.backend_detail
             )
             persist(session: session)

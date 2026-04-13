@@ -2,20 +2,23 @@
 
 - Batch: 52
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 52 web persisted session preview parity — stored web shell preview now surfaces backend detail + local clear recommendation so refresh/restore persistence cues stay visible after save
-- Status: verify
+- Scope: batch 52 persisted session preview parity — web + iOS shells now surface backend detail + local clear recommendation from saved session state so refresh/restore persistence cues remain visible after save
+- Status: complete
 - Files:
   - apps/web-nextjs/app/login/page.tsx
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `28f5eca` — `batch51: mark workflow complete`
-  - working tree: bẩn đúng theo batch 52 web persisted-session preview slice + workflow files (chưa commit ở nhịp này)
+  - latest committed slice before this update: `0470cde` — `batch52: expose persisted session detail`
+  - working tree: bẩn đúng theo batch 52 iOS persisted-session preview slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit web batch-52 slice này; sau đó inspect iOS persisted session snapshot cue only if needed to keep refresh/restore persistence parity cross-shell
+- Next: chốt batch 52 bằng commit iOS + workflow; sau đó clean closeout nếu chỉ còn artifact, rồi chọn seam auth/session end-to-end kế tiếp cho batch 53
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 52 update:
-  - web stored-session preview nay hiện `backend_detail` thay vì ẩn mất detail đã persist
-  - web stored-session preview nay hiện `local_clear_recommended` để persistence/cleanup cue không bị mất sau refresh/restore
+  - web stored-session preview nay hiện `backend_detail` + `local_clear_recommended`
+  - iOS persisted session snapshot nay persist + surface `localClearRecommended` cùng `backendDetail`
+  - persistence parity giữa web và iOS nay đã align ở mức saved-session preview cue

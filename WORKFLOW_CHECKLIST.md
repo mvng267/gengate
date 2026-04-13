@@ -89,19 +89,19 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **52**
-- Scope hiện tại: web persisted session preview parity — stored web shell preview now surfaces backend detail + local clear recommendation.
-- Trạng thái hiện tại: **verify**
+- Scope hiện tại: iOS persisted session preview parity — saved session snapshot now surfaces backend detail + local clear recommendation.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `28f5eca` — `batch51: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 52 web persisted-session preview slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `0470cde` — `batch52: expose persisted session detail`
+  - working tree hiện tại: bẩn đúng theo batch 52 iOS persisted-session preview slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit web batch-52 slice này; sau đó inspect iOS persisted session snapshot cue only if needed to keep refresh/restore persistence parity cross-shell
+  - chốt batch 52 bằng commit iOS + workflow; sau đó clean closeout nếu chỉ còn artifact, rồi chọn seam auth/session end-to-end kế tiếp cho batch 53
 
 ## Batch handoff note
 
