@@ -1,21 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 89
+- Batch: 90
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 89 iOS feed moment-create hardening — allow creating moment + image metadata directly from native feed shell and reloading authored/private feed lists
+- Scope: batch 90 iOS location share-action hardening — allow creating location share + audience directly from native location shell while keeping count/status checks
 - Status: MVP-testable
 - Files:
-  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `cd6043a` — `batch88: harden ios inbox send message`
-  - working tree: bẩn (batch 89 ready to commit)
+  - latest commit: `3522e91` — `batch90: harden ios location share actions`
+  - working tree: sạch
 - Blocker: none
-- Next: commit batch 89 iOS feed moment-create hardening; then continue only with concrete MVP seam gaps
+- Next: open next narrow MVP seam only from concrete human-test friction; avoid metadata churn
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -89,10 +89,13 @@
 - Batch 88 handoff:
   - `cd6043a` — `batch88: harden ios inbox send message`
   - native inbox mutation seam remains MVP-testable while batch 89 hardens native moment create/feed flow
-- Batch 89 outcome:
-  - iOS feed shell now supports creating moments + image metadata via `POST /moments` and `POST /moments/{id}/media`
-  - iOS feed shell now supports authored moment reload via `GET /moments?author_user_id=<uuid>` alongside private feed reload via `GET /moments/feed`
-  - this reduces dependency on web compose shell for iOS-first moment posting MVP tests
+- Batch 89 handoff:
+  - `7f7b1ab` — `batch89: harden ios feed moment create flow`
+  - native feed moment create/read seam remains MVP-testable while batch 90 hardens native location mutation actions
+- Batch 90 outcome:
+  - iOS location shell now supports creating location share via `POST /locations/shares` directly from native tab
+  - iOS location shell now supports adding audience user via `POST /locations/shares/{share_id}/audience` and reloading counts
+  - location MVP seam on iOS is no longer read-only status-only, reducing dependency on web for share-action tests
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -103,4 +106,4 @@
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
   - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, and load messages
   - iOS Notifications path: open Notifications tab, paste a user UUID, and load notifications
-  - iOS Location path: open Location tab, paste an owner UUID, optionally a share UUID, and load location status counts
+  - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

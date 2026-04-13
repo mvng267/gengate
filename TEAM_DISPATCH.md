@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 89
-- Trục công việc: iOS feed moment-create hardening — bật create moment + image metadata trực tiếp trên native feed shell.
+- Batch workflow chính thức hiện tại: 90
+- Trục công việc: batch 90 đã chốt — iOS location share-action hardening (native create share + add audience + status reload).
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: complete_batch84.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 89 iOS feed moment-create hardening đã xong.
-- Kết quả gần nhất: native feed shell create được moment + image metadata và reload được authored/private feed lists.
-- Trạng thái: complete_batch89.
+- Scope hiện tại: batch 90 iOS location share-action hardening đã xong.
+- Kết quả gần nhất: native location shell create được share + audience và reload được location status counts.
+- Trạng thái: complete_batch90.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

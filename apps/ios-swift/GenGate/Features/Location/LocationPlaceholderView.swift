@@ -4,32 +4,46 @@ struct LocationPlaceholderView: View {
     @Environment(AppSessionStore.self) private var sessionStore
 
     @State private var ownerUserIDDraft: String = ""
+    @State private var allowedUserIDDraft: String = ""
     @State private var shareIDDraft: String = ""
     @State private var snapshotCount: Int?
     @State private var audienceCount: Int?
     @State private var totalShareCount: Int?
+    @State private var createdShareID: String?
     @State private var fetchError: String?
+    @State private var statusMessage: String?
     @State private var isLoading = false
+    @State private var isCreatingShare = false
+    @State private var isCreatingAudience = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 FeaturePlaceholderView(
                     title: "Location",
-                    summary: "iOS native location status reader. Use an owner UUID to inspect snapshot counts and optionally a share UUID to inspect audience counts via the backend contracts already available.",
-                    status: "Status: native location surface is live as a read-only status shell. Map rendering, permission flow, and share mutation stay out of scope for this slice.",
+                    summary: "iOS native location status shell now supports minimal share/audience mutations plus count reading via existing backend contracts.",
+                    status: "Status: native location now supports create share + add audience + count checks; map rendering and permission flow stay out of scope.",
                     bullets: [
-                        "Paste an owner UUID to read that owner's location snapshot count.",
-                        "Optionally paste a location share UUID if one was already created via web/backend to inspect audience count.",
-                        "This shell stays honest to the current backend contract: count/status only, no fake map or detailed snapshot list."
+                        "Paste an owner UUID to read location snapshot/share counts.",
+                        "Create a share via `POST /locations/shares`, then optionally add audience via `POST /locations/shares/{share_id}/audience`.",
+                        "Use counts and IDs below to verify location-sharing state transitions without fake map UI."
                     ]
                 )
 
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Location status reader")
+                    Text("Location status + mutation shell")
                         .font(.headline)
 
                     TextField("Owner user UUID", text: $ownerUserIDDraft)
+#if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+#endif
+                        .padding(12)
+                        .background(Color.secondary.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    TextField("Allowed user UUID (optional)", text: $allowedUserIDDraft)
 #if os(iOS)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
@@ -47,7 +61,7 @@ struct LocationPlaceholderView: View {
                         .background(Color.secondary.opacity(0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                    Button("Use current session user") {
+                    Button("Use current session user as owner") {
                         fillFromCurrentSessionUser()
                     }
                     .buttonStyle(.bordered)
@@ -64,9 +78,46 @@ struct LocationPlaceholderView: View {
                     .buttonStyle(.borderedProminent)
                     .disabled(isLoading || ownerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 
+                    Button {
+                        Task {
+                            await createLocationShare()
+                        }
+                    } label: {
+                        Text(isCreatingShare ? "Creating location share..." : "Create location share")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(
+                        isCreatingShare ||
+                        isLoading ||
+                        ownerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    )
+
+                    Button {
+                        Task {
+                            await addAudienceToShare()
+                        }
+                    } label: {
+                        Text(isCreatingAudience ? "Adding audience..." : "Add audience to share")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(
+                        isCreatingAudience ||
+                        isLoading ||
+                        effectiveShareID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                        allowedUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    )
+
                     if let currentSessionUserID {
                         Text("Current session user_id: \(currentSessionUserID)")
                             .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if let statusMessage {
+                        Text(statusMessage)
+                            .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
 
@@ -82,9 +133,11 @@ struct LocationPlaceholderView: View {
                         .font(.headline)
 
                     statusRow(label: "owner_user_id", value: ownerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "(not set)" : ownerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines))
+                    statusRow(label: "allowed_user_id", value: allowedUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "(optional/not set)" : allowedUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines))
+                    statusRow(label: "active_share_id", value: effectiveShareID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "(not set)" : effectiveShareID)
                     statusRow(label: "snapshot_count", value: snapshotCount.map(String.init) ?? "not loaded")
                     statusRow(label: "total_share_count", value: totalShareCount.map(String.init) ?? "not loaded")
-                    statusRow(label: "audience_count", value: audienceCount.map(String.init) ?? (shareIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "optional share UUID not provided" : "not loaded"))
+                    statusRow(label: "audience_count", value: audienceCount.map(String.init) ?? (effectiveShareID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "share UUID not provided/created" : "not loaded"))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -101,6 +154,15 @@ struct LocationPlaceholderView: View {
             return userSession.userID
         }
         return nil
+    }
+
+    private var effectiveShareID: String {
+        let trimmedManualShareID = shareIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedManualShareID.isEmpty {
+            return trimmedManualShareID
+        }
+
+        return createdShareID ?? ""
     }
 
     private func prefillFromCurrentSessionUserIfNeeded() {
@@ -120,7 +182,7 @@ struct LocationPlaceholderView: View {
 
     private func loadLocationStatus() async {
         let trimmedOwnerID = ownerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedShareID = shareIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedShareID = effectiveShareID.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedOwnerID.isEmpty else {
             fetchError = "Owner UUID là bắt buộc để load location status."
@@ -146,6 +208,8 @@ struct LocationPlaceholderView: View {
             } else {
                 audienceCount = try await apiClient.fetchAudienceCount(shareID: trimmedShareID)
             }
+
+            statusMessage = "Loaded location status counts successfully."
         } catch {
             snapshotCount = nil
             totalShareCount = nil
@@ -154,6 +218,58 @@ struct LocationPlaceholderView: View {
         }
 
         isLoading = false
+    }
+
+    private func createLocationShare() async {
+        let trimmedOwnerID = ownerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedOwnerID.isEmpty else {
+            fetchError = "Owner UUID là bắt buộc để tạo location share."
+            return
+        }
+
+        isCreatingShare = true
+        fetchError = nil
+
+        do {
+            let createdShare = try await LocationStatusAPIClient().createShare(ownerUserID: trimmedOwnerID)
+            createdShareID = createdShare.id
+            shareIDDraft = createdShare.id
+            statusMessage = "Created location share \(createdShare.id). Reloading status..."
+            await loadLocationStatus()
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        isCreatingShare = false
+    }
+
+    private func addAudienceToShare() async {
+        let trimmedShareID = effectiveShareID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedAllowedUserID = allowedUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedShareID.isEmpty else {
+            fetchError = "Cần share UUID để thêm audience."
+            return
+        }
+
+        guard !trimmedAllowedUserID.isEmpty else {
+            fetchError = "Allowed user UUID là bắt buộc để thêm audience."
+            return
+        }
+
+        isCreatingAudience = true
+        fetchError = nil
+
+        do {
+            _ = try await LocationStatusAPIClient().createShareAudience(shareID: trimmedShareID, allowedUserID: trimmedAllowedUserID)
+            statusMessage = "Added audience user to share \(trimmedShareID). Reloading status..."
+            await loadLocationStatus()
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        isCreatingAudience = false
     }
 
     private func statusRow(label: String, value: String) -> some View {
@@ -171,9 +287,45 @@ struct LocationPlaceholderView: View {
     }
 }
 
+private struct LocationShareCreateResult {
+    let id: String
+    let ownerUserID: String
+    let isActive: Bool
+    let sharingMode: String
+}
+
+private struct LocationShareAudienceCreateResult {
+    let id: String
+    let locationShareID: String
+    let allowedUserID: String
+}
+
 private struct LocationStatusAPIClient {
     private struct CountResponse: Decodable {
         let count: Int
+    }
+
+    private struct ShareCreateRequest: Encodable {
+        let owner_user_id: String
+        let is_active: Bool
+        let sharing_mode: String
+    }
+
+    private struct ShareResponse: Decodable {
+        let id: String
+        let owner_user_id: String
+        let is_active: Bool
+        let sharing_mode: String
+    }
+
+    private struct ShareAudienceCreateRequest: Encodable {
+        let allowed_user_id: String
+    }
+
+    private struct ShareAudienceResponse: Decodable {
+        let id: String
+        let location_share_id: String
+        let allowed_user_id: String
     }
 
     private struct BackendErrorPayload: Decodable {
@@ -212,6 +364,63 @@ private struct LocationStatusAPIClient {
     func fetchAudienceCount(shareID: String) async throws -> Int {
         let url = try makeURL(path: "/locations/shares/\(shareID)/audience")
         return try await fetchCount(from: url, prefix: "Location audience count fetch failed")
+    }
+
+    func createShare(ownerUserID: String) async throws -> LocationShareCreateResult {
+        var request = URLRequest(url: try makeURL(path: "/locations/shares"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(
+            ShareCreateRequest(
+                owner_user_id: ownerUserID,
+                is_active: true,
+                sharing_mode: "custom_list"
+            )
+        )
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 201 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Location share create failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(ShareResponse.self, from: data)
+            return LocationShareCreateResult(
+                id: payload.id,
+                ownerUserID: payload.owner_user_id,
+                isActive: payload.is_active,
+                sharingMode: payload.sharing_mode
+            )
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func createShareAudience(shareID: String, allowedUserID: String) async throws -> LocationShareAudienceCreateResult {
+        var request = URLRequest(url: try makeURL(path: "/locations/shares/\(shareID)/audience"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(ShareAudienceCreateRequest(allowed_user_id: allowedUserID))
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 201 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Location share audience create failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(ShareAudienceResponse.self, from: data)
+            return LocationShareAudienceCreateResult(
+                id: payload.id,
+                locationShareID: payload.location_share_id,
+                allowedUserID: payload.allowed_user_id
+            )
+        } catch {
+            throw APIError.invalidResponse
+        }
     }
 
     private func fetchCount(from url: URL, prefix: String) async throws -> Int {

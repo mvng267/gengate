@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **89 — iOS feed moment-create hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **90 — iOS location share-action hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **89**
-- Scope hiện tại: iOS feed moment-create hardening — allow creating moment + image metadata directly from native feed shell and reloading authored/private feed lists.
+- Batch workflow chính thức hiện tại: **90**
+- Scope hiện tại: iOS location share-action hardening — allow creating location share + audience directly from native location shell while keeping count/status checks.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
+  - `apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `cd6043a` — `batch88: harden ios inbox send message`
-  - working tree hiện tại: bẩn (batch 89 ready to commit)
+  - commit gần nhất đã chốt: `3522e91` — `batch90: harden ios location share actions`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch89 iOS feed moment-create hardening; sau đó mở batch mới chỉ khi có MVP seam gap thật từ human testing
+  - mở batch mới chỉ khi có MVP seam gap thật từ human-test run; ưu tiên slice hẹp tăng khả năng test end-to-end
 
 ## Batch handoff note
 
