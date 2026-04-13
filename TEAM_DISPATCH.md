@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 133
-- Trục công việc: iOS inbox seam hardening — reset timestamp state khi recipient-user input bị clear.
+- Batch workflow chính thức hiện tại: 134
+- Trục công việc: iOS inbox seam hardening — reset timestamp debug state khi đổi direct-thread identity.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 133 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: clear `Recipient user UUID` nay reset luôn auto-reload timestamp state để tránh cross-context leftover note.
-- Trạng thái: verify_batch133_ios.
+- Scope hiện tại: batch 134 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: đổi User A/User B nay reset timestamp debug state để tránh carry-over giữa 2 thread contexts.
+- Trạng thái: verify_batch134_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

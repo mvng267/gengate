@@ -48,7 +48,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input state reset; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch state reset; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -76,7 +76,8 @@ struct InboxPlaceholderView: View {
                         "Manual `Reload recipient devices` now explicitly clears skip-hint state before/after reload so UI reflects freshest fetch path.",
                         "Recipient-device section now surfaces tiny event timestamps for latest auto-reload and rate-limit skip events (bounded visibility window) to help human testers debug behavior quickly without long-run UI noise.",
                         "After timestamp hints auto-hide (>20s), the UI shows a brief passive note so testers know it is intentional behavior, not missing data.",
-                        "Clearing `Recipient user UUID` now also clears auto-reload timestamp state to prevent cross-context leftover debug notes."
+                        "Clearing `Recipient user UUID` now also clears auto-reload timestamp state to prevent cross-context leftover debug notes.",
+                        "Switching direct-thread identity (`User A`/`User B`) now also clears recipient-device timestamp debug state to avoid cross-thread carry-over."
                     ]
                 )
 
@@ -1069,6 +1070,8 @@ struct InboxPlaceholderView: View {
     private func clearCursorFormSyncHintIfIdentityChanged() {
         lastCursorFormSyncSummary = nil
         lastCursorFormSyncAt = nil
+        lastRecipientDevicesAutoReloadAt = nil
+        lastRecipientDevicesRateLimitSkipAt = nil
     }
 
     private func loadInboxThread(silent: Bool = false) async {
