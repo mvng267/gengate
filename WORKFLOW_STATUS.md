@@ -13,12 +13,12 @@
   - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest committed slice before this update: `0470cde` — `batch52: expose persisted session detail`
-  - working tree: bẩn đúng theo batch 52 iOS persisted-session preview slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `fe1ae33` — `batch52: align ios persisted session detail`
+  - working tree: sạch
 - Blocker: none
-- Next: chốt batch 52 bằng commit iOS + workflow; sau đó clean closeout nếu chỉ còn artifact, rồi chọn seam auth/session end-to-end kế tiếp cho batch 53
+- Next: mở batch 53 với 1 seam auth/session end-to-end mới; ưu tiên outcome parity cho logout/restore/refresh giữa backend và shell nếu còn cue chưa thẳng hàng
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 52 update:
-  - web stored-session preview nay hiện `backend_detail` + `local_clear_recommended`
-  - iOS persisted session snapshot nay persist + surface `localClearRecommended` cùng `backendDetail`
-  - persistence parity giữa web và iOS nay đã align ở mức saved-session preview cue
+- Batch 52 closeout:
+  - web saved-session preview nay hiện `backend_detail` + `local_clear_recommended`
+  - iOS saved-session preview nay hiện `backend_detail` + `local_clear_recommended`
+  - artifact verify output đã được dọn; batch 52 hiện complete sạch

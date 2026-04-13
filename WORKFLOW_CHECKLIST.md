@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 52**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đã complete batch 52**.
 
 ## Reporting hard rule
 
@@ -89,32 +89,33 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **52**
-- Scope hiện tại: iOS persisted session preview parity — saved session snapshot now surfaces backend detail + local clear recommendation.
+- Scope hiện tại: batch 52 closeout — artifact cleanup + truthful workflow finish marker after cross-shell persisted-session preview parity.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `WORKFLOW_STATUS.md`
+  - `WORKFLOW_CHECKLIST.md`
 - Test-verify:
-  - `cd apps/ios-swift && swift build` → ✅ pass
+  - web: `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - iOS: `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `0470cde` — `batch52: expose persisted session detail`
-  - working tree hiện tại: bẩn đúng theo batch 52 iOS persisted-session preview slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `fe1ae33` — `batch52: align ios persisted session detail`
+  - working tree hiện tại: sạch sau khi dọn `apps/ios-swift/.build/` và `apps/web-nextjs/tsconfig.tsbuildinfo`
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - chốt batch 52 bằng commit iOS + workflow; sau đó clean closeout nếu chỉ còn artifact, rồi chọn seam auth/session end-to-end kế tiếp cho batch 53
+  - mở batch 53 với 1 seam auth/session end-to-end mới; ưu tiên outcome parity cho logout/restore/refresh giữa backend và shell nếu còn cue chưa thẳng hàng
 
 ## Batch handoff note
 
-- Batch vừa xong: **51**
+- Batch vừa xong: **52**
 - Commit cuối đã chốt:
-  - `5b3efb3` — `batch51: surface register conflict detail`
-  - `e6416a1` — `batch51: align ios register conflict detail`
-  - `28f5eca` — `batch51: mark workflow complete`
+  - `0470cde` — `batch52: expose persisted session detail`
+  - `fe1ae33` — `batch52: align ios persisted session detail`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - không có blocker code trực tiếp; batch 51 đã khép kín ở mức register-conflict backend detail parity giữa web và iOS shell
-- Batch kế tiếp: **52**
-- Scope hẹp đầu tiên của batch 52:
-  - expose persisted-session backend detail + local-clear recommendation trong web shell preview để refresh/restore persistence contract không bị ẩn sau khi lưu local session
+  - không có blocker code trực tiếp; batch 52 đã khép kín ở mức persisted-session preview parity giữa web và iOS shell
+- Batch kế tiếp: **53**
+- Scope hẹp đầu tiên của batch 53:
+  - ưu tiên outcome parity cho logout/restore/refresh giữa backend và web/iOS shell ở nơi summary/message/detail cue còn lệch nhau
