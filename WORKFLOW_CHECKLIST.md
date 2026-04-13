@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **90 — iOS location share-action hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **91 — iOS notifications lifecycle hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **90**
-- Scope hiện tại: iOS location share-action hardening — allow creating location share + audience directly from native location shell while keeping count/status checks.
+- Batch workflow chính thức hiện tại: **91**
+- Scope hiện tại: iOS notifications lifecycle hardening — allow creating notifications from native shell before read/unread toggles.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift`
+  - `apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `3522e91` — `batch90: harden ios location share actions`
+  - commit gần nhất đã chốt: `a0a4cbe` — `batch91: harden ios notifications lifecycle`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch mới chỉ khi có MVP seam gap thật từ human-test run; ưu tiên slice hẹp tăng khả năng test end-to-end
+  - chỉ mở batch mới khi có MVP seam gap thật từ human-test run; giữ scope hẹp và có verify path rõ ràng
 
 ## Batch handoff note
 

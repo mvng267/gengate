@@ -4,22 +4,26 @@ struct NotificationsPlaceholderView: View {
     @Environment(AppSessionStore.self) private var sessionStore
 
     @State private var userIDDraft: String = ""
+    @State private var createTypeDraft: String = "ios_shell_notice"
+    @State private var createPayloadDraft: String = "hello from ios notifications shell"
     @State private var notificationRows: [NotificationRow] = []
     @State private var mutatingNotificationIDs: Set<String> = []
     @State private var fetchError: String?
+    @State private var statusMessage: String?
     @State private var isLoading = false
+    @State private var isCreatingNotification = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 FeaturePlaceholderView(
                     title: "Notifications",
-                    summary: "iOS native notification center reader. Use a real user UUID to inspect the current notification list through the same backend contract already exposed on web/backend.",
-                    status: "Status: native notification center now supports read/unread mutation for each row; delete remains intentionally out of scope for this slice.",
+                    summary: "iOS native notification center shell now supports create + read/unread mutation so notification flow can be exercised end-to-end from native UI.",
+                    status: "Status: native notification center now supports create + read/unread toggles; delete remains intentionally out of scope for this slice.",
                     bullets: [
-                        "Paste a backend user UUID that already has seeded notifications.",
-                        "This shell reads `/notifications/{user_id}` then allows toggling each item via `/notifications/{id}/read` and `/notifications/{id}/unread`.",
-                        "Use backend or web tools when you need to create new notifications; use this iOS tab to consume and toggle read state natively."
+                        "Paste a backend user UUID to create and load notifications for that user.",
+                        "This shell can create via `POST /notifications`, then read `/notifications/{user_id}` and toggle each row via `/notifications/{id}/read` + `/notifications/{id}/unread`.",
+                        "Use this tab to run minimal notification lifecycle checks from iOS without relying on web seeding first."
                     ]
                 )
 
@@ -51,11 +55,57 @@ struct NotificationsPlaceholderView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(isLoading || userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(isLoading || isCreatingNotification || userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Create notification")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+
+                        TextField("Notification type", text: $createTypeDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        TextField("Payload message", text: $createPayloadDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.sentences)
+                            .autocorrectionDisabled(false)
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        Button {
+                            Task {
+                                await createNotification()
+                            }
+                        } label: {
+                            Text(isCreatingNotification ? "Creating notification..." : "Create notification")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(
+                            isLoading ||
+                            isCreatingNotification ||
+                            userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                            createTypeDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        )
+                    }
 
                     if let currentSessionUserID {
                         Text("Current session user_id: \(currentSessionUserID)")
                             .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if let statusMessage {
+                        Text(statusMessage)
+                            .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
 
@@ -165,13 +215,48 @@ struct NotificationsPlaceholderView: View {
         do {
             notificationRows = try await NotificationsAPIClient().fetchNotifications(userID: trimmedUserID)
             mutatingNotificationIDs = []
+            statusMessage = "Loaded \(notificationRows.count) notification(s)."
         } catch {
             notificationRows = []
             mutatingNotificationIDs = []
+            statusMessage = nil
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
 
         isLoading = false
+    }
+
+    private func createNotification() async {
+        let trimmedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedType = createTypeDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedPayload = createPayloadDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedUserID.isEmpty else {
+            fetchError = "User UUID là bắt buộc để tạo notification."
+            return
+        }
+
+        guard !trimmedType.isEmpty else {
+            fetchError = "Notification type là bắt buộc."
+            return
+        }
+
+        isCreatingNotification = true
+        fetchError = nil
+
+        do {
+            let createdRow = try await NotificationsAPIClient().createNotification(
+                userID: trimmedUserID,
+                notificationType: trimmedType,
+                payloadMessage: trimmedPayload.isEmpty ? "sent from ios notifications shell" : trimmedPayload
+            )
+            statusMessage = "Created notification \(createdRow.id). Reloading list..."
+            await loadNotifications()
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        isCreatingNotification = false
     }
 
     private func toggleReadState(for row: NotificationRow) async {
@@ -191,6 +276,9 @@ struct NotificationsPlaceholderView: View {
             if let index = notificationRows.firstIndex(where: { $0.id == updated.id }) {
                 notificationRows[index] = updated
             }
+            statusMessage = updated.isRead
+                ? "Marked notification \(updated.id) as read."
+                : "Marked notification \(updated.id) as unread."
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
@@ -220,6 +308,12 @@ private struct NotificationsAPIClient {
         let notification_type: String
         let payload_json: [String: StringOrIntOrBool]
         let read_at: String?
+    }
+
+    private struct NotificationCreateRequest: Encodable {
+        let user_id: String
+        let notification_type: String
+        let payload_json: [String: String]
     }
 
     private enum StringOrIntOrBool: Decodable, CustomStringConvertible {
@@ -291,6 +385,36 @@ private struct NotificationsAPIClient {
         do {
             let payload = try JSONDecoder().decode(NotificationListResponse.self, from: data)
             return payload.items.map(mapNotification)
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func createNotification(userID: String, notificationType: String, payloadMessage: String) async throws -> NotificationRow {
+        var request = URLRequest(url: try makeURL(path: "/notifications"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(
+            NotificationCreateRequest(
+                user_id: userID,
+                notification_type: notificationType,
+                payload_json: [
+                    "source": "ios_notifications_shell",
+                    "message": payloadMessage,
+                ]
+            )
+        )
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 201 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Notification create failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(NotificationResponse.self, from: data)
+            return mapNotification(payload)
         } catch {
             throw APIError.invalidResponse
         }

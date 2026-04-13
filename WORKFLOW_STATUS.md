@@ -1,18 +1,18 @@
 # GenGate Workflow Status
 
-- Batch: 90
+- Batch: 91
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 90 iOS location share-action hardening — allow creating location share + audience directly from native location shell while keeping count/status checks
+- Scope: batch 91 iOS notifications lifecycle hardening — allow creating notifications from native shell before read/unread toggles
 - Status: MVP-testable
 - Files:
-  - apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `3522e91` — `batch90: harden ios location share actions`
+  - latest commit: `a0a4cbe` — `batch91: harden ios notifications lifecycle`
   - working tree: sạch
 - Blocker: none
 - Next: open next narrow MVP seam only from concrete human-test friction; avoid metadata churn
@@ -92,10 +92,13 @@
 - Batch 89 handoff:
   - `7f7b1ab` — `batch89: harden ios feed moment create flow`
   - native feed moment create/read seam remains MVP-testable while batch 90 hardens native location mutation actions
-- Batch 90 outcome:
-  - iOS location shell now supports creating location share via `POST /locations/shares` directly from native tab
-  - iOS location shell now supports adding audience user via `POST /locations/shares/{share_id}/audience` and reloading counts
-  - location MVP seam on iOS is no longer read-only status-only, reducing dependency on web for share-action tests
+- Batch 90 handoff:
+  - `ecbd162` — `batch90: harden ios location share actions`
+  - native location share create/audience add seam remains MVP-testable while batch 91 hardens native notifications lifecycle
+- Batch 91 outcome:
+  - iOS notifications shell now supports creating notifications via `POST /notifications` directly from native tab
+  - iOS notifications shell continues supporting `/notifications/{user_id}` read and per-row read/unread toggle mutation
+  - notification seam is now testable end-to-end from iOS without pre-seeding via web/backend tools
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -105,5 +108,5 @@
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, and load friend graph snapshot
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
   - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, and load messages
-  - iOS Notifications path: open Notifications tab, paste a user UUID, and load notifications
+  - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts
