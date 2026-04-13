@@ -40,13 +40,14 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
                         "You can now call `PATCH /conversations/{id}/members/{user_id}/read-cursor` directly from iOS to move read cursor and observe `last_read_by` + focused `read_status(user)` + member cursor summary in-shell.",
                         "Quick action `Mark latest message as read (focus user)` helps testers advance read cursor to newest loaded row with one tap.",
-                        "Quick preset buttons now let testers pick member/message targets without copy-pasting UUIDs manually."
+                        "Quick preset buttons now let testers pick member/message targets without copy-pasting UUIDs manually.",
+                        "Member summary now shows cursor ordering hint + unread count behind cursor to spot lagging read state quickly."
                     ]
                 )
 
@@ -535,6 +536,8 @@ struct InboxPlaceholderView: View {
                             let cursorMessage = messageRows.first(where: { $0.id == cursorMessageID })
                             let isFocusUser = member.userID == resolvedReadStatusFocusUserID
                             let isAtLatest = cursorMessageID != nil && cursorMessageID == latestLoadedMessageID
+                            let unreadBehindCount = unreadMessageCountBehindCursor(lastReadMessageID: cursorMessageID)
+                            let cursorOrderHint = cursorOrderHintText(lastReadMessageID: cursorMessageID)
 
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("user_id: \(member.userID)")
@@ -560,6 +563,14 @@ struct InboxPlaceholderView: View {
                                 Text("cursor_state: \(isAtLatest ? "at_latest" : "behind_or_unknown")")
                                     .font(.caption.monospaced())
                                     .foregroundStyle(isAtLatest ? .green : .orange)
+
+                                Text("cursor_order_hint: \(cursorOrderHint)")
+                                    .font(.caption.monospaced())
+                                    .foregroundStyle(.secondary)
+
+                                Text("unread_behind_cursor: \(unreadBehindCount)")
+                                    .font(.caption.monospaced())
+                                    .foregroundStyle(unreadBehindCount == 0 ? .green : .orange)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(12)
@@ -750,6 +761,25 @@ struct InboxPlaceholderView: View {
 
     private var latestLoadedMessageID: String? {
         messageRows.last?.id
+    }
+
+    private func unreadMessageCountBehindCursor(lastReadMessageID: String?) -> Int {
+        guard let lastReadMessageID,
+              let cursorIndex = messageRows.firstIndex(where: { $0.id == lastReadMessageID }) else {
+            return messageRows.count
+        }
+
+        let trailingCount = messageRows.count - cursorIndex - 1
+        return max(trailingCount, 0)
+    }
+
+    private func cursorOrderHintText(lastReadMessageID: String?) -> String {
+        guard let lastReadMessageID,
+              let cursorIndex = messageRows.firstIndex(where: { $0.id == lastReadMessageID }) else {
+            return "unknown"
+        }
+
+        return "index \(cursorIndex + 1)/\(messageRows.count)"
     }
 
     private var isMutatingInbox: Bool {
