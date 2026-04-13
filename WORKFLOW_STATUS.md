@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 128
+- Batch: 129
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 128 iOS inbox seam hardening — surface helper hint when recipient-device auto reload is skipped by rate-limit guard
+- Scope: batch 129 iOS inbox seam hardening — reset recipient-device rate-limit skip hint around manual reload path for truthful UI state
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch128 slice)
+  - latest commit: `HEAD` (local batch129 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch129 cho messaging friction tiếp theo (ví dụ reset stale recipient-device hint/state khi manual reload thành công để UI luôn phản ánh fetch mới nhất) trong iOS inbox shell
+- Next: mở batch130 cho messaging friction tiếp theo (ví dụ expose tiny timestamp helper cho auto-reload/skip events để tester debug recipient-device behavior nhanh hơn) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -243,6 +243,10 @@
   - khi auto reload bị skip bởi rate-limit guard, view now records `lastRecipientDevicesRateLimitSkipAt` và hiển thị helper hint ngắn (~1.2s)
   - helper hint giải thích rõ vì sao options chưa refresh ngay và gợi ý chờ thêm hoặc bấm manual reload
   - skip-hint state được reset khi recipient user rỗng, khi fetch reload chạy, và khi view disappear để tránh stale helper text
+- Batch 129 outcome:
+  - manual `Reload recipient devices` action now explicitly clears `lastRecipientDevicesRateLimitSkipAt` trước và sau reload call
+  - đảm bảo helper hint không bị kẹt/nhấp nháy sai sau manual recovery path
+  - UI now phản ánh rõ hơn rằng manual reload đã override skip state và đi theo fetch path mới nhất
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -252,7 +256,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve direct conversation, nhập/paste `Recipient user UUID` rồi chờ ~0.35s để verify auto reload; chỉnh nhanh recipient user nhiều lần <1s để kích hoạt rate-limit skip và verify helper hint xuất hiện ngắn dưới recipient device section; đợi >1s rồi đổi lại để verify auto reload chạy lại và hint tự biến mất; cuối cùng chọn device và `Create message-device key`
+  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve direct conversation, nhập/paste `Recipient user UUID` rồi đổi nhanh để kích hoạt skip-hint; khi hint đang hiện, bấm `Reload recipient devices` để verify hint clear ngay và options refresh theo fetch mới; sau đó chọn device và `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

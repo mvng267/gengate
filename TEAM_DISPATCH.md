@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 128
-- Trục công việc: iOS inbox seam hardening — skip-hint UX cho auto recipient-device reload rate-limit guard.
+- Batch workflow chính thức hiện tại: 129
+- Trục công việc: iOS inbox seam hardening — reset skip-hint state quanh manual recipient-device reload.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 128 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: hiển thị helper hint ngắn khi auto recipient-device reload bị skip bởi rate-limit guard.
-- Trạng thái: verify_batch128_ios.
+- Scope hiện tại: batch 129 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: manual reload recipient devices clear skip-hint state trước/sau reload để UI truthful.
+- Trạng thái: verify_batch129_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
