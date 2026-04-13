@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **batch 48 đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 49**.
 
 ## Reporting hard rule
 
@@ -88,23 +88,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **48**
-- Scope hiện tại: batch 48 closeout — workflow-only finish marker sau khi backend/web/iOS parity đã xong
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **49**
+- Scope hiện tại: backend login detail cue parity — surface explicit backend detail in `/auth/login` response.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `WORKFLOW_STATUS.md`
-  - `WORKFLOW_CHECKLIST.md`
+  - `apps/backend-python/app/modules/auth/router.py`
+  - `apps/backend-python/tests/test_auth_api.py`
 - Test-verify:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ pass
-  - web: `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - iOS: `cd apps/ios-swift && swift build` → ✅ pass
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `128df67` — `batch48: add ios refresh restore detail cues`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `450152c` — `batch48: mark workflow complete`
+  - working tree hiện tại: bẩn đúng theo batch 49 backend login detail cue slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit workflow-only finish marker cho batch 48; sau đó mở batch mới bằng 1 handoff note ngắn + scope auth/session hẹp đầu tiên
+  - commit backend batch-49 slice này; sau đó follow-up 1 shell lane để đọc trực tiếp login `backend_detail` mới thay vì fallback từ `session_status`
 
 ## Batch handoff note
 
@@ -113,6 +111,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `d1b95e7` — `batch48: add refresh restore detail cues`
   - `67e615e` — `batch48: add web refresh restore detail cues`
   - `128df67` — `batch48: add ios refresh restore detail cues`
+  - `450152c` — `batch48: mark workflow complete`
 - Test-verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → pass
   - web: `cd apps/web-nextjs && npm run verify` → pass
@@ -121,4 +120,4 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - không có blocker code trực tiếp; batch 48 đã khép kín ở mức refresh/restore detail cue parity
 - Batch kế tiếp: **49**
 - Scope hẹp đầu tiên của batch 49:
-  - chọn 1 follow-up auth/session nhỏ giúp tiến gần auth flow thật hơn mà không mở rộng UI lớn; ưu tiên bổ sung 1 cue/contract end-to-end tiếp theo từ backend sang shell
+  - bổ sung explicit login backend detail cue từ backend để shell login flow cũng có cue parity như refresh / restore / logout

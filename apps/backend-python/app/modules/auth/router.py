@@ -68,6 +68,8 @@ def login(payload: LoginRequest, db: Session = Depends(get_db_session)) -> Login
         token_type="bearer",
         bootstrap_mode=bootstrap_mode,
         session_status=auth_service.get_session_status(auth_session),
+        local_clear_recommended=False,
+        backend_detail="login_session_created",
     )
 
 

@@ -1,33 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 48
+- Batch: 49
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 48 refresh/restore backend detail cue parity complete — backend + web + iOS all surface explicit backend detail for refresh/restore-capable auth flows so shell verify can distinguish restore vs refresh from server-confirmed cue instead of inferring only from local status text
-- Status: complete
+- Scope: batch 49 login backend detail cue parity — surface explicit backend detail for `/auth/login` so shell login flow no longer relies on fallback from `session_status`
+- Status: verify
 - Files:
-  - apps/backend-python/app/schemas/auth.py
   - apps/backend-python/app/modules/auth/router.py
   - apps/backend-python/tests/test_auth_api.py
-  - apps/web-nextjs/lib/auth/types.ts
-  - apps/web-nextjs/lib/auth/client.ts
-  - apps/web-nextjs/app/login/page.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅
-  - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `128df67` — `batch48: add ios refresh restore detail cues`
-  - working tree: sạch
+  - latest commit: `450152c` — `batch48: mark workflow complete`
+  - working tree: bẩn đúng theo batch 49 backend login detail cue slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch kế tiếp với 1 scope auth/session hẹp mới sau khi handoff note batch 48 được chốt trong checklist
+- Next: commit backend batch-49 slice này; sau đó follow-up 1 shell lane để đọc trực tiếp login `backend_detail` mới thay vì fallback từ `session_status`
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 48 closeout:
-  - `/auth/refresh` trả explicit `backend_detail="refresh_rotated"` + `local_clear_recommended=false`
-  - `/auth/session` trả explicit `backend_detail="session_restored"` + `local_clear_recommended=false`
-  - web shell đọc trực tiếp `backend_detail` + `local_clear_recommended` cho login/register-refresh/restore outcome preview
-  - iOS shell đọc trực tiếp `backend_detail` + `local_clear_recommended` cho login/refresh/restore outcome summary
-  - batch 48 đã sạch và chốt xong ở cả 3 lane
+- Batch 49 update:
+  - `/auth/login` nay trả explicit `backend_detail="login_session_created"` + `local_clear_recommended=false`
+  - login response contract giờ có cue parity rõ hơn với refresh / restore / logout

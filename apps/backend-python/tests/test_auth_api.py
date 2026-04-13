@@ -69,7 +69,7 @@ def test_auth_login_creates_session_shell_for_existing_user() -> None:
     assert payload["bootstrap_mode"] == "password_stub"
     assert payload["session_status"] == "active"
     assert payload["local_clear_recommended"] is False
-    assert payload["backend_detail"] is None
+    assert payload["backend_detail"] == "login_session_created"
     assert payload["expires_in_seconds"] > 0
 
     clear_overrides()
