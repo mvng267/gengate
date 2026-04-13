@@ -9,21 +9,26 @@ struct InboxPlaceholderView: View {
     @State private var messageRows: [InboxMessageRow] = []
     @State private var attachmentMap: [String: [InboxAttachmentRow]] = [:]
     @State private var messageDraft: String = ""
+    @State private var attachmentTargetMessageIDDraft: String = ""
+    @State private var attachmentTypeDraft: String = "image"
+    @State private var attachmentStorageKeyDraft: String = "attachments/ios-demo-image.enc"
+    @State private var attachmentBlobDraft: String = "ios-demo-attachment-blob"
     @State private var fetchError: String?
     @State private var isLoading = false
     @State private var isSendingMessage = false
+    @State private var isCreatingAttachment = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 FeaturePlaceholderView(
                     title: "Inbox",
-                    summary: "iOS native inbox reader. Use two real user UUIDs to resolve a direct conversation and inspect its message list through the same backend contracts already wired for web.",
-                    status: "Status: native inbox now supports minimal text sending plus message/attachment reading; device keys and realtime remain pending.",
+                    summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment metadata, and inspect message list via the same backend contracts as web.",
+                    status: "Status: native inbox now supports text send + attachment create/list in one tab flow; device keys and realtime remain pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
-                        "This shell first calls `/conversations/direct`, then reads `/messages?conversation_id=<uuid>` and per-message `/messages/{id}/attachments`.",
-                        "You can now send text messages as User A via `POST /messages` (with resolved conversation id) directly from iOS; attachment upload still relies on web/backend tools."
+                        "This shell calls `/conversations/direct`, reads `/messages?conversation_id=<uuid>`, and lists `/messages/{id}/attachments`.",
+                        "You can now send text via `POST /messages` and attach metadata via `POST /messages/{id}/attachments` directly from iOS."
                     ]
                 )
 
@@ -98,6 +103,67 @@ struct InboxPlaceholderView: View {
                         )
                     }
 
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Create attachment metadata")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+
+                        TextField("Target message UUID (optional, defaults to newest loaded)", text: $attachmentTargetMessageIDDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        TextField("Attachment type", text: $attachmentTypeDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        TextField("Storage key (optional)", text: $attachmentStorageKeyDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        TextField("Encrypted blob placeholder", text: $attachmentBlobDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        Button {
+                            Task {
+                                await createAttachment()
+                            }
+                        } label: {
+                            Text(isCreatingAttachment ? "Creating attachment..." : "Create attachment")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(
+                            isLoading ||
+                            isSendingMessage ||
+                            isCreatingAttachment ||
+                            conversationSummary == nil ||
+                            (resolvedAttachmentTargetMessageID?.isEmpty ?? true) ||
+                            attachmentTypeDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                            attachmentBlobDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        )
+                    }
+
                     if let currentSessionUserID {
                         Text("Current session user_id: \(currentSessionUserID)")
                             .font(.footnote.monospaced())
@@ -129,6 +195,10 @@ struct InboxPlaceholderView: View {
                     }
 
                     Text("Loaded messages: \(messageRows.count)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
+                    Text("Attachment target message_id: \(resolvedAttachmentTargetMessageID ?? "(not resolved)")")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
                 }
@@ -187,6 +257,15 @@ struct InboxPlaceholderView: View {
             return userSession.userID
         }
         return nil
+    }
+
+    private var resolvedAttachmentTargetMessageID: String? {
+        let manualMessageID = attachmentTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !manualMessageID.isEmpty {
+            return manualMessageID
+        }
+
+        return messageRows.last?.id
     }
 
     private func prefillUserAFromCurrentSessionIfNeeded() {
@@ -273,6 +352,45 @@ struct InboxPlaceholderView: View {
 
         isSendingMessage = false
     }
+
+    private func createAttachment() async {
+        guard let targetMessageID = resolvedAttachmentTargetMessageID,
+              !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            fetchError = "Cần message UUID hợp lệ để tạo attachment."
+            return
+        }
+
+        let trimmedType = attachmentTypeDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedStorageKey = attachmentStorageKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedBlob = attachmentBlobDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedType.isEmpty else {
+            fetchError = "Attachment type là bắt buộc."
+            return
+        }
+
+        guard !trimmedBlob.isEmpty else {
+            fetchError = "Encrypted blob placeholder là bắt buộc."
+            return
+        }
+
+        isCreatingAttachment = true
+        fetchError = nil
+
+        do {
+            _ = try await InboxAPIClient().createAttachment(
+                messageID: targetMessageID,
+                attachmentType: trimmedType,
+                encryptedAttachmentBlob: trimmedBlob,
+                storageKey: trimmedStorageKey.isEmpty ? nil : trimmedStorageKey
+            )
+            await loadInboxThread()
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        isCreatingAttachment = false
+    }
 }
 
 private struct DirectConversationSummary {
@@ -326,6 +444,12 @@ private struct InboxAPIClient {
     private struct AttachmentResponse: Decodable {
         let id: String
         let message_id: String
+        let attachment_type: String
+        let encrypted_attachment_blob: String
+        let storage_key: String?
+    }
+
+    private struct AttachmentCreateRequest: Encodable {
         let attachment_type: String
         let encrypted_attachment_blob: String
         let storage_key: String?
@@ -456,6 +580,43 @@ private struct InboxAPIClient {
                     storageKey: $0.storage_key
                 )
             }
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func createAttachment(
+        messageID: String,
+        attachmentType: String,
+        encryptedAttachmentBlob: String,
+        storageKey: String?
+    ) async throws -> InboxAttachmentRow {
+        let url = try makeURL(path: "/messages/\(messageID)/attachments")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(
+            AttachmentCreateRequest(
+                attachment_type: attachmentType,
+                encrypted_attachment_blob: encryptedAttachmentBlob,
+                storage_key: storageKey
+            )
+        )
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 201 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Attachment create failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(AttachmentResponse.self, from: data)
+            return InboxAttachmentRow(
+                id: payload.id,
+                attachmentType: payload.attachment_type,
+                storageKey: payload.storage_key
+            )
         } catch {
             throw APIError.invalidResponse
         }

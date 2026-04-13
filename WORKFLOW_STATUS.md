@@ -1,21 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 92
+- Batch: 93
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 92 iOS shell truth hardening — align Root tab auth-gate summaries with real implemented MVP seams
+- Scope: batch 93 iOS inbox attachment-create hardening — enable `POST /messages/{id}/attachments` directly from native inbox shell
 - Status: MVP-testable
 - Files:
-  - apps/ios-swift/GenGate/App/RootTabView.swift
+  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `51a08f3` — `batch91: harden ios notifications lifecycle`
-  - working tree: bẩn (batch 92 ready to commit)
+  - latest commit: `e4310b1` — `batch92: align ios root tab seam summaries`
+  - working tree: bẩn (batch 93 ready to commit)
 - Blocker: none
-- Next: commit batch 92 root-tab truth hardening; then continue only with concrete human-test friction
+- Next: commit batch 93 iOS inbox attachment-create hardening, then keep advancing only by concrete human-test seams
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -98,10 +98,13 @@
 - Batch 91 handoff:
   - `51a08f3` — `batch91: harden ios notifications lifecycle`
   - native notifications create/read/toggle seam remains MVP-testable while batch 92 aligns root auth-gate summaries with actual seam state
-- Batch 92 outcome:
-  - `RootTabView` auth-gate summaries now match the real implemented state of Feed/Inbox/Location/Notifications shells
-  - this removes stale “pending” copy that could mislead human testers about already-available MVP flows
-  - iOS top-level navigation now reflects truthful seam readiness before login/session handoff
+- Batch 92 handoff:
+  - `e4310b1` — `batch92: align ios root tab seam summaries`
+  - iOS top-level summaries stay truthful while batch 93 extends native inbox mutation parity
+- Batch 93 outcome:
+  - iOS Inbox tab now supports creating message attachments via `POST /messages/{id}/attachments` directly from native UI
+  - attachment target defaults to newest loaded message while still allowing manual message-id override
+  - direct messaging seam on iOS now covers text send + attachment create/list within one tab flow
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -110,6 +113,6 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, and load messages
+  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, then create/list attachment metadata on a chosen message
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

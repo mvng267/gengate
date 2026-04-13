@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 92
-- Trục công việc: iOS shell truth hardening — align Root tab auth-gate summaries with actual implemented seam state.
+- Batch workflow chính thức hiện tại: 93
+- Trục công việc: iOS inbox attachment-create hardening — enable native `POST /messages/{id}/attachments` from Inbox shell.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: complete_batch84.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 92 iOS shell truth hardening đã xong.
-- Kết quả gần nhất: Root tab summaries đã phản ánh đúng các seam iOS đã live để giảm sai lệch khi human test.
-- Trạng thái: complete_batch92.
+- Scope hiện tại: batch 93 iOS inbox attachment-create hardening đã xong.
+- Kết quả gần nhất: Inbox shell có thể tạo attachment metadata trực tiếp từ iOS sau khi resolve thread/message.
+- Trạng thái: complete_batch93.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

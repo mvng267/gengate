@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **92 — iOS shell truth hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **93 — iOS inbox attachment-create hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **92**
-- Scope hiện tại: iOS shell truth hardening — align Root tab auth-gate summaries with real implemented MVP seams.
+- Batch workflow chính thức hiện tại: **93**
+- Scope hiện tại: iOS inbox attachment-create hardening — enable `POST /messages/{id}/attachments` directly from native inbox shell.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/App/RootTabView.swift`
+  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `51a08f3` — `batch91: harden ios notifications lifecycle`
-  - working tree hiện tại: bẩn (batch 92 ready to commit)
+  - commit gần nhất đã chốt: `e4310b1` — `batch92: align ios root tab seam summaries`
+  - working tree hiện tại: bẩn (batch 93 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch92 root-tab truth hardening; sau đó chỉ mở batch mới khi có MVP seam gap thật từ human-test run
+  - commit batch93 iOS inbox attachment-create hardening; sau đó tiếp tục theo seam MVP có friction test thật
 
 ## Batch handoff note
 
