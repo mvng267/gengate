@@ -391,7 +391,7 @@ private struct FriendGraphAPIClient {
         }
     }
 
-    private let baseURL = URL(string: "http://127.0.0.1:8000")
+    private let baseURL = BackendEnvironment.apiBaseURL
 
     func fetchSnapshot(userID: String) async throws -> FriendGraphSnapshot {
         let requestsResponse = try await fetchFriendRequests(userID: userID)

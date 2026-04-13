@@ -204,7 +204,7 @@ final class AppSessionStore {
     }
 
     init(
-        backendBaseURL: URL? = URL(string: "http://127.0.0.1:8000"),
+        backendBaseURL: URL? = BackendEnvironment.apiBaseURL,
         sessionStore: UserDefaults = .standard
     ) {
         self.backendBaseURL = backendBaseURL

@@ -371,7 +371,7 @@ private struct NotificationsAPIClient {
         }
     }
 
-    private let baseURL = URL(string: "http://127.0.0.1:8000")
+    private let baseURL = BackendEnvironment.apiBaseURL
 
     func fetchNotifications(userID: String) async throws -> [NotificationRow] {
         let url = try makeURL(path: "/notifications/\(userID)")

@@ -444,7 +444,7 @@ private struct PrivateFeedAPIClient {
         }
     }
 
-    private let baseURL = URL(string: "http://127.0.0.1:8000")
+    private let baseURL = BackendEnvironment.apiBaseURL
 
     func fetchFeed(viewerUserID: String) async throws -> [PrivateFeedMomentRow] {
         let url = try makeURL(path: "/moments/feed", queryItems: [URLQueryItem(name: "viewer_user_id", value: viewerUserID)])

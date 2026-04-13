@@ -476,7 +476,7 @@ private struct InboxAPIClient {
         }
     }
 
-    private let baseURL = URL(string: "http://127.0.0.1:8000")
+    private let baseURL = BackendEnvironment.apiBaseURL
 
     func resolveDirectConversation(userAID: String, userBID: String) async throws -> DirectConversationSummary {
         let url = try makeURL(path: "/conversations/direct")

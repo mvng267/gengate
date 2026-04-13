@@ -431,7 +431,7 @@ private struct LocationStatusAPIClient {
         }
     }
 
-    private let baseURL = URL(string: "http://127.0.0.1:8000")
+    private let baseURL = BackendEnvironment.apiBaseURL
 
     func fetchSnapshotCount(ownerUserID: String) async throws -> Int {
         let url = try makeURL(path: "/locations/snapshots/\(ownerUserID)")
