@@ -2,21 +2,24 @@
 
 - Batch: 51
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 51 register conflict backend detail parity — web shell now surfaces explicit backend error detail for failed `/auth/register` conflict instead of collapsing register conflict to generic text
-- Status: verify
+- Scope: batch 51 register conflict backend detail parity — web + iOS shells now surface explicit backend error detail for failed `/auth/register` conflict instead of collapsing register conflict to generic text
+- Status: complete
 - Files:
   - apps/web-nextjs/lib/auth/client.ts
   - apps/web-nextjs/app/login/page.tsx
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `eee0e27` — `batch50: mark workflow complete`
-  - working tree: bẩn đúng theo batch 51 web register-conflict detail slice + workflow files (chưa commit ở nhịp này)
+  - latest committed slice before this update: `5b3efb3` — `batch51: surface register conflict detail`
+  - working tree: bẩn đúng theo batch 51 iOS register-conflict detail slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit web batch-51 slice này; sau đó decide follow-up lane còn lại chỉ nếu cần để keep register-conflict detail parity end-to-end
+- Next: chốt batch 51 bằng commit iOS + workflow; sau đó follow-up clean closeout nếu còn artifact, rồi chọn seam auth shell end-to-end kế tiếp cho batch 52
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 51 update:
   - web register flow nay preserve backend error detail cho 409 conflict thay vì nuốt mất code thật
-  - register-then-sign-in outcome panel nay hiện `backend_detail: user_exists` (hoặc detail backend khác) thay vì `none`
+  - iOS auth shell nay map register 409 thành `registerRejected(detail)` để surface `backend_detail` thật trong register-then-sign-in outcome summary
+  - register-conflict detail parity giữa web và iOS đã được align ở mức shell detail cue

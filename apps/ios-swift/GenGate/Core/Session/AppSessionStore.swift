@@ -82,6 +82,7 @@ final class AppSessionStore {
         case invalidResponse
         case unauthorized(detail: String?)
         case loginRejected(detail: String?)
+        case registerRejected(detail: String?)
         case network(String)
 
         var errorDescription: String? {
@@ -100,6 +101,11 @@ final class AppSessionStore {
                     return "Backend từ chối login với detail \(detail)."
                 }
                 return "Backend từ chối login vì user không tồn tại hoặc auth shell chưa sẵn sàng."
+            case let .registerRejected(detail):
+                if let detail, !detail.isEmpty {
+                    return "Backend từ chối register với detail \(detail). Hãy đăng nhập bằng account shell hiện có."
+                }
+                return "Email này đã tồn tại. Hãy đăng nhập bằng account shell hiện có."
             case let .network(message):
                 return message
             }
@@ -465,10 +471,20 @@ final class AppSessionStore {
             isRegistering = false
             authState = .signedOut
             let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            let backendDetail: String?
+            let loginResult: String
+            if let sessionError = error as? SessionError,
+               case let .registerRejected(detail) = sessionError {
+                backendDetail = detail
+                loginResult = "register_then_sign_in_failed_conflict"
+            } else {
+                backendDetail = nil
+                loginResult = "register_then_sign_in_failed"
+            }
             statusMessage = message
             loginOutcomeSummary = [
-                "login_result: register_then_sign_in_failed",
-                "backend_detail: none",
+                "login_result: \(loginResult)",
+                "backend_detail: \(backendDetail ?? "none")",
                 "message: \(message)"
             ].joined(separator: "\n")
         }
@@ -599,7 +615,7 @@ final class AppSessionStore {
         }
 
         if httpResponse.statusCode == 409 {
-            throw SessionError.network("Email này đã tồn tại. Hãy đăng nhập bằng account shell hiện có.")
+            throw SessionError.registerRejected(detail: readErrorDetail(from: data))
         }
 
         guard httpResponse.statusCode == 201 else {
