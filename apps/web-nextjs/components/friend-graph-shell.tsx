@@ -7,6 +7,11 @@ type FriendGraphShellProps = {
 };
 
 export async function FriendGraphShell({ userId }: FriendGraphShellProps) {
+  const feedHref = `/feed?author=${encodeURIComponent(userId)}&viewer=${encodeURIComponent(userId)}`;
+  const inboxHref = `/inbox?userA=${encodeURIComponent(userId)}&sender=${encodeURIComponent(userId)}`;
+  const notificationsHref = `/notifications?user=${encodeURIComponent(userId)}`;
+  const locationHref = `/location?owner=${encodeURIComponent(userId)}`;
+
   try {
     const snapshot = await fetchFriendGraphSnapshot(userId);
 
@@ -26,8 +31,8 @@ export async function FriendGraphShell({ userId }: FriendGraphShellProps) {
         </p>
 
         <p>
-          Next seam pivots for this profile context: <Link href="/feed">Feed</Link> · <Link href="/inbox">Inbox</Link> ·{" "}
-          <Link href="/notifications">Notifications</Link> · <Link href="/location">Location</Link>
+          Next seam pivots for this profile context: <Link href={feedHref}>Feed</Link> · <Link href={inboxHref}>Inbox</Link> ·{" "}
+          <Link href={notificationsHref}>Notifications</Link> · <Link href={locationHref}>Location</Link>
         </p>
 
         <h2>Pending friend requests</h2>
@@ -84,8 +89,8 @@ export async function FriendGraphShell({ userId }: FriendGraphShellProps) {
           then reload this page with <code>?user=&lt;uuid&gt;</code>.
         </p>
         <p>
-          After friend graph data is visible here, you can pivot to <Link href="/feed">Feed</Link>, <Link href="/inbox">Inbox</Link>,{" "}
-          <Link href="/notifications">Notifications</Link>, and <Link href="/location">Location</Link> from the same test session.
+          After friend graph data is visible here, you can pivot to <Link href={feedHref}>Feed</Link>, <Link href={inboxHref}>Inbox</Link>,{" "}
+          <Link href={notificationsHref}>Notifications</Link>, and <Link href={locationHref}>Location</Link> from the same test session.
         </p>
       </section>
     );

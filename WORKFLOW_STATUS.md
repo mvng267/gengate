@@ -1,22 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 76
+- Batch: 77
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 76 repo hygiene for MVP testing — ignore verify-generated build artifacts so working tree stays clean between real slices
+- Scope: batch 77 web profile pivot hardening — carry active profile user context into nearby launcher links so testers can move across seams with less UUID retyping
 - Status: MVP-testable
 - Files:
-  - .gitignore
-  - apps/web-nextjs/.gitignore
+  - apps/web-nextjs/app/profile/page.tsx
+  - apps/web-nextjs/components/friend-graph-shell.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
-  - repo: `git status --short` → chỉ còn file batch 76, artifacts đã được dọn ✅
+  - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `b022001` — `batch75: harden web mvp hub`
-  - working tree: bẩn (batch 76 ready to commit; no stray verify artifacts)
+  - latest commit: `74cd9be` — `batch76: ignore verify artifacts`
+  - working tree: bẩn (batch 77 ready to commit)
 - Blocker: none
-- Next: commit batch 76 repo hygiene slice; sau đó ưu tiên bug-fix/hardening từ human testing hoặc một issue thật thay vì metadata-only churn
+- Next: commit batch 77 web profile pivot hardening; after that, prefer human-tested bug fixes or similarly concrete cross-seam friction fixes only if they remove real copy/paste pain
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -51,10 +51,13 @@
 - Batch 75 handoff:
   - `b022001` — `batch75: harden web mvp hub`
   - MVP hub hardening remains testable while batch 76 cleans noisy verify artifacts from repo state
-- Batch 76 outcome:
-  - repo now ignores Swift `.build` artifacts and TypeScript `*.tsbuildinfo`
-  - stray verify outputs were removed so working tree no longer looks dirty for non-product reasons
-  - this reduces false-positive diff noise between real MVP implementation slices
+- Batch 76 handoff:
+  - `74cd9be` — `batch76: ignore verify artifacts`
+  - repo hygiene remains in place while batch 77 reduces cross-seam browser friction from the profile entry point
+- Batch 77 outcome:
+  - `/profile` quick pivots now carry the active profile UUID into feed, inbox, notifications, and location launcher routes
+  - `FriendGraphShell` next-step links do the same, so testers can move across seams with fewer manual UUID pastes
+  - this shortens a real browser smoke path starting from the highest-priority social seam without changing backend contracts
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

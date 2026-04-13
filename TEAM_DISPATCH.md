@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 76
-- Trục công việc: repo hygiene cho MVP testing — ignore verify-generated artifacts để working tree sạch giữa các batch.
+- Batch workflow chính thức hiện tại: 77
+- Trục công việc: web profile pivot hardening — carry active profile user context into nearby launcher links for faster cross-seam browser testing.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -46,9 +46,9 @@
 - Trạng thái: idle_batch68.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: batch 76 repo hygiene đã xong.
-- Kết quả gần nhất: verify artifacts không còn làm bẩn working tree ngoài ý muốn.
-- Trạng thái: complete_batch76.
+- Scope hiện tại: batch 77 web profile pivot hardening đã xong.
+- Kết quả gần nhất: `/profile` và friend graph shell đã carry user context sang launcher links kế tiếp.
+- Trạng thái: complete_batch77.
 
 ### pikame-ios — iOS
 - Scope hiện tại: không mở iOS scope mới trong batch 70.

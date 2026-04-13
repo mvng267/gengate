@@ -11,6 +11,10 @@ type ProfilePageProps = {
 export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const params = searchParams ? await searchParams : undefined;
   const selectedUserId = params?.user?.trim() ?? "";
+  const feedHref = selectedUserId ? `/feed?author=${encodeURIComponent(selectedUserId)}&viewer=${encodeURIComponent(selectedUserId)}` : "/feed";
+  const inboxHref = selectedUserId ? `/inbox?userA=${encodeURIComponent(selectedUserId)}&sender=${encodeURIComponent(selectedUserId)}` : "/inbox";
+  const notificationsHref = selectedUserId ? `/notifications?user=${encodeURIComponent(selectedUserId)}` : "/notifications";
+  const locationHref = selectedUserId ? `/location?owner=${encodeURIComponent(selectedUserId)}` : "/location";
 
   return (
     <section>
@@ -43,11 +47,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             Active profile user: <code>{selectedUserId}</code>
           </p>
           <p>
-            Quick pivots for the same browser test session: <Link href="/feed">Feed</Link> · <Link href="/inbox">Inbox</Link> ·{" "}
-            <Link href="/notifications">Notifications</Link> · <Link href="/location">Location</Link>
+            Quick pivots for the same browser test session: <Link href={feedHref}>Feed</Link> · <Link href={inboxHref}>Inbox</Link> ·{" "}
+            <Link href={notificationsHref}>Notifications</Link> · <Link href={locationHref}>Location</Link>
           </p>
           <p>
-            Tip: keep this UUID handy when moving into feed, inbox, notification, and location shells that still need explicit IDs.
+            Tip: these pivots now carry the active profile UUID into nearby launcher pages, so you only need to fill the second user when a seam truly requires it.
           </p>
           <FriendGraphShell userId={selectedUserId} />
         </>
