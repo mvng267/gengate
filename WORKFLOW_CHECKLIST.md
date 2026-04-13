@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **106 — iOS inbox member read-cursor summary panel slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **107 — iOS inbox quick latest-read action slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **106**
-- Scope hiện tại: iOS inbox read-status UX hardening — compact member read-cursor summary panel.
+- Batch workflow chính thức hiện tại: **107**
+- Scope hiện tại: iOS inbox read-status UX hardening — quick action set read-cursor to latest for focus user.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch106 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch107 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch107 cho messaging friction tiếp theo (quick action set read-cursor to latest) trong iOS inbox shell
+  - mở batch108 cho messaging friction tiếp theo (quick preset read-cursor user/message chips) trong iOS inbox shell
 
 ## Batch handoff note
 

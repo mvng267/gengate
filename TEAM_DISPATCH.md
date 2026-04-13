@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 106
-- Trục công việc: iOS inbox seam hardening — add member read-cursor summary panel để giảm read-status test friction.
+- Batch workflow chính thức hiện tại: 107
+- Trục công việc: iOS inbox seam hardening — add one-tap latest-read action for focus user để giảm read-cursor thao tác tay.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 106 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: Inbox có panel `Member read-cursor summary` với `last_read_message_id`, payload preview, cursor_state và mark focus user.
-- Trạng thái: verify_batch106_ios.
+- Scope hiện tại: batch 107 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: Inbox có quick action `Mark latest message as read (focus user)` dùng chung read-cursor contract/helper với flow manual.
+- Trạng thái: verify_batch107_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

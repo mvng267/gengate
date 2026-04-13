@@ -40,11 +40,12 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
-                        "You can now call `PATCH /conversations/{id}/members/{user_id}/read-cursor` directly from iOS to move read cursor and observe `last_read_by` + focused `read_status(user)` + member cursor summary in-shell."
+                        "You can now call `PATCH /conversations/{id}/members/{user_id}/read-cursor` directly from iOS to move read cursor and observe `last_read_by` + focused `read_status(user)` + member cursor summary in-shell.",
+                        "Quick action `Mark latest message as read (focus user)` helps testers advance read cursor to newest loaded row with one tap."
                     ]
                 )
 
@@ -333,6 +334,27 @@ struct InboxPlaceholderView: View {
                             conversationSummary == nil ||
                             (resolvedReadCursorTargetUserID?.isEmpty ?? true) ||
                             (resolvedReadCursorTargetMessageID?.isEmpty ?? true)
+                        )
+
+                        Button {
+                            Task {
+                                await markLatestMessageAsReadForFocusUser()
+                            }
+                        } label: {
+                            Text(isUpdatingReadCursor ? "Marking latest as read..." : "Mark latest message as read (focus user)")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(
+                            isLoading ||
+                            isSendingMessage ||
+                            isCreatingAttachment ||
+                            isCreatingDeviceKey ||
+                            isDeletingMessage ||
+                            isUpdatingReadCursor ||
+                            conversationSummary == nil ||
+                            (resolvedReadStatusFocusUserID?.isEmpty ?? true) ||
+                            (latestLoadedMessageID?.isEmpty ?? true)
                         )
                     }
 
@@ -904,11 +926,6 @@ struct InboxPlaceholderView: View {
     }
 
     private func updateReadCursor() async {
-        guard let conversationID = conversationSummary?.id else {
-            fetchError = "Load direct thread trước khi cập nhật read cursor."
-            return
-        }
-
         guard let targetUserID = resolvedReadCursorTargetUserID,
               !targetUserID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             fetchError = "Cần member user UUID hợp lệ để cập nhật read cursor."
@@ -918,6 +935,31 @@ struct InboxPlaceholderView: View {
         guard let targetMessageID = resolvedReadCursorTargetMessageID,
               !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             fetchError = "Cần message UUID hợp lệ để cập nhật read cursor."
+            return
+        }
+
+        await performReadCursorUpdate(targetUserID: targetUserID, targetMessageID: targetMessageID)
+    }
+
+    private func markLatestMessageAsReadForFocusUser() async {
+        guard let targetUserID = resolvedReadStatusFocusUserID,
+              !targetUserID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            fetchError = "Cần focus user UUID hợp lệ để mark latest message as read."
+            return
+        }
+
+        guard let targetMessageID = latestLoadedMessageID,
+              !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            fetchError = "Không có message nào để mark as read."
+            return
+        }
+
+        await performReadCursorUpdate(targetUserID: targetUserID, targetMessageID: targetMessageID)
+    }
+
+    private func performReadCursorUpdate(targetUserID: String, targetMessageID: String) async {
+        guard let conversationID = conversationSummary?.id else {
+            fetchError = "Load direct thread trước khi cập nhật read cursor."
             return
         }
 
