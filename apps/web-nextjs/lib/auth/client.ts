@@ -377,10 +377,14 @@ export async function registerAndLoginWithEmailPassword(
     const registerResponse = await registerWithEmail(email, username);
     if (!registerResponse.ok) {
       if (registerResponse.status === 409) {
+        const backendDetail = await readErrorDetail(registerResponse);
         return {
           ok: false,
           reason: "conflict",
-          message: "Email này đã tồn tại. Hãy đăng nhập bằng session shell hiện có.",
+          message: backendDetail
+            ? `Backend từ chối register với detail ${backendDetail}. Hãy đăng nhập bằng session shell hiện có.`
+            : "Email này đã tồn tại. Hãy đăng nhập bằng session shell hiện có.",
+          backendDetail,
         };
       }
 

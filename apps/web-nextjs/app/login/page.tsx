@@ -372,7 +372,7 @@ export default function LoginPage() {
               setLoginOutcomePreview(
                 [
                   `login_result: register_then_sign_in_failed_${result.reason}`,
-                  `backend_detail: ${result.details ?? "none"}`,
+                  `backend_detail: ${result.backendDetail ?? result.details ?? "none"}`,
                   `message: ${result.message}`,
                 ].join("\n"),
               );

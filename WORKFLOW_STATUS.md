@@ -1,24 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 50
+- Batch: 51
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 50 failed login backend detail parity complete — web + iOS shells now surface explicit backend error detail for failed `/auth/login` instead of collapsing login failure to `backend_detail: none`
-- Status: complete
+- Scope: batch 51 register conflict backend detail parity — web shell now surfaces explicit backend error detail for failed `/auth/register` conflict instead of collapsing register conflict to generic text
+- Status: verify
 - Files:
-  - apps/web-nextjs/lib/auth/types.ts
   - apps/web-nextjs/lib/auth/client.ts
   - apps/web-nextjs/app/login/page.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - WORKFLOW_STATUS.md
+  - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `33ffb41` — `batch50: align ios login failure detail`
-  - working tree: sạch
+  - latest commit: `eee0e27` — `batch50: mark workflow complete`
+  - working tree: bẩn đúng theo batch 51 web register-conflict detail slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 51 với 1 scope hẹp mới quanh auth shell contract/verify gap gần nhất; ưu tiên seam end-to-end thật thay vì micro-cleanup
+- Next: commit web batch-51 slice này; sau đó decide follow-up lane còn lại chỉ nếu cần để keep register-conflict detail parity end-to-end
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 50 closeout:
-  - web auth client preserve backend error detail cho login 404/401
-  - iOS auth shell map login 404/401 thành `loginRejected(detail)` để surface `backend_detail` thật trong login outcome summary
-  - build artifacts đã được dọn; repo sạch sau khi chốt batch 50
+- Batch 51 update:
+  - web register flow nay preserve backend error detail cho 409 conflict thay vì nuốt mất code thật
+  - register-then-sign-in outcome panel nay hiện `backend_detail: user_exists` (hoặc detail backend khác) thay vì `none`
