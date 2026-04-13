@@ -1,10 +1,11 @@
-import { AuthenticatedRouteShell } from "@/components/authenticated-route-shell";
+import { DirectMessageShell } from "@/components/direct-message-shell";
 
 export default function InboxPage() {
   return (
-    <AuthenticatedRouteShell
-      title="Inbox"
-      summary="1:1 encrypted messaging thread list and composer are pending."
-    />
+    <section>
+      <h1>Inbox</h1>
+      <p>1:1 direct messaging shell is now wired for MVP testing.</p>
+      <DirectMessageShell />
+    </section>
   );
 }

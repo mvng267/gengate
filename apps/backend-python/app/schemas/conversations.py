@@ -7,9 +7,20 @@ class ConversationCreateRequest(BaseModel):
     conversation_type: str = "direct"
 
 
+class DirectConversationGetOrCreateRequest(BaseModel):
+    user_a_id: uuid.UUID
+    user_b_id: uuid.UUID
+
+
 class ConversationResponse(BaseModel):
     id: uuid.UUID
     conversation_type: str
+
+
+class DirectConversationResponse(BaseModel):
+    id: uuid.UUID
+    conversation_type: str
+    member_user_ids: list[uuid.UUID]
 
 
 class ConversationListResponse(BaseModel):

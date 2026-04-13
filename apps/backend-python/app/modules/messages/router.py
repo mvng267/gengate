@@ -35,9 +35,16 @@ def to_message_response(message) -> MessageResponse:
 @router.post("", response_model=MessageResponse, status_code=201)
 def create_message(payload: MessageCreateRequest, db: Session = Depends(get_db_session)) -> MessageResponse:
     try:
-        message = message_service.create_message(db, payload.sender_user_id, payload.payload_text)
+        message = message_service.create_message(
+            db,
+            payload.sender_user_id,
+            payload.payload_text,
+            payload.conversation_id,
+        )
     except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        code = str(exc)
+        status_code = 400 if code == "conversation_member_not_found" else 404
+        raise HTTPException(status_code=status_code, detail=code)
     return to_message_response(message)
 
 

@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class MessageCreateRequest(BaseModel):
     sender_user_id: uuid.UUID
     payload_text: str
+    conversation_id: uuid.UUID | None = None
 
 
 class MessageDeviceKeyCreateRequest(BaseModel):

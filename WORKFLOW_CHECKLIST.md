@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **57 — private friend feed shell slice is open and in progress**.
+- Batch workflow chính thức mới nhất trong checklist/status: **58 — direct messaging shell slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,31 +89,35 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **57**
-- Scope hiện tại: private friend feed shell — backend feed contract for accepted-friend moments + web `/feed` wired to load that contract by viewer UUID.
+- Batch workflow chính thức hiện tại: **58**
+- Scope hiện tại: direct messaging shell — backend direct-conversation/thread contract + web `/inbox` wired to create/load a 1:1 thread by user UUIDs.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/backend-python/app/modules/moments/router.py`
-  - `apps/backend-python/app/services/moments.py`
-  - `apps/backend-python/app/repositories/moments.py`
-  - `apps/backend-python/app/schemas/moments.py`
-  - `apps/backend-python/tests/test_moments_api.py`
-  - `apps/web-nextjs/app/feed/page.tsx`
-  - `apps/web-nextjs/lib/moments/client.ts`
-  - `apps/web-nextjs/components/moment-compose-shell.tsx`
+  - `apps/backend-python/app/modules/conversations/router.py`
+  - `apps/backend-python/app/modules/messages/router.py`
+  - `apps/backend-python/app/services/conversations.py`
+  - `apps/backend-python/app/services/messages.py`
+  - `apps/backend-python/app/repositories/conversations.py`
+  - `apps/backend-python/app/repositories/messages.py`
+  - `apps/backend-python/app/schemas/conversations.py`
+  - `apps/backend-python/app/schemas/messages.py`
+  - `apps/backend-python/tests/test_messages_api.py`
+  - `apps/web-nextjs/app/inbox/page.tsx`
+  - `apps/web-nextjs/lib/inbox/client.ts`
+  - `apps/web-nextjs/components/direct-message-shell.tsx`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` → ✅ pass
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_messages_api.py` → ✅ pass
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `c4f5fcb` — `batch56: wire moment posting shell`
-  - working tree hiện tại: bẩn (batch 57 ready to commit)
+  - commit gần nhất đã chốt: `4a779eb` — `batch57: wire private friend feed shell`
+  - working tree hiện tại: bẩn (batch 58 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch57 private friend feed shell, rồi mở slice kế tiếp cho direct messaging shell
+  - commit batch58 direct messaging shell, rồi mở slice kế tiếp cho optional location sharing state shell hoặc notification shell
 
 ## Batch handoff note
 

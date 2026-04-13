@@ -817,3 +817,100 @@ def test_batch24_message_device_key_duplicate_integrity_parity() -> None:
         )
         messages_module.message_device_key_repository.create = original_create
         app.dependency_overrides.clear()
+
+
+def test_batch58_direct_conversation_thread_shell_flow() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    user_a = client.post("/auth/register", json={"email": "batch58-a@example.com", "username": "batch58_a"})
+    user_b = client.post("/auth/register", json={"email": "batch58-b@example.com", "username": "batch58_b"})
+    assert user_a.status_code == 201
+    assert user_b.status_code == 201
+    user_a_id = user_a.json()["id"]
+    user_b_id = user_b.json()["id"]
+
+    open_thread = client.post(
+        "/conversations/direct",
+        json={"user_a_id": user_a_id, "user_b_id": user_b_id},
+    )
+    assert open_thread.status_code == 201
+    conversation_id = open_thread.json()["id"]
+    assert open_thread.json()["conversation_type"] == "direct"
+    assert set(open_thread.json()["member_user_ids"]) == {user_a_id, user_b_id}
+
+    reopen_thread = client.post(
+        "/conversations/direct",
+        json={"user_a_id": user_b_id, "user_b_id": user_a_id},
+    )
+    assert reopen_thread.status_code == 201
+    assert reopen_thread.json()["id"] == conversation_id
+
+    send_message = client.post(
+        "/messages",
+        json={
+            "conversation_id": conversation_id,
+            "sender_user_id": user_a_id,
+            "payload_text": "batch58 hello direct thread",
+        },
+    )
+    assert send_message.status_code == 201
+    assert send_message.json()["conversation_id"] == conversation_id
+    assert send_message.json()["payload_text"] == "batch58 hello direct thread"
+
+    list_messages = client.get(f"/messages?conversation_id={conversation_id}")
+    assert list_messages.status_code == 200
+    assert list_messages.json()["count"] == 1
+    assert list_messages.json()["items"][0]["sender_user_id"] == user_a_id
+
+    invalid_sender = client.post(
+        "/messages",
+        json={
+            "conversation_id": conversation_id,
+            "sender_user_id": str(uuid.uuid4()),
+            "payload_text": "should fail",
+        },
+    )
+    assert invalid_sender.status_code == 404
+    assert invalid_sender.json() == {"error": {"code": "user_not_found", "message": "user_not_found"}}
+
+    outsider = client.post(
+        "/auth/register",
+        json={"email": "batch58-outsider@example.com", "username": "batch58_outsider"},
+    )
+    assert outsider.status_code == 201
+    outsider_id = outsider.json()["id"]
+
+    outsider_send = client.post(
+        "/messages",
+        json={
+            "conversation_id": conversation_id,
+            "sender_user_id": outsider_id,
+            "payload_text": "outsider should fail",
+        },
+    )
+    assert outsider_send.status_code == 400
+    assert outsider_send.json() == {
+        "error": {"code": "conversation_member_not_found", "message": "conversation_member_not_found"}
+    }
+
+    app.dependency_overrides.clear()

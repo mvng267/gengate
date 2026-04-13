@@ -3,11 +3,12 @@ import uuid
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.models.conversation_members import ConversationMember
 from app.models.conversations import Conversation
 from app.models.devices import Device
 from app.models.message_device_keys import MessageDeviceKey
 from app.models.messages import Message
-from app.repositories.conversations import conversation_repository
+from app.repositories.conversations import conversation_member_repository, conversation_repository
 from app.repositories.messages import message_device_key_repository, message_repository
 from app.repositories.security import device_repository
 from app.repositories.users import user_repository
@@ -61,16 +62,31 @@ class MessageService:
         db.flush()
         return device
 
-    def create_message(self, db: Session, sender_user_id: uuid.UUID, payload_text: str) -> Message:
+    def create_message(
+        self,
+        db: Session,
+        sender_user_id: uuid.UUID,
+        payload_text: str,
+        conversation_id: uuid.UUID | None = None,
+    ) -> Message:
         sender = user_repository.get(db, sender_user_id)
         if sender is None:
             raise ValueError("user_not_found")
 
         device = self._get_or_create_sender_device(db, sender_user_id)
 
-        conversation = Conversation(conversation_type="direct")
-        db.add(conversation)
-        db.flush()
+        if conversation_id is None:
+            conversation = Conversation(conversation_type="direct")
+            db.add(conversation)
+            db.flush()
+        else:
+            conversation = conversation_repository.get(db, conversation_id)
+            if conversation is None:
+                raise ValueError("conversation_not_found")
+
+            member = conversation_member_repository.get_by_conversation_and_user(db, conversation_id, sender_user_id)
+            if member is None:
+                raise ValueError("conversation_member_not_found")
 
         return message_repository.create(
             db,

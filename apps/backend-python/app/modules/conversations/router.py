@@ -11,6 +11,8 @@ from app.schemas.conversations import (
     ConversationMemberListResponse,
     ConversationMemberResponse,
     ConversationResponse,
+    DirectConversationGetOrCreateRequest,
+    DirectConversationResponse,
 )
 from app.services.conversations import conversation_service
 
@@ -32,6 +34,14 @@ def to_member_response(member) -> ConversationMemberResponse:
     )
 
 
+def to_direct_conversation_response(conversation, members) -> DirectConversationResponse:
+    return DirectConversationResponse(
+        id=conversation.id,
+        conversation_type=conversation.conversation_type,
+        member_user_ids=[member.user_id for member in members],
+    )
+
+
 @router.post("", response_model=ConversationResponse, status_code=status.HTTP_201_CREATED)
 def create_conversation(
     payload: ConversationCreateRequest,
@@ -46,6 +56,24 @@ def list_conversations(db: Session = Depends(get_db_session)) -> ConversationLis
     conversations = conversation_service.list_conversations(db)
     items = [to_conversation_response(conversation) for conversation in conversations]
     return ConversationListResponse(count=len(items), items=items)
+
+
+@router.post("/direct", response_model=DirectConversationResponse, status_code=status.HTTP_201_CREATED)
+def get_or_create_direct_conversation(
+    payload: DirectConversationGetOrCreateRequest,
+    db: Session = Depends(get_db_session),
+) -> DirectConversationResponse:
+    try:
+        conversation, members = conversation_service.get_or_create_direct_conversation(
+            db,
+            user_a_id=payload.user_a_id,
+            user_b_id=payload.user_b_id,
+        )
+    except ValueError as exc:
+        code = str(exc)
+        status_code = status.HTTP_400_BAD_REQUEST if code == "invalid_direct_members" else status.HTTP_404_NOT_FOUND
+        raise HTTPException(status_code=status_code, detail=code)
+    return to_direct_conversation_response(conversation, members)
 
 
 @router.post("/{conversation_id}/members", response_model=ConversationMemberResponse, status_code=status.HTTP_201_CREATED)

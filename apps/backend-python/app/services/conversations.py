@@ -24,6 +24,10 @@ class ConversationService:
         if user is None:
             raise ValueError("user_not_found")
 
+        existing_member = conversation_member_repository.get_by_conversation_and_user(db, conversation_id, user_id)
+        if existing_member is not None:
+            return existing_member
+
         return conversation_member_repository.create(
             db,
             conversation_id=conversation_id,
@@ -36,6 +40,41 @@ class ConversationService:
         if conversation is None:
             raise ValueError("conversation_not_found")
         return conversation_member_repository.list_by_conversation(db, conversation_id)
+
+    def get_or_create_direct_conversation(
+        self,
+        db: Session,
+        user_a_id: uuid.UUID,
+        user_b_id: uuid.UUID,
+    ) -> tuple[Conversation, list[ConversationMember]]:
+        if user_a_id == user_b_id:
+            raise ValueError("invalid_direct_members")
+
+        user_a = user_repository.get(db, user_a_id)
+        user_b = user_repository.get(db, user_b_id)
+        if user_a is None or user_b is None:
+            raise ValueError("user_not_found")
+
+        existing = conversation_repository.find_direct_by_members(db, user_a_id, user_b_id)
+        if existing is not None:
+            return existing, conversation_member_repository.list_by_conversation(db, existing.id)
+
+        conversation = conversation_repository.create(db, conversation_type="direct")
+        members = [
+            conversation_member_repository.create(
+                db,
+                conversation_id=conversation.id,
+                user_id=user_a_id,
+                last_read_message_id=None,
+            ),
+            conversation_member_repository.create(
+                db,
+                conversation_id=conversation.id,
+                user_id=user_b_id,
+                last_read_message_id=None,
+            ),
+        ]
+        return conversation, members
 
 
 conversation_service = ConversationService()
