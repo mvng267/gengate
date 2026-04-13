@@ -2,12 +2,14 @@
 
 - Batch: 54
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 54 failure cleanup cue parity — backend/web/iOS now expose explicit local-clear cue around invalid or cleared session outcomes so auth restore/refresh framing stays structurally consistent end-to-end
+- Scope: batch 54 failure cleanup cue parity — backend/web/iOS now expose explicit local-clear cue around invalid or cleared session outcomes, and web has started consuming backend 401 metadata directly in failure summaries
 - Status: verify
 - Files:
   - apps/backend-python/app/main.py
   - apps/backend-python/app/modules/auth/router.py
   - apps/backend-python/tests/test_auth_api.py
+  - apps/web-nextjs/lib/auth/types.ts
+  - apps/web-nextjs/lib/auth/client.ts
   - apps/web-nextjs/app/login/page.tsx
   - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - WORKFLOW_STATUS.md
@@ -17,14 +19,14 @@
   - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `d26f65c` — `batch54: align ios failure cleanup cue`
-  - working tree: bẩn đúng theo batch 54 backend cleanup-cue contract slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `bf0583e` — `batch54: preserve auth cleanup cue metadata`
+  - working tree: bẩn đúng theo batch 54 web backend-metadata consumption slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit backend batch-54 contract slice này; sau đó inspect whether clients can consume backend unauthorized metadata directly instead of locally hardcoding `local_clear_recommended: false` on failure summaries
+- Next: commit web batch-54 metadata-consumption slice này; sau đó inspect whether iOS auth client should also consume backend unauthorized metadata directly instead of keeping local fallback cue logic
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 54 update:
-  - backend auth 401 invalid-session payloads nay giữ `local_clear_recommended: true`
-  - backend auth 401 invalid-session payloads nay giữ `backend_detail: session_not_found|session_revoked|session_expired`
-  - web restore/refresh failure outcomes hiện `local_clear_recommended: false`
-  - iOS restore/refresh failure outcomes hiện `local_clear_recommended: false`
-  - failure cleanup cue nay explicit xuyên backend ↔ web ↔ iOS, dù client failure summaries vẫn đang map cue local theo UX copy hiện tại
+  - backend auth 401 invalid-session payloads giữ `local_clear_recommended: true` + `backend_detail`
+  - web auth client nay parse structured backend error payload thay vì chỉ đọc bare detail string
+  - web restore/refresh unauthorized summaries nay show `local_clear_recommended` từ backend metadata
+  - iOS restore/refresh failure summaries vẫn explicit cue nhưng hiện còn map từ local branch logic
+  - failure cleanup cue parity nay explicit xuyên backend ↔ web ↔ iOS, với web đã nối trực tiếp vào contract error metadata

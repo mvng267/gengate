@@ -22,11 +22,34 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object";
 }
 
-async function readErrorDetail(response: Response): Promise<string | undefined> {
+type BackendErrorPayload = {
+  code: string;
+  message: string;
+  backend_detail?: string;
+  local_clear_recommended?: boolean;
+};
+
+function isBackendErrorPayload(value: unknown): value is BackendErrorPayload {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    typeof value.code === "string" &&
+    typeof value.message === "string" &&
+    (typeof value.backend_detail === "string" || value.backend_detail === undefined) &&
+    (typeof value.local_clear_recommended === "boolean" || value.local_clear_recommended === undefined)
+  );
+}
+
+async function readErrorPayload(response: Response): Promise<BackendErrorPayload | undefined> {
   try {
     const data: unknown = await response.json();
+    if (isRecord(data) && isBackendErrorPayload(data.error)) {
+      return data.error;
+    }
     if (isRecord(data) && typeof data.detail === "string") {
-      return data.detail;
+      return { code: data.detail, message: data.detail, backend_detail: data.detail };
     }
   } catch {
     return undefined;
@@ -181,13 +204,15 @@ export async function logoutPersistedSession(): Promise<{
     }
 
     if (response.status === 401) {
-      const backendDetail = await readErrorDetail(response);
+      const errorPayload = await readErrorPayload(response);
+      const backendDetail = errorPayload?.backend_detail ?? errorPayload?.code;
       clearPersistedAuthSession();
       const suffix = backendDetail ? ` (${backendDetail})` : "";
       return {
         ok: true,
         message: `Backend báo session logout không còn hợp lệ${suffix}; local session vẫn đã được xóa.`,
         backendDetail,
+        localClearRecommended: errorPayload?.local_clear_recommended,
       };
     }
 
@@ -315,7 +340,8 @@ export async function loginWithEmailPassword(
     }
 
     if (response.status === 404) {
-      const backendDetail = await readErrorDetail(response);
+      const errorPayload = await readErrorPayload(response);
+      const backendDetail = errorPayload?.backend_detail ?? errorPayload?.code;
       return {
         ok: false,
         reason: "not-found",
@@ -323,12 +349,14 @@ export async function loginWithEmailPassword(
           ? `Backend từ chối login với detail ${backendDetail}.`
           : "Backend từ chối login vì user không tồn tại hoặc chưa sẵn sàng.",
         backendDetail,
+        localClearRecommended: errorPayload?.local_clear_recommended,
         details: response.statusText,
       };
     }
 
     if (response.status === 401) {
-      const backendDetail = await readErrorDetail(response);
+      const errorPayload = await readErrorPayload(response);
+      const backendDetail = errorPayload?.backend_detail ?? errorPayload?.code;
       return {
         ok: false,
         reason: "unauthorized",
@@ -336,6 +364,7 @@ export async function loginWithEmailPassword(
           ? `Backend từ chối login với detail ${backendDetail}.`
           : "Backend từ chối login vì session/auth state không hợp lệ.",
         backendDetail,
+        localClearRecommended: errorPayload?.local_clear_recommended,
         details: response.statusText,
       };
     }
@@ -377,7 +406,8 @@ export async function registerAndLoginWithEmailPassword(
     const registerResponse = await registerWithEmail(email, username);
     if (!registerResponse.ok) {
       if (registerResponse.status === 409) {
-        const backendDetail = await readErrorDetail(registerResponse);
+        const errorPayload = await readErrorPayload(registerResponse);
+        const backendDetail = errorPayload?.backend_detail ?? errorPayload?.code;
         return {
           ok: false,
           reason: "conflict",
@@ -385,6 +415,7 @@ export async function registerAndLoginWithEmailPassword(
             ? `Backend từ chối register với detail ${backendDetail}. Hãy đăng nhập bằng session shell hiện có.`
             : "Email này đã tồn tại. Hãy đăng nhập bằng session shell hiện có.",
           backendDetail,
+          localClearRecommended: errorPayload?.local_clear_recommended,
         };
       }
 
@@ -453,7 +484,8 @@ export async function restorePersistedSession(): Promise<RestoreSessionResult> {
     }
 
     if (response.status === 401) {
-      const backendDetail = await readErrorDetail(response);
+      const errorPayload = await readErrorPayload(response);
+      const backendDetail = errorPayload?.backend_detail ?? errorPayload?.code;
       clearPersistedAuthSession();
       const suffix = backendDetail ? ` (${backendDetail})` : "";
       return {
@@ -461,6 +493,7 @@ export async function restorePersistedSession(): Promise<RestoreSessionResult> {
         reason: "unauthorized",
         message: `Refresh token cũ không còn hợp lệ${suffix}; đã xóa session local.`,
         backendDetail,
+        localClearRecommended: errorPayload?.local_clear_recommended,
       };
     }
 
@@ -518,7 +551,8 @@ export async function refreshPersistedSession(): Promise<RestoreSessionResult> {
     }
 
     if (response.status === 401) {
-      const backendDetail = await readErrorDetail(response);
+      const errorPayload = await readErrorPayload(response);
+      const backendDetail = errorPayload?.backend_detail ?? errorPayload?.code;
       clearPersistedAuthSession();
       const suffix = backendDetail ? ` (${backendDetail})` : "";
       return {
@@ -526,6 +560,7 @@ export async function refreshPersistedSession(): Promise<RestoreSessionResult> {
         reason: "unauthorized",
         message: `Manual refresh cho thấy refresh token cũ không còn hợp lệ${suffix}; đã xóa session local.`,
         backendDetail,
+        localClearRecommended: errorPayload?.local_clear_recommended,
       };
     }
 

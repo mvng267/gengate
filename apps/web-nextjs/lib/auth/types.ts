@@ -63,6 +63,7 @@ export type AuthLoginResult =
       message: string;
       details?: string;
       backendDetail?: string;
+      localClearRecommended?: boolean;
     };
 
 export type RestoreSessionResult =
@@ -76,4 +77,5 @@ export type RestoreSessionResult =
       reason: "missing" | "unauthorized" | "network-error" | "invalid-response";
       message: string;
       backendDetail?: string;
+      localClearRecommended?: boolean;
     };

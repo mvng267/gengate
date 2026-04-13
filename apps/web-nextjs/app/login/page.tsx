@@ -146,7 +146,7 @@ export default function LoginPage() {
           [
             "restore_result: failed_local_cleared",
             `backend_detail: ${result.backendDetail ?? "none"}`,
-            "local_clear_recommended: false",
+            `local_clear_recommended: ${result.localClearRecommended ? "true" : "false"}`,
             `message: ${restoreMessage}`,
           ].join("\n"),
         );
@@ -437,7 +437,7 @@ export default function LoginPage() {
                   [
                     "refresh_result: failed_local_cleared",
                     `backend_detail: ${result.backendDetail ?? "none"}`,
-                    "local_clear_recommended: false",
+                    `local_clear_recommended: ${result.localClearRecommended ? "true" : "false"}`,
                     `message: ${result.message}`,
                   ].join("\n"),
                 );
