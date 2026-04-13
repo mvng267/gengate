@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 111
-- Trục công việc: iOS inbox seam hardening — add row-tap picker để set focus user nhanh hơn.
+- Batch workflow chính thức hiện tại: 112
+- Trục công việc: iOS inbox seam hardening — row tap set đồng thời focus user + read-cursor target user.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 111 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: Member summary row tap set được `Read-status focus user UUID` ngay tại chỗ (`focus_user`/`set_focus`).
-- Trạng thái: verify_batch111_ios.
+- Scope hiện tại: batch 112 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: Member summary row tap set đồng thời `Read-status focus user UUID` + `Member user UUID` (`focus+cursor_user`/`set_focus+cursor_user`).
+- Trạng thái: verify_batch112_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

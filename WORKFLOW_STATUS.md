@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 111
+- Batch: 112
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 111 iOS inbox seam hardening — add quick focus-user pick from member summary row tap
+- Scope: batch 112 iOS inbox seam hardening — row tap now sets focus user and read-cursor target user together
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch111 slice)
+  - latest commit: `HEAD` (local batch112 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch112 cho messaging friction tiếp theo (ví dụ quick set read-cursor user + focus user đồng thời từ member row) trong iOS inbox shell
+- Next: mở batch113 cho messaging friction tiếp theo (ví dụ quick row action to set target message from member cursor) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -175,6 +175,10 @@
   - member summary user row is now tappable; tap sets `Read-status focus user UUID` immediately
   - row action shows inline label `focus_user` vs `set_focus` so operator can see selected focus quickly
   - focus selection no longer requires manual UUID paste before running read-status/read-cursor quick actions
+- Batch 112 outcome:
+  - member summary row tap now sets both `Read-status focus user UUID` and `Member user UUID` (read-cursor target user)
+  - row label now surfaces combined state `focus+cursor_user` / `set_focus+cursor_user`
+  - read-cursor/manual quick actions can run right after row tap without an extra user-target selection step
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -184,7 +188,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, nhập recipient user để load device list (`/auth/devices/{user_id}`), chọn recipient device rồi create/list message device keys, bật `Auto refresh every 3s` để quan sát near-realtime polling, dùng quick presets để chọn read-cursor target user/message (hoặc nhập tay), chạm user row trong `Member read-cursor summary` để set focus user, sau đó chạy `Update read cursor` / `Mark latest message as read (focus user)` / `Jump focus user to first unread candidate` và verify `last_read_by`, `read_status(<focus_user>)`, `cursor_order_hint`, `unread_behind_cursor`
+  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, nhập recipient user để load device list (`/auth/devices/{user_id}`), chọn recipient device rồi create/list message device keys, bật `Auto refresh every 3s` để quan sát near-realtime polling, dùng quick presets để chọn read-cursor target user/message (hoặc nhập tay), chạm user row trong `Member read-cursor summary` để set đồng thời focus user + cursor target user, sau đó chạy `Update read cursor` / `Mark latest message as read (focus user)` / `Jump focus user to first unread candidate` và verify `last_read_by`, `read_status(<focus_user>)`, `cursor_order_hint`, `unread_behind_cursor`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts
