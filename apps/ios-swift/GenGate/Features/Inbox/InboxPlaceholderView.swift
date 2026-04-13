@@ -6,12 +6,15 @@ struct InboxPlaceholderView: View {
     @State private var userAIDDraft: String = ""
     @State private var userBIDDraft: String = ""
     @State private var conversationSummary: DirectConversationSummary?
+    @State private var conversationMembers: [InboxConversationMemberRow] = []
     @State private var messageRows: [InboxMessageRow] = []
     @State private var attachmentMap: [String: [InboxAttachmentRow]] = [:]
     @State private var deviceKeyMap: [String: [InboxDeviceKeyRow]] = [:]
     @State private var messageDraft: String = ""
     @State private var attachmentTargetMessageIDDraft: String = ""
     @State private var deviceKeyTargetMessageIDDraft: String = ""
+    @State private var readCursorTargetUserIDDraft: String = ""
+    @State private var readCursorTargetMessageIDDraft: String = ""
     @State private var recipientUserIDDraft: String = ""
     @State private var recipientDeviceIDDraft: String = ""
     @State private var wrappedMessageKeyBlobDraft: String = "ios-demo-wrapped-message-key"
@@ -24,6 +27,7 @@ struct InboxPlaceholderView: View {
     @State private var isSendingMessage = false
     @State private var isCreatingAttachment = false
     @State private var isCreatingDeviceKey = false
+    @State private var isUpdatingReadCursor = false
     @State private var isDeletingMessage = false
 
     var body: some View {
@@ -31,12 +35,12 @@ struct InboxPlaceholderView: View {
             VStack(alignment: .leading, spacing: 20) {
                 FeaturePlaceholderView(
                     title: "Inbox",
-                    summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment metadata, and inspect message list via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list in one tab flow; device keys and realtime remain pending.",
+                    summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, and inspect read-cursor state via the same backend contracts as web.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + read-cursor updates; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
-                        "This shell calls `/conversations/direct`, reads `/messages?conversation_id=<uuid>`, and lists `/messages/{id}/attachments`.",
-                        "You can now send text via `POST /messages` and attach metadata via `POST /messages/{id}/attachments` directly from iOS."
+                        "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, and `/messages/{id}/device-keys`.",
+                        "You can now call `PATCH /conversations/{id}/members/{user_id}/read-cursor` directly from iOS to move read cursor and observe `last_read_by` in loaded rows."
                     ]
                 )
 
@@ -238,6 +242,51 @@ struct InboxPlaceholderView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
+                        Text("Update read cursor")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+
+                        TextField("Member user UUID (defaults to User A)", text: $readCursorTargetUserIDDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        TextField("Last-read message UUID (optional, defaults to newest loaded)", text: $readCursorTargetMessageIDDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        Button {
+                            Task {
+                                await updateReadCursor()
+                            }
+                        } label: {
+                            Text(isUpdatingReadCursor ? "Updating read cursor..." : "Update read cursor")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(
+                            isLoading ||
+                            isSendingMessage ||
+                            isCreatingAttachment ||
+                            isCreatingDeviceKey ||
+                            isDeletingMessage ||
+                            isUpdatingReadCursor ||
+                            conversationSummary == nil ||
+                            (resolvedReadCursorTargetUserID?.isEmpty ?? true) ||
+                            (resolvedReadCursorTargetMessageID?.isEmpty ?? true)
+                        )
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Delete message (soft-delete)")
                             .font(.subheadline)
                             .fontWeight(.semibold)
@@ -265,6 +314,7 @@ struct InboxPlaceholderView: View {
                             isSendingMessage ||
                             isCreatingAttachment ||
                             isCreatingDeviceKey ||
+                            isUpdatingReadCursor ||
                             isDeletingMessage ||
                             conversationSummary == nil ||
                             (resolvedMessageToDeleteID?.isEmpty ?? true)
@@ -313,6 +363,14 @@ struct InboxPlaceholderView: View {
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
 
+                    Text("Read-cursor target user_id: \(resolvedReadCursorTargetUserID ?? "(not resolved)")")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
+                    Text("Read-cursor target message_id: \(resolvedReadCursorTargetMessageID ?? "(not resolved)")")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
                     Text("Delete target message_id: \(resolvedMessageToDeleteID ?? "(not resolved)")")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
@@ -353,6 +411,16 @@ struct InboxPlaceholderView: View {
 
                                 if let firstDeviceKey = deviceKeys.first {
                                     Text("first_device_key: recipient_user=\(firstDeviceKey.recipientUserID) · recipient_device=\(firstDeviceKey.recipientDeviceID)")
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+
+                                let readCursorOwners = conversationMembers
+                                    .filter { $0.lastReadMessageID == row.id }
+                                    .map(\.userID)
+
+                                if !readCursorOwners.isEmpty {
+                                    Text("last_read_by: \(readCursorOwners.joined(separator: ", "))")
                                         .font(.footnote)
                                         .foregroundStyle(.secondary)
                                 }
@@ -403,6 +471,29 @@ struct InboxPlaceholderView: View {
         return messageRows.last?.id
     }
 
+    private var resolvedReadCursorTargetUserID: String? {
+        let manualUserID = readCursorTargetUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !manualUserID.isEmpty {
+            return manualUserID
+        }
+
+        let fallbackUserA = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !fallbackUserA.isEmpty {
+            return fallbackUserA
+        }
+
+        return nil
+    }
+
+    private var resolvedReadCursorTargetMessageID: String? {
+        let manualMessageID = readCursorTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !manualMessageID.isEmpty {
+            return manualMessageID
+        }
+
+        return messageRows.last?.id
+    }
+
     private var resolvedMessageToDeleteID: String? {
         let manualMessageID = messageToDeleteIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         if !manualMessageID.isEmpty {
@@ -442,6 +533,7 @@ struct InboxPlaceholderView: View {
         do {
             let apiClient = InboxAPIClient()
             let directConversation = try await apiClient.resolveDirectConversation(userAID: trimmedUserA, userBID: trimmedUserB)
+            let members = try await apiClient.fetchConversationMembers(conversationID: directConversation.id)
             let messages = try await apiClient.fetchMessages(conversationID: directConversation.id)
             var nextAttachmentMap: [String: [InboxAttachmentRow]] = [:]
             var nextDeviceKeyMap: [String: [InboxDeviceKeyRow]] = [:]
@@ -450,11 +542,13 @@ struct InboxPlaceholderView: View {
                 nextDeviceKeyMap[message.id] = try await apiClient.fetchMessageDeviceKeys(messageID: message.id)
             }
             conversationSummary = directConversation
+            conversationMembers = members
             messageRows = messages
             attachmentMap = nextAttachmentMap
             deviceKeyMap = nextDeviceKeyMap
         } catch {
             conversationSummary = nil
+            conversationMembers = []
             messageRows = []
             attachmentMap = [:]
             deviceKeyMap = [:]
@@ -585,6 +679,41 @@ struct InboxPlaceholderView: View {
         isCreatingDeviceKey = false
     }
 
+    private func updateReadCursor() async {
+        guard let conversationID = conversationSummary?.id else {
+            fetchError = "Load direct thread trước khi cập nhật read cursor."
+            return
+        }
+
+        guard let targetUserID = resolvedReadCursorTargetUserID,
+              !targetUserID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            fetchError = "Cần member user UUID hợp lệ để cập nhật read cursor."
+            return
+        }
+
+        guard let targetMessageID = resolvedReadCursorTargetMessageID,
+              !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            fetchError = "Cần message UUID hợp lệ để cập nhật read cursor."
+            return
+        }
+
+        isUpdatingReadCursor = true
+        fetchError = nil
+
+        do {
+            _ = try await InboxAPIClient().updateConversationReadCursor(
+                conversationID: conversationID,
+                userID: targetUserID,
+                lastReadMessageID: targetMessageID
+            )
+            await loadInboxThread()
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        isUpdatingReadCursor = false
+    }
+
     private func deleteMessage() async {
         guard let targetMessageID = resolvedMessageToDeleteID,
               !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
@@ -602,6 +731,9 @@ struct InboxPlaceholderView: View {
             }
             if deviceKeyTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == targetMessageID {
                 deviceKeyTargetMessageIDDraft = ""
+            }
+            if readCursorTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == targetMessageID {
+                readCursorTargetMessageIDDraft = ""
             }
             if messageToDeleteIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == targetMessageID {
                 messageToDeleteIDDraft = ""
@@ -627,6 +759,13 @@ private struct InboxMessageRow: Identifiable {
     let payloadText: String
 }
 
+private struct InboxConversationMemberRow: Identifiable {
+    let id: String
+    let conversationID: String
+    let userID: String
+    let lastReadMessageID: String?
+}
+
 private struct InboxAttachmentRow: Identifiable {
     let id: String
     let attachmentType: String
@@ -645,6 +784,18 @@ private struct InboxAPIClient {
         let id: String
         let conversation_type: String
         let member_user_ids: [String]
+    }
+
+    private struct ConversationMemberListResponse: Decodable {
+        let count: Int
+        let items: [ConversationMemberResponse]
+    }
+
+    private struct ConversationMemberResponse: Decodable {
+        let id: String
+        let conversation_id: String
+        let user_id: String
+        let last_read_message_id: String?
     }
 
     private struct MessageListResponse: Decodable {
@@ -703,6 +854,10 @@ private struct InboxAPIClient {
         let wrapped_message_key_blob: String
     }
 
+    private struct ConversationReadCursorUpdateRequest: Encodable {
+        let last_read_message_id: String
+    }
+
     private struct BackendErrorPayload: Decodable {
         let detail: String?
     }
@@ -750,6 +905,30 @@ private struct InboxAPIClient {
                 conversationType: payload.conversation_type,
                 memberUserIDs: payload.member_user_ids
             )
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func fetchConversationMembers(conversationID: String) async throws -> [InboxConversationMemberRow] {
+        let url = try makeURL(path: "/conversations/\(conversationID)/members")
+        let (data, response) = try await URLSession.shared.data(from: url)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 200 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Conversation members fetch failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(ConversationMemberListResponse.self, from: data)
+            return payload.items.map {
+                InboxConversationMemberRow(
+                    id: $0.id,
+                    conversationID: $0.conversation_id,
+                    userID: $0.user_id,
+                    lastReadMessageID: $0.last_read_message_id
+                )
+            }
         } catch {
             throw APIError.invalidResponse
         }
@@ -889,6 +1068,39 @@ private struct InboxAPIClient {
                 messageID: payload.message_id,
                 recipientUserID: payload.recipient_user_id,
                 recipientDeviceID: payload.recipient_device_id
+            )
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func updateConversationReadCursor(
+        conversationID: String,
+        userID: String,
+        lastReadMessageID: String
+    ) async throws -> InboxConversationMemberRow {
+        let url = try makeURL(path: "/conversations/\(conversationID)/members/\(userID)/read-cursor")
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(
+            ConversationReadCursorUpdateRequest(last_read_message_id: lastReadMessageID)
+        )
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 200 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Read cursor update failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(ConversationMemberResponse.self, from: data)
+            return InboxConversationMemberRow(
+                id: payload.id,
+                conversationID: payload.conversation_id,
+                userID: payload.user_id,
+                lastReadMessageID: payload.last_read_message_id
             )
         } catch {
             throw APIError.invalidResponse

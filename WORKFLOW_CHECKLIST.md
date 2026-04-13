@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **101 — backend direct-conversation read-cursor contract is complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **102 — iOS inbox read-cursor consume slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,27 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **101**
-- Scope hiện tại: backend messaging contract parity — update direct member read-cursor cho read-status seam.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **102**
+- Scope hiện tại: iOS inbox consume read-cursor API và hiển thị `last_read_by` trên message rows.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/backend-python/app/schemas/conversations.py`
-  - `apps/backend-python/app/repositories/conversations.py`
-  - `apps/backend-python/app/services/conversations.py`
-  - `apps/backend-python/app/modules/conversations/router.py`
-  - `apps/backend-python/tests/test_batch7_conversations_api.py`
+  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` → ✅ pass (2 passed)
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `e24df01` — `batch101: add direct conversation read cursor update contract`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `68baeef` — `chore: sync team dispatch for batch101`
+  - working tree hiện tại: bẩn (batch102 iOS read-cursor slice pending commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch102 iOS consume read-cursor seam (web paused)
+  - commit batch102 iOS read-cursor slice; sau đó mở batch103 messaging/realtime friction kế tiếp (web paused)
 
 ## Batch handoff note
 

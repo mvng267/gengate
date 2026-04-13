@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 101
-- Trục công việc: backend messaging contract hardening — direct member read-cursor update endpoint (đã hoàn tất, chờ mở batch 102).
+- Batch workflow chính thức hiện tại: 102
+- Trục công việc: iOS inbox seam hardening — consume read-cursor API và hiển thị `last_read_by`.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -41,9 +41,9 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: batch 101 backend read-status parity đã chốt; giữ ổn định contract read-cursor.
+- Scope hiện tại: giữ ổn định backend read-cursor contract vừa chốt ở batch 101.
 - Kết quả gần nhất: `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` + contract tests pass.
-- Trạng thái: complete_batch101_backend.
+- Trạng thái: stable_after_batch101.
 
 ### pikachu-web — frontend web
 - Scope hiện tại: tạm dừng theo chỉ đạo user.
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: giữ ổn định batch 100 inbox device-key controls; chờ batch 102 consume read-cursor API.
-- Kết quả gần nhất: commit `fe19ace` đã thêm device-key create/list vào Inbox shell.
-- Trạng thái: stable_after_batch100.
+- Scope hiện tại: batch 102 iOS inbox read-cursor consume slice.
+- Kết quả gần nhất: Inbox đã có action cập nhật read-cursor và hiển thị `last_read_by` theo member cursor.
+- Trạng thái: verify_batch102_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
