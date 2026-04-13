@@ -62,6 +62,7 @@ export default function LoginPage() {
   const [statusTone, setStatusTone] = useState<"neutral" | "success" | "error">("neutral");
   const [sessionPreview, setSessionPreview] = useState<string | null>(null);
   const [storedSessionPreview, setStoredSessionPreview] = useState<string | null>(null);
+  const [loginOutcomePreview, setLoginOutcomePreview] = useState<string | null>(null);
   const [logoutOutcomePreview, setLogoutOutcomePreview] = useState<string | null>(null);
   const [refreshOutcomePreview, setRefreshOutcomePreview] = useState<string | null>(null);
   const [restoreOutcomePreview, setRestoreOutcomePreview] = useState<string | null>(null);
@@ -163,14 +164,16 @@ export default function LoginPage() {
     setIsSubmitting(true);
     setStatusMessage(null);
     setSessionPreview(null);
+    setLoginOutcomePreview(null);
     setLogoutOutcomePreview(null);
     setRefreshOutcomePreview(null);
     setRestoreOutcomePreview(null);
 
     const result = await loginWithEmailPassword(form);
     if (result.ok) {
+      const loginMessage = `${result.message} Đang chuyển tới ${nextPath}`;
       setStatusTone("success");
-      setStatusMessage(`${result.message} Đang chuyển tới ${nextPath}`);
+      setStatusMessage(loginMessage);
       setSessionPreview(
         [
           `user_id: ${result.payload.user_id}`,
@@ -182,10 +185,24 @@ export default function LoginPage() {
           `expires_in_seconds: ${result.payload.expires_in_seconds}`,
         ].join("\n"),
       );
+      setLoginOutcomePreview(
+        [
+          "login_result: success_persisted",
+          `backend_detail: ${result.payload.session_status}`,
+          `message: ${loginMessage}`,
+        ].join("\n"),
+      );
       setStoredSessionPreview(formatStoredSessionPreview());
     } else {
       setStatusTone("error");
       setStatusMessage(result.message);
+      setLoginOutcomePreview(
+        [
+          `login_result: failed_${result.reason}`,
+          `backend_detail: ${result.details ?? "none"}`,
+          `message: ${result.message}`,
+        ].join("\n"),
+      );
       setSessionPreview(null);
       setStoredSessionPreview(formatStoredSessionPreview());
     }
@@ -199,6 +216,7 @@ export default function LoginPage() {
 
   async function handleLogout() {
     setIsLoggingOut(true);
+    setLoginOutcomePreview(null);
     setLogoutOutcomePreview(null);
     setRefreshOutcomePreview(null);
     setRestoreOutcomePreview(null);
@@ -225,6 +243,7 @@ export default function LoginPage() {
     clearPersistedAuthSession();
     setStatusTone("neutral");
     setStatusMessage("Đã xóa session local đã lưu trên web shell.");
+    setLoginOutcomePreview(null);
     setLogoutOutcomePreview(null);
     setRefreshOutcomePreview(null);
     setRestoreOutcomePreview(null);
@@ -236,17 +255,17 @@ export default function LoginPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-start">
       <section className="flex-1 space-y-4">
         <span className="inline-flex rounded-full border border-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-          Batch 44 · Web restore outcome signal
+          Batch 45 · Web login outcome signal
         </span>
         <h1 className="text-4xl font-black tracking-tight text-black">
-          Web shell nay có thêm restore outcome signal rõ hơn để phân biệt restore thành công với refresh token local đã mất hiệu lực.
+          Web shell nay có thêm login outcome signal riêng để tách kết quả sign-in/register khỏi status text tổng quát và giúp auth loop dễ verify hơn.
         </h1>
         <p className="max-w-2xl text-base leading-7 text-neutral-700">
-          Batch 44 ưu tiên thêm 1 action outcome surface hẹp: khi restore, màn web hiển thị riêng kết quả restore/local clear và backend detail để auth loop dễ verify hơn.
+          Batch 45 ưu tiên thêm 1 action outcome surface hẹp: khi login/register, màn web hiển thị riêng login result và backend detail để auth loop dễ verify hơn.
         </p>
         <ul className="space-y-2 text-sm text-neutral-700">
           <li>• Password/OTP vẫn là placeholder trên UI, chưa dùng cho API ở batch này.</li>
-          <li>• Web shell nay có persisted-session inspector, logout outcome panel, refresh outcome panel, và thêm restore outcome panel để nhìn rõ kết quả restore.</li>
+          <li>• Web shell nay có persisted-session inspector, login outcome panel, restore outcome panel, refresh outcome panel, và logout outcome panel để nhìn rõ từng auth action.</li>
           <li>• Redirect đích mặc định vẫn là <code>/feed</code> nếu không có <code>?next=...</code> hợp lệ.</li>
         </ul>
       </section>
@@ -299,14 +318,16 @@ export default function LoginPage() {
               setIsRegistering(true);
               setStatusMessage(null);
               setSessionPreview(null);
+              setLoginOutcomePreview(null);
               setLogoutOutcomePreview(null);
               setRefreshOutcomePreview(null);
               setRestoreOutcomePreview(null);
 
               const result = await registerAndLoginWithEmailPassword(form);
               if (result.ok) {
+                const loginMessage = `Tạo account shell + đăng nhập thành công. Đang chuyển tới ${nextPath}`;
                 setStatusTone("success");
-                setStatusMessage(`Tạo account shell + đăng nhập thành công. Đang chuyển tới ${nextPath}`);
+                setStatusMessage(loginMessage);
                 setSessionPreview(
                   [
                     `user_id: ${result.payload.user_id}`,
@@ -318,6 +339,13 @@ export default function LoginPage() {
                     `expires_in_seconds: ${result.payload.expires_in_seconds}`,
                   ].join("\n"),
                 );
+                setLoginOutcomePreview(
+                  [
+                    "login_result: register_then_sign_in_success",
+                    `backend_detail: ${result.payload.session_status}`,
+                    `message: ${loginMessage}`,
+                  ].join("\n"),
+                );
                 setStoredSessionPreview(formatStoredSessionPreview());
                 setIsRegistering(false);
                 router.replace(nextPath);
@@ -326,6 +354,13 @@ export default function LoginPage() {
 
               setStatusTone(result.reason === "conflict" ? "neutral" : "error");
               setStatusMessage(result.message);
+              setLoginOutcomePreview(
+                [
+                  `login_result: register_then_sign_in_failed_${result.reason}`,
+                  `backend_detail: ${result.details ?? "none"}`,
+                  `message: ${result.message}`,
+                ].join("\n"),
+              );
               setStoredSessionPreview(formatStoredSessionPreview());
               setIsRegistering(false);
             })();
@@ -343,6 +378,7 @@ export default function LoginPage() {
               setIsRefreshing(true);
               setStatusMessage(null);
               setSessionPreview(null);
+              setLoginOutcomePreview(null);
               setLogoutOutcomePreview(null);
               setRefreshOutcomePreview(null);
               setRestoreOutcomePreview(null);
@@ -419,7 +455,7 @@ export default function LoginPage() {
           <div className="font-semibold">Status</div>
           <p className={buildStatusClass(statusTone)}>
             {statusMessage ??
-              "Chưa submit. Batch 44 shell này ưu tiên giúp auth E2E flow hiện rõ restore outcome thật bên cạnh persisted-session state."}
+              "Chưa submit. Batch 45 shell này ưu tiên giúp auth E2E flow hiện rõ login outcome thật bên cạnh persisted-session state."}
           </p>
 
           {statusMessage?.includes("đăng nhập lại") ? (
@@ -433,6 +469,19 @@ export default function LoginPage() {
               {sessionPreview}
             </pre>
           ) : null}
+
+          <div className="mt-3">
+            <div className="font-semibold">Login outcome</div>
+            {loginOutcomePreview ? (
+              <pre className="mt-2 overflow-x-auto border border-black bg-neutral-100 p-3 text-xs text-black">
+                {loginOutcomePreview}
+              </pre>
+            ) : (
+              <p className="mt-2 text-xs text-neutral-600">
+                Chưa có login/register attempt nào trong phiên shell hiện tại.
+              </p>
+            )}
+          </div>
 
           <div className="mt-3">
             <div className="font-semibold">Restore outcome</div>

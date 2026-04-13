@@ -1,25 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 44
+- Batch: 45
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 44 restore outcome signal complete — web + iOS surface dedicated backend/detail result after restore to make auth loop easier to verify
-- Status: complete
+- Scope: batch 45 web login outcome signal — web surfaces dedicated login/register result + backend/detail cue separate from generic status text to make auth loop easier to verify
+- Status: verify
 - Files:
   - apps/web-nextjs/app/login/page.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `a876193` — `batch44: add ios restore outcome signal`
-  - working tree: sạch
+  - latest commit: `eedd8b7` — `batch44: mark workflow complete`
+  - working tree: bẩn đúng theo batch 45 web login outcome slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 45 với 1 scope hẹp theo hướng auth outcome aggregation hoặc session lifecycle cue tiếp theo để hoàn thiện auth loop verify path
+- Next: commit web batch-45 login outcome slice này; sau đó chọn 1 parity slice hẹp tương ứng trên iOS hoặc backend nếu cần
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 44 result:
-  - Web login shell có panel `Restore outcome` hiển thị rõ restore result + backend detail sau restore attempt
-  - iOS Session screen cũng có card `Restore outcome` hiển thị riêng restore result + backend detail bên cạnh refresh/logout outcome và persisted-session snapshot
-  - Hai shell giờ đều phân biệt restore thành công với case refresh token local đã mất hiệu lực trước đó
+- Batch 45 update:
+  - Web login shell nay có panel `Login outcome` hiển thị riêng login/register result + backend/detail cue
+  - Login outcome được reset hợp lý khi chạy refresh/logout/clear để tránh lẫn state cũ
+  - Web shell giờ có đủ login/restore/refresh/logout outcome panels bên cạnh persisted-session snapshot
