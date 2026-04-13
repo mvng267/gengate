@@ -16,6 +16,13 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
   const userBId = params?.userB?.trim() ?? "";
   const senderUserId = params?.sender?.trim() ?? userAId;
 
+  const profileHref = senderUserId ? `/profile?user=${encodeURIComponent(senderUserId)}` : userAId ? `/profile?user=${encodeURIComponent(userAId)}` : "/profile";
+  const feedHref = userAId || userBId
+    ? `/feed?author=${encodeURIComponent(senderUserId || userAId)}&viewer=${encodeURIComponent(userBId || userAId || senderUserId)}`
+    : "/feed";
+  const notificationsHref = senderUserId ? `/notifications?user=${encodeURIComponent(senderUserId)}` : "/notifications";
+  const locationHref = senderUserId ? `/location?owner=${encodeURIComponent(senderUserId)}` : "/location";
+
   return (
     <section>
       <h1>Inbox</h1>
@@ -67,8 +74,14 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
             Active thread pair: <code>{userAId}</code> ↔ <code>{userBId}</code>
           </p>
           <p>
-            Suggested pivot after validating the thread: <Link href="/profile">Profile</Link> · <Link href="/feed">Feed</Link> ·{" "}
-            <Link href="/notifications">Notifications</Link> · <Link href="/location">Location</Link>
+            Active sender context: <code>{senderUserId || "(not set)"}</code>
+          </p>
+          <p>
+            Suggested pivot after validating the thread: <Link href={profileHref}>Profile</Link> · <Link href={feedHref}>Feed</Link> ·{" "}
+            <Link href={notificationsHref}>Notifications</Link> · <Link href={locationHref}>Location</Link>
+          </p>
+          <p>
+            Tip: these pivots now carry the current messaging context forward, so you can keep testing with the sender/user pair instead of retyping IDs from scratch.
           </p>
         </>
       ) : (

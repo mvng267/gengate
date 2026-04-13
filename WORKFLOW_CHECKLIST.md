@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **77 — web profile pivot hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **78 — web inbox pivot hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,24 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **77**
-- Scope hiện tại: web profile pivot hardening — carry active profile user context into nearby launcher links so testers can move across seams with less UUID retyping.
+- Batch workflow chính thức hiện tại: **78**
+- Scope hiện tại: web inbox pivot hardening — carry active thread context into nearby launcher links so testers can move out of direct messaging with less UUID retyping.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/app/profile/page.tsx`
-  - `apps/web-nextjs/components/friend-graph-shell.tsx`
+  - `apps/web-nextjs/app/inbox/page.tsx`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `74cd9be` — `batch76: ignore verify artifacts`
-  - working tree hiện tại: bẩn (batch 77 ready to commit)
+  - commit gần nhất đã chốt: `fa44cd9` — `batch77: harden web profile pivots`
+  - working tree hiện tại: bẩn (batch 78 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch77 web profile pivot hardening; sau đó chỉ mở slice mới nếu nó giải quyết friction thật từ human testing hoặc cross-seam navigation pain cụ thể
+  - commit batch78 web inbox pivot hardening; sau đó chỉ mở slice mới nếu nó giải quyết friction thật từ human testing hoặc cross-seam navigation pain cụ thể
 
 ## Batch handoff note
 

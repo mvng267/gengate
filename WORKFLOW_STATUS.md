@@ -1,22 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 77
+- Batch: 78
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 77 web profile pivot hardening — carry active profile user context into nearby launcher links so testers can move across seams with less UUID retyping
+- Scope: batch 78 web inbox pivot hardening — carry active thread context into nearby launcher links so testers can move out of direct messaging with less UUID retyping
 - Status: MVP-testable
 - Files:
-  - apps/web-nextjs/app/profile/page.tsx
-  - apps/web-nextjs/components/friend-graph-shell.tsx
+  - apps/web-nextjs/app/inbox/page.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `74cd9be` — `batch76: ignore verify artifacts`
-  - working tree: bẩn (batch 77 ready to commit)
+  - latest commit: `fa44cd9` — `batch77: harden web profile pivots`
+  - working tree: bẩn (batch 78 ready to commit)
 - Blocker: none
-- Next: commit batch 77 web profile pivot hardening; after that, prefer human-tested bug fixes or similarly concrete cross-seam friction fixes only if they remove real copy/paste pain
+- Next: commit batch 78 web inbox pivot hardening; after that, only open another slice if it removes similarly concrete cross-seam friction in human testing
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -54,10 +53,13 @@
 - Batch 76 handoff:
   - `74cd9be` — `batch76: ignore verify artifacts`
   - repo hygiene remains in place while batch 77 reduces cross-seam browser friction from the profile entry point
-- Batch 77 outcome:
-  - `/profile` quick pivots now carry the active profile UUID into feed, inbox, notifications, and location launcher routes
-  - `FriendGraphShell` next-step links do the same, so testers can move across seams with fewer manual UUID pastes
-  - this shortens a real browser smoke path starting from the highest-priority social seam without changing backend contracts
+- Batch 77 handoff:
+  - `fa44cd9` — `batch77: harden web profile pivots`
+  - profile pivot hardening remains MVP-testable while batch 78 reduces similar friction from the messaging entry point
+- Batch 78 outcome:
+  - `/inbox` quick pivots now carry active sender/thread context into profile, feed, notifications, and location launcher routes
+  - testers can continue cross-seam validation from a direct message thread without retyping the most relevant UUIDs
+  - this further shortens the real browser smoke path while keeping domain contracts unchanged
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
