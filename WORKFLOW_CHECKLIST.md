@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **64 — iOS friend graph reader slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **65 — iOS private feed reader slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,12 +89,11 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **64**
-- Scope hiện tại: iOS friend graph reader — Profile tab consumes existing `/friends/requests` + `/friends` backend contracts via a UUID-driven read-only shell.
+- Batch workflow chính thức hiện tại: **65**
+- Scope hiện tại: iOS private feed reader — Feed tab consumes existing `/moments/feed` backend contracts via a viewer UUID read-only shell.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
   - `apps/ios-swift/GenGate/App/RootTabView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
@@ -102,12 +101,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `6803d8e` — `batch63: add ios mvp readiness hub`
-  - working tree hiện tại: bẩn (batch 64 ready to commit)
+  - commit gần nhất đã chốt: `e0bc13c` — `batch64: add ios friend graph reader`
+  - working tree hiện tại: bẩn (batch 65 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch64 iOS friend graph reader; sau đó ưu tiên một native read-only slice tương tự cho feed hoặc inbox
+  - commit batch65 iOS private feed reader; sau đó ưu tiên một native read-only slice cho inbox hoặc notifications
 
 ## Batch handoff note
 

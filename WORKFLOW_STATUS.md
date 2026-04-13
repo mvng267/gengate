@@ -1,12 +1,11 @@
 # GenGate Workflow Status
 
-- Batch: 64
+- Batch: 65
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 64 iOS friend graph reader — consume existing backend friendship contracts from the native Profile tab via a read-only UUID-driven shell
+- Scope: batch 65 iOS private feed reader — consume existing backend private feed contracts from the native Feed tab via a read-only viewer UUID shell
 - Status: MVP-testable
 - Files:
-  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
   - apps/ios-swift/GenGate/App/RootTabView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
@@ -14,10 +13,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `6803d8e` — `batch63: add ios mvp readiness hub`
-  - working tree: bẩn (batch 64 ready to commit)
+  - latest commit: `e0bc13c` — `batch64: add ios friend graph reader`
+  - working tree: bẩn (batch 65 ready to commit)
 - Blocker: none
-- Next: commit batch 64 iOS friend graph reader; after that, prefer one similarly narrow native consumption slice for feed or inbox instead of broad shell polish
+- Next: commit batch 65 iOS private feed reader; after that, prefer one more narrow native read-only slice for inbox or notifications
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -28,14 +27,15 @@
 - Batch 57 handoff:
   - `4a779eb` — `batch57: wire private friend feed shell`
   - private friend feed seam remains MVP-testable while batch 58 opens direct messaging
-- Batch 64 outcome:
-  - iOS Profile tab now consumes live backend friendship contracts through a UUID-driven read-only friend graph shell
-  - native testers can fetch pending requests and accepted friendships without leaving iOS shell copy/readiness-only mode
-  - this is the first real iOS social seam beyond auth/session, while still keeping scope strictly read-only and MVP-safe
+- Batch 65 outcome:
+  - iOS Feed tab now consumes live backend private feed contracts through a viewer UUID-driven read-only shell
+  - native testers can inspect friend-only moment captions and media metadata without leaving iOS
+  - this adds a second real iOS social seam beyond auth/session while keeping scope MVP-safe and read-only
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
   - iOS verify: `cd apps/ios-swift && swift build`
   - web MVP hub: `http://localhost:3000/`
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
-  - iOS path: open Session tab, then Profile tab, paste a real user UUID, and load friend graph snapshot
+  - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, and load friend graph snapshot
+  - iOS Feed path: open Feed tab, paste a viewer UUID, and load private feed
