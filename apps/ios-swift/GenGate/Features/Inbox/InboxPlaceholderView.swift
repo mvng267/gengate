@@ -51,7 +51,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset + empty-context-only helper-note visibility + short recipient-id mismatch hint + compact helper-note reason + readable short-caption mapping + recipient quick-member presets + quick first-valid-device select action; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset + empty-context-only helper-note visibility + short recipient-id mismatch hint + compact helper-note reason + readable short-caption mapping + recipient quick-member presets + quick first-valid-device select action + selection-source hint; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -91,7 +91,8 @@ struct InboxPlaceholderView: View {
                         "Reset helper note now uses a compact reason label (`non_member_after_switch`) to reduce line-wrap noise on narrow iPhone layouts.",
                         "Helper note now maps compact reason labels to short human-readable captions (e.g. `non-member after switch`) so UI stays concise but understandable for testers.",
                         "Recipient-device form now has quick member preset buttons so testers can fill `Recipient user UUID` from current conversation members without manual copy/paste.",
-                        "After recipient devices are loaded, quick action `Use first valid recipient device` lets testers apply the first current option in one tap when manual/picker selection is empty or stale."
+                        "After recipient devices are loaded, quick action `Use first valid recipient device` lets testers apply the first current option in one tap when manual/picker selection is empty or stale.",
+                        "Recipient-device section now shows a compact selection-source hint so testers know whether current `Recipient device UUID` is in-sync with loaded options or still a manual out-of-options value."
                     ]
                 )
 
@@ -379,6 +380,12 @@ struct InboxPlaceholderView: View {
                             Text("Recipient device UUID không còn trong danh sách thiết bị hiện tại; bấm `Reload recipient devices` để fallback về thiết bị hợp lệ.")
                                 .font(.footnote)
                                 .foregroundStyle(.orange)
+                        }
+
+                        if let recipientDeviceSelectionSourceHintText {
+                            Text(recipientDeviceSelectionSourceHintText)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
                         }
 
                         if let lastRecipientDevicesRateLimitSkipAt {
@@ -1057,6 +1064,23 @@ struct InboxPlaceholderView: View {
         }
 
         return recipientDeviceIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) != firstRecipientDeviceOptionID
+    }
+
+    private var recipientDeviceSelectionSourceHintText: String? {
+        let trimmedRecipientDeviceID = recipientDeviceIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedRecipientDeviceID.isEmpty else {
+            if let firstRecipientDeviceOptionID {
+                return "Recipient device source: chưa chọn (first option: \(firstRecipientDeviceOptionID))."
+            }
+            return "Recipient device source: chưa chọn (manual input hoặc load devices để có options)."
+        }
+
+        if recipientDeviceOptions.contains(where: { $0.id == trimmedRecipientDeviceID }) {
+            return "Recipient device source: current options (in-sync)."
+        }
+
+        return "Recipient device source: manual UUID (không nằm trong options hiện tại)."
     }
 
     private var resolvedReadStatusMessageID: String? {
