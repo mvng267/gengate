@@ -13,7 +13,7 @@
 
 ## Active batch
 - Batch workflow chính thức hiện tại: 54
-- Trục công việc: batch 54 auth/session failure cleanup cue parity đã complete sạch; chưa mở batch mới chính thức.
+- Trục công việc: batch 54 auth/session failure cleanup cue parity đã complete sạch; project hiện finished/paused cho autopilot.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -24,6 +24,9 @@
   - `6dd83ce` — `batch54: consume auth cleanup cue metadata`
   - `b53608a` — `batch54: consume ios cleanup cue metadata`
   - `41a269c` — `batch54: mark workflow complete`
+  - `9646f1d` — `batch54: sync team dispatch state`
+  - `e83f0d2` — `batch54: sync workflow git state`
+  - `325b8c7` — `batch54: refresh workflow head`
 - Test/verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅
   - web: `cd apps/web-nextjs && npm run verify` ✅
@@ -38,19 +41,19 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: idle chờ batch mới chính thức.
+- Scope hiện tại: idle, không mở nhịp mới cho đến khi có batch chính thức.
 - Kết quả gần nhất: backend auth 401 invalid-session payloads giữ `local_clear_recommended: true` + `backend_detail`.
-- Trạng thái: complete_batch54.
+- Trạng thái: finished_batch54.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: idle chờ batch mới chính thức.
+- Scope hiện tại: idle, không mở nhịp mới cho đến khi có batch chính thức.
 - Kết quả gần nhất: web auth client parse structured backend error payload và surface cleanup cue từ server metadata.
-- Trạng thái: complete_batch54.
+- Trạng thái: finished_batch54.
 
 ### pikame-ios — iOS
-- Scope hiện tại: idle chờ batch mới chính thức.
+- Scope hiện tại: idle, không mở nhịp mới cho đến khi có batch chính thức.
 - Kết quả gần nhất: iOS auth client parse structured backend error payload cho restore/refresh/logout unauthorized paths.
-- Trạng thái: complete_batch54.
+- Trạng thái: finished_batch54.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

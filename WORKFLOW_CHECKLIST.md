@@ -19,6 +19,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
      - `pushed`
      - `blocked`
      - `complete`
+     - `finished`
 
 4. **File đã đụng**
    - danh sách file chính của nhịp hiện tại
@@ -47,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **đã complete batch 54**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đã complete batch 54 và đang finished/paused cho autopilot**.
 
 ## Reporting hard rule
 
@@ -90,7 +91,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch workflow chính thức hiện tại: **54**
 - Scope hiện tại: failure cleanup cue parity — backend/web/iOS now expose explicit local-clear cue around invalid or cleared session outcomes, and both web + iOS consume backend 401 metadata in failure summaries.
-- Trạng thái hiện tại: **complete**
+- Trạng thái hiện tại: **finished**
 - File đã đụng:
   - `apps/backend-python/app/main.py`
   - `apps/backend-python/app/modules/auth/router.py`
@@ -99,18 +100,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `apps/web-nextjs/lib/auth/client.ts`
   - `apps/web-nextjs/app/login/page.tsx`
   - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `WORKFLOW_STATUS.md`
+  - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ pass
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `e83f0d2` — `batch54: sync workflow git state`
+  - commit gần nhất đã chốt: `325b8c7` — `batch54: refresh workflow head`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - batch 54 đã clean closed; run kế tiếp chỉ mở batch mới nếu workflow truth thực sự cần thêm end-to-end auth/session seam khác, không bịa micro-cleanup tiếp cho batch này
+  - project đang finished/paused cho autopilot; chỉ mở batch 55 khi có seam end-to-end auth/session mới thật sự còn thiếu
 
 ## Batch handoff note
 
@@ -124,13 +127,14 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `41a269c` — `batch54: mark workflow complete`
   - `9646f1d` — `batch54: sync team dispatch state`
   - `e83f0d2` — `batch54: sync workflow git state`
+  - `325b8c7` — `batch54: refresh workflow head`
 - Test-verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → pass
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
   - không còn blocker trực tiếp trong seam batch 54; phần đã làm là parity + contract consumption quanh invalid-session cleanup cue
-  - hiện chỉ còn blocker điều phối: chưa có seam product mới đủ rõ để mở batch 55 một cách trung thực
+  - chưa có seam product mới đủ rõ để mở batch 55 một cách trung thực
 - Batch kế tiếp:
   - chưa mở chính thức
 - Scope hẹp đầu tiên của batch kế tiếp:
