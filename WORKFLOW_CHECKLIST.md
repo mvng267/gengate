@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 50**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đã xong batch 50**.
 
 ## Reporting hard rule
 
@@ -89,34 +89,33 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **50**
-- Scope hiện tại: iOS failed login backend detail parity — preserve + surface explicit backend error detail for failed `/auth/login`.
+- Scope hiện tại: batch 50 closeout — artifact cleanup + workflow truth refresh sau khi failed-login backend detail parity đã hoàn tất trên web + iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `WORKFLOW_STATUS.md`
+  - `WORKFLOW_CHECKLIST.md`
 - Test-verify:
-  - `cd apps/ios-swift && swift build` → ✅ pass
+  - web: `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - iOS: `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `1a71c48` — `batch50: surface login failure detail`
-  - working tree hiện tại: bẩn đúng theo batch 50 iOS failed-login detail slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `33ffb41` — `batch50: align ios login failure detail`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - chốt batch 50 bằng commit iOS + workflow; sau đó follow-up clean closeout nếu còn artifact, rồi chọn seam auth shell end-to-end kế tiếp cho batch 51
+  - mở batch 51 với 1 scope hẹp mới quanh auth shell contract/verify gap gần nhất; ưu tiên seam end-to-end thật thay vì micro-cleanup
 
 ## Batch handoff note
 
-- Batch vừa xong: **49**
+- Batch vừa xong: **50**
 - Commit cuối đã chốt:
-  - `6528d37` — `batch49: add login detail cue`
-  - `7d57c87` — `batch49: align web login detail cue`
-  - `678ba6a` — `batch49: align ios login detail cue`
-  - `1de81b2` — `batch49: mark workflow complete`
+  - `1a71c48` — `batch50: surface login failure detail`
+  - `33ffb41` — `batch50: align ios login failure detail`
 - Test-verify cuối:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → pass
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - không có blocker code trực tiếp; batch 49 đã khép kín ở mức login backend detail cue parity
-- Batch kế tiếp: **50**
-- Scope hẹp đầu tiên của batch 50:
-  - surface explicit backend error detail cho failed login trên web shell thay vì collapse thành `backend_detail: none`
+  - không có blocker code trực tiếp; batch 50 đã khép kín ở mức failed-login backend detail parity
+- Batch kế tiếp: **51**
+- Scope hẹp đầu tiên đề xuất:
+  - chọn seam auth shell end-to-end gần nhất còn thiếu contract/verify rõ ràng sau login success/failure cue parity, rồi mở đúng 1 lane để nối tiếp
