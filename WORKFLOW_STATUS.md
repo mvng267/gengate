@@ -1,22 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 73
+- Batch: 74
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 73 web notifications launcher hardening — reduce browser-test friction by adding user-context prefill launcher on `/notifications`
+- Scope: batch 74 web location launcher hardening — reduce browser-test friction by adding owner/share user-context prefill launcher on `/location`
 - Status: MVP-testable
 - Files:
-  - apps/web-nextjs/app/notifications/page.tsx
-  - apps/web-nextjs/components/notification-shell.tsx
+  - apps/web-nextjs/app/location/page.tsx
+  - apps/web-nextjs/components/location-shell.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `74cca73` — `batch72: harden web feed launcher`
-  - working tree: bẩn (batch 73 ready to commit)
+  - latest commit: `16d44ba` — `batch73: harden web notifications launcher`
+  - working tree: bẩn (batch 74 ready to commit)
 - Blocker: none
-- Next: commit batch 73 web notifications launcher hardening; after that, prefer concrete human-test bug fixes or another similarly narrow browser friction fix only if it clearly shortens the MVP test path
+- Next: commit batch 74 web location launcher hardening; after that, prefer concrete human-test bug fixes over more launcher polish unless a real tester reports more friction
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -42,10 +42,13 @@
 - Batch 72 handoff:
   - `74cca73` — `batch72: harden web feed launcher`
   - feed launcher hardening remains MVP-testable while batch 73 reduces browser friction for notification testing
-- Batch 73 outcome:
-  - web `/notifications` now includes a real GET launcher form for User UUID prefill
-  - notification shell accepts query-prefilled user context so testers can load/create/toggle notifications with less retyping
-  - this shortens the browser path for notification testing while keeping the existing contracts and shell behavior honest
+- Batch 73 handoff:
+  - `16d44ba` — `batch73: harden web notifications launcher`
+  - notifications launcher hardening remains MVP-testable while batch 74 completes the same browser friction pass for location
+- Batch 74 outcome:
+  - web `/location` now includes a real GET launcher form for Owner / Allowed / existing Share UUID prefill
+  - location shell accepts query-prefilled owner/share context so testers can exercise counts, audience, toggles, and snapshots with less retyping
+  - this completes a consistent launcher/prefill path across the core web MVP seams while keeping contracts unchanged
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

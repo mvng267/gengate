@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **73 — web notifications launcher hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **74 — web location launcher hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,24 +89,24 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **73**
-- Scope hiện tại: web notifications launcher hardening — add a real browser form on `/notifications` and query-prefill the user field so testers can load/create/toggle notifications without retyping IDs.
+- Batch workflow chính thức hiện tại: **74**
+- Scope hiện tại: web location launcher hardening — add a real browser form on `/location` and query-prefill owner/share-related fields so testers can exercise the location seam without retyping IDs.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/app/notifications/page.tsx`
-  - `apps/web-nextjs/components/notification-shell.tsx`
+  - `apps/web-nextjs/app/location/page.tsx`
+  - `apps/web-nextjs/components/location-shell.tsx`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `74cca73` — `batch72: harden web feed launcher`
-  - working tree hiện tại: bẩn (batch 73 ready to commit)
+  - commit gần nhất đã chốt: `16d44ba` — `batch73: harden web notifications launcher`
+  - working tree hiện tại: bẩn (batch 74 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch73 web notifications launcher hardening; sau đó ưu tiên bug-fix/hardening trực tiếp từ human testing hoặc đúng 1 browser friction slice nhỏ tiếp theo nếu thật sự rút ngắn đường test MVP
+  - commit batch74 web location launcher hardening; sau đó ưu tiên bug-fix/hardening trực tiếp từ human testing thay vì tiếp tục launcher polish trừ khi có friction thật
 
 ## Batch handoff note
 

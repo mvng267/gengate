@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   createAudience,
@@ -12,6 +12,12 @@ import {
   type LocationShareItem,
 } from "@/lib/location/client";
 
+type LocationShellProps = {
+  initialOwnerUserId?: string;
+  initialAllowedUserId?: string;
+  initialShareId?: string;
+};
+
 const initialForm = {
   ownerUserId: "",
   allowedUserId: "",
@@ -21,9 +27,22 @@ const initialForm = {
   accuracyMeters: "20",
 };
 
-export function LocationShell() {
-  const [form, setForm] = useState(initialForm);
-  const [share, setShare] = useState<LocationShareItem | null>(null);
+export function LocationShell({
+  initialOwnerUserId = "",
+  initialAllowedUserId = "",
+  initialShareId = "",
+}: LocationShellProps) {
+  const [form, setForm] = useState({
+    ...initialForm,
+    ownerUserId: initialOwnerUserId,
+    allowedUserId: initialAllowedUserId,
+  });
+  const [share, setShare] = useState<LocationShareItem | null>(initialShareId ? {
+    id: initialShareId,
+    owner_user_id: initialOwnerUserId,
+    sharing_mode: initialForm.sharingMode,
+    is_active: true,
+  } : null);
   const [audienceCount, setAudienceCount] = useState(0);
   const [snapshotCount, setSnapshotCount] = useState(0);
   const [status, setStatus] = useState(
@@ -34,6 +53,26 @@ export function LocationShell() {
   const [isAddingAudience, setIsAddingAudience] = useState(false);
   const [isCreatingSnapshot, setIsCreatingSnapshot] = useState(false);
   const [isReloadingCounts, setIsReloadingCounts] = useState(false);
+
+  useEffect(() => {
+    setForm((current) => ({
+      ...current,
+      ownerUserId: initialOwnerUserId,
+      allowedUserId: initialAllowedUserId,
+    }));
+    setShare(
+      initialShareId
+        ? {
+            id: initialShareId,
+            owner_user_id: initialOwnerUserId,
+            sharing_mode: initialForm.sharingMode,
+            is_active: true,
+          }
+        : null,
+    );
+    setAudienceCount(0);
+    setSnapshotCount(0);
+  }, [initialAllowedUserId, initialOwnerUserId, initialShareId]);
 
   async function reloadCounts(currentShareId?: string) {
     const ownerUserId = form.ownerUserId.trim();
@@ -176,11 +215,7 @@ export function LocationShell() {
         <button type="button" onClick={() => void handleToggleShare()} disabled={isTogglingShare || !share}>
           {isTogglingShare ? "Saving..." : share?.is_active ? "Disable sharing" : "Enable sharing"}
         </button>
-        <button
-          type="button"
-          onClick={() => void reloadCounts(share?.id)}
-          disabled={isReloadingCounts}
-        >
+        <button type="button" onClick={() => void reloadCounts(share?.id)} disabled={isReloadingCounts}>
           {isReloadingCounts ? "Reloading..." : "Reload counts"}
         </button>
       </div>
