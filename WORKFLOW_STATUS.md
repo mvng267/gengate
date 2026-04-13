@@ -1,25 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 43
+- Batch: 44
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 43 refresh outcome signal complete — web + iOS surface dedicated backend/detail result after refresh to make auth loop easier to verify
-- Status: complete
+- Scope: batch 44 web restore outcome signal — surface dedicated backend/detail result after restore to make auth loop easier to verify
+- Status: verify
 - Files:
   - apps/web-nextjs/app/login/page.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `c88dd31` — `batch43: add ios refresh outcome signal`
-  - working tree: sạch
+  - latest commit: `7c1584b` — `batch43: mark workflow complete`
+  - working tree: bẩn đúng theo batch 44 web restore outcome signal slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 44 với 1 scope hẹp theo hướng restore outcome signal để hoàn thiện auth/session loop verify cue trên web hoặc iOS
+- Next: commit slice này; sau đó cân nhắc parity slice tương tự trên iOS hoặc workflow-only closeout nếu batch đủ leverage
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 43 result:
-  - Web login shell có panel `Refresh outcome` hiển thị rõ refresh result + backend detail sau manual refresh
-  - iOS Session screen cũng có card `Refresh outcome` hiển thị riêng refresh result + backend detail bên cạnh `Logout outcome` và persisted-session snapshot
-  - Hai shell giờ đều phân biệt rotate thành công với case refresh token đã mất hiệu lực trước đó
+- Batch 44 update:
+  - Web login shell nay có panel `Restore outcome` hiển thị rõ restore result + backend detail sau restore attempt
+  - Panel này giúp phân biệt restore thành công với case refresh token local đã mất hiệu lực trước đó

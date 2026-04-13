@@ -64,6 +64,7 @@ export default function LoginPage() {
   const [storedSessionPreview, setStoredSessionPreview] = useState<string | null>(null);
   const [logoutOutcomePreview, setLogoutOutcomePreview] = useState<string | null>(null);
   const [refreshOutcomePreview, setRefreshOutcomePreview] = useState<string | null>(null);
+  const [restoreOutcomePreview, setRestoreOutcomePreview] = useState<string | null>(null);
 
   const nextPath = useMemo(() => {
     const value = searchParams.get("next");
@@ -103,10 +104,9 @@ export default function LoginPage() {
       }
 
       if (result.ok) {
+        const restoreMessage = `Đã restore session local hợp lệ cho ${result.session.session.email}. Đang chuyển tới ${nextPath}`;
         setStatusTone("success");
-        setStatusMessage(
-          `Đã restore session local hợp lệ cho ${result.session.session.email}. Đang chuyển tới ${nextPath}`,
-        );
+        setStatusMessage(restoreMessage);
         setSessionPreview(
           [
             `user_id: ${result.session.session.user_id}`,
@@ -117,6 +117,13 @@ export default function LoginPage() {
             `expires_in_seconds: ${result.session.session.expires_in_seconds}`,
           ].join("\n"),
         );
+        setRestoreOutcomePreview(
+          [
+            "restore_result: local_restored_valid",
+            `backend_detail: ${result.session.session.session_status}`,
+            `message: ${restoreMessage}`,
+          ].join("\n"),
+        );
         setStoredSessionPreview(formatStoredSessionPreview());
         setIsRestoring(false);
         router.replace(nextPath);
@@ -124,11 +131,18 @@ export default function LoginPage() {
       }
 
       if (result.reason !== "missing") {
-        setStatusTone(result.reason === "unauthorized" ? "neutral" : "error");
-        setStatusMessage(
+        const restoreMessage =
           result.reason === "unauthorized"
             ? `${result.message} Hãy đăng nhập lại để tạo session mới.`
-            : result.message,
+            : result.message;
+        setStatusTone(result.reason === "unauthorized" ? "neutral" : "error");
+        setStatusMessage(restoreMessage);
+        setRestoreOutcomePreview(
+          [
+            "restore_result: failed_local_cleared",
+            `backend_detail: ${result.backendDetail ?? "none"}`,
+            `message: ${restoreMessage}`,
+          ].join("\n"),
         );
         setSessionPreview(null);
         setStoredSessionPreview(formatStoredSessionPreview());
@@ -151,6 +165,7 @@ export default function LoginPage() {
     setSessionPreview(null);
     setLogoutOutcomePreview(null);
     setRefreshOutcomePreview(null);
+    setRestoreOutcomePreview(null);
 
     const result = await loginWithEmailPassword(form);
     if (result.ok) {
@@ -186,6 +201,7 @@ export default function LoginPage() {
     setIsLoggingOut(true);
     setLogoutOutcomePreview(null);
     setRefreshOutcomePreview(null);
+    setRestoreOutcomePreview(null);
     const result = await logoutPersistedSession();
     setStatusTone(result.ok ? "neutral" : "error");
     setStatusMessage(
@@ -211,6 +227,7 @@ export default function LoginPage() {
     setStatusMessage("Đã xóa session local đã lưu trên web shell.");
     setLogoutOutcomePreview(null);
     setRefreshOutcomePreview(null);
+    setRestoreOutcomePreview(null);
     setSessionPreview(null);
     setStoredSessionPreview(formatStoredSessionPreview());
   }
@@ -219,17 +236,17 @@ export default function LoginPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-start">
       <section className="flex-1 space-y-4">
         <span className="inline-flex rounded-full border border-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-          Batch 43 · Web refresh outcome signal
+          Batch 44 · Web restore outcome signal
         </span>
         <h1 className="text-4xl font-black tracking-tight text-black">
-          Web shell nay có thêm refresh outcome signal rõ hơn để phân biệt rotate thành công với refresh token đã mất hiệu lực.
+          Web shell nay có thêm restore outcome signal rõ hơn để phân biệt restore thành công với refresh token local đã mất hiệu lực.
         </h1>
         <p className="max-w-2xl text-base leading-7 text-neutral-700">
-          Batch 43 ưu tiên thêm 1 action outcome surface hẹp: khi refresh, màn web hiển thị riêng kết quả rotate/local update và backend detail để auth loop dễ verify hơn.
+          Batch 44 ưu tiên thêm 1 action outcome surface hẹp: khi restore, màn web hiển thị riêng kết quả restore/local clear và backend detail để auth loop dễ verify hơn.
         </p>
         <ul className="space-y-2 text-sm text-neutral-700">
           <li>• Password/OTP vẫn là placeholder trên UI, chưa dùng cho API ở batch này.</li>
-          <li>• Web shell nay có persisted-session inspector, logout outcome panel, và thêm refresh outcome panel để nhìn rõ kết quả rotate.</li>
+          <li>• Web shell nay có persisted-session inspector, logout outcome panel, refresh outcome panel, và thêm restore outcome panel để nhìn rõ kết quả restore.</li>
           <li>• Redirect đích mặc định vẫn là <code>/feed</code> nếu không có <code>?next=...</code> hợp lệ.</li>
         </ul>
       </section>
@@ -284,6 +301,7 @@ export default function LoginPage() {
               setSessionPreview(null);
               setLogoutOutcomePreview(null);
               setRefreshOutcomePreview(null);
+              setRestoreOutcomePreview(null);
 
               const result = await registerAndLoginWithEmailPassword(form);
               if (result.ok) {
@@ -327,6 +345,7 @@ export default function LoginPage() {
               setSessionPreview(null);
               setLogoutOutcomePreview(null);
               setRefreshOutcomePreview(null);
+              setRestoreOutcomePreview(null);
 
               const result = await refreshPersistedSession();
               if (result.ok) {
@@ -400,7 +419,7 @@ export default function LoginPage() {
           <div className="font-semibold">Status</div>
           <p className={buildStatusClass(statusTone)}>
             {statusMessage ??
-              "Chưa submit. Batch 43 shell này ưu tiên giúp auth E2E flow hiện rõ refresh outcome thật bên cạnh persisted-session state."}
+              "Chưa submit. Batch 44 shell này ưu tiên giúp auth E2E flow hiện rõ restore outcome thật bên cạnh persisted-session state."}
           </p>
 
           {statusMessage?.includes("đăng nhập lại") ? (
@@ -414,6 +433,19 @@ export default function LoginPage() {
               {sessionPreview}
             </pre>
           ) : null}
+
+          <div className="mt-3">
+            <div className="font-semibold">Restore outcome</div>
+            {restoreOutcomePreview ? (
+              <pre className="mt-2 overflow-x-auto border border-black bg-neutral-100 p-3 text-xs text-black">
+                {restoreOutcomePreview}
+              </pre>
+            ) : (
+              <p className="mt-2 text-xs text-neutral-600">
+                Chưa có restore attempt nào trong phiên shell hiện tại.
+              </p>
+            )}
+          </div>
 
           <div className="mt-3">
             <div className="font-semibold">Refresh outcome</div>

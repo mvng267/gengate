@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **đã chốt batch 43**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 44**.
 
 ## Reporting hard rule
 
@@ -88,25 +88,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **43**
-- Scope hiện tại: batch 43 refresh outcome signal complete — web + iOS surface dedicated backend/detail result after refresh to make auth loop easier to verify.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **44**
+- Scope hiện tại: web restore outcome signal — surface dedicated backend/detail result after restore to make auth loop easier to verify.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/web-nextjs/app/login/page.tsx`
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
-  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
-  - `WORKFLOW_STATUS.md`
-  - `WORKFLOW_CHECKLIST.md`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `c88dd31` — `batch43: add ios refresh outcome signal`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `7c1584b` — `batch43: mark workflow complete`
+  - working tree hiện tại: bẩn đúng theo batch 44 web restore outcome signal slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch 44 với 1 scope hẹp: thêm restore outcome signal trên web hoặc iOS để hoàn thiện auth/session loop verify cue
+  - commit slice này; sau đó cân nhắc parity slice tương tự trên iOS hoặc workflow-only closeout nếu batch đủ leverage
 
 ## Batch handoff note
 
@@ -114,6 +109,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Commit cuối đã chốt:
   - `97ebdf4` — `batch43: add web refresh outcome signal`
   - `c88dd31` — `batch43: add ios refresh outcome signal`
+  - `7c1584b` — `batch43: mark workflow complete`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
