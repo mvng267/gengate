@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **58 — direct messaging shell slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **59 — notification shell slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,35 +89,26 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **58**
-- Scope hiện tại: direct messaging shell — backend direct-conversation/thread contract + web `/inbox` wired to create/load a 1:1 thread by user UUIDs.
+- Batch workflow chính thức hiện tại: **59**
+- Scope hiện tại: notification shell — web `/notifications` wired to load per-user notifications and toggle read state against existing backend contracts.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/backend-python/app/modules/conversations/router.py`
-  - `apps/backend-python/app/modules/messages/router.py`
-  - `apps/backend-python/app/services/conversations.py`
-  - `apps/backend-python/app/services/messages.py`
-  - `apps/backend-python/app/repositories/conversations.py`
-  - `apps/backend-python/app/repositories/messages.py`
-  - `apps/backend-python/app/schemas/conversations.py`
-  - `apps/backend-python/app/schemas/messages.py`
-  - `apps/backend-python/tests/test_messages_api.py`
-  - `apps/web-nextjs/app/inbox/page.tsx`
-  - `apps/web-nextjs/lib/inbox/client.ts`
-  - `apps/web-nextjs/components/direct-message-shell.tsx`
+  - `apps/web-nextjs/app/notifications/page.tsx`
+  - `apps/web-nextjs/lib/notifications/client.ts`
+  - `apps/web-nextjs/components/notification-shell.tsx`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_messages_api.py` → ✅ pass
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py` → ✅ pass
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `4a779eb` — `batch57: wire private friend feed shell`
-  - working tree hiện tại: bẩn (batch 58 ready to commit)
+  - commit gần nhất đã chốt: `d92b349` — `batch58: wire direct messaging shell`
+  - working tree hiện tại: bẩn (batch 59 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch58 direct messaging shell, rồi mở slice kế tiếp cho optional location sharing state shell hoặc notification shell
+  - commit batch59 notification shell, rồi mở slice kế tiếp cho optional location sharing state shell
 
 ## Batch handoff note
 
