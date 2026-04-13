@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **94 — backend+iOS location audience parity hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **97 — backend+iOS messaging parity (soft-delete + native inbox delete action) is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,28 +89,31 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **94**
-- Scope hiện tại: backend+iOS location audience parity hardening — duplicate guard (`audience_exists`) + remove audience action in native Location shell.
+- Batch workflow chính thức hiện tại: **97**
+- Scope hiện tại: backend+iOS messaging parity — soft-delete message contract + iOS Inbox native delete action.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/backend-python/app/modules/locations/router.py`
-  - `apps/backend-python/app/repositories/locations.py`
+  - `apps/backend-python/app/modules/messages/router.py`
+  - `apps/backend-python/app/repositories/messages.py`
+  - `apps/backend-python/app/services/messages.py`
+  - `apps/backend-python/tests/test_messages_api.py`
   - `apps/backend-python/app/services/locations.py`
   - `apps/backend-python/tests/test_location_audience_api.py`
-  - `apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift`
+  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_messages_api.py` → ✅ pass (12 passed)
   - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_location_audience_api.py` → ✅ pass (3 passed)
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `4bc434d` — `batch94: harden location audience duplicate/remove parity`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `04f4c39` — `batch97: add message soft-delete contract and ios inbox action`
+  - working tree hiện tại: bẩn (flow docs pending sync)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch95 backend+iOS: de-hardcode iOS backend base URL qua shared environment path (tạm dừng web)
+  - push main với flow docs batch97; tiếp tục batch98 backend+iOS theo seam messaging/thread friction thật (web paused)
 
 ## Batch handoff note
 

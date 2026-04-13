@@ -1,26 +1,29 @@
 # GenGate Workflow Status
 
-- Batch: 94
+- Batch: 97
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 94 backend+iOS location audience parity hardening — add duplicate guard + native remove action on `/locations/shares/{share_id}/audience/{audience_id}`
+- Scope: batch 97 backend+iOS messaging parity — backend soft-delete contract for `/messages/{id}` + iOS Inbox native delete action
 - Status: MVP-testable
 - Files:
-  - apps/backend-python/app/modules/locations/router.py
-  - apps/backend-python/app/repositories/locations.py
+  - apps/backend-python/app/modules/messages/router.py
+  - apps/backend-python/app/repositories/messages.py
+  - apps/backend-python/app/services/messages.py
+  - apps/backend-python/tests/test_messages_api.py
   - apps/backend-python/app/services/locations.py
   - apps/backend-python/tests/test_location_audience_api.py
-  - apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_messages_api.py` ✅ (12 passed)
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_location_audience_api.py` ✅ (3 passed)
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `4bc434d` — `batch94: harden location audience duplicate/remove parity`
-  - working tree: sạch
+  - latest commit: `04f4c39` — `batch97: add message soft-delete contract and ios inbox action`
+  - working tree: bẩn (flow docs pending sync)
 - Blocker: none
-- Next: mở batch 95 theo hướng backend+iOS (tạm dừng web): de-hardcode iOS backend base URL qua shared environment path để giảm friction run ngoài localhost
+- Next: sync WORKFLOW_CHECKLIST/TEAM_DISPATCH cho batch97 rồi push main (tạm dừng web)
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -110,6 +113,21 @@
   - iOS Inbox tab now supports creating message attachments via `POST /messages/{id}/attachments` directly from native UI
   - attachment target defaults to newest loaded message while still allowing manual message-id override
   - direct messaging seam on iOS now covers text send + attachment create/list within one tab flow
+- Batch 94 handoff:
+  - `4bc434d` — `batch94: harden location audience duplicate/remove parity`
+  - backend `/locations/shares/{share_id}/audience` now guards duplicates with `409 audience_exists`
+  - iOS Location shell now supports remove audience flow and audience-id tracking
+- Batch 95 handoff:
+  - `c10d99c` — `batch95: de-hardcode ios backend base url`
+  - iOS shell clients now use shared `BackendEnvironment.apiBaseURL`
+  - `AppSessionStore` default backend URL now comes from shared environment path
+- Batch 96 handoff:
+  - `731c7da` — `batch96: align location audience remove missing-share parity`
+  - backend location audience remove now returns `share_not_found` when parent share is missing
+- Batch 97 outcome:
+  - backend adds soft-delete contract `DELETE /messages/{message_id}` (returns `{"status":"deleted"}`)
+  - deleted messages are hidden from `GET /messages/{id}` and message lists
+  - iOS Inbox shell now has native "Delete message" action (defaults to newest loaded message)
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
