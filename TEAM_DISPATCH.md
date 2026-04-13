@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 136
-- Trục công việc: iOS inbox seam hardening — reset recipient-device draft/options khi direct-thread load reset/failure.
+- Batch workflow chính thức hiện tại: 137
+- Trục công việc: iOS inbox seam hardening — auto-reset recipient-device context khi recipient user không còn thuộc member set của direct-thread vừa load.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 136 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: load-thread failure/reset path nay clear luôn recipient user/device/options + auto-reload task qua helper dùng chung để tránh stale target sau lỗi chuyển context.
-- Trạng thái: verify_batch136_ios.
+- Scope hiện tại: batch 137 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: sau load direct-thread thành công, nếu recipient user hiện tại không thuộc member set mới thì recipient user/device/options + auto-reload task được clear ngay để tránh stale target cross-conversation.
+- Trạng thái: verify_batch137_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

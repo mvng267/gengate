@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **136 — iOS inbox load-failure recipient-device reset slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **137 — iOS inbox non-member recipient-device reset slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **136**
-- Scope hiện tại: iOS inbox read-status UX hardening — clear recipient-device draft/options khi thread load reset/failure để tránh stale target sau lỗi chuyển context.
+- Batch workflow chính thức hiện tại: **137**
+- Scope hiện tại: iOS inbox read-status UX hardening — khi load thread thành công với direct-conversation mới, auto-clear recipient-device context nếu recipient user không thuộc member set hiện tại.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch136 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch137 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch137 cho messaging friction tiếp theo (khi load thread thành công với direct-conversation mới, auto-clear recipient-device context nếu recipient user không thuộc 2 member IDs hiện tại) trong iOS inbox shell
+  - mở batch138 cho messaging friction tiếp theo (khi auto-clear recipient-device context vì non-member recipient user, show explicit inline helper note để tester hiểu rõ lý do reset) trong iOS inbox shell
 
 ## Batch handoff note
 

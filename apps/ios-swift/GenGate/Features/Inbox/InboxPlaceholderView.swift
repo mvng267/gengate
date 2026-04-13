@@ -48,7 +48,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure recipient-device context reset; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -79,7 +79,8 @@ struct InboxPlaceholderView: View {
                         "Clearing `Recipient user UUID` now also clears auto-reload timestamp state to prevent cross-context leftover debug notes.",
                         "Switching direct-thread identity (`User A`/`User B`) now also clears recipient-device timestamp debug state to avoid cross-thread carry-over.",
                         "Switching direct-thread identity (`User A`/`User B`) now clears recipient-device user/device drafts + options immediately to prevent stale device-target actions before next reload.",
-                        "If direct-thread load fails and thread state resets, recipient-device user/device/options are now cleared in the same reset path so stale targets do not leak across recovery flows."
+                        "If direct-thread load fails and thread state resets, recipient-device user/device/options are now cleared in the same reset path so stale targets do not leak across recovery flows.",
+                        "After successful thread load, if current recipient user is not in loaded conversation members, recipient-device context is auto-cleared to avoid cross-conversation stale target carry-over."
                     ]
                 )
 
@@ -1183,7 +1184,12 @@ struct InboxPlaceholderView: View {
 
             let resolvedRecipientUserID = recipientUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
             if !resolvedRecipientUserID.isEmpty {
-                await loadRecipientDevices(silent: true)
+                let memberUserIDs = Set(members.map(\.userID))
+                if memberUserIDs.contains(resolvedRecipientUserID) {
+                    await loadRecipientDevices(silent: true)
+                } else {
+                    clearRecipientDeviceContext()
+                }
             }
         } catch {
             if !silent {
