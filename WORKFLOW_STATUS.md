@@ -20,7 +20,7 @@
   - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `9646f1d` — `batch54: sync team dispatch state`
+  - latest commit: `e83f0d2` — `batch54: sync workflow git state`
   - working tree: sạch
 - Blocker: none
 - Next: batch 54 đã clean closed; run kế tiếp chỉ mở batch mới nếu workflow truth thực sự cần thêm end-to-end auth/session seam khác, không bịa micro-cleanup tiếp cho batch này

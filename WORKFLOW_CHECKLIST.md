@@ -105,7 +105,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `9646f1d` — `batch54: sync team dispatch state`
+  - commit gần nhất đã chốt: `e83f0d2` — `batch54: sync workflow git state`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
@@ -123,6 +123,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `b53608a` — `batch54: consume ios cleanup cue metadata`
   - `41a269c` — `batch54: mark workflow complete`
   - `9646f1d` — `batch54: sync team dispatch state`
+  - `e83f0d2` — `batch54: sync workflow git state`
 - Test-verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → pass
   - web: `cd apps/web-nextjs && npm run verify` → pass
