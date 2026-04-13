@@ -1,23 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 84
+- Batch: 85
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 84 web direct-message attachment hardening — allow creating/listing image attachments on thread messages from the inbox shell
+- Scope: batch 85 iOS inbox attachment reader hardening — show attachment count and first attachment metadata per message in native inbox shell
 - Status: MVP-testable
 - Files:
-  - apps/web-nextjs/components/direct-message-shell.tsx
-  - apps/web-nextjs/lib/inbox/client.ts
-  - apps/web-nextjs/app/inbox/page.tsx
+  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
-  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `48559e8` — `batch83: harden web friend request actions`
-  - working tree: bẩn (batch 84 ready to commit)
+  - latest commit: `a1e27ed` — `batch84: harden web direct-message attachments`
+  - working tree: bẩn (batch 85 ready to commit)
 - Blocker: none
-- Next: commit batch 84 web direct-message attachment hardening; after that, keep opening only real MVP seam gaps from human testing
+- Next: commit batch 85 iOS inbox attachment reader hardening; after that, open only real MVP seam gaps or concrete human-test friction
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -76,10 +74,13 @@
 - Batch 83 handoff:
   - `48559e8` — `batch83: harden web friend request actions`
   - friend-request create/accept web path remains MVP-testable while batch 84 hardens direct-message attachments
-- Batch 84 outcome:
-  - web inbox shell now supports creating image attachments for a selected message id
-  - inbox shell can list attachments for a selected message id using backend message-attachment contracts
-  - this makes messaging seam closer to MVP requirement (text + image attachments) without backend contract churn
+- Batch 84 handoff:
+  - `a1e27ed` — `batch84: harden web direct-message attachments`
+  - web direct-message text + attachment create/list remains MVP-testable while batch 85 brings iOS inbox reader closer to same seam
+- Batch 85 outcome:
+  - iOS inbox reader now loads message attachments for each message via `/messages/{id}/attachments`
+  - native inbox rows now show attachment count + first attachment metadata (type + storage key)
+  - this keeps iOS messaging seam read-only but much closer to the MVP text+image contract
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

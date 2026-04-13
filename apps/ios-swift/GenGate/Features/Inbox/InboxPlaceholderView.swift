@@ -7,6 +7,7 @@ struct InboxPlaceholderView: View {
     @State private var userBIDDraft: String = ""
     @State private var conversationSummary: DirectConversationSummary?
     @State private var messageRows: [InboxMessageRow] = []
+    @State private var attachmentMap: [String: [InboxAttachmentRow]] = [:]
     @State private var fetchError: String?
     @State private var isLoading = false
 
@@ -16,11 +17,11 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox reader. Use two real user UUIDs to resolve a direct conversation and inspect its message list through the same backend contracts already wired for web.",
-                    status: "Status: native inbox is live as a read-only shell; composer, device keys, attachments, and realtime remain pending.",
+                    status: "Status: native inbox is live as a read-only shell; it reads direct thread + messages + attachment metadata while composer/device keys/realtime remain pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
-                        "This shell first calls `/conversations/direct`, then reads `/messages?conversation_id=<uuid>`.",
-                        "Use web or backend tools when you need to create/send messages; use this iOS tab to consume the resulting thread natively."
+                        "This shell first calls `/conversations/direct`, then reads `/messages?conversation_id=<uuid>` and per-message `/messages/{id}/attachments`.",
+                        "Use web or backend tools when you need to create/send messages or upload attachments; use this iOS tab to consume resulting message+attachment state natively."
                     ]
                 )
 
@@ -114,6 +115,18 @@ struct InboxPlaceholderView: View {
                                     .foregroundStyle(.secondary)
                                 Text(row.payloadText)
                                     .font(.footnote)
+
+                                let attachments = attachmentMap[row.id] ?? []
+                                Text("attachment_count: \(attachments.count)")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+
+                                if let firstAttachment = attachments.first {
+                                    Text("first_attachment: \(firstAttachment.attachmentType) · \(firstAttachment.storageKey ?? "(no storage key)")")
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+
                                 Text("message_id: \(row.id)")
                                     .font(.caption.monospaced())
                                     .foregroundStyle(.secondary)
@@ -173,11 +186,17 @@ struct InboxPlaceholderView: View {
             let apiClient = InboxAPIClient()
             let directConversation = try await apiClient.resolveDirectConversation(userAID: trimmedUserA, userBID: trimmedUserB)
             let messages = try await apiClient.fetchMessages(conversationID: directConversation.id)
+            var nextAttachmentMap: [String: [InboxAttachmentRow]] = [:]
+            for message in messages {
+                nextAttachmentMap[message.id] = try await apiClient.fetchAttachments(messageID: message.id)
+            }
             conversationSummary = directConversation
             messageRows = messages
+            attachmentMap = nextAttachmentMap
         } catch {
             conversationSummary = nil
             messageRows = []
+            attachmentMap = [:]
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
 
@@ -197,6 +216,12 @@ private struct InboxMessageRow: Identifiable {
     let payloadText: String
 }
 
+private struct InboxAttachmentRow: Identifiable {
+    let id: String
+    let attachmentType: String
+    let storageKey: String?
+}
+
 private struct InboxAPIClient {
     private struct DirectConversationResponse: Decodable {
         let id: String
@@ -214,6 +239,19 @@ private struct InboxAPIClient {
         let conversation_id: String
         let sender_user_id: String
         let payload_text: String
+    }
+
+    private struct AttachmentListResponse: Decodable {
+        let count: Int
+        let items: [AttachmentResponse]
+    }
+
+    private struct AttachmentResponse: Decodable {
+        let id: String
+        let message_id: String
+        let attachment_type: String
+        let encrypted_attachment_blob: String
+        let storage_key: String?
     }
 
     private struct BackendErrorPayload: Decodable {
@@ -284,6 +322,29 @@ private struct InboxAPIClient {
                     id: $0.id,
                     senderUserID: $0.sender_user_id,
                     payloadText: $0.payload_text
+                )
+            }
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func fetchAttachments(messageID: String) async throws -> [InboxAttachmentRow] {
+        let url = try makeURL(path: "/messages/\(messageID)/attachments")
+        let (data, response) = try await URLSession.shared.data(from: url)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 200 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Attachment list fetch failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(AttachmentListResponse.self, from: data)
+            return payload.items.map {
+                InboxAttachmentRow(
+                    id: $0.id,
+                    attachmentType: $0.attachment_type,
+                    storageKey: $0.storage_key
                 )
             }
         } catch {

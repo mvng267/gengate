@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 84
-- Trục công việc: web direct-message attachment hardening — cho phép tạo/list image attachments trực tiếp từ inbox shell.
+- Batch workflow chính thức hiện tại: 85
+- Trục công việc: iOS inbox attachment reader hardening — hiển thị attachment metadata theo từng message trong native inbox shell.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: complete_batch84.
 
 ### pikame-ios — iOS
-- Scope hiện tại: không mở iOS scope mới trong batch 70.
-- Kết quả gần nhất: batch 69 session-user quick-fill hardening đã xong.
-- Trạng thái: idle_batch70.
+- Scope hiện tại: batch 85 iOS inbox attachment reader hardening đã xong.
+- Kết quả gần nhất: iOS inbox row hiển thị attachment count + first attachment metadata theo từng message.
+- Trạng thái: complete_batch85.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

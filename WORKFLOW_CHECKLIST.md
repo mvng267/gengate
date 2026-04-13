@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **84 — web direct-message attachment hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **85 — iOS inbox attachment reader hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,25 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **84**
-- Scope hiện tại: web direct-message attachment hardening — allow creating/listing image attachments on thread messages from the inbox shell.
+- Batch workflow chính thức hiện tại: **85**
+- Scope hiện tại: iOS inbox attachment reader hardening — show attachment count and first attachment metadata per message in native inbox shell.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/components/direct-message-shell.tsx`
-  - `apps/web-nextjs/lib/inbox/client.ts`
-  - `apps/web-nextjs/app/inbox/page.tsx`
+  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `48559e8` — `batch83: harden web friend request actions`
-  - working tree hiện tại: bẩn (batch 84 ready to commit)
+  - commit gần nhất đã chốt: `a1e27ed` — `batch84: harden web direct-message attachments`
+  - working tree hiện tại: bẩn (batch 85 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch84 web direct-message attachment hardening; sau đó mở slice hẹp kế tiếp chỉ khi có MVP seam gap thật hoặc human-test friction cụ thể
+  - commit batch85 iOS inbox attachment reader hardening; sau đó mở slice mới chỉ khi có MVP seam gap thật hoặc friction cụ thể từ human testing
 
 ## Batch handoff note
 
