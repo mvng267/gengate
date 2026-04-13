@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 43 · iOS refresh outcome signal")
+            Text("Batch 44 · iOS restore outcome signal")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -19,7 +19,7 @@ struct SessionEntryView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Batch 43 ưu tiên thêm refresh outcome surface riêng để nhìn rõ refresh result, local update, và backend detail sau manual refresh ngay trên màn Session.")
+                    Text("Batch 44 ưu tiên thêm restore outcome surface riêng để nhìn rõ restore result, local clear, và backend detail sau restore attempt ngay trên màn Session.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -100,6 +100,12 @@ struct SessionEntryView: View {
                     }
 
                     outcomeCard(
+                        title: "Restore outcome",
+                        content: sessionStore.restoreOutcomeSummary,
+                        emptyState: "Chưa có restore attempt nào trong phiên shell hiện tại."
+                    )
+
+                    outcomeCard(
                         title: "Refresh outcome",
                         content: sessionStore.refreshOutcomeSummary,
                         emptyState: "Chưa có refresh attempt nào trong phiên shell hiện tại."
@@ -137,7 +143,7 @@ struct SessionEntryView: View {
                     .font(.footnote.monospaced())
                     .foregroundStyle(.secondary)
 
-                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ còn có refresh outcome surface riêng để nhìn rõ kết quả rotate/detail sau manual refresh bên cạnh logout outcome và persisted-session inspector.")
+                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ còn có restore outcome surface riêng để nhìn rõ kết quả restore/detail sau restore attempt bên cạnh refresh outcome, logout outcome, và persisted-session inspector.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -169,6 +175,12 @@ struct SessionEntryView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+
+                    outcomeCard(
+                        title: "Restore outcome",
+                        content: sessionStore.restoreOutcomeSummary,
+                        emptyState: "Chưa có restore attempt nào trong phiên shell hiện tại."
+                    )
 
                     outcomeCard(
                         title: "Refresh outcome",

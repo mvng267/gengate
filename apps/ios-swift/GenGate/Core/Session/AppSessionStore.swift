@@ -106,6 +106,7 @@ final class AppSessionStore {
     var statusMessage: String?
     var logoutOutcomeSummary: String?
     var refreshOutcomeSummary: String?
+    var restoreOutcomeSummary: String?
     var isRefreshingSession: Bool = false
     var isRegistering: Bool = false
 
@@ -279,10 +280,12 @@ final class AppSessionStore {
         guard let persisted = loadPersistedSession() else {
             authState = .signedOut
             statusMessage = "Chưa có persisted session local để restore."
+            restoreOutcomeSummary = nil
             return
         }
 
         authState = .restoring
+        restoreOutcomeSummary = nil
 
         do {
             let snapshot = try await requestSessionSnapshot(refreshToken: persisted.refreshToken)
@@ -304,8 +307,18 @@ final class AppSessionStore {
                 selectedTab = destination
                 pendingProtectedTab = nil
                 statusMessage = "Đã restore session từ backend auth shell và mở tab \(destination.displayName)."
+                restoreOutcomeSummary = [
+                    "restore_result: local_restored_valid",
+                    "backend_detail: \(snapshot.session_status)",
+                    "message: Đã restore session từ backend auth shell và mở tab \(destination.displayName)."
+                ].joined(separator: "\n")
             } else {
                 statusMessage = "Đã restore persisted session với backend auth shell."
+                restoreOutcomeSummary = [
+                    "restore_result: local_restored_valid",
+                    "backend_detail: \(snapshot.session_status)",
+                    "message: Đã restore persisted session với backend auth shell."
+                ].joined(separator: "\n")
             }
         } catch {
             clearPersistedSession()
@@ -315,11 +328,27 @@ final class AppSessionStore {
                case let .unauthorized(detail) = sessionError {
                 if let detail, !detail.isEmpty {
                     statusMessage = "Session đã hết hạn hoặc bị revoke (\(detail)). Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
+                    restoreOutcomeSummary = [
+                        "restore_result: failed_local_cleared",
+                        "backend_detail: \(detail)",
+                        "message: Session đã hết hạn hoặc bị revoke (\(detail)). Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
+                    ].joined(separator: "\n")
                 } else {
                     statusMessage = "Session đã hết hạn hoặc bị revoke. Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
+                    restoreOutcomeSummary = [
+                        "restore_result: failed_local_cleared",
+                        "backend_detail: none",
+                        "message: Session đã hết hạn hoặc bị revoke. Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
+                    ].joined(separator: "\n")
                 }
             } else {
-                statusMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                statusMessage = message
+                restoreOutcomeSummary = [
+                    "restore_result: failed_local_cleared",
+                    "backend_detail: none",
+                    "message: \(message)"
+                ].joined(separator: "\n")
             }
         }
     }
@@ -329,6 +358,7 @@ final class AppSessionStore {
         statusMessage = nil
         logoutOutcomeSummary = nil
         refreshOutcomeSummary = nil
+        restoreOutcomeSummary = nil
 
         do {
             let response = try await requestLogin(email: emailDraft)
@@ -367,6 +397,7 @@ final class AppSessionStore {
         statusMessage = nil
         logoutOutcomeSummary = nil
         refreshOutcomeSummary = nil
+        restoreOutcomeSummary = nil
 
         do {
             _ = try await requestRegister(email: normalizedEmail)
@@ -389,6 +420,7 @@ final class AppSessionStore {
 
         logoutOutcomeSummary = nil
         refreshOutcomeSummary = nil
+        restoreOutcomeSummary = nil
 
         if let persistedRefreshToken {
             logoutOutcome = try? await requestLogout(refreshToken: persistedRefreshToken)
@@ -451,6 +483,7 @@ final class AppSessionStore {
         statusMessage = "Cần đăng nhập hoặc restore session để mở tab \(tab.displayName)."
         logoutOutcomeSummary = nil
         refreshOutcomeSummary = nil
+        restoreOutcomeSummary = nil
     }
 
     private func requestRegister(email: String) async throws -> RegisterResponse {

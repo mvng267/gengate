@@ -89,19 +89,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **44**
-- Scope hiện tại: web restore outcome signal — surface dedicated backend/detail result after restore to make auth loop easier to verify.
+- Scope hiện tại: iOS restore outcome signal parity — surface dedicated backend/detail result after restore to match web and make auth loop easier to verify.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
+  - web slice trong cùng batch đã verify trước đó: `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `7c1584b` — `batch43: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 44 web restore outcome signal slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `a877f6e` — `batch44: add web restore outcome signal`
+  - working tree hiện tại: bẩn đúng theo batch 44 iOS restore outcome parity slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó cân nhắc parity slice tương tự trên iOS hoặc workflow-only closeout nếu batch đủ leverage
+  - commit iOS parity slice này; sau đó làm workflow-only closeout marker cho batch 44
 
 ## Batch handoff note
 
