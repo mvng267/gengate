@@ -1,27 +1,23 @@
 # GenGate Workflow Status
 
-- Batch: 49
+- Batch: 50
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 49 login backend detail cue parity complete — backend + web + iOS all surface explicit backend detail for `/auth/login` so shell login flow no longer relies on fallback from `session_status`
-- Status: complete
+- Scope: batch 50 failed login backend detail parity — web shell now surfaces explicit backend error detail for failed `/auth/login` instead of collapsing login failure to `backend_detail: none`
+- Status: verify
 - Files:
-  - apps/backend-python/app/modules/auth/router.py
-  - apps/backend-python/tests/test_auth_api.py
+  - apps/web-nextjs/lib/auth/types.ts
+  - apps/web-nextjs/lib/auth/client.ts
   - apps/web-nextjs/app/login/page.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
+  - WORKFLOW_STATUS.md
+  - WORKFLOW_CHECKLIST.md
 - Test:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `678ba6a` — `batch49: align ios login detail cue`
-  - working tree: sạch
+  - latest commit: `1de81b2` — `batch49: mark workflow complete`
+  - working tree: bẩn đúng theo batch 50 web failed-login detail slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 50 với 1 scope hẹp mới quanh auth shell contract/verify gap gần nhất; ưu tiên seam end-to-end thật thay vì micro-cleanup
+- Next: commit web batch-50 slice này; sau đó decide follow-up lane còn lại (backend hoặc iOS) chỉ nếu cần để keep failed-login detail parity end-to-end
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 49 closeout:
-  - `/auth/login` trả explicit `backend_detail="login_session_created"` + `local_clear_recommended=false`
-  - web shell framing/login outcome align trực tiếp với cue login mới từ backend
-  - iOS shell nay persist + surface login `backend_detail` trực tiếp, kể cả register-then-sign-in summary
-  - build artifacts đã được dọn; repo sạch sau khi chốt batch 49
+- Batch 50 update:
+  - web auth client nay preserve backend error detail cho login 404/401 thay vì nuốt mất code thật
+  - login outcome panel nay hiện `backend_detail: user_not_found` (hoặc detail backend khác) thay vì `none`

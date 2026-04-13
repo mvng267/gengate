@@ -53,9 +53,16 @@ export type AuthLoginResult =
     }
   | {
       ok: false;
-      reason: "not-implemented" | "network-error" | "invalid-response" | "conflict";
+      reason:
+        | "not-implemented"
+        | "network-error"
+        | "invalid-response"
+        | "conflict"
+        | "unauthorized"
+        | "not-found";
       message: string;
       details?: string;
+      backendDetail?: string;
     };
 
 export type RestoreSessionResult =

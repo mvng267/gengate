@@ -197,12 +197,12 @@ export default function LoginPage() {
       );
       setStoredSessionPreview(formatStoredSessionPreview());
     } else {
-      setStatusTone("error");
+      setStatusTone(result.reason === "not-found" || result.reason === "unauthorized" ? "neutral" : "error");
       setStatusMessage(result.message);
       setLoginOutcomePreview(
         [
           `login_result: failed_${result.reason}`,
-          `backend_detail: ${result.details ?? "none"}`,
+          `backend_detail: ${result.backendDetail ?? result.details ?? "none"}`,
           `message: ${result.message}`,
         ].join("\n"),
       );

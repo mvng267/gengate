@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **đã xong batch 49**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 50**.
 
 ## Reporting hard rule
 
@@ -88,23 +88,22 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **49**
-- Scope hiện tại: batch 49 closeout — artifact cleanup + workflow truth refresh sau khi backend/web/iOS login detail cue parity đã hoàn tất.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **50**
+- Scope hiện tại: web failed login backend detail parity — preserve + surface explicit backend error detail for failed `/auth/login`.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `WORKFLOW_STATUS.md`
-  - `WORKFLOW_CHECKLIST.md`
+  - `apps/web-nextjs/lib/auth/types.ts`
+  - `apps/web-nextjs/lib/auth/client.ts`
+  - `apps/web-nextjs/app/login/page.tsx`
 - Test-verify:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ pass
-  - web: `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - iOS: `cd apps/ios-swift && swift build` → ✅ pass
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `678ba6a` — `batch49: align ios login detail cue`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `1de81b2` — `batch49: mark workflow complete`
+  - working tree hiện tại: bẩn đúng theo batch 50 web failed-login detail slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch 50 với 1 scope hẹp mới quanh auth shell contract/verify gap gần nhất; ưu tiên seam end-to-end thật thay vì micro-cleanup
+  - commit web batch-50 slice này; sau đó decide follow-up lane còn lại (backend hoặc iOS) chỉ nếu cần để keep failed-login detail parity end-to-end
 
 ## Batch handoff note
 
@@ -113,6 +112,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `6528d37` — `batch49: add login detail cue`
   - `7d57c87` — `batch49: align web login detail cue`
   - `678ba6a` — `batch49: align ios login detail cue`
+  - `1de81b2` — `batch49: mark workflow complete`
 - Test-verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → pass
   - web: `cd apps/web-nextjs && npm run verify` → pass
@@ -120,5 +120,5 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Blocker/rủi ro còn lại:
   - không có blocker code trực tiếp; batch 49 đã khép kín ở mức login backend detail cue parity
 - Batch kế tiếp: **50**
-- Scope hẹp đầu tiên đề xuất:
-  - chọn seam auth shell end-to-end gần nhất còn thiếu verify/contract rõ ràng sau login/refresh/restore/logout cue parity, rồi mở đúng 1 lane để nối tiếp
+- Scope hẹp đầu tiên của batch 50:
+  - surface explicit backend error detail cho failed login trên web shell thay vì collapse thành `backend_detail: none`

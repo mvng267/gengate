@@ -314,7 +314,33 @@ export async function loginWithEmailPassword(
       };
     }
 
-    if (response.status === 404 || response.status === 501) {
+    if (response.status === 404) {
+      const backendDetail = await readErrorDetail(response);
+      return {
+        ok: false,
+        reason: "not-found",
+        message: backendDetail
+          ? `Backend từ chối login với detail ${backendDetail}.`
+          : "Backend từ chối login vì user không tồn tại hoặc chưa sẵn sàng.",
+        backendDetail,
+        details: response.statusText,
+      };
+    }
+
+    if (response.status === 401) {
+      const backendDetail = await readErrorDetail(response);
+      return {
+        ok: false,
+        reason: "unauthorized",
+        message: backendDetail
+          ? `Backend từ chối login với detail ${backendDetail}.`
+          : "Backend từ chối login vì session/auth state không hợp lệ.",
+        backendDetail,
+        details: response.statusText,
+      };
+    }
+
+    if (response.status === 501) {
       return {
         ok: false,
         reason: "not-implemented",
