@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 141
-- Trục công việc: iOS inbox seam hardening — helper note non-member reset kèm recipient user id rút gọn để debug mismatch nhanh hơn.
+- Batch workflow chính thức hiện tại: 142
+- Trục công việc: iOS inbox seam hardening — compact reset-reason label trong helper note để giảm line-wrap noise trên màn hẹp.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 141 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: non-member reset helper note nay hiển thị thêm recipient user short-id (`abcd…wxyz`) để xác định mismatch context nhanh.
-- Trạng thái: verify_batch141_ios.
+- Scope hiện tại: batch 142 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: non-member reset helper note dùng reason label ngắn `non_member_after_switch` + recipient short-id để giữ note gọn hơn nhưng vẫn đủ context debug.
+- Trạng thái: verify_batch142_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

@@ -51,7 +51,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset + empty-context-only helper-note visibility + short recipient-id mismatch hint; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset + empty-context-only helper-note visibility + short recipient-id mismatch hint + compact helper-note reason; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -87,7 +87,8 @@ struct InboxPlaceholderView: View {
                         "When non-member auto-clear happens, inbox now shows a short inline reset-reason helper note (~20s) so testers know this reset is intentional.",
                         "Typing a new `Recipient user UUID` now clears the previous reset-reason helper note immediately to avoid stale explanation text in the new context.",
                         "Reset-reason helper note is now shown only while recipient context is still empty (user/device/options all empty) after auto-clear, reducing visual noise once context is refilled.",
-                        "Non-member auto-clear helper note now includes a shortened recipient user id (e.g. `abcd…wxyz`) so testers can quickly map mismatch context without full UUID scanning."
+                        "Non-member auto-clear helper note now includes a shortened recipient user id (e.g. `abcd…wxyz`) so testers can quickly map mismatch context without full UUID scanning.",
+                        "Reset helper note now uses a compact reason label (`non_member_after_switch`) to reduce line-wrap noise on narrow iPhone layouts."
                     ]
                 )
 
@@ -1251,7 +1252,7 @@ struct InboxPlaceholderView: View {
                     await loadRecipientDevices(silent: true)
                 } else {
                     clearRecipientDeviceContext(
-                        reason: "non-member recipient after direct-thread switch",
+                        reason: "non_member_after_switch",
                         recipientUserID: resolvedRecipientUserID
                     )
                 }
