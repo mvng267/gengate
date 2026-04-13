@@ -857,6 +857,7 @@ enum AppTab: Hashable {
     case feed
     case inbox
     case location
+    case notifications
     case profile
 
     var displayName: String {
@@ -869,6 +870,8 @@ enum AppTab: Hashable {
             return "Inbox"
         case .location:
             return "Location"
+        case .notifications:
+            return "Notifications"
         case .profile:
             return "Profile"
         }

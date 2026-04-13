@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 66
-- Trục công việc: iOS inbox reader — thêm native read-only consumption cho direct messaging thay vì mở composer/realtime flow mới.
+- Batch workflow chính thức hiện tại: 67
+- Trục công việc: iOS notification center reader — thêm native read-only consumption cho notification surface thay vì mở toggle/mutation flow mới.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -41,19 +41,19 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: không mở backend scope mới trong batch 66.
+- Scope hiện tại: không mở backend scope mới trong batch 67.
 - Kết quả gần nhất: toàn bộ MVP API seams đã có và verified green cho web consumption.
-- Trạng thái: idle_batch66.
+- Trạng thái: idle_batch67.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: không mở web scope mới trong batch 66.
+- Scope hiện tại: không mở web scope mới trong batch 67.
 - Kết quả gần nhất: `/profile` launcher batch 62 đã xong.
-- Trạng thái: idle_batch66.
+- Trạng thái: idle_batch67.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 66 native inbox reader slice đã xong.
-- Kết quả gần nhất: Inbox tab đã resolve direct conversation và đọc được `/messages` qua read-only user-pair flow.
-- Trạng thái: complete_batch66.
+- Scope hiện tại: batch 67 native notification center reader slice đã xong.
+- Kết quả gần nhất: Notifications tab đã đọc được `/notifications/{user_id}` qua read-only user UUID flow.
+- Trạng thái: complete_batch67.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

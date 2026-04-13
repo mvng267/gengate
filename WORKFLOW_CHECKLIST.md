@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **66 — iOS inbox reader slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **67 — iOS notification center reader slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,24 +89,25 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **66**
-- Scope hiện tại: iOS inbox reader — Inbox tab consumes existing direct conversation + message list backend contracts via a read-only user-pair shell.
+- Batch workflow chính thức hiện tại: **67**
+- Scope hiện tại: iOS notification center reader — add a native Notifications tab that consumes existing `/notifications/{user_id}` backend contracts via a read-only user UUID shell.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
+  - `apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift`
   - `apps/ios-swift/GenGate/App/RootTabView.swift`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `e49324d` — `batch65: add ios private feed reader`
-  - working tree hiện tại: bẩn (batch 66 ready to commit)
+  - commit gần nhất đã chốt: `10364c3` — `batch66: add ios inbox reader`
+  - working tree hiện tại: bẩn (batch 67 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch66 iOS inbox reader; sau đó ưu tiên một native read-only slice cho notifications hoặc location
+  - commit batch67 iOS notification center reader; sau đó ưu tiên một native read-only location slice hoặc bug-fix pass từ tester feedback
 
 ## Batch handoff note
 
