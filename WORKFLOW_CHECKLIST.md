@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **85 — iOS inbox attachment reader hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **86 — iOS notification mutation hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **85**
-- Scope hiện tại: iOS inbox attachment reader hardening — show attachment count and first attachment metadata per message in native inbox shell.
+- Batch workflow chính thức hiện tại: **86**
+- Scope hiện tại: iOS notification mutation hardening — allow toggling read/unread directly in native notifications shell.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
+  - `apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `a1e27ed` — `batch84: harden web direct-message attachments`
-  - working tree hiện tại: bẩn (batch 85 ready to commit)
+  - commit gần nhất đã chốt: `91f44d7` — `batch85: harden ios inbox attachment reader`
+  - working tree hiện tại: bẩn (batch 86 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch85 iOS inbox attachment reader hardening; sau đó mở slice mới chỉ khi có MVP seam gap thật hoặc friction cụ thể từ human testing
+  - commit batch86 iOS notifications read/unread toggle; sau đó mở slice mới chỉ khi còn MVP seam gap thật hoặc friction cụ thể từ human testing
 
 ## Batch handoff note
 

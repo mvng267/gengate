@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 85
-- Trục công việc: iOS inbox attachment reader hardening — hiển thị attachment metadata theo từng message trong native inbox shell.
+- Batch workflow chính thức hiện tại: 86
+- Trục công việc: iOS notification mutation hardening — bật read/unread toggle trực tiếp trên native notifications shell.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: complete_batch84.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 85 iOS inbox attachment reader hardening đã xong.
-- Kết quả gần nhất: iOS inbox row hiển thị attachment count + first attachment metadata theo từng message.
-- Trạng thái: complete_batch85.
+- Scope hiện tại: batch 86 iOS notifications read/unread toggle hardening đã xong.
+- Kết quả gần nhất: native notifications shell toggle được read/unread trực tiếp trên từng row.
+- Trạng thái: complete_batch86.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

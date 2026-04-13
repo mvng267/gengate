@@ -1,21 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 85
+- Batch: 86
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 85 iOS inbox attachment reader hardening — show attachment count and first attachment metadata per message in native inbox shell
+- Scope: batch 86 iOS notification mutation hardening — allow toggling read/unread state directly from native notifications shell
 - Status: MVP-testable
 - Files:
-  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `a1e27ed` — `batch84: harden web direct-message attachments`
-  - working tree: bẩn (batch 85 ready to commit)
+  - latest commit: `91f44d7` — `batch85: harden ios inbox attachment reader`
+  - working tree: bẩn (batch 86 ready to commit)
 - Blocker: none
-- Next: commit batch 85 iOS inbox attachment reader hardening; after that, open only real MVP seam gaps or concrete human-test friction
+- Next: commit batch 86 iOS notification mutation hardening; after that, open only real MVP seam gaps or concrete human-test friction
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -77,10 +77,13 @@
 - Batch 84 handoff:
   - `a1e27ed` — `batch84: harden web direct-message attachments`
   - web direct-message text + attachment create/list remains MVP-testable while batch 85 brings iOS inbox reader closer to same seam
-- Batch 85 outcome:
-  - iOS inbox reader now loads message attachments for each message via `/messages/{id}/attachments`
-  - native inbox rows now show attachment count + first attachment metadata (type + storage key)
-  - this keeps iOS messaging seam read-only but much closer to the MVP text+image contract
+- Batch 85 handoff:
+  - `91f44d7` — `batch85: harden ios inbox attachment reader`
+  - iOS inbox reader attachment metadata path remains MVP-testable while batch 86 hardens native notifications mutation controls
+- Batch 86 outcome:
+  - iOS notifications shell now toggles read/unread per row via backend PATCH contracts
+  - native notification rows reflect immediate read-state mutation without requiring full reload
+  - notification seam is now testable for both read and minimal state change flows from iOS
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

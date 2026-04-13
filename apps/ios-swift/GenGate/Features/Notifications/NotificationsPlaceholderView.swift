@@ -5,6 +5,7 @@ struct NotificationsPlaceholderView: View {
 
     @State private var userIDDraft: String = ""
     @State private var notificationRows: [NotificationRow] = []
+    @State private var mutatingNotificationIDs: Set<String> = []
     @State private var fetchError: String?
     @State private var isLoading = false
 
@@ -14,11 +15,11 @@ struct NotificationsPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Notifications",
                     summary: "iOS native notification center reader. Use a real user UUID to inspect the current notification list through the same backend contract already exposed on web/backend.",
-                    status: "Status: native notification center is live as a read-only shell; mark read/unread and delete remain intentionally out of scope for this slice.",
+                    status: "Status: native notification center now supports read/unread mutation for each row; delete remains intentionally out of scope for this slice.",
                     bullets: [
                         "Paste a backend user UUID that already has seeded notifications.",
-                        "This shell reads only `/notifications/{user_id}` and surfaces notification type, payload, and read state.",
-                        "Use backend or web tools when you need to create/toggle notifications; use this iOS tab to consume them natively."
+                        "This shell reads `/notifications/{user_id}` then allows toggling each item via `/notifications/{id}/read` and `/notifications/{id}/unread`.",
+                        "Use backend or web tools when you need to create new notifications; use this iOS tab to consume and toggle read state natively."
                     ]
                 )
 
@@ -79,13 +80,33 @@ struct NotificationsPlaceholderView: View {
                             .foregroundStyle(.secondary)
                     } else {
                         ForEach(notificationRows) { row in
-                            VStack(alignment: .leading, spacing: 6) {
+                            let isMutating = mutatingNotificationIDs.contains(row.id)
+
+                            VStack(alignment: .leading, spacing: 8) {
                                 Text(row.notificationType)
                                     .font(.subheadline)
                                     .fontWeight(.semibold)
-                                Text("read_state: \(row.readState)")
-                                    .font(.footnote)
-                                    .foregroundStyle(.secondary)
+
+                                HStack(spacing: 10) {
+                                    Text("read_state: \(row.readState)")
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+
+                                    Image(systemName: row.isRead ? "checkmark.circle.fill" : "circle")
+                                        .font(.footnote)
+                                        .foregroundStyle(row.isRead ? .green : .secondary)
+                                }
+
+                                Button {
+                                    Task {
+                                        await toggleReadState(for: row)
+                                    }
+                                } label: {
+                                    Text(isMutating ? "Updating..." : (row.isRead ? "Mark unread" : "Mark read"))
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(isMutating || isLoading)
+
                                 Text("payload: \(row.payloadSummary)")
                                     .font(.footnote)
                                 Text("notification_id: \(row.id)")
@@ -143,12 +164,36 @@ struct NotificationsPlaceholderView: View {
 
         do {
             notificationRows = try await NotificationsAPIClient().fetchNotifications(userID: trimmedUserID)
+            mutatingNotificationIDs = []
         } catch {
             notificationRows = []
+            mutatingNotificationIDs = []
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
 
         isLoading = false
+    }
+
+    private func toggleReadState(for row: NotificationRow) async {
+        guard !mutatingNotificationIDs.contains(row.id) else {
+            return
+        }
+
+        mutatingNotificationIDs.insert(row.id)
+        defer {
+            mutatingNotificationIDs.remove(row.id)
+        }
+
+        fetchError = nil
+
+        do {
+            let updated = try await NotificationsAPIClient().setNotificationReadState(notificationID: row.id, read: !row.isRead)
+            if let index = notificationRows.firstIndex(where: { $0.id == updated.id }) {
+                notificationRows[index] = updated
+            }
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
     }
 }
 
@@ -156,7 +201,11 @@ private struct NotificationRow: Identifiable {
     let id: String
     let notificationType: String
     let payloadSummary: String
-    let readState: String
+    let isRead: Bool
+
+    var readState: String {
+        isRead ? "read" : "unread"
+    }
 }
 
 private struct NotificationsAPIClient {
@@ -241,20 +290,42 @@ private struct NotificationsAPIClient {
 
         do {
             let payload = try JSONDecoder().decode(NotificationListResponse.self, from: data)
-            return payload.items.map {
-                NotificationRow(
-                    id: $0.id,
-                    notificationType: $0.notification_type,
-                    payloadSummary: $0.payload_json
-                        .sorted { $0.key < $1.key }
-                        .map { "\($0.key)=\($0.value.description)" }
-                        .joined(separator: ", "),
-                    readState: $0.read_at == nil ? "unread" : "read"
-                )
-            }
+            return payload.items.map(mapNotification)
         } catch {
             throw APIError.invalidResponse
         }
+    }
+
+    func setNotificationReadState(notificationID: String, read: Bool) async throws -> NotificationRow {
+        let path = read ? "/notifications/\(notificationID)/read" : "/notifications/\(notificationID)/unread"
+        var request = URLRequest(url: try makeURL(path: path))
+        request.httpMethod = "PATCH"
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 200 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Notification mutation failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(NotificationResponse.self, from: data)
+            return mapNotification(payload)
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    private func mapNotification(_ payload: NotificationResponse) -> NotificationRow {
+        NotificationRow(
+            id: payload.id,
+            notificationType: payload.notification_type,
+            payloadSummary: payload.payload_json
+                .sorted { $0.key < $1.key }
+                .map { "\($0.key)=\($0.value.description)" }
+                .joined(separator: ", "),
+            isRead: payload.read_at != nil
+        )
     }
 
     private func makeURL(path: String) throws -> URL {
