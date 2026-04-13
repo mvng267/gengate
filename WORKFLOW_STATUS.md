@@ -3,7 +3,7 @@
 - Batch: 43
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
 - Scope: batch 43 refresh outcome signal complete — web + iOS surface dedicated backend/detail result after refresh to make auth loop easier to verify
-- Status: verify
+- Status: complete
 - Files:
   - apps/web-nextjs/app/login/page.tsx
   - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
@@ -14,12 +14,12 @@
   - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `97ebdf4` — `batch43: add web refresh outcome signal`
-  - working tree: bẩn đúng theo batch 43 iOS refresh outcome signal parity slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `c88dd31` — `batch43: add ios refresh outcome signal`
+  - working tree: sạch
 - Blocker: none
-- Next: commit iOS parity slice này; sau đó làm workflow-only closeout marker cho batch 43
+- Next: mở batch 44 với 1 scope hẹp theo hướng restore outcome signal để hoàn thiện auth/session loop verify cue trên web hoặc iOS
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 43 update:
+- Batch 43 result:
   - Web login shell có panel `Refresh outcome` hiển thị rõ refresh result + backend detail sau manual refresh
-  - iOS Session screen nay cũng có card `Refresh outcome` hiển thị riêng refresh result + backend detail bên cạnh `Logout outcome` và persisted-session snapshot
+  - iOS Session screen cũng có card `Refresh outcome` hiển thị riêng refresh result + backend detail bên cạnh `Logout outcome` và persisted-session snapshot
   - Hai shell giờ đều phân biệt rotate thành công với case refresh token đã mất hiệu lực trước đó
