@@ -1,23 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 67
+- Batch: 68
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 67 iOS notification center reader — consume existing backend notification-list contracts from a native Notifications tab via a read-only user UUID shell
+- Scope: batch 68 iOS location status reader — consume existing backend location count contracts from the native Location tab via a read-only owner UUID shell
 - Status: MVP-testable
 - Files:
-  - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
-  - apps/ios-swift/GenGate/App/RootTabView.swift
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `10364c3` — `batch66: add ios inbox reader`
-  - working tree: bẩn (batch 67 ready to commit)
+  - latest commit: `c1f8b00` — `batch67: add ios notification center reader`
+  - working tree: bẩn (batch 68 ready to commit)
 - Blocker: none
-- Next: commit batch 67 iOS notification center reader; after that, prefer a narrow native read-only location slice or a bug-fix pass based on real tester friction
+- Next: commit batch 68 iOS location status reader; after that, prefer bug-fix/hardening passes driven by actual human tester friction rather than opening broader new surfaces
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -28,10 +26,10 @@
 - Batch 57 handoff:
   - `4a779eb` — `batch57: wire private friend feed shell`
   - private friend feed seam remains MVP-testable while batch 58 opens direct messaging
-- Batch 67 outcome:
-  - iOS now has a dedicated Notifications tab that consumes live backend notification-list contracts through a read-only user UUID shell
-  - native testers can inspect notification type, payload summary, and read state without leaving iOS
-  - this adds a fourth real iOS surface beyond auth/session while keeping mutations explicitly out of scope for this batch
+- Batch 68 outcome:
+  - iOS Location tab now consumes the backend's current location count contracts through a read-only owner/share UUID status shell
+  - native testers can inspect snapshot counts, total share counts, and optional audience counts without fake map/detail UI
+  - this covers the optional location MVP seam honestly, while preserving clear limits of the current backend read surface
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -42,3 +40,4 @@
   - iOS Feed path: open Feed tab, paste a viewer UUID, and load private feed
   - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, and load messages
   - iOS Notifications path: open Notifications tab, paste a user UUID, and load notifications
+  - iOS Location path: open Location tab, paste an owner UUID, optionally a share UUID, and load location status counts

@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **67 — iOS notification center reader slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **68 — iOS location status reader slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,25 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **67**
-- Scope hiện tại: iOS notification center reader — add a native Notifications tab that consumes existing `/notifications/{user_id}` backend contracts via a read-only user UUID shell.
+- Batch workflow chính thức hiện tại: **68**
+- Scope hiện tại: iOS location status reader — Location tab consumes existing location count contracts via a read-only owner UUID shell.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift`
-  - `apps/ios-swift/GenGate/App/RootTabView.swift`
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `10364c3` — `batch66: add ios inbox reader`
-  - working tree hiện tại: bẩn (batch 67 ready to commit)
+  - commit gần nhất đã chốt: `c1f8b00` — `batch67: add ios notification center reader`
+  - working tree hiện tại: bẩn (batch 68 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch67 iOS notification center reader; sau đó ưu tiên một native read-only location slice hoặc bug-fix pass từ tester feedback
+  - commit batch68 iOS location status reader; sau đó ưu tiên bug-fix/hardening pass từ tester feedback thay vì mở surface lớn mới
 
 ## Batch handoff note
 
