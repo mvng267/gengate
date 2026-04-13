@@ -10,6 +10,7 @@ struct InboxPlaceholderView: View {
     @State private var attachmentMap: [String: [InboxAttachmentRow]] = [:]
     @State private var messageDraft: String = ""
     @State private var attachmentTargetMessageIDDraft: String = ""
+    @State private var messageToDeleteIDDraft: String = ""
     @State private var attachmentTypeDraft: String = "image"
     @State private var attachmentStorageKeyDraft: String = "attachments/ios-demo-image.enc"
     @State private var attachmentBlobDraft: String = "ios-demo-attachment-blob"
@@ -17,6 +18,7 @@ struct InboxPlaceholderView: View {
     @State private var isLoading = false
     @State private var isSendingMessage = false
     @State private var isCreatingAttachment = false
+    @State private var isDeletingMessage = false
 
     var body: some View {
         ScrollView {
@@ -156,11 +158,45 @@ struct InboxPlaceholderView: View {
                         .disabled(
                             isLoading ||
                             isSendingMessage ||
+                            isDeletingMessage ||
                             isCreatingAttachment ||
                             conversationSummary == nil ||
                             (resolvedAttachmentTargetMessageID?.isEmpty ?? true) ||
                             attachmentTypeDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
                             attachmentBlobDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        )
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Delete message (soft-delete)")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+
+                        TextField("Message UUID to delete (optional, defaults to newest loaded)", text: $messageToDeleteIDDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        Button {
+                            Task {
+                                await deleteMessage()
+                            }
+                        } label: {
+                            Text(isDeletingMessage ? "Deleting message..." : "Delete message")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(
+                            isLoading ||
+                            isSendingMessage ||
+                            isCreatingAttachment ||
+                            isDeletingMessage ||
+                            conversationSummary == nil ||
+                            (resolvedMessageToDeleteID?.isEmpty ?? true)
                         )
                     }
 
@@ -199,6 +235,10 @@ struct InboxPlaceholderView: View {
                         .foregroundStyle(.secondary)
 
                     Text("Attachment target message_id: \(resolvedAttachmentTargetMessageID ?? "(not resolved)")")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
+                    Text("Delete target message_id: \(resolvedMessageToDeleteID ?? "(not resolved)")")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
                 }
@@ -261,6 +301,15 @@ struct InboxPlaceholderView: View {
 
     private var resolvedAttachmentTargetMessageID: String? {
         let manualMessageID = attachmentTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !manualMessageID.isEmpty {
+            return manualMessageID
+        }
+
+        return messageRows.last?.id
+    }
+
+    private var resolvedMessageToDeleteID: String? {
+        let manualMessageID = messageToDeleteIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         if !manualMessageID.isEmpty {
             return manualMessageID
         }
@@ -345,6 +394,7 @@ struct InboxPlaceholderView: View {
                 payloadText: trimmedPayload
             )
             messageDraft = ""
+            messageToDeleteIDDraft = ""
             await loadInboxThread()
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
@@ -390,6 +440,32 @@ struct InboxPlaceholderView: View {
         }
 
         isCreatingAttachment = false
+    }
+
+    private func deleteMessage() async {
+        guard let targetMessageID = resolvedMessageToDeleteID,
+              !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            fetchError = "Cần message UUID hợp lệ để delete."
+            return
+        }
+
+        isDeletingMessage = true
+        fetchError = nil
+
+        do {
+            try await InboxAPIClient().deleteMessage(messageID: targetMessageID)
+            if attachmentTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == targetMessageID {
+                attachmentTargetMessageIDDraft = ""
+            }
+            if messageToDeleteIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == targetMessageID {
+                messageToDeleteIDDraft = ""
+            }
+            await loadInboxThread()
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        isDeletingMessage = false
     }
 }
 
@@ -582,6 +658,19 @@ private struct InboxAPIClient {
             }
         } catch {
             throw APIError.invalidResponse
+        }
+    }
+
+    func deleteMessage(messageID: String) async throws {
+        let url = try makeURL(path: "/messages/\(messageID)")
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 200 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Message delete failed"))
         }
     }
 

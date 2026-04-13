@@ -150,12 +150,21 @@ class MessageService:
             raise ValueError("message_not_found")
         return message_device_key_repository.list_by_message(db, message_id)
 
+    def delete_message(self, db: Session, message_id: uuid.UUID) -> Message:
+        message = message_repository.get(db, message_id)
+        if message is None or message.deleted_at is not None:
+            raise ValueError("message_not_found")
+        return message_repository.soft_delete(db, message)
+
     def get_message(self, db: Session, message_id: uuid.UUID) -> Message | None:
-        return message_repository.get(db, message_id)
+        message = message_repository.get(db, message_id)
+        if message is None or message.deleted_at is not None:
+            return None
+        return message
 
     def list_messages(self, db: Session, conversation_id: uuid.UUID | None) -> list[Message]:
         if conversation_id is None:
-            return message_repository.list(db, limit=200, offset=0)
+            return message_repository.list_active(db, limit=200, offset=0)
 
         conversation = conversation_repository.get(db, conversation_id)
         if conversation is None:

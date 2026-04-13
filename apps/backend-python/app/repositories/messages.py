@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
 
 from app.models.message_device_keys import MessageDeviceKey
@@ -12,9 +12,36 @@ class MessageRepository(BaseRepository[Message]):
     def __init__(self) -> None:
         super().__init__(Message)
 
-    def list_by_conversation(self, db: Session, conversation_id: uuid.UUID) -> list[Message]:
-        statement = select(Message).where(Message.conversation_id == conversation_id)
+    def list_active(self, db: Session, *, limit: int = 100, offset: int = 0) -> list[Message]:
+        statement = (
+            select(Message)
+            .where(Message.deleted_at.is_(None))
+            .order_by(Message.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
         return list(db.scalars(statement).all())
+
+    def list_by_conversation(self, db: Session, conversation_id: uuid.UUID) -> list[Message]:
+        statement = (
+            select(Message)
+            .where(
+                and_(
+                    Message.conversation_id == conversation_id,
+                    Message.deleted_at.is_(None),
+                )
+            )
+            .order_by(Message.created_at.asc())
+        )
+        return list(db.scalars(statement).all())
+
+    def soft_delete(self, db: Session, message: Message) -> Message:
+        from datetime import datetime, timezone
+
+        message.deleted_at = datetime.now(timezone.utc)
+        db.add(message)
+        db.flush()
+        return message
 
 
 class MessageDeviceKeyRepository(BaseRepository[MessageDeviceKey]):

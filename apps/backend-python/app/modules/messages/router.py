@@ -66,6 +66,15 @@ def list_messages(conversation_id: uuid.UUID | None = None, db: Session = Depend
     return MessageListResponse(count=len(items), items=items)
 
 
+@router.delete("/{message_id}", response_model=dict)
+def delete_message(message_id: uuid.UUID, db: Session = Depends(get_db_session)) -> dict[str, str]:
+    try:
+        message_service.delete_message(db, message_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    return {"status": "deleted"}
+
+
 def to_message_device_key_response(device_key) -> MessageDeviceKeyResponse:
     return MessageDeviceKeyResponse(
         id=device_key.id,

@@ -312,6 +312,27 @@ def test_batch21_message_create_reuses_sender_device_and_attachment_missing_pare
     assert list_attachments_response.json()["count"] == 1
     assert list_attachments_response.json()["items"][0]["storage_key"] == "attachments/batch21/image1.enc"
 
+    delete_response = client.delete(f"/messages/{first_message_id}")
+    assert delete_response.status_code == 200
+    assert delete_response.json() == {"status": "deleted"}
+
+    get_deleted_response = client.get(f"/messages/{first_message_id}")
+    assert get_deleted_response.status_code == 404
+    assert get_deleted_response.json() == {
+        "error": {"code": "message_not_found", "message": "message_not_found"}
+    }
+
+    list_after_delete = client.get("/messages")
+    assert list_after_delete.status_code == 200
+    assert list_after_delete.json()["count"] == 1
+    assert list_after_delete.json()["items"][0]["id"] == second_message.json()["id"]
+
+    delete_again_response = client.delete(f"/messages/{first_message_id}")
+    assert delete_again_response.status_code == 404
+    assert delete_again_response.json() == {
+        "error": {"code": "message_not_found", "message": "message_not_found"}
+    }
+
     missing_create_response = client.post(
         f"/messages/{uuid.uuid4()}/attachments",
         json={
