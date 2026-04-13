@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 124
+- Batch: 125
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 124 iOS inbox seam hardening — clear stale attachment/device-key target messages when they no longer exist in loaded rows
+- Scope: batch 125 iOS inbox seam hardening — recipient device fallback guard when selected device becomes stale vs refreshed `/auth/devices/{user_id}` options
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch124 slice)
+  - latest commit: `HEAD` (local batch125 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch125 cho messaging friction tiếp theo (ví dụ fallback recipientDeviceIDDraft khi selected device không còn trong refreshed recipient list) trong iOS inbox shell
+- Next: mở batch126 cho messaging friction tiếp theo (ví dụ tự reload recipient devices khi recipient user đổi và debounce nhẹ để giảm thao tác manual) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -227,6 +227,10 @@
   - successful reload path now validates manual `attachmentTargetMessageIDDraft` và `deviceKeyTargetMessageIDDraft` against freshly loaded `messageRows`
   - nếu attachment/device-key target message UUID thủ công không còn tồn tại trong loaded rows, mỗi field tương ứng tự clear để fallback về newest-message resolution
   - attachment/device-key create actions tránh bám stale message target sau delete/reload loop
+- Batch 125 outcome:
+  - recipient-user input change now clears `recipientDeviceIDDraft` nếu selected device không còn thuộc `recipientDeviceOptions` hiện tại
+  - UI thêm warning line khi `Recipient device UUID` đang stale vs option list, hướng tester reload để fallback về device hợp lệ
+  - kết hợp với logic sẵn có trong `loadRecipientDevices` (fallback về first option khi stale) giúp device-key flow ít bị mismatch hơn khi device list đổi
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -236,7 +240,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, nhập recipient user để load device list (`/auth/devices/{user_id}`), chọn recipient device rồi create/list message device keys, bật `Auto refresh every 3s` để quan sát near-realtime polling, thử đặt thủ công `Target message UUID` ở block attachment và device-key thành id cũ rồi reload để verify mỗi field tự clear khi id không còn trong loaded rows, sau đó tiếp tục `Create attachment metadata` + `Create message-device key` và verify dòng `Attachment target message_id` / `Device-key target message_id` luôn resolve hợp lệ
+  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, nhập `Recipient user UUID` và load `/auth/devices/{user_id}`, chọn 1 device rồi đổi sang recipient user khác để tạo stale context; verify `Recipient device UUID` được clear khi không còn match option list, warning line hiển thị đúng khi UUID nhập tay không còn hợp lệ, rồi bấm `Reload recipient devices` để fallback về device hợp lệ và tiếp tục `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

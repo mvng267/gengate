@@ -42,7 +42,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with user/message/focus/delete/attachment/device-key stale-target guards; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback guard; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -63,7 +63,8 @@ struct InboxPlaceholderView: View {
                         "Manual read-cursor target user UUID is now auto-cleared when it no longer belongs to current conversation members.",
                         "Manual read-status focus user UUID is now auto-cleared when it no longer belongs to current conversation members.",
                         "Manual delete-target message UUID is now auto-cleared when it no longer exists in loaded message rows.",
-                        "Manual attachment/device-key target message UUIDs are now auto-cleared when they no longer exist in loaded message rows."
+                        "Manual attachment/device-key target message UUIDs are now auto-cleared when they no longer exist in loaded message rows.",
+                        "Recipient device UUID draft is now validated against refreshed `/auth/devices/{user_id}` options and auto-fallbacks to first valid device when stale."
                     ]
                 )
 
@@ -228,6 +229,15 @@ struct InboxPlaceholderView: View {
                             .padding(12)
                             .background(Color.secondary.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .onChange(of: recipientUserIDDraft) {
+                                let trimmedRecipientUserID = recipientUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+                                let trimmedRecipientDeviceID = recipientDeviceIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+                                if !trimmedRecipientUserID.isEmpty,
+                                   !trimmedRecipientDeviceID.isEmpty,
+                                   !recipientDeviceOptions.contains(where: { $0.id == trimmedRecipientDeviceID }) {
+                                    recipientDeviceIDDraft = ""
+                                }
+                            }
 
                         if isLoadingRecipientDevices {
                             Text("Recipient devices: loading...")
@@ -258,6 +268,15 @@ struct InboxPlaceholderView: View {
                             .padding(12)
                             .background(Color.secondary.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        if !recipientUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                           !recipientDeviceOptions.isEmpty,
+                           !recipientDeviceIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                           !recipientDeviceOptions.contains(where: { $0.id == recipientDeviceIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) }) {
+                            Text("Recipient device UUID không còn trong danh sách thiết bị hiện tại; bấm `Reload recipient devices` để fallback về thiết bị hợp lệ.")
+                                .font(.footnote)
+                                .foregroundStyle(.orange)
+                        }
 
                         TextField("Wrapped message key blob", text: $wrappedMessageKeyBlobDraft)
 #if os(iOS)
