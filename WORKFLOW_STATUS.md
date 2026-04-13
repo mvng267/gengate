@@ -1,25 +1,24 @@
 # GenGate Workflow Status
 
-- Batch: 46
+- Batch: 47
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 46 local clear outcome signal complete — web + iOS surface dedicated local-session-clear result separate from logout/revoke flow to make auth loop easier to verify
-- Status: complete
+- Scope: batch 47 backend logout detail contract — surface explicit local-clear recommendation + backend detail cue so web/iOS shells can verify backend-vs-local clear intent without guessing
+- Status: verify
 - Files:
-  - apps/web-nextjs/app/login/page.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
+  - apps/backend-python/app/schemas/auth.py
+  - apps/backend-python/app/modules/auth/router.py
+  - apps/backend-python/tests/test_auth_api.py
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
-  - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅
 - Git:
-  - latest commit: `1f2ea9a` — `batch46: add ios local clear outcome signal`
-  - working tree: sạch trước khi ghi workflow-only closeout marker cho batch 46
+  - latest commit: `452385b` — `batch46: mark workflow complete`
+  - working tree: bẩn đúng theo batch 47 backend logout detail contract + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 47 với 1 scope hẹp trên backend — thêm endpoint/detail contract để shell đọc được local/session clear intent rõ hơn từ backend-facing auth flow khi cần verify end-to-end
+- Next: commit backend batch-47 slice này; sau đó follow-up 1 shell lane để read/use `local_clear_recommended` + `backend_detail` từ logout response directly
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 46 outcome:
-  - web login shell có panel `Local clear outcome` hiển thị riêng local session clear result + backend/detail cue
-  - iOS Session screen có card `Local clear outcome` và action clear-local riêng, hiển thị tách biệt với logout/revoke flow
-  - hai shell giờ cùng phân tách rõ local-only clear khỏi logout/revoke flow để auth loop dễ verify hơn
+- Batch 47 update:
+  - `/auth/logout` nay trả thêm `local_clear_recommended=true` và `backend_detail="logout_revoked"`
+  - `/auth/session` và các snapshot response khác giữ default explicit fields `local_clear_recommended=false`, `backend_detail=null`
+  - shell layers nay có backend cue rõ hơn để phân biệt revoke/logout intent với local-only clear outcome

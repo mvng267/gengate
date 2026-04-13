@@ -122,6 +122,8 @@ def test_auth_refresh_rotates_session_and_session_snapshot_reads_active_session(
     assert session_payload["device_id"] == login_payload["device_id"]
     assert session_payload["session_id"] == login_payload["session_id"]
     assert session_payload["session_status"] == "active"
+    assert session_payload["local_clear_recommended"] is False
+    assert session_payload["backend_detail"] is None
     assert session_payload["expires_in_seconds"] > 0
 
     refresh_response = client.post(
@@ -182,9 +184,12 @@ def test_auth_logout_revokes_current_session() -> None:
         json={"refresh_token": login_payload["refresh_token"]},
     )
     assert logout_response.status_code == 200
-    assert logout_response.json()["session_status"] == "revoked"
-    assert logout_response.json()["session_id"] == login_payload["session_id"]
-    assert logout_response.json()["expires_in_seconds"] > 0
+    logout_payload = logout_response.json()
+    assert logout_payload["session_status"] == "revoked"
+    assert logout_payload["session_id"] == login_payload["session_id"]
+    assert logout_payload["local_clear_recommended"] is True
+    assert logout_payload["backend_detail"] == "logout_revoked"
+    assert logout_payload["expires_in_seconds"] > 0
 
     post_logout_session = client.post(
         "/auth/session",

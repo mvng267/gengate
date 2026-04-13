@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **đã chốt batch 46**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 47**.
 
 ## Reporting hard rule
 
@@ -88,23 +88,22 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **46**
-- Scope hiện tại: batch 46 local clear outcome signal complete — web + iOS parity done.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **47**
+- Scope hiện tại: backend logout detail contract — surface explicit local-clear recommendation + backend detail cue for shell verify path.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/app/login/page.tsx`
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
-  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
+  - `apps/backend-python/app/schemas/auth.py`
+  - `apps/backend-python/app/modules/auth/router.py`
+  - `apps/backend-python/tests/test_auth_api.py`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - `cd apps/ios-swift && swift build` → ✅ pass
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ pass
 - Git mốc gần nhất:
-  - commit code cuối của batch: `1f2ea9a` — `batch46: add ios local clear outcome signal`
-  - working tree: sạch trước khi ghi workflow-only closeout marker
+  - commit gần nhất đã chốt: `452385b` — `batch46: mark workflow complete`
+  - working tree hiện tại: bẩn đúng theo batch 47 backend logout detail contract + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch 47 với 1 scope hẹp backend: thêm endpoint/detail contract để shell đọc rõ hơn auth/session-clear intent từ backend-facing flow khi verify end-to-end
+  - commit backend batch-47 slice này; sau đó follow-up 1 shell lane để read/use `local_clear_recommended` + `backend_detail` từ logout response directly
 
 ## Batch handoff note
 
@@ -112,6 +111,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Commit cuối đã chốt:
   - `b841f1e` — `batch46: add web local clear outcome signal`
   - `1f2ea9a` — `batch46: add ios local clear outcome signal`
+  - `452385b` — `batch46: mark workflow complete`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass

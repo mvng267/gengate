@@ -111,3 +111,5 @@ class SessionSnapshotResponse(BaseModel):
     expires_in_seconds: int
     token_type: str
     session_status: str
+    local_clear_recommended: bool = False
+    backend_detail: str | None = None
