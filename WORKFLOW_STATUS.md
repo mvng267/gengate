@@ -1,21 +1,24 @@
 # GenGate Workflow Status
 
-- Batch: 81
+- Batch: 82
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 81 web location pivot hardening — carry active owner/share context into nearby launcher links so testers can move out of location with less UUID retyping
+- Scope: batch 82 dev docker MVP bootstrap — add a local docker compose path for backend + web + postgres + redis so human MVP testing is easier to start
 - Status: MVP-testable
 - Files:
-  - apps/web-nextjs/app/location/page.tsx
+  - docker-compose.dev.yml
+  - docker/dev/README.md
+  - docker/dev/backend-entrypoint.sh
+  - docker/dev/web-entrypoint.sh
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
-  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - dev stack: `docker compose -f docker-compose.dev.yml config` ✅
 - Git:
-  - latest commit: `6bb404a` — `batch80: harden web notifications pivots`
-  - working tree: bẩn (batch 81 ready to commit)
+  - latest commit: `82a557c` — `batch81: harden web location pivots`
+  - working tree: bẩn (batch 82 ready to commit)
 - Blocker: none
-- Next: commit batch 81 web location pivot hardening; after that, only open another slice if a real human-test blocker appears rather than continuing generic launcher polish
+- Next: commit batch 82 dev docker MVP bootstrap; after that, prefer real human-test bugs or startup friction reports over more generic polish
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -65,10 +68,13 @@
 - Batch 80 handoff:
   - `6bb404a` — `batch80: harden web notifications pivots`
   - notifications pivot hardening remains MVP-testable while batch 81 completes the same cross-seam treatment for location
-- Batch 81 outcome:
-  - `/location` quick pivots now carry active owner/allowed context into profile, feed, inbox, and notifications launcher routes
-  - testers can continue cross-seam validation from location without retyping the same IDs
-  - this completes a more consistent cross-seam launcher pivot loop across the core web MVP surfaces without changing domain contracts
+- Batch 81 handoff:
+  - `82a557c` — `batch81: harden web location pivots`
+  - cross-seam launcher pivots remain MVP-testable while batch 82 reduces local startup friction for human testing
+- Batch 82 outcome:
+  - repo now includes a dev docker compose stack for postgres + redis + backend + web
+  - backend/web container entrypoints are documented and wired for local MVP startup
+  - this gives human testers a simpler local run path without changing core product contracts
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

@@ -1,0 +1,72 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: gengate
+      POSTGRES_USER: gengate
+      POSTGRES_PASSWORD: gengate
+    ports:
+      - "5432:5432"
+    volumes:
+      - gengate-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gengate -d gengate"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    image: python:3.11-slim
+    working_dir: /app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_NAME: GenGate Backend
+      APP_VERSION: 0.1.0
+      ENVIRONMENT: development
+      API_V1_PREFIX: /v1
+      DATABASE_URL: postgresql+psycopg://gengate:gengate@postgres:5432/gengate
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_ENDPOINT: https://example.r2.cloudflarestorage.com
+      STORAGE_BUCKET: gengate-dev
+      STORAGE_ACCESS_KEY_ID: dev-access-key
+      STORAGE_SECRET_ACCESS_KEY: dev-secret-key
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./:/app
+    command: ["sh", "/app/docker/dev/backend-entrypoint.sh"]
+    ports:
+      - "8000:8000"
+
+  web:
+    image: node:22-alpine
+    working_dir: /app
+    depends_on:
+      backend:
+        condition: service_started
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://backend:8000
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./:/app
+      - gengate-web-node-modules:/app/apps/web-nextjs/node_modules
+    command: ["sh", "/app/docker/dev/web-entrypoint.sh"]
+    ports:
+      - "3000:3000"
+
+volumes:
+  gengate-postgres-data:
+  gengate-web-node-modules:

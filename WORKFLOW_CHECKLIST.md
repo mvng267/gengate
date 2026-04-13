@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **81 — web location pivot hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **82 — dev docker MVP bootstrap slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,26 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **81**
-- Scope hiện tại: web location pivot hardening — carry active owner/share context into nearby launcher links so testers can move out of location with less UUID retyping.
+- Batch workflow chính thức hiện tại: **82**
+- Scope hiện tại: dev docker MVP bootstrap — add a local compose path for backend + web + postgres + redis so human testing is easier to start.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/app/location/page.tsx`
+  - `docker-compose.dev.yml`
+  - `docker/dev/README.md`
+  - `docker/dev/backend-entrypoint.sh`
+  - `docker/dev/web-entrypoint.sh`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `docker compose -f docker-compose.dev.yml config` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `6bb404a` — `batch80: harden web notifications pivots`
-  - working tree hiện tại: bẩn (batch 81 ready to commit)
+  - commit gần nhất đã chốt: `82a557c` — `batch81: harden web location pivots`
+  - working tree hiện tại: bẩn (batch 82 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch81 web location pivot hardening; sau đó chỉ mở slice mới nếu có blocker thật từ human testing thay vì tiếp tục generic launcher polish
+  - commit batch82 dev docker MVP bootstrap; sau đó chỉ mở batch mới nếu có bug/friction thật từ human testing hoặc startup path thật
 
 ## Batch handoff note
 
