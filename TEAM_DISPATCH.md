@@ -12,41 +12,45 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 30
-- Trục công việc: 3-lane song song quanh auth/login vertical slice đầu tiên.
+- Batch workflow chính thức hiện tại: 54
+- Trục công việc: batch 54 auth/session failure cleanup cue parity đã complete sạch; chưa mở batch mới chính thức.
 
-## Batch 29 handoff (closed)
-- Batch vừa xong: **29**
-- Commit cuối đã push:
-  - backend: `e1e4026` — `test(profiles): lock bio null preserve omitted display/avatar`
-  - web: `b3700f5` — `bootstrap web-nextjs foundation shell`
-  - iOS: `37a4e87` — `batch29 ios: bootstrap swift foundation skeleton`
+## Batch 54 handoff (closed)
+- Batch vừa xong: **54**
+- Commit cuối đã chốt:
+  - `5ddea98` — `batch54: expose failure cleanup cue`
+  - `d26f65c` — `batch54: align ios failure cleanup cue`
+  - `bf0583e` — `batch54: preserve auth cleanup cue metadata`
+  - `6dd83ce` — `batch54: consume auth cleanup cue metadata`
+  - `b53608a` — `batch54: consume ios cleanup cue metadata`
+  - `41a269c` — `batch54: mark workflow complete`
 - Test/verify cuối:
-  - backend focused: `./.venv/bin/pytest -q tests/test_profiles_api.py -k "updates_bio_to_null_and_preserves_omitted_display_name_and_avatar_url"` ✅ (2 passed)
-  - backend full file: `./.venv/bin/pytest -q tests/test_profiles_api.py` ✅ (47 passed)
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅
   - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Blocker/rủi ro còn lại:
-  - chưa có blocker code rõ ràng; iOS mới ở mức foundation skeleton, chưa có verify/runtime note tương đương web/backend
-- Batch kế tiếp: **30**
-- Scope hẹp đầu tiên của batch 30:
-  - scaffold backend auth/session shell trong `apps/backend-python` để tạo trục tích hợp đầu tiên cho web/iOS foundation
+  - không còn blocker trực tiếp trong seam batch 54
+  - chưa có batch 55 chính thức vì chưa xác nhận được seam end-to-end auth/session mới thực sự còn thiếu
+- Batch kế tiếp: **chưa mở chính thức**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chỉ xác định sau khi main agent đối chiếu workflow truth và tìm được 1 seam product thật sự còn thiếu; không bịa micro-cleanup tiếp cho batch 54
 
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: batch 30 auth/session shell backend đã verify xanh.
-- Kết quả hiện tại: `/auth/login` + schema/service wiring + test hẹp đã có trong repo.
-- Trạng thái: pushed_batch30.
+- Scope hiện tại: idle chờ batch mới chính thức.
+- Kết quả gần nhất: backend auth 401 invalid-session payloads giữ `local_clear_recommended: true` + `backend_detail`.
+- Trạng thái: complete_batch54.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: batch 30 login/auth shell web đã verify xanh.
-- Kết quả hiện tại: login page shell thật + auth client/env stub đã có trong repo.
-- Trạng thái: pushed_batch30.
+- Scope hiện tại: idle chờ batch mới chính thức.
+- Kết quả gần nhất: web auth client parse structured backend error payload và surface cleanup cue từ server metadata.
+- Trạng thái: complete_batch54.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 30 login/session placeholder flow iOS đã verify xanh.
-- Kết quả hiện tại: `AppSessionStore`, `SessionEntryView`, auth-gated root tabs, app root update + SwiftPM resource fix đã có trong repo.
-- Trạng thái: pushed_batch30.
+- Scope hiện tại: idle chờ batch mới chính thức.
+- Kết quả gần nhất: iOS auth client parse structured backend error payload cho restore/refresh/logout unauthorized paths.
+- Trạng thái: complete_batch54.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
