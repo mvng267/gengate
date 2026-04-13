@@ -3,7 +3,7 @@
 - Batch: 99
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
 - Scope: batch 99 backend messaging parity hardening — hide `/messages/{id}/device-keys` create/list when parent message is soft-deleted (`message_not_found` parity)
-- Status: verify
+- Status: MVP-testable
 - Files:
   - apps/backend-python/app/services/messages.py
   - apps/backend-python/tests/test_messages_api.py
@@ -14,10 +14,10 @@
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_messages_api.py` ✅ (13 passed)
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `3d5bd8f` — `batch99: add ios backend base url override controls`
-  - working tree: bẩn (batch99 backend parity + flow docs pending commit)
+  - latest commit: `6560136` — `batch99: hide deleted messages from device key endpoints`
+  - working tree: sạch
 - Blocker: none
-- Next: commit backend batch99 parity + flow docs; mở batch100 theo friction messaging/realtime kế tiếp (web paused)
+- Next: mở batch100 backend+iOS theo friction messaging/realtime kế tiếp (web paused)
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -128,7 +128,7 @@
 - Batch 99 outcome:
   - iOS Session tab adds editable backend base URL override for shell runs beyond localhost (`3d5bd8f`)
   - backend message device-key create/list now return `message_not_found` when parent message is soft-deleted (same parity as attachment endpoints)
-  - regression guard added in `tests/test_messages_api.py` to ensure deleted parent cannot create/list device keys
+  - regression guard added in `tests/test_messages_api.py` to ensure deleted parent cannot create/list device keys (`6560136`)
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

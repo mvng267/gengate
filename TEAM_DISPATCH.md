@@ -41,9 +41,9 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: batch 99 backend parity — chặn create/list device-keys nếu parent message đã soft-delete.
-- Kết quả gần nhất: `message_service` đã guard `deleted_at` cho cả create/list device-key paths + test hồi quy mới pass.
-- Trạng thái: verify_batch99_backend.
+- Scope hiện tại: batch 99 backend parity đã chốt — device-key endpoints ẩn parent message soft-delete.
+- Kết quả gần nhất: commit `6560136` guard `deleted_at` cho create/list `/messages/{id}/device-keys` + regression pass.
+- Trạng thái: complete_batch99_backend.
 
 ### pikachu-web — frontend web
 - Scope hiện tại: tạm dừng theo chỉ đạo user.

@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **99 — backend messaging device-key parity on soft-deleted parent messages is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **99 — backend+iOS messaging run-friction parity is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -91,7 +91,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch workflow chính thức hiện tại: **99**
 - Scope hiện tại: backend messaging parity — chặn `/messages/{id}/device-keys` create/list nếu parent message đã soft-delete.
-- Trạng thái hiện tại: **verify**
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/backend-python/app/services/messages.py`
   - `apps/backend-python/tests/test_messages_api.py`
@@ -102,12 +102,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_messages_api.py` → ✅ pass (13 passed)
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `3d5bd8f` — `batch99: add ios backend base url override controls`
-  - working tree hiện tại: bẩn (batch99 backend parity + flow docs pending commit)
+  - commit gần nhất đã chốt: `6560136` — `batch99: hide deleted messages from device key endpoints`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch99 backend parity + flow docs; sau đó mở batch100 backend+iOS theo seam messaging/realtime friction thật (web paused)
+  - mở batch100 backend+iOS theo seam messaging/realtime friction thật (web paused)
 
 ## Batch handoff note
 
