@@ -31,6 +31,8 @@ export type BackendSessionSnapshot = {
   expires_in_seconds: number;
   token_type: string;
   session_status: string;
+  local_clear_recommended: boolean;
+  backend_detail: string | null;
 };
 
 export type StoredAuthSession = {

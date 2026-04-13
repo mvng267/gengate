@@ -234,6 +234,7 @@ export default function LoginPage() {
       [
         `logout_result: ${result.ok ? "local_cleared" : "request_failed_local_cleared"}`,
         `backend_detail: ${result.backendDetail ?? "none"}`,
+        `local_clear_recommended: ${result.localClearRecommended ? "true" : "false"}`,
         `message: ${result.message}`,
       ].join("\n"),
     );
@@ -265,17 +266,18 @@ export default function LoginPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-start">
       <section className="flex-1 space-y-4">
         <span className="inline-flex rounded-full border border-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-          Batch 46 · Web local clear outcome signal
+          Batch 47 · Web logout backend detail signal
         </span>
         <h1 className="text-4xl font-black tracking-tight text-black">
-          Web shell nay có thêm local clear outcome signal riêng để tách thao tác xóa session local khỏi logout/revoke flow và giúp auth loop dễ verify hơn.
+          Web shell nay đọc trực tiếp logout backend detail signal để phân biệt rõ revoke intent từ backend với local clear action và giúp auth loop dễ verify hơn.
         </h1>
         <p className="max-w-2xl text-base leading-7 text-neutral-700">
-          Batch 46 ưu tiên thêm 1 action outcome surface hẹp: khi xóa session local, màn web hiển thị riêng local clear result và backend detail để auth loop dễ verify hơn.
+          Batch 47 ưu tiên 1 follow-up hẹp: khi logout, màn web đọc trực tiếp `backend_detail` và `local_clear_recommended` từ response backend thay vì chỉ suy từ local status text.
         </p>
         <ul className="space-y-2 text-sm text-neutral-700">
           <li>• Password/OTP vẫn là placeholder trên UI, chưa dùng cho API ở batch này.</li>
           <li>• Web shell nay có persisted-session inspector, login outcome panel, local clear outcome panel, restore outcome panel, refresh outcome panel, và logout outcome panel để nhìn rõ từng auth action.</li>
+          <li>• Logout outcome nay đọc trực tiếp `backend_detail` + `local_clear_recommended` từ backend contract mới.</li>
           <li>• Redirect đích mặc định vẫn là <code>/feed</code> nếu không có <code>?next=...</code> hợp lệ.</li>
         </ul>
       </section>

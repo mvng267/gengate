@@ -2,23 +2,27 @@
 
 - Batch: 47
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 47 backend logout detail contract — surface explicit local-clear recommendation + backend detail cue so web/iOS shells can verify backend-vs-local clear intent without guessing
+- Scope: batch 47 logout backend detail signal complete on backend + web — shell now reads explicit backend logout cue instead of inferring only from local status text
 - Status: verify
 - Files:
   - apps/backend-python/app/schemas/auth.py
   - apps/backend-python/app/modules/auth/router.py
   - apps/backend-python/tests/test_auth_api.py
+  - apps/web-nextjs/lib/auth/types.ts
+  - apps/web-nextjs/lib/auth/client.ts
+  - apps/web-nextjs/app/login/page.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅
+  - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `452385b` — `batch46: mark workflow complete`
-  - working tree: bẩn đúng theo batch 47 backend logout detail contract + workflow files (chưa commit ở nhịp này)
+  - latest commit: `99eaa01` — `batch47: add logout local clear detail contract`
+  - working tree: bẩn đúng theo batch 47 web follow-up slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit backend batch-47 slice này; sau đó follow-up 1 shell lane để read/use `local_clear_recommended` + `backend_detail` từ logout response directly
+- Next: commit web batch-47 slice này; sau đó làm 1 iOS follow-up tương tự để đọc `backend_detail` + `local_clear_recommended` trực tiếp từ logout response
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 47 update:
-  - `/auth/logout` nay trả thêm `local_clear_recommended=true` và `backend_detail="logout_revoked"`
-  - `/auth/session` và các snapshot response khác giữ default explicit fields `local_clear_recommended=false`, `backend_detail=null`
-  - shell layers nay có backend cue rõ hơn để phân biệt revoke/logout intent với local-only clear outcome
+  - backend `/auth/logout` trả explicit `local_clear_recommended=true` và `backend_detail="logout_revoked"`
+  - web logout outcome nay đọc trực tiếp `backend_detail` + `local_clear_recommended` từ response backend
+  - auth loop web/backend nay đối chiếu được rõ hơn giữa revoke intent và local clear outcome

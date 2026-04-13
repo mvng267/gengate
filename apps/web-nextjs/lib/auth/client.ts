@@ -67,7 +67,9 @@ function isBackendSessionSnapshot(value: unknown): value is BackendSessionSnapsh
     typeof value.expires_at === "string" &&
     typeof value.expires_in_seconds === "number" &&
     typeof value.token_type === "string" &&
-    typeof value.session_status === "string"
+    typeof value.session_status === "string" &&
+    typeof value.local_clear_recommended === "boolean" &&
+    (typeof value.backend_detail === "string" || value.backend_detail === null)
   );
 }
 
@@ -115,6 +117,8 @@ export function persistAuthSession(payload: BackendLoginPayload): StoredAuthSess
       expires_in_seconds: payload.expires_in_seconds,
       token_type: payload.token_type,
       session_status: payload.session_status,
+      local_clear_recommended: false,
+      backend_detail: null,
     },
   };
 
@@ -135,6 +139,7 @@ export async function logoutPersistedSession(): Promise<{
   ok: boolean;
   message: string;
   backendDetail?: string;
+  localClearRecommended?: boolean;
 }> {
   const stored = readPersistedAuthSession();
   if (!stored) {
@@ -159,12 +164,17 @@ export async function logoutPersistedSession(): Promise<{
     if (response.ok) {
       const snapshot = await readSessionSnapshot(response);
       clearPersistedAuthSession();
-      const backendDetail = snapshot?.session_status;
+      const backendDetail = snapshot?.backend_detail ?? snapshot?.session_status;
+      const localClearRecommended = snapshot?.local_clear_recommended ?? false;
       const suffix = backendDetail ? ` (${backendDetail})` : "";
+      const localClearMessage = localClearRecommended
+        ? " Backend cũng báo nên clear local session để shell state sạch và dễ verify hơn."
+        : "";
       return {
         ok: true,
-        message: `Đã revoke session hiện tại${suffix} và xóa persisted session local.`,
+        message: `Đã revoke session hiện tại${suffix} và xóa persisted session local.${localClearMessage}`,
         backendDetail,
+        localClearRecommended,
       };
     }
 
