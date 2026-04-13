@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 117
-- Trục công việc: iOS inbox seam hardening — clear cursor-form sync hint khi identity input đổi.
+- Batch workflow chính thức hiện tại: 118
+- Trục công việc: iOS inbox seam hardening — clear cursor-form sync hint khi thread load fail/conversation reset.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 117 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: đổi User A/User B sẽ clear ngay sync hint (summary + timestamp) để tránh carry-over context giữa thread identities.
-- Trạng thái: verify_batch117_ios.
+- Scope hiện tại: batch 118 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: load thread fail (non-silent) giờ clear sync hint cùng lúc với reset conversation/messages state.
+- Trạng thái: verify_batch118_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

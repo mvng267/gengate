@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 117
+- Batch: 118
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 117 iOS inbox seam hardening — clear cursor-form sync hint when direct-thread identity inputs change
+- Scope: batch 118 iOS inbox seam hardening — clear cursor-form sync hint when thread load fails and conversation resets
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch117 slice)
+  - latest commit: `HEAD` (local batch118 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch118 cho messaging friction tiếp theo (ví dụ clear sync hint when thread load fails or conversation resets) trong iOS inbox shell
+- Next: mở batch119 cho messaging friction tiếp theo (ví dụ clear sync hint when direct conversation members become empty) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -199,6 +199,10 @@
   - User A/User B input fields now clear cursor-form sync hint immediately on identity change
   - sync hint state reset includes both summary text and timestamp, preventing cross-thread carry-over
   - direct-thread switching now has cleaner operator feedback before next thread load/read-cursor action
+- Batch 118 outcome:
+  - load-thread failure path (non-silent) now clears cursor-form sync hint when conversation/messages are reset to empty state
+  - sync hint no longer survives error-reset screen state, reducing operator confusion after failed direct-thread load
+  - identity-reset + failure-reset now both converge to same hint-clear helper for consistent behavior
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -208,7 +212,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, nhập recipient user để load device list (`/auth/devices/{user_id}`), chọn recipient device rồi create/list message device keys, bật `Auto refresh every 3s` để quan sát near-realtime polling, dùng quick presets để chọn read-cursor target user/message (hoặc nhập tay), chạm user row trong `Member read-cursor summary` để sync full cursor form (focus user + cursor target user + optional cursor message), quan sát sync hint `cursor_form_sync: ... · Ns ago` gần form để xác nhận context vừa apply, đổi User A hoặc User B và verify sync hint bị clear ngay, reload thread mới rồi tiếp tục `Update read cursor` / `Mark latest message as read (focus user)` / `Jump focus user to first unread candidate` và verify `last_read_by`, `read_status(<focus_user>)`, `cursor_order_hint`, `unread_behind_cursor`
+  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, nhập recipient user để load device list (`/auth/devices/{user_id}`), chọn recipient device rồi create/list message device keys, bật `Auto refresh every 3s` để quan sát near-realtime polling, dùng quick presets để chọn read-cursor target user/message (hoặc nhập tay), chạm user row trong `Member read-cursor summary` để sync full cursor form (focus user + cursor target user + optional cursor message), quan sát sync hint `cursor_form_sync: ... · Ns ago` gần form để xác nhận context vừa apply, đổi User A/User B để verify hint clear ngay, thử load thread lỗi (ví dụ UUID không hợp lệ) để verify hint cũng clear khi conversation reset, sau đó load lại thread hợp lệ và tiếp tục `Update read cursor` / `Mark latest message as read (focus user)` / `Jump focus user to first unread candidate` + verify `last_read_by`, `read_status(<focus_user>)`, `cursor_order_hint`, `unread_behind_cursor`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

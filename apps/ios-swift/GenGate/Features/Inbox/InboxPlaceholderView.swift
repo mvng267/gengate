@@ -42,7 +42,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with reload/identity reset; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with reload/identity/failure reset; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -56,7 +56,8 @@ struct InboxPlaceholderView: View {
                         "Member row tap now applies full read-cursor form context (`Read-status focus user UUID` + `Member user UUID` + optional `Last-read message UUID`).",
                         "Read-cursor form now shows a brief sync hint after row tap so testers can verify which member/context was just applied.",
                         "After thread reload, sync hint refreshes to current read-cursor form values to avoid stale context text.",
-                        "When direct-thread identity inputs (User A/User B) change, sync hint is cleared immediately to avoid carry-over across threads."
+                        "When direct-thread identity inputs (User A/User B) change, sync hint is cleared immediately to avoid carry-over across threads.",
+                        "If thread load fails and conversation state resets, sync hint is also cleared to keep form context truthful."
                     ]
                 )
 
@@ -1009,6 +1010,7 @@ struct InboxPlaceholderView: View {
                 attachmentMap = [:]
                 deviceKeyMap = [:]
                 recipientDeviceOptions = []
+                clearCursorFormSyncHintIfIdentityChanged()
                 fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             }
         }
