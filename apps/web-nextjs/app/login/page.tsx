@@ -31,6 +31,24 @@ function buildStatusClass(tone: "neutral" | "success" | "error") {
   return "text-neutral-700";
 }
 
+function formatStoredSessionPreview() {
+  const stored = readPersistedAuthSession();
+  if (!stored) {
+    return null;
+  }
+
+  return [
+    `refresh_token: ${stored.refreshToken}`,
+    `user_id: ${stored.session.user_id}`,
+    `email: ${stored.session.email}`,
+    `session_id: ${stored.session.session_id}`,
+    `device_id: ${stored.session.device_id}`,
+    `token_type: ${stored.session.token_type}`,
+    `session_status: ${stored.session.session_status}`,
+    `expires_in_seconds: ${stored.session.expires_in_seconds}`,
+  ].join("\n");
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -43,6 +61,7 @@ export default function LoginPage() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusTone, setStatusTone] = useState<"neutral" | "success" | "error">("neutral");
   const [sessionPreview, setSessionPreview] = useState<string | null>(null);
+  const [storedSessionPreview, setStoredSessionPreview] = useState<string | null>(null);
 
   const nextPath = useMemo(() => {
     const value = searchParams.get("next");
@@ -66,6 +85,9 @@ export default function LoginPage() {
 
     async function restore() {
       const localSession = readPersistedAuthSession();
+      if (isMounted) {
+        setStoredSessionPreview(formatStoredSessionPreview());
+      }
       if (!localSession) {
         if (isMounted) {
           setIsRestoring(false);
@@ -93,6 +115,7 @@ export default function LoginPage() {
             `expires_in_seconds: ${result.session.session.expires_in_seconds}`,
           ].join("\n"),
         );
+        setStoredSessionPreview(formatStoredSessionPreview());
         setIsRestoring(false);
         router.replace(nextPath);
         return;
@@ -106,6 +129,7 @@ export default function LoginPage() {
             : result.message,
         );
         setSessionPreview(null);
+        setStoredSessionPreview(formatStoredSessionPreview());
       }
 
       setIsRestoring(false);
@@ -139,10 +163,12 @@ export default function LoginPage() {
           `expires_in_seconds: ${result.payload.expires_in_seconds}`,
         ].join("\n"),
       );
+      setStoredSessionPreview(formatStoredSessionPreview());
     } else {
       setStatusTone("error");
       setStatusMessage(result.message);
       setSessionPreview(null);
+      setStoredSessionPreview(formatStoredSessionPreview());
     }
 
     setIsSubmitting(false);
@@ -162,6 +188,7 @@ export default function LoginPage() {
         : result.message,
     );
     setSessionPreview(null);
+    setStoredSessionPreview(formatStoredSessionPreview());
     setIsLoggingOut(false);
   }
 
@@ -170,23 +197,24 @@ export default function LoginPage() {
     setStatusTone("neutral");
     setStatusMessage("Đã xóa session local đã lưu trên web shell.");
     setSessionPreview(null);
+    setStoredSessionPreview(formatStoredSessionPreview());
   }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-start">
       <section className="flex-1 space-y-4">
         <span className="inline-flex rounded-full border border-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-          Batch 40 · Web auth E2E shell
+          Batch 41 · Web auth state inspector
         </span>
         <h1 className="text-4xl font-black tracking-tight text-black">
-          Web shell nay cho chạy tay đủ vòng login → restore/refresh persisted session → logout trên cùng một màn.
+          Web shell nay vừa chạy được auth loop, vừa cho nhìn thẳng persisted session state trước và sau mỗi bước.
         </h1>
         <p className="max-w-2xl text-base leading-7 text-neutral-700">
-          Batch 40 ưu tiên 1 flow thật trên web: đăng nhập, restore session local với backend, manual refresh để rotate refresh token, rồi logout với feedback nhất quán end-to-end.
+          Batch 41 ưu tiên thêm 1 surface quan sát rõ ràng: local persisted session snapshot luôn hiện ngay trên màn để kiểm tra login, restore, refresh rotation, và logout/clear có đang đổi state thật hay không.
         </p>
         <ul className="space-y-2 text-sm text-neutral-700">
           <li>• Password/OTP vẫn là placeholder trên UI, chưa dùng cho API ở batch này.</li>
-          <li>• Web shell nay có nút manual refresh để test explicit refresh-token rotation thay vì chỉ restore ngầm lúc load trang.</li>
+          <li>• Web shell nay có persisted-session inspector để nhìn local state trước/sau restore, refresh rotation, logout, và clear.</li>
           <li>• Redirect đích mặc định vẫn là <code>/feed</code> nếu không có <code>?next=...</code> hợp lệ.</li>
         </ul>
       </section>
@@ -255,6 +283,7 @@ export default function LoginPage() {
                     `expires_in_seconds: ${result.payload.expires_in_seconds}`,
                   ].join("\n"),
                 );
+                setStoredSessionPreview(formatStoredSessionPreview());
                 setIsRegistering(false);
                 router.replace(nextPath);
                 return;
@@ -262,6 +291,7 @@ export default function LoginPage() {
 
               setStatusTone(result.reason === "conflict" ? "neutral" : "error");
               setStatusMessage(result.message);
+              setStoredSessionPreview(formatStoredSessionPreview());
               setIsRegistering(false);
             })();
           }}
@@ -293,6 +323,7 @@ export default function LoginPage() {
                     `expires_in_seconds: ${result.session.session.expires_in_seconds}`,
                   ].join("\n"),
                 );
+                setStoredSessionPreview(formatStoredSessionPreview());
               } else {
                 setStatusTone(result.reason === "unauthorized" ? "neutral" : "error");
                 setStatusMessage(
@@ -301,6 +332,7 @@ export default function LoginPage() {
                     : result.message,
                 );
                 setSessionPreview(null);
+                setStoredSessionPreview(formatStoredSessionPreview());
               }
 
               setIsRefreshing(false);
@@ -335,7 +367,7 @@ export default function LoginPage() {
           <div className="font-semibold">Status</div>
           <p className={buildStatusClass(statusTone)}>
             {statusMessage ??
-              "Chưa submit. Batch 40 shell này ưu tiên cho chạy tay đủ flow login → restore/refresh persisted session → logout qua backend."}
+              "Chưa submit. Batch 41 shell này ưu tiên giúp auth E2E flow hiện trạng thái persisted session thật trước/sau mỗi bước."}
           </p>
 
           {statusMessage?.includes("đăng nhập lại") ? (
@@ -349,6 +381,17 @@ export default function LoginPage() {
               {sessionPreview}
             </pre>
           ) : null}
+
+          <div className="mt-3">
+            <div className="font-semibold">Persisted session snapshot</div>
+            {storedSessionPreview ? (
+              <pre className="mt-2 overflow-x-auto border border-black bg-neutral-100 p-3 text-xs text-black">
+                {storedSessionPreview}
+              </pre>
+            ) : (
+              <p className="mt-2 text-xs text-neutral-600">Chưa có persisted session trong local storage.</p>
+            )}
+          </div>
         </div>
       </section>
     </main>

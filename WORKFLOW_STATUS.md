@@ -1,24 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 40
+- Batch: 41
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 40 auth E2E shell complete — web + iOS now frame and exercise login → restore/refresh → logout flow clearly
-- Status: complete
+- Scope: batch 41 web auth state inspector — expose current persisted-session snapshot directly in login shell
+- Status: verify
 - Files:
   - apps/web-nextjs/app/login/page.tsx
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `bb7f576` — `batch40: align ios auth e2e shell`
-  - working tree: sạch
+  - latest commit: `f7de6e5` — `batch40: mark workflow complete`
+  - working tree: bẩn đúng theo batch 41 web auth state inspector slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 41 với 1 auth E2E data/UX slice hẹp có leverage cao hơn; ưu tiên thêm 1 verify surface hoặc client-side state cue giúp flow thật dễ quan sát hơn thay vì chỉ copy/control framing
+- Next: commit slice này; sau đó cân nhắc parity tương ứng cho iOS persisted-session inspector hoặc chốt nếu muốn giữ batch 41 tập trung ở web quan sát-state path
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 40 outcome:
-  - Web login shell nay cho chạy tay đủ vòng login → restore/refresh persisted session → logout trên cùng một màn
-  - iOS Session screen nay cũng phản ánh đúng auth E2E loop tương ứng với manual refresh control rõ ràng hơn
-  - Batch 40 đã nâng auth shell từ parity/copy improvements sang 1 flow E2E dễ thao tác hơn trên cả web và iOS
+- Batch 41 update:
+  - Web login shell nay hiển thị trực tiếp persisted-session snapshot trong local storage
+  - Inspector này được sync sau login, restore, refresh rotation, logout, và clear local session để auth E2E state dễ quan sát hơn

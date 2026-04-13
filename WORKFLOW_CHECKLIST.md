@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **batch 40 đã complete**.
+- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đang làm batch 41**.
 
 ## Reporting hard rule
 
@@ -88,22 +88,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **40**
-- Scope hiện tại: auth E2E shell complete — web + iOS now frame and exercise login → restore/refresh → logout flow clearly.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **41**
+- Scope hiện tại: web auth state inspector — expose current persisted-session snapshot directly in login shell.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/web-nextjs/app/login/page.tsx`
-  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `bb7f576` — `batch40: align ios auth e2e shell`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `f7de6e5` — `batch40: mark workflow complete`
+  - working tree hiện tại: bẩn đúng theo batch 41 web auth state inspector slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch 41 với 1 auth E2E data/UX slice hẹp có leverage cao hơn; ưu tiên thêm 1 verify surface hoặc client-side state cue giúp flow thật dễ quan sát hơn thay vì chỉ copy/control framing
+  - commit slice này; sau đó cân nhắc parity tương ứng cho iOS persisted-session inspector hoặc chốt nếu muốn giữ batch 41 tập trung ở web quan sát-state path
 
 ## Batch handoff note
 
@@ -111,12 +109,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Commit cuối đã chốt:
   - `94d56b4` — `batch40: add web auth e2e shell`
   - `bb7f576` — `batch40: align ios auth e2e shell`
+  - `f7de6e5` — `batch40: mark workflow complete`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - memory search tạm unavailable ở nhịp chốt batch này, nhưng repo + workflow files vẫn nhất quán và đủ để chốt trạng thái thật
-  - chưa có blocker code; next leverage nên là 1 auth E2E data/UX slice có tác động hành vi rõ hơn, không chỉ framing/copy
+  - chưa có blocker code; batch 41 đang thêm auth E2E state visibility để flow thật dễ kiểm tra hơn
 - Batch kế tiếp: **41**
 - Scope hẹp đầu tiên của batch 41:
   - thêm 1 surface quan sát state/session rõ hơn trên web hoặc iOS để auth E2E flow hiện trạng thái thật trước/sau restore/refresh/logout dễ kiểm tra hơn
