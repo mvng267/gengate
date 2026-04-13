@@ -1,8 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { createMomentWithImage, listMomentsForAuthor, listPrivateFeed, type MomentListItem } from "@/lib/moments/client";
+
+type MomentComposeShellProps = {
+  initialAuthorUserId?: string;
+  initialViewerUserId?: string;
+};
 
 const initialForm = {
   authorUserId: "",
@@ -14,14 +19,28 @@ const initialForm = {
   imageHeight: "1350",
 };
 
-export function MomentComposeShell() {
-  const [form, setForm] = useState(initialForm);
+export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUserId = "" }: MomentComposeShellProps) {
+  const [form, setForm] = useState({
+    ...initialForm,
+    authorUserId: initialAuthorUserId,
+    viewerUserId: initialViewerUserId,
+  });
   const [status, setStatus] = useState("Provide a real user UUID, caption, and image storage key to test the moment shell.");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingList, setIsLoadingList] = useState(false);
   const [isLoadingFeed, setIsLoadingFeed] = useState(false);
   const [items, setItems] = useState<MomentListItem[]>([]);
   const [feedItems, setFeedItems] = useState<MomentListItem[]>([]);
+
+  useEffect(() => {
+    setForm((current) => ({
+      ...current,
+      authorUserId: initialAuthorUserId,
+      viewerUserId: initialViewerUserId,
+    }));
+    setItems([]);
+    setFeedItems([]);
+  }, [initialAuthorUserId, initialViewerUserId]);
 
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

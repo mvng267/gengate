@@ -1,22 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 71
+- Batch: 72
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 71 web inbox launcher hardening — reduce browser-test friction by adding user-pair launcher form and query-prefill on `/inbox`
+- Scope: batch 72 web feed launcher hardening — reduce browser-test friction by adding viewer/author prefill launcher on `/feed`
 - Status: MVP-testable
 - Files:
-  - apps/web-nextjs/app/inbox/page.tsx
-  - apps/web-nextjs/components/direct-message-shell.tsx
+  - apps/web-nextjs/app/feed/page.tsx
+  - apps/web-nextjs/components/moment-compose-shell.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `cbe4423` — `batch70: harden web profile launcher`
-  - working tree: bẩn (batch 71 ready to commit)
+  - latest commit: `6760b2f` — `batch71: harden web inbox launcher`
+  - working tree: bẩn (batch 72 ready to commit)
 - Blocker: none
-- Next: commit batch 71 web inbox launcher hardening; after that, prefer concrete human-test bug fixes or another similarly narrow browser friction fix only if it clearly shortens the MVP test path
+- Next: commit batch 72 web feed launcher hardening; after that, prefer concrete human-test bug fixes or another similarly narrow browser friction fix only if it clearly shortens the MVP test path
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -36,10 +36,13 @@
 - Batch 70 handoff:
   - `cbe4423` — `batch70: harden web profile launcher`
   - profile launcher hardening remains MVP-testable while batch 71 reduces browser friction for the direct messaging seam
-- Batch 71 outcome:
-  - web `/inbox` now includes a real GET launcher form for User A / User B / optional Sender prefill
-  - direct messaging shell accepts query-prefilled IDs so testers can launch and retry user pairs without retyping the whole form
-  - this makes the browser messaging seam faster to exercise while keeping the underlying contracts unchanged
+- Batch 71 handoff:
+  - `6760b2f` — `batch71: harden web inbox launcher`
+  - inbox launcher hardening remains MVP-testable while batch 72 reduces browser friction for moments/private-feed testing
+- Batch 72 outcome:
+  - web `/feed` now includes a real GET launcher form for Author / Viewer UUID prefill
+  - moment shell accepts query-prefilled author/viewer IDs so testers can create moments and reload private feed with less retyping
+  - this shortens the browser path for moments/feed testing while keeping the existing contracts and shell behavior honest
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
