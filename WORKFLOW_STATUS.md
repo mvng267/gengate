@@ -1,24 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 52
+- Batch: 53
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 52 persisted session preview parity — web + iOS shells now surface backend detail + local clear recommendation from saved session state so refresh/restore persistence cues remain visible after save
-- Status: complete
+- Scope: batch 53 web restore outcome parity — web shell restore summary now surfaces local clear recommendation alongside backend detail so restore cue matches the persistence/refresh framing better
+- Status: verify
 - Files:
   - apps/web-nextjs/app/login/page.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `fe1ae33` — `batch52: align ios persisted session detail`
-  - working tree: sạch
+  - latest commit: `ceaf1c0` — `batch52: mark workflow complete`
+  - working tree: bẩn đúng theo batch 53 web restore-summary parity slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 53 với 1 seam auth/session end-to-end mới; ưu tiên outcome parity cho logout/restore/refresh giữa backend và shell nếu còn cue chưa thẳng hàng
+- Next: commit web batch-53 slice này; sau đó inspect iOS/web logout+restore+refresh summaries only where `local_clear_recommended` / backend detail cues still differ materially
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 52 closeout:
-  - web saved-session preview nay hiện `backend_detail` + `local_clear_recommended`
-  - iOS saved-session preview nay hiện `backend_detail` + `local_clear_recommended`
-  - artifact verify output đã được dọn; batch 52 hiện complete sạch
+- Batch 53 update:
+  - web restore outcome preview nay hiện `local_clear_recommended` thay vì chỉ có `backend_detail`
+  - refresh/persisted preview/restore framing trên web nay nhất quán hơn về cleanup cue

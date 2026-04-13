@@ -125,6 +125,7 @@ export default function LoginPage() {
           [
             "restore_result: local_restored_valid",
             `backend_detail: ${result.session.session.backend_detail ?? result.session.session.session_status}`,
+            `local_clear_recommended: ${result.session.session.local_clear_recommended ? "true" : "false"}`,
             `message: ${restoreMessage}`,
           ].join("\n"),
         );
