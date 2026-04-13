@@ -1,12 +1,12 @@
 # GenGate Workflow Status
 
-- Batch: 63
+- Batch: 64
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 63 iOS MVP readiness hub — turn the iOS Profile tab into a guided readiness/test surface for current MVP seams
+- Scope: batch 64 iOS friend graph reader — consume existing backend friendship contracts from the native Profile tab via a read-only UUID-driven shell
 - Status: MVP-testable
 - Files:
   - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
-  - apps/ios-swift/GenGate/Core/UI/FeaturePlaceholderView.swift
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - apps/ios-swift/GenGate/App/RootTabView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
@@ -14,10 +14,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `503446e` — `batch62: harden profile launcher`
-  - working tree: bẩn (batch 63 ready to commit)
+  - latest commit: `6803d8e` — `batch63: add ios mvp readiness hub`
+  - working tree: bẩn (batch 64 ready to commit)
 - Blocker: none
-- Next: commit batch 63 iOS MVP readiness hub; after that, prefer real iOS client consumption of one existing seam instead of more readiness copy unless testing exposes a gap
+- Next: commit batch 64 iOS friend graph reader; after that, prefer one similarly narrow native consumption slice for feed or inbox instead of broad shell polish
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -28,14 +28,14 @@
 - Batch 57 handoff:
   - `4a779eb` — `batch57: wire private friend feed shell`
   - private friend feed seam remains MVP-testable while batch 58 opens direct messaging
-- Batch 63 outcome:
-  - iOS Profile tab now acts as an MVP readiness hub instead of a generic placeholder
-  - native shell now clearly reports which seams are already backend/web testable and what iOS still exposes only as shell
-  - this gives humans a coherent backend/web/iOS test path without claiming unfinished native domain clients are done
+- Batch 64 outcome:
+  - iOS Profile tab now consumes live backend friendship contracts through a UUID-driven read-only friend graph shell
+  - native testers can fetch pending requests and accepted friendships without leaving iOS shell copy/readiness-only mode
+  - this is the first real iOS social seam beyond auth/session, while still keeping scope strictly read-only and MVP-safe
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
   - iOS verify: `cd apps/ios-swift && swift build`
   - web MVP hub: `http://localhost:3000/`
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
-  - iOS path: open Session tab first, then inspect Profile readiness hub and protected shell tabs
+  - iOS path: open Session tab, then Profile tab, paste a real user UUID, and load friend graph snapshot

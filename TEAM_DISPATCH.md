@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 63
-- Trục công việc: iOS MVP readiness hub — giữ các seams hiện có và nâng iOS shell thành bề mặt readiness/test rõ ràng thay vì đứng ở auth-only context.
+- Batch workflow chính thức hiện tại: 64
+- Trục công việc: iOS friend graph reader — thêm native read-only consumption cho một seam social đã có thay vì tiếp tục readiness-only polish.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -41,19 +41,19 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: không mở backend scope mới trong batch 63.
+- Scope hiện tại: không mở backend scope mới trong batch 64.
 - Kết quả gần nhất: toàn bộ MVP API seams đã có và verified green cho web consumption.
-- Trạng thái: idle_batch63.
+- Trạng thái: idle_batch64.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: không mở web scope mới trong batch 63.
+- Scope hiện tại: không mở web scope mới trong batch 64.
 - Kết quả gần nhất: `/profile` launcher batch 62 đã xong.
-- Trạng thái: idle_batch63.
+- Trạng thái: idle_batch64.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 63 iOS hardening slice đã xong.
-- Kết quả gần nhất: Profile tab đã thành MVP readiness hub thay vì placeholder chung chung.
-- Trạng thái: complete_batch63.
+- Scope hiện tại: batch 64 native friend graph reader slice đã xong.
+- Kết quả gần nhất: Profile tab đã đọc được `/friends/requests` + `/friends` qua shell UUID-driven read-only flow.
+- Trạng thái: complete_batch64.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
