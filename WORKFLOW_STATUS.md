@@ -2,23 +2,27 @@
 
 - Batch: 49
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 49 login backend detail cue parity — backend + web now surface explicit backend detail for `/auth/login` so shell login flow no longer relies on fallback from `session_status`
-- Status: verify
+- Scope: batch 49 login backend detail cue parity complete — backend + web + iOS all surface explicit backend detail for `/auth/login` so shell login flow no longer relies on fallback from `session_status`
+- Status: complete
 - Files:
   - apps/backend-python/app/modules/auth/router.py
   - apps/backend-python/tests/test_auth_api.py
   - apps/web-nextjs/app/login/page.tsx
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅
   - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `6528d37` — `batch49: add login detail cue`
-  - working tree: bẩn đúng theo batch 49 web login detail cue slice + workflow files (chưa commit ở nhịp này)
+  - latest committed slice before this update: `7d57c87` — `batch49: align web login detail cue`
+  - working tree: bẩn đúng theo batch 49 iOS login detail cue slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit web batch-49 slice này; sau đó follow-up 1 shell lane còn lại (ưu tiên iOS) để align login `backend_detail` framing trực tiếp
+- Next: chốt batch 49 bằng commit iOS + workflow; sau đó mở batch 50 với 1 scope hẹp mới quanh auth shell contract/verify gap gần nhất
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 49 update:
   - `/auth/login` trả explicit `backend_detail="login_session_created"` + `local_clear_recommended=false`
-  - web shell framing/login outcome nay align trực tiếp với cue login mới từ backend
+  - web shell framing/login outcome align trực tiếp với cue login mới từ backend
+  - iOS shell nay persist + surface login `backend_detail` trực tiếp, kể cả register-then-sign-in summary

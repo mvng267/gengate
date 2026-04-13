@@ -21,6 +21,7 @@ final class AppSessionStore {
         let expiresInSeconds: Int
         let tokenType: String
         let sessionStatus: String
+        let backendDetail: String?
 
         var displayName: String {
             email.isEmpty ? "GenGate Tester" : email
@@ -227,7 +228,8 @@ final class AppSessionStore {
                 expiresAt: response.expires_at,
                 expiresInSeconds: response.expires_in_seconds,
                 tokenType: response.token_type,
-                sessionStatus: response.session_status
+                sessionStatus: response.session_status,
+                backendDetail: response.backend_detail
             )
             persist(session: refreshed)
             authState = .authenticated(refreshed)
@@ -308,7 +310,8 @@ final class AppSessionStore {
                 expiresAt: snapshot.expires_at,
                 expiresInSeconds: snapshot.expires_in_seconds,
                 tokenType: snapshot.token_type,
-                sessionStatus: snapshot.session_status
+                sessionStatus: snapshot.session_status,
+                backendDetail: snapshot.backend_detail
             )
             persist(session: restored)
             authState = .authenticated(restored)
@@ -383,7 +386,8 @@ final class AppSessionStore {
                 expiresAt: response.expires_at,
                 expiresInSeconds: response.expires_in_seconds,
                 tokenType: response.token_type,
-                sessionStatus: response.session_status
+                sessionStatus: response.session_status,
+                backendDetail: response.backend_detail
             )
             persist(session: session)
             passwordDraft = ""
@@ -436,7 +440,7 @@ final class AppSessionStore {
                 statusMessage = loginMessage
                 loginOutcomeSummary = [
                     "login_result: register_then_sign_in_success",
-                    "backend_detail: \(session.sessionStatus)",
+                    "backend_detail: \(session.backendDetail ?? session.sessionStatus)",
                     "local_clear_recommended: false",
                     "message: \(loginMessage)"
                 ].joined(separator: "\n")

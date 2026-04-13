@@ -89,19 +89,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **49**
-- Scope hiện tại: web login detail cue parity — align web login shell framing with explicit backend login cue.
-- Trạng thái hiện tại: **verify**
+- Scope hiện tại: iOS login detail cue parity — persist + surface explicit backend login cue in iOS auth shell and register-then-sign-in summary.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `6528d37` — `batch49: add login detail cue`
-  - working tree hiện tại: bẩn đúng theo batch 49 web login detail cue slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `7d57c87` — `batch49: align web login detail cue`
+  - working tree hiện tại: bẩn đúng theo batch 49 iOS login detail cue slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit web batch-49 slice này; sau đó follow-up 1 shell lane còn lại (ưu tiên iOS) để align login `backend_detail` framing trực tiếp
+  - chốt batch 49 bằng commit iOS + workflow; sau đó mở batch 50 với 1 scope hẹp mới quanh auth shell contract/verify gap gần nhất
 
 ## Batch handoff note
 

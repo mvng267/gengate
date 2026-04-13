@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 48 · iOS refresh restore detail cue parity")
+            Text("Batch 49 · iOS login detail cue parity")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -19,7 +19,7 @@ struct SessionEntryView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Batch 48 ưu tiên follow-up refresh/restore detail cue parity: màn Session đọc trực tiếp backend cue ở login, refresh, và restore path để phân biệt state backend xác nhận thay vì chỉ suy từ local session status.")
+                    Text("Batch 49 ưu tiên follow-up login detail cue parity: màn Session nay giữ và surface trực tiếp cue login từ backend để phân biệt rõ session vừa được tạo mới thay vì chỉ fallback từ local session status.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -160,7 +160,7 @@ struct SessionEntryView: View {
                     .font(.footnote.monospaced())
                     .foregroundStyle(.secondary)
 
-                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ đọc trực tiếp backend detail cue bên cạnh login/restore/refresh/logout/local-clear outcome và persisted-session inspector để nhìn rõ từng auth action result.")
+                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ giữ trực tiếp login backend detail cue bên cạnh login/restore/refresh/logout/local-clear outcome và persisted-session inspector để nhìn rõ từng auth action result.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
