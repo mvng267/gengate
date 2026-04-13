@@ -14,6 +14,13 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
   const authorUserId = params?.author?.trim() ?? "";
   const viewerUserId = params?.viewer?.trim() ?? "";
 
+  const profileHref = authorUserId ? `/profile?user=${encodeURIComponent(authorUserId)}` : viewerUserId ? `/profile?user=${encodeURIComponent(viewerUserId)}` : "/profile";
+  const inboxHref = authorUserId || viewerUserId
+    ? `/inbox?userA=${encodeURIComponent(authorUserId || viewerUserId)}&userB=${encodeURIComponent(viewerUserId || authorUserId)}&sender=${encodeURIComponent(authorUserId || viewerUserId)}`
+    : "/inbox";
+  const notificationsHref = viewerUserId ? `/notifications?user=${encodeURIComponent(viewerUserId)}` : authorUserId ? `/notifications?user=${encodeURIComponent(authorUserId)}` : "/notifications";
+  const locationHref = authorUserId ? `/location?owner=${encodeURIComponent(authorUserId)}&allowed=${encodeURIComponent(viewerUserId)}` : viewerUserId ? `/location?owner=${encodeURIComponent(viewerUserId)}` : "/location";
+
   return (
     <section>
       <h1>Feed</h1>
@@ -54,8 +61,11 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
             Active feed context: author <code>{authorUserId || "(not set)"}</code> · viewer <code>{viewerUserId || "(not set)"}</code>
           </p>
           <p>
-            Suggested pivots after validating moments/feed: <Link href="/profile">Profile</Link> · <Link href="/inbox">Inbox</Link> ·{" "}
-            <Link href="/notifications">Notifications</Link> · <Link href="/location">Location</Link>
+            Suggested pivots after validating moments/feed: <Link href={profileHref}>Profile</Link> · <Link href={inboxHref}>Inbox</Link> ·{" "}
+            <Link href={notificationsHref}>Notifications</Link> · <Link href={locationHref}>Location</Link>
+          </p>
+          <p>
+            Tip: these pivots now carry the current author/viewer context forward, so you can continue cross-seam testing without re-entering the same UUID pair.
           </p>
         </>
       ) : (
