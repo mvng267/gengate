@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 40 · iOS auth E2E shell")
+            Text("Batch 41 · iOS auth state inspector")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -15,11 +15,11 @@ struct SessionEntryView: View {
             switch sessionStore.authState {
             case .signedOut, .signingIn, .restoring:
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Register + auth loop shell")
+                    Text("Register + auth state shell")
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Batch 40 ưu tiên cho chạy tay đủ vòng register/login, restore hoặc manual refresh persisted session, rồi logout với feedback thật từ backend ngay trên màn Session.")
+                    Text("Batch 41 ưu tiên thêm persisted-session inspector để nhìn rõ local state trước và sau login, restore, manual refresh, logout, hoặc clear ngay trên màn Session.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -98,6 +98,26 @@ struct SessionEntryView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Persisted session snapshot")
+                            .font(.footnote)
+                            .fontWeight(.semibold)
+
+                        if let persistedSessionSnapshot = sessionStore.persistedSessionSnapshot {
+                            Text(persistedSessionSnapshot)
+                                .font(.caption.monospaced())
+                                .textSelection(.enabled)
+                        } else {
+                            Text("Chưa có persisted session trong local storage.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .background(Color.secondary.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
 
             case let .authenticated(userSession):
@@ -119,7 +139,7 @@ struct SessionEntryView: View {
                     .font(.footnote.monospaced())
                     .foregroundStyle(.secondary)
 
-                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ có thể chạy tay đủ flow login → restore/refresh persisted session → logout để nối auth/session với backend rõ hơn.")
+                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ còn có persisted-session inspector để nhìn rõ state thật trước/sau restore, refresh, và logout.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -151,6 +171,26 @@ struct SessionEntryView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Persisted session snapshot")
+                            .font(.footnote)
+                            .fontWeight(.semibold)
+
+                        if let persistedSessionSnapshot = sessionStore.persistedSessionSnapshot {
+                            Text(persistedSessionSnapshot)
+                                .font(.caption.monospaced())
+                                .textSelection(.enabled)
+                        } else {
+                            Text("Chưa có persisted session trong local storage.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .background(Color.secondary.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
 
                     Button {
                         Task {

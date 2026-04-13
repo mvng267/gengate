@@ -133,6 +133,23 @@ final class AppSessionStore {
         }
     }
 
+    var persistedSessionSnapshot: String? {
+        guard let persisted = loadPersistedSession() else {
+            return nil
+        }
+
+        return [
+            "refresh_token: \(persisted.refreshToken)",
+            "user_id: \(persisted.userID)",
+            "email: \(persisted.email)",
+            "session_id: \(persisted.sessionID)",
+            "device_id: \(persisted.deviceID)",
+            "token_type: \(persisted.tokenType)",
+            "session_status: \(persisted.sessionStatus)",
+            "expires_in_seconds: \(persisted.expiresInSeconds)"
+        ].joined(separator: "\n")
+    }
+
     var authGateMessage: String {
         let pendingSuffix: String
         if let pendingProtectedTab {

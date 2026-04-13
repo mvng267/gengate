@@ -89,19 +89,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **41**
-- Scope hiện tại: web auth state inspector — expose current persisted-session snapshot directly in login shell.
+- Scope hiện tại: iOS auth state inspector — expose current persisted-session snapshot directly in Session screen.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `f7de6e5` — `batch40: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 41 web auth state inspector slice, chưa commit
+  - commit gần nhất đã chốt: `288f57a` — `batch41: add web auth state inspector`
+  - working tree hiện tại: bẩn đúng theo batch 41 iOS auth state inspector slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó cân nhắc parity tương ứng cho iOS persisted-session inspector hoặc chốt nếu muốn giữ batch 41 tập trung ở web quan sát-state path
+  - commit slice này; sau đó cân nhắc chốt batch 41 nếu web+iOS state-visibility parity đã đủ, hoặc chọn 1 auth E2E behavior slice hẹp kế tiếp có leverage cao hơn
 
 ## Batch handoff note
 

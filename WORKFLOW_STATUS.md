@@ -2,20 +2,21 @@
 
 - Batch: 41
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 41 web auth state inspector — expose current persisted-session snapshot directly in login shell
+- Scope: batch 41 iOS auth state inspector — expose current persisted-session snapshot directly in Session screen
 - Status: verify
 - Files:
-  - apps/web-nextjs/app/login/page.tsx
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
-  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `f7de6e5` — `batch40: mark workflow complete`
-  - working tree: bẩn đúng theo batch 41 web auth state inspector slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `288f57a` — `batch41: add web auth state inspector`
+  - working tree: bẩn đúng theo batch 41 iOS auth state inspector slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit slice này; sau đó cân nhắc parity tương ứng cho iOS persisted-session inspector hoặc chốt nếu muốn giữ batch 41 tập trung ở web quan sát-state path
+- Next: commit slice này; sau đó cân nhắc chốt batch 41 nếu web+iOS state-visibility parity đã đủ, hoặc chọn 1 auth E2E behavior slice hẹp kế tiếp có leverage cao hơn
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 41 update:
-  - Web login shell nay hiển thị trực tiếp persisted-session snapshot trong local storage
-  - Inspector này được sync sau login, restore, refresh rotation, logout, và clear local session để auth E2E state dễ quan sát hơn
+  - iOS Session screen nay hiển thị trực tiếp persisted-session snapshot trong local storage
+  - Inspector này dùng cùng stored session data hiện có để quan sát state thật sau login, restore, refresh, logout, và clear local state
