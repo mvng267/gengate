@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 54**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đã complete batch 54**.
 
 ## Reporting hard rule
 
@@ -104,25 +104,29 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `6dd83ce` — `batch54: consume auth cleanup cue metadata`
-  - working tree hiện tại: bẩn đúng theo batch 54 iOS metadata-consumption slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `b53608a` — `batch54: consume ios cleanup cue metadata`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit iOS batch-54 metadata-consumption slice này; sau đó do closure-only run to clean artifacts and mark batch 54 fully closed if repo has no remaining real code seam for this batch
+  - batch 54 đã clean closed; run kế tiếp chỉ mở batch mới nếu workflow truth thực sự cần thêm end-to-end auth/session seam khác, không bịa micro-cleanup tiếp cho batch này
 
 ## Batch handoff note
 
-- Batch vừa xong: **53**
+- Batch vừa xong: **54**
 - Commit cuối đã chốt:
-  - `d5dfaee` — `batch53: expose restore cleanup cue`
-  - `90f82b0` — `batch53: align ios restore cleanup cue`
-  - `25b6fd6` — `batch53: mark workflow complete`
+  - `5ddea98` — `batch54: expose failure cleanup cue`
+  - `d26f65c` — `batch54: align ios failure cleanup cue`
+  - `bf0583e` — `batch54: preserve auth cleanup cue metadata`
+  - `6dd83ce` — `batch54: consume auth cleanup cue metadata`
+  - `b53608a` — `batch54: consume ios cleanup cue metadata`
 - Test-verify cuối:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → pass
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - không có blocker code trực tiếp; batch 53 đã khép kín ở mức restore outcome parity giữa web và iOS shell
-- Batch kế tiếp: **54**
-- Scope hẹp đầu tiên của batch 54:
-  - expose explicit `local_clear_recommended` trong web restore/refresh failure summaries để cleared-session outcomes không mất cấu trúc cue
+  - không còn blocker trực tiếp trong seam batch 54; phần đã làm là parity + contract consumption quanh invalid-session cleanup cue
+- Batch kế tiếp:
+  - chưa mở chính thức
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chỉ xác định sau khi main agent đối chiếu workflow truth và tìm được seam end-to-end auth/session mới thực sự còn thiếu

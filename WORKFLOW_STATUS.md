@@ -19,14 +19,14 @@
   - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `6dd83ce` — `batch54: consume auth cleanup cue metadata`
-  - working tree: bẩn đúng theo batch 54 iOS metadata-consumption slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `b53608a` — `batch54: consume ios cleanup cue metadata`
+  - working tree: sạch
 - Blocker: none
-- Next: commit iOS batch-54 metadata-consumption slice này; sau đó do closure-only run to clean artifacts and mark batch 54 fully closed if repo has no remaining real code seam for this batch
+- Next: batch 54 đã clean closed; run kế tiếp chỉ mở batch mới nếu workflow truth thực sự cần thêm end-to-end auth/session seam khác, không bịa micro-cleanup tiếp cho batch này
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 54 update:
+- Batch 54 closeout:
   - backend auth 401 invalid-session payloads giữ `local_clear_recommended: true` + `backend_detail`
   - web auth client parse structured backend error payload và show cleanup cue từ server metadata
-  - iOS auth client nay parse structured backend error payload cho restore/refresh/logout unauthorized paths
-  - iOS restore/refresh failure summaries nay show `local_clear_recommended` từ backend metadata thay vì hardcode local fallback
-  - batch 54 failure cleanup cue parity nay đã explicit xuyên backend ↔ web ↔ iOS cả ở contract lẫn summary consumption
+  - iOS auth client parse structured backend error payload cho restore/refresh/logout unauthorized paths
+  - restore/refresh failure summaries ở web + iOS đều đọc cleanup cue từ backend metadata
+  - artifact build outputs đã được dọn; batch 54 hiện closed sạch
