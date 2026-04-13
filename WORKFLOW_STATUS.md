@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 132
+- Batch: 133
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 132 iOS inbox seam hardening — add passive helper note when recipient-device timestamp debug hints auto-hide
+- Scope: batch 133 iOS inbox seam hardening — reset recipient-device auto-reload timestamp state when recipient user input is cleared
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch132 slice)
+  - latest commit: `HEAD` (local batch133 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch133 cho messaging friction tiếp theo (ví dụ reset auto-reload timestamp khi recipient user bị clear để tránh leftover debug-note cross-context) trong iOS inbox shell
+- Next: mở batch134 cho messaging friction tiếp theo (ví dụ clear stale timestamp state ngay khi conversation identity User A/User B đổi để tránh carry-over cross-thread) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -259,6 +259,10 @@
   - khi timestamp debug hints đã tự ẩn (>20s), UI giờ hiển thị một passive helper note giải thích đây là behavior chủ động để giữ màn hình gọn
   - helper note chỉ hiện khi có ít nhất một timestamp event đã vượt visibility window, tránh noise lúc chưa có event
   - giúp tester phân biệt rõ trạng thái “auto-hide theo thiết kế” với lỗi thiếu dữ liệu
+- Batch 133 outcome:
+  - khi `Recipient user UUID` bị clear, view giờ reset thêm `lastRecipientDevicesAutoReloadAt` cùng với skip state/device options
+  - tránh leftover timestamp state hoặc passive auto-hide note bị carry sang context recipient-user rỗng / mới
+  - recipient-device debug surface giờ nhất quán hơn khi tester chuyển giữa các recipient contexts
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -268,7 +272,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve direct conversation, nhập/paste `Recipient user UUID` để trigger auto reload và verify timestamp hint; đổi nhanh recipient user để kích hoạt skip hint; chờ >20s để xác nhận timestamp hints tự ẩn và passive note xuất hiện (không phải lỗi), sau đó bấm `Reload recipient devices` để tạo event mới và tiếp tục `Create message-device key`
+  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve direct conversation, nhập/paste `Recipient user UUID` để trigger timestamp hints/passive note; sau đó clear hoàn toàn `Recipient user UUID` và verify timestamp/passive-note state được reset ngay (không carry-over), rồi nhập recipient mới và tiếp tục `Reload recipient devices` + `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts
