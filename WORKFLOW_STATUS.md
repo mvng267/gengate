@@ -1,22 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 74
+- Batch: 75
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 74 web location launcher hardening — reduce browser-test friction by adding owner/share user-context prefill launcher on `/location`
+- Scope: batch 75 web MVP hub hardening — refresh `/` so the main browser entry point documents the new launcher/prefill paths across all core seams
 - Status: MVP-testable
 - Files:
-  - apps/web-nextjs/app/location/page.tsx
-  - apps/web-nextjs/components/location-shell.tsx
+  - apps/web-nextjs/app/page.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `16d44ba` — `batch73: harden web notifications launcher`
-  - working tree: bẩn (batch 74 ready to commit)
+  - latest commit: `58dbaff` — `batch74: harden web location launcher`
+  - working tree: bẩn (batch 75 ready to commit)
 - Blocker: none
-- Next: commit batch 74 web location launcher hardening; after that, prefer concrete human-test bug fixes over more launcher polish unless a real tester reports more friction
+- Next: commit batch 75 web MVP hub hardening; after that, prefer bug-fix/hardening from real human testing rather than more generic launcher polish
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -45,10 +44,13 @@
 - Batch 73 handoff:
   - `16d44ba` — `batch73: harden web notifications launcher`
   - notifications launcher hardening remains MVP-testable while batch 74 completes the same browser friction pass for location
-- Batch 74 outcome:
-  - web `/location` now includes a real GET launcher form for Owner / Allowed / existing Share UUID prefill
-  - location shell accepts query-prefilled owner/share context so testers can exercise counts, audience, toggles, and snapshots with less retyping
-  - this completes a consistent launcher/prefill path across the core web MVP seams while keeping contracts unchanged
+- Batch 74 handoff:
+  - `58dbaff` — `batch74: harden web location launcher`
+  - location launcher hardening remains MVP-testable while batch 75 refreshes the top-level MVP hub documentation for all launcher paths
+- Batch 75 outcome:
+  - web `/` now documents the launcher route and prefill example for each core MVP seam in one place
+  - browser testers no longer need to remember route/query conventions across Profile / Feed / Inbox / Notifications / Location
+  - this turns the MVP hub into a clearer top-level smoke-test navigator without changing backend contracts or domain behavior
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

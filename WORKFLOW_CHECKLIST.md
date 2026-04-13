@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **74 — web location launcher hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **75 — web MVP hub hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,24 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **74**
-- Scope hiện tại: web location launcher hardening — add a real browser form on `/location` and query-prefill owner/share-related fields so testers can exercise the location seam without retyping IDs.
+- Batch workflow chính thức hiện tại: **75**
+- Scope hiện tại: web MVP hub hardening — refresh `/` so testers can see all launcher routes and query-prefill examples in one place.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/app/location/page.tsx`
-  - `apps/web-nextjs/components/location-shell.tsx`
+  - `apps/web-nextjs/app/page.tsx`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `16d44ba` — `batch73: harden web notifications launcher`
-  - working tree hiện tại: bẩn (batch 74 ready to commit)
+  - commit gần nhất đã chốt: `58dbaff` — `batch74: harden web location launcher`
+  - working tree hiện tại: bẩn (batch 75 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch74 web location launcher hardening; sau đó ưu tiên bug-fix/hardening trực tiếp từ human testing thay vì tiếp tục launcher polish trừ khi có friction thật
+  - commit batch75 web MVP hub hardening; sau đó ưu tiên bug-fix/hardening trực tiếp từ human testing thay vì tiếp tục launcher polish chung chung
 
 ## Batch handoff note
 

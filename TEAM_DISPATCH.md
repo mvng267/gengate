@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 74
-- Trục công việc: web location launcher hardening — giảm ma sát browser test bằng launcher form owner/share context thật trên `/location`, không bắt tester retype UUID thủ công.
+- Batch workflow chính thức hiện tại: 75
+- Trục công việc: web MVP hub hardening — gom launcher guidance + query-prefill examples vào `/` để browser smoke path rõ ràng hơn.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -46,9 +46,9 @@
 - Trạng thái: idle_batch68.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: batch 74 `/location` launcher hardening đã xong.
-- Kết quả gần nhất: `/location` có owner/share launcher form thật và query-prefill flow cho browser testing.
-- Trạng thái: complete_batch74.
+- Scope hiện tại: batch 75 web MVP hub hardening đã xong.
+- Kết quả gần nhất: `/` đã gom launcher guidance và prefill examples cho các seam web chính.
+- Trạng thái: complete_batch75.
 
 ### pikame-ios — iOS
 - Scope hiện tại: không mở iOS scope mới trong batch 70.
