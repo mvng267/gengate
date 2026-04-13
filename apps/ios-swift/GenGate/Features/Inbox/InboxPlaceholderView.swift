@@ -50,7 +50,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -83,7 +83,8 @@ struct InboxPlaceholderView: View {
                         "Switching direct-thread identity (`User A`/`User B`) now clears recipient-device user/device drafts + options immediately to prevent stale device-target actions before next reload.",
                         "If direct-thread load fails and thread state resets, recipient-device user/device/options are now cleared in the same reset path so stale targets do not leak across recovery flows.",
                         "After successful thread load, if current recipient user is not in loaded conversation members, recipient-device context is auto-cleared to avoid cross-conversation stale target carry-over.",
-                        "When non-member auto-clear happens, inbox now shows a short inline reset-reason helper note (~20s) so testers know this reset is intentional."
+                        "When non-member auto-clear happens, inbox now shows a short inline reset-reason helper note (~20s) so testers know this reset is intentional.",
+                        "Typing a new `Recipient user UUID` now clears the previous reset-reason helper note immediately to avoid stale explanation text in the new context."
                     ]
                 )
 
@@ -249,6 +250,11 @@ struct InboxPlaceholderView: View {
                             .background(Color.secondary.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                             .onChange(of: recipientUserIDDraft) {
+                                if lastRecipientDeviceContextResetReason != nil {
+                                    lastRecipientDeviceContextResetReason = nil
+                                    lastRecipientDeviceContextResetAt = nil
+                                }
+
                                 let trimmedRecipientUserID = recipientUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
                                 let trimmedRecipientDeviceID = recipientDeviceIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
                                 if !trimmedRecipientUserID.isEmpty,

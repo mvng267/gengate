@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 138
+- Batch: 139
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 138 iOS inbox seam hardening — hiển thị explicit inline helper note khi recipient-device context bị auto-clear do recipient user không thuộc member set của direct-thread mới
+- Scope: batch 139 iOS inbox seam hardening — clear non-member reset-reason helper note ngay khi tester nhập recipient user mới để tránh stale explanation text
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch138 slice)
+  - latest commit: `HEAD` (local batch139 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch139 cho messaging friction tiếp theo (khi non-member auto-clear xảy ra, clear helper note ngay khi tester nhập recipient user mới để tránh stale explanation text) trong iOS inbox shell
+- Next: mở batch140 cho messaging friction tiếp theo (chỉ hiện non-member reset-reason helper note khi recipient context thực sự đang rỗng sau auto-clear, tránh note hiển thị trong state đã refill mới) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -283,6 +283,10 @@
   - `clearRecipientDeviceContext` được mở rộng với `reason` metadata để ghi lại lý do reset gần nhất + timestamp
   - khi non-member auto-clear xảy ra sau direct-thread load thành công, helper note inline sẽ hiển thị: `Recipient-device context reset (non-member recipient after direct-thread switch) · <Ns> ago`
   - helper note tự hết hạn sau ~20s, giúp tester hiểu reset là hành vi chủ động thay vì lỗi ngẫu nhiên
+- Batch 139 outcome:
+  - khi tester bắt đầu nhập `Recipient user UUID` mới, state `lastRecipientDeviceContextResetReason/At` được clear ngay ở `onChange` của input này
+  - nhờ đó helper note từ non-member auto-clear trước đó không còn bám vào context mới trong lúc tester chuẩn bị reload recipient devices
+  - UX recipient-device flow nhất quán hơn giữa pha reset thread cũ và pha nhập recipient mới
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -292,7 +296,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, load direct thread A-B, set recipient user/device to load options; sau đó load direct thread C-D thành công (khác member set) và verify recipient user/device/options bị auto-clear khi recipient user cũ không thuộc member set mới + xuất hiện inline reset-reason helper note; cuối cùng nhập recipient user phù hợp context mới rồi `Reload recipient devices` + `Create message-device key`
+  - iOS Inbox path: open Inbox tab, load direct thread A-B, set recipient user/device to load options; sau đó load direct thread C-D thành công (khác member set) và verify recipient user/device/options bị auto-clear khi recipient user cũ không thuộc member set mới + xuất hiện inline reset-reason helper note; tiếp theo bắt đầu nhập recipient user mới và verify helper note cũ biến mất ngay; cuối cùng `Reload recipient devices` + `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts
