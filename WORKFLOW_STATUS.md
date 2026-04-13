@@ -1,21 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 80
+- Batch: 81
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 80 web notifications pivot hardening — carry active notification user context into nearby launcher links so testers can move out of notifications with less UUID retyping
+- Scope: batch 81 web location pivot hardening — carry active owner/share context into nearby launcher links so testers can move out of location with less UUID retyping
 - Status: MVP-testable
 - Files:
-  - apps/web-nextjs/app/notifications/page.tsx
+  - apps/web-nextjs/app/location/page.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `b8dc422` — `batch79: harden web feed pivots`
-  - working tree: bẩn (batch 80 ready to commit)
+  - latest commit: `6bb404a` — `batch80: harden web notifications pivots`
+  - working tree: bẩn (batch 81 ready to commit)
 - Blocker: none
-- Next: commit batch 80 web notifications pivot hardening; after that, only open another slice if it removes similarly concrete cross-seam friction in human testing
+- Next: commit batch 81 web location pivot hardening; after that, only open another slice if a real human-test blocker appears rather than continuing generic launcher polish
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -62,10 +62,13 @@
 - Batch 79 handoff:
   - `b8dc422` — `batch79: harden web feed pivots`
   - feed pivot hardening remains MVP-testable while batch 80 reduces similar friction from the notifications entry point
-- Batch 80 outcome:
-  - `/notifications` quick pivots now carry active user context into profile, feed, inbox, and location launcher routes
-  - testers can continue cross-seam validation from notifications without retyping the same UUID
-  - this further shortens the real browser smoke path while keeping domain contracts unchanged
+- Batch 80 handoff:
+  - `6bb404a` — `batch80: harden web notifications pivots`
+  - notifications pivot hardening remains MVP-testable while batch 81 completes the same cross-seam treatment for location
+- Batch 81 outcome:
+  - `/location` quick pivots now carry active owner/allowed context into profile, feed, inbox, and notifications launcher routes
+  - testers can continue cross-seam validation from location without retyping the same IDs
+  - this completes a more consistent cross-seam launcher pivot loop across the core web MVP surfaces without changing domain contracts
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

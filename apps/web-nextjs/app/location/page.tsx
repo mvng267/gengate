@@ -16,6 +16,15 @@ export default async function LocationPage({ searchParams }: LocationPageProps) 
   const allowedUserId = params?.allowed?.trim() ?? "";
   const shareId = params?.share?.trim() ?? "";
 
+  const profileHref = ownerUserId ? `/profile?user=${encodeURIComponent(ownerUserId)}` : allowedUserId ? `/profile?user=${encodeURIComponent(allowedUserId)}` : "/profile";
+  const feedHref = ownerUserId || allowedUserId
+    ? `/feed?author=${encodeURIComponent(ownerUserId || allowedUserId)}&viewer=${encodeURIComponent(allowedUserId || ownerUserId)}`
+    : "/feed";
+  const inboxHref = ownerUserId || allowedUserId
+    ? `/inbox?userA=${encodeURIComponent(ownerUserId || allowedUserId)}&userB=${encodeURIComponent(allowedUserId || ownerUserId)}&sender=${encodeURIComponent(ownerUserId || allowedUserId)}`
+    : "/inbox";
+  const notificationsHref = ownerUserId ? `/notifications?user=${encodeURIComponent(ownerUserId)}` : allowedUserId ? `/notifications?user=${encodeURIComponent(allowedUserId)}` : "/notifications";
+
   return (
     <section>
       <h1>Location</h1>
@@ -69,8 +78,11 @@ export default async function LocationPage({ searchParams }: LocationPageProps) 
             <code>{shareId || "(not set)"}</code>
           </p>
           <p>
-            Suggested pivots after validating location state: <Link href="/profile">Profile</Link> · <Link href="/feed">Feed</Link> ·{" "}
-            <Link href="/inbox">Inbox</Link> · <Link href="/notifications">Notifications</Link>
+            Suggested pivots after validating location state: <Link href={profileHref}>Profile</Link> · <Link href={feedHref}>Feed</Link> ·{" "}
+            <Link href={inboxHref}>Inbox</Link> · <Link href={notificationsHref}>Notifications</Link>
+          </p>
+          <p>
+            Tip: these pivots now carry the current owner/allowed context forward, so you can continue cross-seam testing without retyping the same IDs.
           </p>
         </>
       ) : (

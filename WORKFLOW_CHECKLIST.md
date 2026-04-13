@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **80 — web notifications pivot hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **81 — web location pivot hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **80**
-- Scope hiện tại: web notifications pivot hardening — carry active notification user context into nearby launcher links so testers can move out of notifications with less UUID retyping.
+- Batch workflow chính thức hiện tại: **81**
+- Scope hiện tại: web location pivot hardening — carry active owner/share context into nearby launcher links so testers can move out of location with less UUID retyping.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/app/notifications/page.tsx`
+  - `apps/web-nextjs/app/location/page.tsx`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `b8dc422` — `batch79: harden web feed pivots`
-  - working tree hiện tại: bẩn (batch 80 ready to commit)
+  - commit gần nhất đã chốt: `6bb404a` — `batch80: harden web notifications pivots`
+  - working tree hiện tại: bẩn (batch 81 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch80 web notifications pivot hardening; sau đó chỉ mở slice mới nếu nó giải quyết friction thật từ human testing hoặc cross-seam navigation pain cụ thể
+  - commit batch81 web location pivot hardening; sau đó chỉ mở slice mới nếu có blocker thật từ human testing thay vì tiếp tục generic launcher polish
 
 ## Batch handoff note
 
