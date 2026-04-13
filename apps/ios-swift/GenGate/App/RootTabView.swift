@@ -16,7 +16,7 @@ struct RootTabView: View {
             NavigationStack {
                 protectedTabContent(
                     title: "Feed",
-                    summary: "Friends-only moment feed UI and data loading are pending."
+                    summary: "Friends-only feed now supports minimal moment create + read shell; reactions and richer media UX remain pending."
                 ) {
                     FeedPlaceholderView()
                 }
@@ -29,7 +29,7 @@ struct RootTabView: View {
             NavigationStack {
                 protectedTabContent(
                     title: "Inbox",
-                    summary: "1:1 encrypted messaging thread list and composer are pending."
+                    summary: "Direct thread + text send shell is live; device-key and realtime delivery flows remain pending."
                 ) {
                     InboxPlaceholderView()
                 }
@@ -42,7 +42,7 @@ struct RootTabView: View {
             NavigationStack {
                 protectedTabContent(
                     title: "Location",
-                    summary: "Snapshot sharing controls and viewer permissions UI are pending."
+                    summary: "Location share state shell now supports create share + audience add + count/status checks; map UI remains pending."
                 ) {
                     LocationPlaceholderView()
                 }
@@ -55,7 +55,7 @@ struct RootTabView: View {
             NavigationStack {
                 protectedTabContent(
                     title: "Notifications",
-                    summary: "Read-only notification center shell backed by live backend list contracts. Mutation controls are still pending."
+                    summary: "Notification shell now supports create + list + read/unread toggles; delete and richer grouping remain pending."
                 ) {
                     NotificationsPlaceholderView()
                 }

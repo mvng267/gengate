@@ -1,21 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 91
+- Batch: 92
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 91 iOS notifications lifecycle hardening — allow creating notifications from native shell before read/unread toggles
+- Scope: batch 92 iOS shell truth hardening — align Root tab auth-gate summaries with real implemented MVP seams
 - Status: MVP-testable
 - Files:
-  - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
+  - apps/ios-swift/GenGate/App/RootTabView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `a0a4cbe` — `batch91: harden ios notifications lifecycle`
-  - working tree: sạch
+  - latest commit: `51a08f3` — `batch91: harden ios notifications lifecycle`
+  - working tree: bẩn (batch 92 ready to commit)
 - Blocker: none
-- Next: open next narrow MVP seam only from concrete human-test friction; avoid metadata churn
+- Next: commit batch 92 root-tab truth hardening; then continue only with concrete human-test friction
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -95,17 +95,20 @@
 - Batch 90 handoff:
   - `ecbd162` — `batch90: harden ios location share actions`
   - native location share create/audience add seam remains MVP-testable while batch 91 hardens native notifications lifecycle
-- Batch 91 outcome:
-  - iOS notifications shell now supports creating notifications via `POST /notifications` directly from native tab
-  - iOS notifications shell continues supporting `/notifications/{user_id}` read and per-row read/unread toggle mutation
-  - notification seam is now testable end-to-end from iOS without pre-seeding via web/backend tools
+- Batch 91 handoff:
+  - `51a08f3` — `batch91: harden ios notifications lifecycle`
+  - native notifications create/read/toggle seam remains MVP-testable while batch 92 aligns root auth-gate summaries with actual seam state
+- Batch 92 outcome:
+  - `RootTabView` auth-gate summaries now match the real implemented state of Feed/Inbox/Location/Notifications shells
+  - this removes stale “pending” copy that could mislead human testers about already-available MVP flows
+  - iOS top-level navigation now reflects truthful seam readiness before login/session handoff
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
   - iOS verify: `cd apps/ios-swift && swift build`
   - web MVP hub: `http://localhost:3000/`
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
-  - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, and load friend graph snapshot
+  - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
   - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, and load messages
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state

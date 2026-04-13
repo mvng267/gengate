@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 91
-- Trục công việc: batch 91 đã chốt — iOS notifications lifecycle hardening (native create notification + list + read/unread toggle).
+- Batch workflow chính thức hiện tại: 92
+- Trục công việc: iOS shell truth hardening — align Root tab auth-gate summaries with actual implemented seam state.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: complete_batch84.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 91 iOS notifications lifecycle hardening đã xong.
-- Kết quả gần nhất: native notifications shell create được notification và toggle read/unread ngay trong iOS tab.
-- Trạng thái: complete_batch91.
+- Scope hiện tại: batch 92 iOS shell truth hardening đã xong.
+- Kết quả gần nhất: Root tab summaries đã phản ánh đúng các seam iOS đã live để giảm sai lệch khi human test.
+- Trạng thái: complete_batch92.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
