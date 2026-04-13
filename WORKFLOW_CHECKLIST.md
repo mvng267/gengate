@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **109 — iOS inbox cursor ordering hint slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **110 — iOS inbox first-unread jump action slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **109**
-- Scope hiện tại: iOS inbox read-status UX hardening — inline cursor ordering + unread-behind hint.
+- Batch workflow chính thức hiện tại: **110**
+- Scope hiện tại: iOS inbox read-status UX hardening — quick jump to first unread candidate for focus user.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch109 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch110 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch110 cho messaging friction tiếp theo (quick jump action to first unread candidate) trong iOS inbox shell
+  - mở batch111 cho messaging friction tiếp theo (quick action set focus user from row tap) trong iOS inbox shell
 
 ## Batch handoff note
 

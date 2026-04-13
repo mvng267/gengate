@@ -40,14 +40,15 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
                         "You can now call `PATCH /conversations/{id}/members/{user_id}/read-cursor` directly from iOS to move read cursor and observe `last_read_by` + focused `read_status(user)` + member cursor summary in-shell.",
                         "Quick action `Mark latest message as read (focus user)` helps testers advance read cursor to newest loaded row with one tap.",
                         "Quick preset buttons now let testers pick member/message targets without copy-pasting UUIDs manually.",
-                        "Member summary now shows cursor ordering hint + unread count behind cursor to spot lagging read state quickly."
+                        "Member summary now shows cursor ordering hint + unread count behind cursor to spot lagging read state quickly.",
+                        "Quick action `Jump focus user to first unread candidate` advances cursor to the earliest unread loaded message for the focus user."
                     ]
                 )
 
@@ -412,6 +413,33 @@ struct InboxPlaceholderView: View {
                             (resolvedReadStatusFocusUserID?.isEmpty ?? true) ||
                             (latestLoadedMessageID?.isEmpty ?? true)
                         )
+
+                        Button {
+                            Task {
+                                await jumpToFirstUnreadCandidateForFocusUser()
+                            }
+                        } label: {
+                            Text(isUpdatingReadCursor ? "Jumping to first unread..." : "Jump focus user to first unread candidate")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(
+                            isLoading ||
+                            isSendingMessage ||
+                            isCreatingAttachment ||
+                            isCreatingDeviceKey ||
+                            isDeletingMessage ||
+                            isUpdatingReadCursor ||
+                            conversationSummary == nil ||
+                            (firstUnreadMessageIDForFocusUser?.isEmpty ?? true) ||
+                            (resolvedReadStatusFocusUserID?.isEmpty ?? true)
+                        )
+
+                        if let firstUnreadMessageIDForFocusUser {
+                            Text("first_unread_candidate_message_id: \(firstUnreadMessageIDForFocusUser)")
+                                .font(.caption.monospaced())
+                                .foregroundStyle(.secondary)
+                        }
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
@@ -763,6 +791,32 @@ struct InboxPlaceholderView: View {
         messageRows.last?.id
     }
 
+    private var firstUnreadMessageIDForFocusUser: String? {
+        guard let focusUserID = resolvedReadStatusFocusUserID,
+              !focusUserID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return nil
+        }
+
+        let focusMember = conversationMembers.first(where: { $0.userID == focusUserID })
+        let cursorMessageID = focusMember?.lastReadMessageID
+
+        guard !messageRows.isEmpty else {
+            return nil
+        }
+
+        guard let cursorMessageID,
+              let cursorIndex = messageRows.firstIndex(where: { $0.id == cursorMessageID }) else {
+            return messageRows.first?.id
+        }
+
+        let unreadIndex = cursorIndex + 1
+        guard unreadIndex < messageRows.count else {
+            return nil
+        }
+
+        return messageRows[unreadIndex].id
+    }
+
     private func unreadMessageCountBehindCursor(lastReadMessageID: String?) -> Int {
         guard let lastReadMessageID,
               let cursorIndex = messageRows.firstIndex(where: { $0.id == lastReadMessageID }) else {
@@ -1036,6 +1090,22 @@ struct InboxPlaceholderView: View {
         guard let targetMessageID = latestLoadedMessageID,
               !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             fetchError = "Không có message nào để mark as read."
+            return
+        }
+
+        await performReadCursorUpdate(targetUserID: targetUserID, targetMessageID: targetMessageID)
+    }
+
+    private func jumpToFirstUnreadCandidateForFocusUser() async {
+        guard let targetUserID = resolvedReadStatusFocusUserID,
+              !targetUserID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            fetchError = "Cần focus user UUID hợp lệ để jump first unread."
+            return
+        }
+
+        guard let targetMessageID = firstUnreadMessageIDForFocusUser,
+              !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            fetchError = "Không có first unread candidate cho focus user."
             return
         }
 

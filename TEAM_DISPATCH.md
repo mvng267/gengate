@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 109
-- Trục công việc: iOS inbox seam hardening — add inline cursor ordering + unread-behind hints để đọc trạng thái nhanh hơn.
+- Batch workflow chính thức hiện tại: 110
+- Trục công việc: iOS inbox seam hardening — add quick jump to first unread candidate cho focus user.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 109 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: Member summary hiển thị `cursor_order_hint` + `unread_behind_cursor` cho từng user để phát hiện cursor lag nhanh hơn.
-- Trạng thái: verify_batch109_ios.
+- Scope hiện tại: batch 110 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: Inbox có action `Jump focus user to first unread candidate` để tiến cursor từng bước unread nhanh hơn.
+- Trạng thái: verify_batch110_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
