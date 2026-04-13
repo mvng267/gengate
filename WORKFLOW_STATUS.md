@@ -1,25 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 51
+- Batch: 52
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 51 register conflict backend detail parity — web + iOS shells now surface explicit backend error detail for failed `/auth/register` conflict instead of collapsing register conflict to generic text
-- Status: complete
+- Scope: batch 52 web persisted session preview parity — stored web shell preview now surfaces backend detail + local clear recommendation so refresh/restore persistence cues stay visible after save
+- Status: verify
 - Files:
-  - apps/web-nextjs/lib/auth/client.ts
   - apps/web-nextjs/app/login/page.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `e6416a1` — `batch51: align ios register conflict detail`
-  - working tree: sạch
+  - latest commit: `28f5eca` — `batch51: mark workflow complete`
+  - working tree: bẩn đúng theo batch 52 web persisted-session preview slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 52 với 1 seam auth/session end-to-end mới; ưu tiên refresh/session restore parity hẹp nếu shell vẫn còn collapse backend detail hoặc thiếu persistence cue
+- Next: commit web batch-52 slice này; sau đó inspect iOS persisted session snapshot cue only if needed to keep refresh/restore persistence parity cross-shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 51 closeout:
-  - web register conflict nay preserve/surface backend detail thật
-  - iOS register conflict nay preserve/surface backend detail thật
-  - artifact verify output đã được dọn; batch 51 hiện complete sạch
+- Batch 52 update:
+  - web stored-session preview nay hiện `backend_detail` thay vì ẩn mất detail đã persist
+  - web stored-session preview nay hiện `local_clear_recommended` để persistence/cleanup cue không bị mất sau refresh/restore

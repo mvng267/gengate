@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **đã complete batch 51**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 52**.
 
 ## Reporting hard rule
 
@@ -88,22 +88,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **51**
-- Scope hiện tại: batch 51 closeout — artifact cleanup + truthful workflow finish marker after cross-shell register-conflict detail parity.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **52**
+- Scope hiện tại: web persisted session preview parity — stored web shell preview now surfaces backend detail + local clear recommendation.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `WORKFLOW_STATUS.md`
-  - `WORKFLOW_CHECKLIST.md`
+  - `apps/web-nextjs/app/login/page.tsx`
 - Test-verify:
-  - web: `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - iOS: `cd apps/ios-swift && swift build` → ✅ pass
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `e6416a1` — `batch51: align ios register conflict detail`
-  - working tree hiện tại: sạch sau khi dọn `apps/ios-swift/.build/` và `apps/web-nextjs/tsconfig.tsbuildinfo`
+  - commit gần nhất đã chốt: `28f5eca` — `batch51: mark workflow complete`
+  - working tree hiện tại: bẩn đúng theo batch 52 web persisted-session preview slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch 52 với 1 seam auth/session end-to-end mới; ưu tiên refresh/session restore parity hẹp nếu shell vẫn còn collapse backend detail hoặc thiếu persistence cue
+  - commit web batch-52 slice này; sau đó inspect iOS persisted session snapshot cue only if needed to keep refresh/restore persistence parity cross-shell
 
 ## Batch handoff note
 
@@ -111,6 +109,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Commit cuối đã chốt:
   - `5b3efb3` — `batch51: surface register conflict detail`
   - `e6416a1` — `batch51: align ios register conflict detail`
+  - `28f5eca` — `batch51: mark workflow complete`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
@@ -118,4 +117,4 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - không có blocker code trực tiếp; batch 51 đã khép kín ở mức register-conflict backend detail parity giữa web và iOS shell
 - Batch kế tiếp: **52**
 - Scope hẹp đầu tiên của batch 52:
-  - ưu tiên refresh/session restore parity tối thiểu giữa backend và web/iOS shell, đặc biệt nơi outcome summary còn thiếu backend detail hoặc persistence cue
+  - expose persisted-session backend detail + local-clear recommendation trong web shell preview để refresh/restore persistence contract không bị ẩn sau khi lưu local session

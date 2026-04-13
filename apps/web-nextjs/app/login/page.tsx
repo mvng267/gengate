@@ -45,6 +45,8 @@ function formatStoredSessionPreview() {
     `device_id: ${stored.session.device_id}`,
     `token_type: ${stored.session.token_type}`,
     `session_status: ${stored.session.session_status}`,
+    `backend_detail: ${stored.session.backend_detail ?? stored.session.session_status}`,
+    `local_clear_recommended: ${stored.session.local_clear_recommended ? "true" : "false"}`,
     `expires_in_seconds: ${stored.session.expires_in_seconds}`,
   ].join("\n");
 }
