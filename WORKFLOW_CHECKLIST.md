@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **102 — iOS inbox read-cursor consume slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **103 — iOS inbox recipient-device fetch/picker slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **102**
-- Scope hiện tại: iOS inbox consume read-cursor API và hiển thị `last_read_by` trên message rows.
+- Batch workflow chính thức hiện tại: **103**
+- Scope hiện tại: iOS inbox device-key UX hardening — fetch/picker recipient devices từ `/auth/devices/{user_id}`.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `68baeef` — `chore: sync team dispatch for batch101`
-  - working tree hiện tại: bẩn (batch102 iOS read-cursor slice pending commit)
+  - commit gần nhất đã chốt: `HEAD` (local batch103 slice)
+  - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch102 iOS read-cursor slice; sau đó mở batch103 messaging/realtime friction kế tiếp (web paused)
+  - mở batch104 cho messaging realtime friction kế tiếp (web paused)
 
 ## Batch handoff note
 

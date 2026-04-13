@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 102
+- Batch: 103
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 102 iOS inbox seam hardening — consume backend read-cursor contract and surface per-message `last_read_by` state
+- Scope: batch 103 iOS inbox seam hardening — reduce device-key create friction via recipient-device fetch/picker
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `68baeef` — `chore: sync team dispatch for batch101`
-  - working tree: bẩn (batch102 iOS read-cursor slice pending commit)
+  - latest commit: `HEAD` (local batch103 slice)
+  - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: commit batch102 iOS read-cursor controls; tiếp tục batch103 messaging/realtime friction kế tiếp (web paused)
+- Next: mở batch104 cho messaging realtime friction kế tiếp (web vẫn paused)
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -135,10 +135,14 @@
   - backend adds `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` to update direct-thread `last_read_message_id`
   - contract returns `conversation_not_direct` / `message_conversation_mismatch` (400) and not-found classes (404) for parity-safe error mapping
   - conversation member response now includes `last_read_message_id` so clients can render read-status cursor directly
-- Batch 102 outcome (in progress):
+- Batch 102 outcome:
   - iOS Inbox tab now loads conversation members (`GET /conversations/{id}/members`) alongside messages
   - iOS Inbox tab adds native "Update read cursor" action calling `PATCH /conversations/{id}/members/{user_id}/read-cursor`
   - message rows now display `last_read_by` derived from member `last_read_message_id` to expose read-status cursor changes in-shell
+- Batch 103 outcome:
+  - iOS Inbox device-key form now fetches recipient devices via `GET /auth/devices/{user_id}`
+  - Inbox adds recipient-device picker + manual reload action; selected option auto-fills `recipient_device_id`
+  - thread reload now refreshes recipient-device options for the selected recipient user to reduce stale-target friction during key create
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -148,7 +152,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, create/list message device keys, then use "Update read cursor" and verify `last_read_by` appears on the target message row
+  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, nhập recipient user để load device list (`/auth/devices/{user_id}`), chọn recipient device rồi create/list message device keys, sau đó dùng "Update read cursor" và verify `last_read_by` appears on the target message row
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

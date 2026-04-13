@@ -17,6 +17,8 @@ struct InboxPlaceholderView: View {
     @State private var readCursorTargetMessageIDDraft: String = ""
     @State private var recipientUserIDDraft: String = ""
     @State private var recipientDeviceIDDraft: String = ""
+    @State private var recipientDeviceOptions: [InboxDeviceOptionRow] = []
+    @State private var isLoadingRecipientDevices = false
     @State private var wrappedMessageKeyBlobDraft: String = "ios-demo-wrapped-message-key"
     @State private var messageToDeleteIDDraft: String = ""
     @State private var attachmentTypeDraft: String = "image"
@@ -35,11 +37,11 @@ struct InboxPlaceholderView: View {
             VStack(alignment: .leading, spacing: 20) {
                 FeaturePlaceholderView(
                     title: "Inbox",
-                    summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, and inspect read-cursor state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + read-cursor updates; realtime delivery remains pending.",
+                    summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor state via the same backend contracts as web.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
-                        "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, and `/messages/{id}/device-keys`.",
+                        "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
                         "You can now call `PATCH /conversations/{id}/members/{user_id}/read-cursor` directly from iOS to move read cursor and observe `last_read_by` in loaded rows."
                     ]
                 )
@@ -200,6 +202,27 @@ struct InboxPlaceholderView: View {
                             .background(Color.secondary.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                        if isLoadingRecipientDevices {
+                            Text("Recipient devices: loading...")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        } else if recipientDeviceOptions.isEmpty {
+                            Text("Recipient devices: chưa load (nhập Recipient user UUID để fetch `/auth/devices/{user_id}`)")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Picker("Recipient device", selection: $recipientDeviceIDDraft) {
+                                Text("Select recipient device UUID").tag("")
+                                ForEach(recipientDeviceOptions) { option in
+                                    Text("\(option.deviceName) · \(option.platform) · \(option.deviceTrustState) · \(option.id)")
+                                        .tag(option.id)
+                                }
+                            }
+#if os(iOS)
+                            .pickerStyle(.menu)
+#endif
+                        }
+
                         TextField("Recipient device UUID", text: $recipientDeviceIDDraft)
 #if os(iOS)
                             .textInputAutocapitalization(.never)
@@ -220,6 +243,21 @@ struct InboxPlaceholderView: View {
 
                         Button {
                             Task {
+                                await loadRecipientDevices()
+                            }
+                        } label: {
+                            Text("Reload recipient devices")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(
+                            isLoading ||
+                            isLoadingRecipientDevices ||
+                            recipientUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        )
+
+                        Button {
+                            Task {
                                 await createMessageDeviceKey()
                             }
                         } label: {
@@ -229,6 +267,7 @@ struct InboxPlaceholderView: View {
                         .buttonStyle(.bordered)
                         .disabled(
                             isLoading ||
+                            isLoadingRecipientDevices ||
                             isSendingMessage ||
                             isCreatingAttachment ||
                             isDeletingMessage ||
@@ -546,12 +585,18 @@ struct InboxPlaceholderView: View {
             messageRows = messages
             attachmentMap = nextAttachmentMap
             deviceKeyMap = nextDeviceKeyMap
+
+            let resolvedRecipientUserID = recipientUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !resolvedRecipientUserID.isEmpty {
+                await loadRecipientDevices()
+            }
         } catch {
             conversationSummary = nil
             conversationMembers = []
             messageRows = []
             attachmentMap = [:]
             deviceKeyMap = [:]
+            recipientDeviceOptions = []
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
 
@@ -671,12 +716,41 @@ struct InboxPlaceholderView: View {
                 recipientDeviceID: trimmedRecipientDeviceID,
                 wrappedMessageKeyBlob: trimmedWrappedBlob
             )
+            wrappedMessageKeyBlobDraft = "ios-demo-wrapped-message-key"
             await loadInboxThread()
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
 
         isCreatingDeviceKey = false
+    }
+
+    private func loadRecipientDevices() async {
+        let trimmedRecipientUserID = recipientUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedRecipientUserID.isEmpty else {
+            recipientDeviceOptions = []
+            recipientDeviceIDDraft = ""
+            return
+        }
+
+        isLoadingRecipientDevices = true
+
+        defer {
+            isLoadingRecipientDevices = false
+        }
+
+        do {
+            let options = try await InboxAPIClient().fetchDevices(userID: trimmedRecipientUserID)
+            recipientDeviceOptions = options
+            if options.contains(where: { $0.id == recipientDeviceIDDraft }) == false {
+                recipientDeviceIDDraft = options.first?.id ?? ""
+            }
+        } catch {
+            recipientDeviceOptions = []
+            recipientDeviceIDDraft = ""
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
     }
 
     private func updateReadCursor() async {
@@ -779,6 +853,13 @@ private struct InboxDeviceKeyRow: Identifiable {
     let recipientDeviceID: String
 }
 
+private struct InboxDeviceOptionRow: Identifiable {
+    let id: String
+    let platform: String
+    let deviceName: String
+    let deviceTrustState: String
+}
+
 private struct InboxAPIClient {
     private struct DirectConversationResponse: Decodable {
         let id: String
@@ -856,6 +937,19 @@ private struct InboxAPIClient {
 
     private struct ConversationReadCursorUpdateRequest: Encodable {
         let last_read_message_id: String
+    }
+
+    private struct DeviceListResponse: Decodable {
+        let count: Int
+        let items: [DeviceResponse]
+    }
+
+    private struct DeviceResponse: Decodable {
+        let id: String
+        let user_id: String
+        let platform: String
+        let device_name: String
+        let device_trust_state: String
     }
 
     private struct BackendErrorPayload: Decodable {
@@ -1102,6 +1196,30 @@ private struct InboxAPIClient {
                 userID: payload.user_id,
                 lastReadMessageID: payload.last_read_message_id
             )
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func fetchDevices(userID: String) async throws -> [InboxDeviceOptionRow] {
+        let url = try makeURL(path: "/auth/devices/\(userID)")
+        let (data, response) = try await URLSession.shared.data(from: url)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 200 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Recipient devices fetch failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(DeviceListResponse.self, from: data)
+            return payload.items.map {
+                InboxDeviceOptionRow(
+                    id: $0.id,
+                    platform: $0.platform,
+                    deviceName: $0.device_name,
+                    deviceTrustState: $0.device_trust_state
+                )
+            }
         } catch {
             throw APIError.invalidResponse
         }

@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 102
-- Trục công việc: iOS inbox seam hardening — consume read-cursor API và hiển thị `last_read_by`.
+- Batch workflow chính thức hiện tại: 103
+- Trục công việc: iOS inbox seam hardening — reduce device-key friction bằng recipient-device fetch/picker.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 102 iOS inbox read-cursor consume slice.
-- Kết quả gần nhất: Inbox đã có action cập nhật read-cursor và hiển thị `last_read_by` theo member cursor.
-- Trạng thái: verify_batch102_ios.
+- Scope hiện tại: batch 103 iOS inbox device-key UX hardening.
+- Kết quả gần nhất: Inbox đã có recipient-device fetch (`/auth/devices/{user_id}`) + picker + reload action để autofill `recipient_device_id` trước khi create key.
+- Trạng thái: verify_batch103_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
