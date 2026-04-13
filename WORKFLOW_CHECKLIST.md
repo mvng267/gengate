@@ -89,20 +89,19 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **49**
-- Scope hiện tại: backend login detail cue parity — surface explicit backend detail in `/auth/login` response.
+- Scope hiện tại: web login detail cue parity — align web login shell framing with explicit backend login cue.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/backend-python/app/modules/auth/router.py`
-  - `apps/backend-python/tests/test_auth_api.py`
+  - `apps/web-nextjs/app/login/page.tsx`
 - Test-verify:
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ pass
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `450152c` — `batch48: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 49 backend login detail cue slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `6528d37` — `batch49: add login detail cue`
+  - working tree hiện tại: bẩn đúng theo batch 49 web login detail cue slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit backend batch-49 slice này; sau đó follow-up 1 shell lane để đọc trực tiếp login `backend_detail` mới thay vì fallback từ `session_status`
+  - commit web batch-49 slice này; sau đó follow-up 1 shell lane còn lại (ưu tiên iOS) để align login `backend_detail` framing trực tiếp
 
 ## Batch handoff note
 

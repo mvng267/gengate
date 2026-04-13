@@ -267,18 +267,18 @@ export default function LoginPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-start">
       <section className="flex-1 space-y-4">
         <span className="inline-flex rounded-full border border-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-          Batch 48 · Web refresh restore detail cue parity
+          Batch 49 · Web login detail cue parity
         </span>
         <h1 className="text-4xl font-black tracking-tight text-black">
-          Web shell nay đọc trực tiếp backend detail cue cho login, refresh, và restore path để phân biệt rõ state do backend xác nhận thay vì chỉ suy từ local session status text.
+          Web shell nay đọc trực tiếp login backend detail cue để phân biệt rõ session vừa được backend tạo mới thay vì chỉ fallback từ local session status text.
         </h1>
         <p className="max-w-2xl text-base leading-7 text-neutral-700">
-          Batch 48 ưu tiên 1 follow-up hẹp: web shell đọc trực tiếp `backend_detail` và `local_clear_recommended` từ refresh/restore-capable auth responses để verify auth loop rõ hơn.
+          Batch 49 ưu tiên 1 follow-up hẹp: web shell align login framing với contract mới của `/auth/login`, nơi backend trả explicit `backend_detail` cho lần tạo session đầu vào.
         </p>
         <ul className="space-y-2 text-sm text-neutral-700">
           <li>• Password/OTP vẫn là placeholder trên UI, chưa dùng cho API ở batch này.</li>
           <li>• Web shell nay có persisted-session inspector, login outcome panel, local clear outcome panel, restore outcome panel, refresh outcome panel, và logout outcome panel để nhìn rõ từng auth action.</li>
-          <li>• Login/refresh/restore outcome nay ưu tiên đọc trực tiếp `backend_detail` + `local_clear_recommended` từ backend contract mới.</li>
+          <li>• Login outcome nay đọc trực tiếp `backend_detail = login_session_created` từ backend contract mới; refresh/restore/logout vẫn giữ cue parity đã có.</li>
           <li>• Redirect đích mặc định vẫn là <code>/feed</code> nếu không có <code>?next=...</code> hợp lệ.</li>
         </ul>
       </section>
@@ -472,7 +472,7 @@ export default function LoginPage() {
           <div className="font-semibold">Status</div>
           <p className={buildStatusClass(statusTone)}>
             {statusMessage ??
-              "Chưa submit. Batch 48 shell này ưu tiên giúp auth E2E flow hiện rõ backend detail cue thật bên cạnh persisted-session state."}
+              "Chưa submit. Batch 49 shell này ưu tiên giúp login flow hiện rõ backend detail cue thật bên cạnh persisted-session state."}
           </p>
 
           {statusMessage?.includes("đăng nhập lại") ? (
