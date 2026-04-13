@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 125
+- Batch: 126
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 125 iOS inbox seam hardening — recipient device fallback guard when selected device becomes stale vs refreshed `/auth/devices/{user_id}` options
+- Scope: batch 126 iOS inbox seam hardening — auto reload recipient devices (debounced) when recipient user changes
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch125 slice)
+  - latest commit: `HEAD` (local batch126 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch126 cho messaging friction tiếp theo (ví dụ tự reload recipient devices khi recipient user đổi và debounce nhẹ để giảm thao tác manual) trong iOS inbox shell
+- Next: mở batch127 cho messaging friction tiếp theo (ví dụ rate-limit guard cho auto recipient-device reload để giảm call burst khi paste/chỉnh nhanh) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -231,6 +231,10 @@
   - recipient-user input change now clears `recipientDeviceIDDraft` nếu selected device không còn thuộc `recipientDeviceOptions` hiện tại
   - UI thêm warning line khi `Recipient device UUID` đang stale vs option list, hướng tester reload để fallback về device hợp lệ
   - kết hợp với logic sẵn có trong `loadRecipientDevices` (fallback về first option khi stale) giúp device-key flow ít bị mismatch hơn khi device list đổi
+- Batch 126 outcome:
+  - `Recipient user UUID` đổi sẽ trigger auto reload `/auth/devices/{user_id}` sau debounce ~350ms (không cần bấm reload thủ công cho luồng bình thường)
+  - auto-reload task cũ bị cancel khi user tiếp tục gõ/paste, tránh burst call khi input thay đổi liên tục
+  - khi view disappear thì auto-reload task bị cancel để tránh side effect ngoài lifecycle
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -240,7 +244,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, nhập `Recipient user UUID` và load `/auth/devices/{user_id}`, chọn 1 device rồi đổi sang recipient user khác để tạo stale context; verify `Recipient device UUID` được clear khi không còn match option list, warning line hiển thị đúng khi UUID nhập tay không còn hợp lệ, rồi bấm `Reload recipient devices` để fallback về device hợp lệ và tiếp tục `Create message-device key`
+  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve direct conversation, nhập/paste `Recipient user UUID` rồi chờ ~0.35s để verify recipient devices auto reload (không cần bấm manual reload), đổi nhanh recipient user liên tiếp để verify call cũ bị debounce-cancel (không nhảy loạn options), sau đó chọn device và tiếp tục `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts
