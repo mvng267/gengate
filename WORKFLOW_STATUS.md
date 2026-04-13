@@ -2,8 +2,8 @@
 
 - Batch: 48
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 48 refresh/restore backend detail cue parity — backend + web now surface explicit backend detail for refresh/restore-capable auth flows so shell verify can distinguish restore vs refresh from server-confirmed cue instead of inferring only from local status text
-- Status: verify
+- Scope: batch 48 refresh/restore backend detail cue parity complete — backend + web + iOS all surface explicit backend detail for refresh/restore-capable auth flows so shell verify can distinguish restore vs refresh from server-confirmed cue instead of inferring only from local status text
+- Status: complete
 - Files:
   - apps/backend-python/app/schemas/auth.py
   - apps/backend-python/app/modules/auth/router.py
@@ -11,18 +11,22 @@
   - apps/web-nextjs/lib/auth/types.ts
   - apps/web-nextjs/lib/auth/client.ts
   - apps/web-nextjs/app/login/page.tsx
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅
   - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `d1b95e7` — `batch48: add refresh restore detail cues`
-  - working tree: bẩn đúng theo batch 48 web refresh/restore cue parity slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `67e615e` — `batch48: add web refresh restore detail cues`
+  - working tree: bẩn đúng theo batch 48 iOS refresh/restore cue parity slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit web batch-48 slice này; sau đó follow-up 1 shell lane còn lại (ưu tiên iOS) để đọc `backend_detail` mới từ refresh/restore response directly
+- Next: commit iOS batch-48 slice này; sau đó chốt workflow complete cho batch 48 và mở batch kế tiếp với 1 scope auth/session hẹp mới
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 48 update:
   - `/auth/refresh` trả explicit `backend_detail="refresh_rotated"` + `local_clear_recommended=false`
   - `/auth/session` trả explicit `backend_detail="session_restored"` + `local_clear_recommended=false`
-  - web shell nay đọc trực tiếp `backend_detail` + `local_clear_recommended` cho login/register-refresh/restore outcome preview thay vì chỉ lấy `session_status`
+  - web shell đọc trực tiếp `backend_detail` + `local_clear_recommended` cho login/register-refresh/restore outcome preview
+  - iOS shell đọc trực tiếp `backend_detail` + `local_clear_recommended` cho login/refresh/restore outcome summary và copy UI đã align sang batch 48

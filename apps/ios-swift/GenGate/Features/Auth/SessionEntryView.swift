@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 47 · iOS logout backend detail signal")
+            Text("Batch 48 · iOS refresh restore detail cue parity")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -19,7 +19,7 @@ struct SessionEntryView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Batch 47 ưu tiên follow-up logout detail signal: màn Session đọc trực tiếp backend logout cue để phân biệt revoke intent với local clear action ngay trên iOS shell.")
+                    Text("Batch 48 ưu tiên follow-up refresh/restore detail cue parity: màn Session đọc trực tiếp backend cue ở login, refresh, và restore path để phân biệt state backend xác nhận thay vì chỉ suy từ local session status.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -98,7 +98,7 @@ struct SessionEntryView: View {
                             .foregroundStyle(statusMessage.contains("đăng nhập lại") ? .orange : .secondary)
 
                         if statusMessage.contains("session_expired") || statusMessage.contains("session_revoked") || statusMessage.contains("hết hạn") || statusMessage.contains("revoke") || statusMessage.contains("logout") {
-                            Text("Local persisted session cũ đã được xóa để tránh restore lặp lại state không còn hợp lệ; revoke/detail thật từ backend cũng được surface ngay trên màn này.")
+                            Text("Local persisted session cũ đã được xóa để tránh restore lặp lại state không còn hợp lệ; detail thật từ backend cũng được surface ngay trên màn này.")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -160,7 +160,7 @@ struct SessionEntryView: View {
                     .font(.footnote.monospaced())
                     .foregroundStyle(.secondary)
 
-                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ đọc trực tiếp backend logout detail signal bên cạnh login/restore/refresh/logout/local-clear outcome và persisted-session inspector để nhìn rõ từng auth action result.")
+                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ đọc trực tiếp backend detail cue bên cạnh login/restore/refresh/logout/local-clear outcome và persisted-session inspector để nhìn rõ từng auth action result.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -187,7 +187,7 @@ struct SessionEntryView: View {
                             .foregroundStyle(statusMessage.contains("đăng nhập lại") ? .orange : .secondary)
 
                         if statusMessage.contains("session_expired") || statusMessage.contains("session_revoked") || statusMessage.contains("hết hạn") || statusMessage.contains("revoke") || statusMessage.contains("logout") {
-                            Text("Local persisted session cũ đã được xóa để tránh restore lặp lại state không còn hợp lệ; revoke/detail thật từ backend cũng được surface ngay trên màn này.")
+                            Text("Local persisted session cũ đã được xóa để tránh restore lặp lại state không còn hợp lệ; detail thật từ backend cũng được surface ngay trên màn này.")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }

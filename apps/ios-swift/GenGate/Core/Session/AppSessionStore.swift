@@ -49,6 +49,8 @@ final class AppSessionStore {
         let token_type: String
         let bootstrap_mode: String
         let session_status: String
+        let local_clear_recommended: Bool
+        let backend_detail: String?
     }
 
     private struct SessionSnapshotResponse: Decodable {
@@ -236,14 +238,16 @@ final class AppSessionStore {
                 statusMessage = "Đã refresh session với backend auth shell, rotate refresh token, và mở tab \(destination.displayName)."
                 refreshOutcomeSummary = [
                     "refresh_result: rotated_local_updated",
-                    "backend_detail: \(response.session_status)",
+                    "backend_detail: \(response.backend_detail ?? response.session_status)",
+                    "local_clear_recommended: \(response.local_clear_recommended ? "true" : "false")",
                     "message: Đã refresh session với backend auth shell, rotate refresh token, và mở tab \(destination.displayName)."
                 ].joined(separator: "\n")
             } else {
                 statusMessage = "Đã refresh session thật với backend auth shell và rotate refresh token local."
                 refreshOutcomeSummary = [
                     "refresh_result: rotated_local_updated",
-                    "backend_detail: \(response.session_status)",
+                    "backend_detail: \(response.backend_detail ?? response.session_status)",
+                    "local_clear_recommended: \(response.local_clear_recommended ? "true" : "false")",
                     "message: Đã refresh session thật với backend auth shell và rotate refresh token local."
                 ].joined(separator: "\n")
             }
@@ -315,14 +319,14 @@ final class AppSessionStore {
                 statusMessage = "Đã restore session từ backend auth shell và mở tab \(destination.displayName)."
                 restoreOutcomeSummary = [
                     "restore_result: local_restored_valid",
-                    "backend_detail: \(snapshot.session_status)",
+                    "backend_detail: \(snapshot.backend_detail ?? snapshot.session_status)",
                     "message: Đã restore session từ backend auth shell và mở tab \(destination.displayName)."
                 ].joined(separator: "\n")
             } else {
                 statusMessage = "Đã restore persisted session với backend auth shell."
                 restoreOutcomeSummary = [
                     "restore_result: local_restored_valid",
-                    "backend_detail: \(snapshot.session_status)",
+                    "backend_detail: \(snapshot.backend_detail ?? snapshot.session_status)",
                     "message: Đã restore persisted session với backend auth shell."
                 ].joined(separator: "\n")
             }
@@ -391,7 +395,8 @@ final class AppSessionStore {
             statusMessage = loginMessage
             loginOutcomeSummary = [
                 "login_result: success_persisted",
-                "backend_detail: \(response.session_status)",
+                "backend_detail: \(response.backend_detail ?? response.session_status)",
+                "local_clear_recommended: \(response.local_clear_recommended ? "true" : "false")",
                 "message: \(loginMessage)"
             ].joined(separator: "\n")
         } catch {
@@ -432,6 +437,7 @@ final class AppSessionStore {
                 loginOutcomeSummary = [
                     "login_result: register_then_sign_in_success",
                     "backend_detail: \(session.sessionStatus)",
+                    "local_clear_recommended: false",
                     "message: \(loginMessage)"
                 ].joined(separator: "\n")
             }

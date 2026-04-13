@@ -89,21 +89,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **48**
-- Scope hiện tại: web refresh/restore detail cue parity — surface explicit backend detail in web auth shell outcome panels.
-- Trạng thái hiện tại: **verify**
+- Scope hiện tại: iOS refresh/restore detail cue parity — surface explicit backend detail in iOS auth shell outcome summaries.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/lib/auth/types.ts`
-  - `apps/web-nextjs/lib/auth/client.ts`
-  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `d1b95e7` — `batch48: add refresh restore detail cues`
-  - working tree hiện tại: bẩn đúng theo batch 48 web refresh/restore cue parity slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `67e615e` — `batch48: add web refresh restore detail cues`
+  - working tree hiện tại: bẩn đúng theo batch 48 iOS refresh/restore cue parity slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit web batch-48 slice này; sau đó follow-up 1 shell lane còn lại (ưu tiên iOS) để đọc `backend_detail` mới từ refresh/restore response directly
+  - commit iOS batch-48 slice này; sau đó chốt workflow complete cho batch 48 và mở batch kế tiếp với 1 scope auth/session hẹp mới
 
 ## Batch handoff note
 
