@@ -28,6 +28,20 @@ export type FriendGraphSnapshot = {
   friendships: FriendshipItem[];
 };
 
+export type FriendRequestRecord = {
+  id: string;
+  requester_user_id: string;
+  receiver_user_id: string;
+  status: string;
+};
+
+export type FriendshipRecord = {
+  id: string;
+  user_a_id: string;
+  user_b_id: string;
+  state: string;
+};
+
 export async function fetchFriendGraphSnapshot(userId: string): Promise<FriendGraphSnapshot> {
   const [requestsResponse, friendshipsResponse] = await Promise.all([
     apiRequest(`/friends/requests?user_id=${encodeURIComponent(userId)}`),
@@ -58,4 +72,38 @@ export async function fetchFriendGraphSnapshot(userId: string): Promise<FriendGr
     pendingRequests: requestsPayload.items,
     friendships: friendshipsPayload.items,
   };
+}
+
+export async function createFriendRequest(input: {
+  requesterUserId: string;
+  receiverUserId: string;
+}): Promise<FriendRequestRecord> {
+  const response = await apiRequest("/friends/requests", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      requester_user_id: input.requesterUserId,
+      receiver_user_id: input.receiverUserId,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`friend_request_create_failed:${response.status}`);
+  }
+
+  return (await response.json()) as FriendRequestRecord;
+}
+
+export async function acceptFriendRequest(requestId: string): Promise<FriendshipRecord> {
+  const response = await apiRequest(`/friends/requests/${encodeURIComponent(requestId)}/accept`, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error(`friend_request_accept_failed:${response.status}`);
+  }
+
+  return (await response.json()) as FriendshipRecord;
 }

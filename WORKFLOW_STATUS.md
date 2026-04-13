@@ -1,24 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 82
+- Batch: 83
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 82 dev docker MVP bootstrap — add a local docker compose path for backend + web + postgres + redis so human MVP testing is easier to start
+- Scope: batch 83 web friend-request action hardening — allow creating/accepting friend requests directly from the profile friend graph shell
 - Status: MVP-testable
 - Files:
-  - docker-compose.dev.yml
-  - docker/dev/README.md
-  - docker/dev/backend-entrypoint.sh
-  - docker/dev/web-entrypoint.sh
+  - apps/web-nextjs/components/friend-graph-shell.tsx
+  - apps/web-nextjs/lib/friends/client.ts
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
-  - dev stack: `docker compose -f docker-compose.dev.yml config` ✅
+  - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `82a557c` — `batch81: harden web location pivots`
-  - working tree: bẩn (batch 82 ready to commit)
+  - latest commit: `92c1c81` — `batch82: add dev docker mvp bootstrap`
+  - working tree: bẩn (batch 83 ready to commit)
 - Blocker: none
-- Next: commit batch 82 dev docker MVP bootstrap; after that, prefer real human-test bugs or startup friction reports over more generic polish
+- Next: commit batch 83 web friend-request action hardening; after that, prefer real human-test bugs or next concrete social seam friction over generic polish
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -71,10 +69,13 @@
 - Batch 81 handoff:
   - `82a557c` — `batch81: harden web location pivots`
   - cross-seam launcher pivots remain MVP-testable while batch 82 reduces local startup friction for human testing
-- Batch 82 outcome:
-  - repo now includes a dev docker compose stack for postgres + redis + backend + web
-  - backend/web container entrypoints are documented and wired for local MVP startup
-  - this gives human testers a simpler local run path without changing core product contracts
+- Batch 82 handoff:
+  - `92c1c81` — `batch82: add dev docker mvp bootstrap`
+  - local docker startup path remains MVP-testable while batch 83 hardens direct friend-request actions in web profile flow
+- Batch 83 outcome:
+  - web friend graph shell now supports sending friend requests directly (requester=current profile user)
+  - pending requests can be accepted in-place when current profile user is the receiver
+  - this turns the highest-priority social seam into a more complete interactive test path without leaving the web shell
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

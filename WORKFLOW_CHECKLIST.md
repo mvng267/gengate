@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **82 — dev docker MVP bootstrap slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **83 — web friend-request action hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,26 +89,24 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **82**
-- Scope hiện tại: dev docker MVP bootstrap — add a local compose path for backend + web + postgres + redis so human testing is easier to start.
+- Batch workflow chính thức hiện tại: **83**
+- Scope hiện tại: web friend-request action hardening — allow creating/accepting friend requests directly from the profile friend graph shell.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `docker-compose.dev.yml`
-  - `docker/dev/README.md`
-  - `docker/dev/backend-entrypoint.sh`
-  - `docker/dev/web-entrypoint.sh`
+  - `apps/web-nextjs/components/friend-graph-shell.tsx`
+  - `apps/web-nextjs/lib/friends/client.ts`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `docker compose -f docker-compose.dev.yml config` → ✅ pass
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `82a557c` — `batch81: harden web location pivots`
-  - working tree hiện tại: bẩn (batch 82 ready to commit)
+  - commit gần nhất đã chốt: `92c1c81` — `batch82: add dev docker mvp bootstrap`
+  - working tree hiện tại: bẩn (batch 83 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch82 dev docker MVP bootstrap; sau đó chỉ mở batch mới nếu có bug/friction thật từ human testing hoặc startup path thật
+  - commit batch83 web friend-request action hardening; sau đó chỉ mở slice mới nếu có bug/friction thật từ human testing hoặc social seam cụ thể tiếp theo
 
 ## Batch handoff note
 

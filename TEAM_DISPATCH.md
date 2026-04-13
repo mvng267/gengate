@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 82
-- Trục công việc: dev docker MVP bootstrap — chốt local compose path cho backend + web + postgres + redis để human testing dễ start hơn.
+- Batch workflow chính thức hiện tại: 83
+- Trục công việc: web friend-request action hardening — cho phép tạo/accept friend request trực tiếp từ profile friend graph shell.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -46,9 +46,9 @@
 - Trạng thái: idle_batch68.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: batch 82 dev docker MVP bootstrap đã xong.
-- Kết quả gần nhất: local compose path cho web + backend + deps đã có thể config/boot thuận tiện hơn.
-- Trạng thái: complete_batch82.
+- Scope hiện tại: batch 83 web friend-request action hardening đã xong.
+- Kết quả gần nhất: `/profile` friend graph shell có thể create/accept friend requests trực tiếp.
+- Trạng thái: complete_batch83.
 
 ### pikame-ios — iOS
 - Scope hiện tại: không mở iOS scope mới trong batch 70.
