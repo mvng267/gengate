@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 144
-- Trục công việc: iOS inbox seam hardening — thêm quick recipient member presets để giảm thao tác copy/paste UUID.
+- Batch workflow chính thức hiện tại: 145
+- Trục công việc: iOS inbox seam hardening — thêm quick action chọn recipient device hợp lệ đầu tiên sau khi load options.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 144 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: recipient-device section có `Quick recipient member presets` để fill nhanh `Recipient user UUID` từ member list hiện tại + highlight member đang chọn.
-- Trạng thái: verify_batch144_ios.
+- Scope hiện tại: batch 145 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: thêm quick action `Use first valid recipient device` + hint option đầu tiên khả dụng để giảm thao tác picker/manual UUID trước khi create device key.
+- Trạng thái: verify_batch145_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
