@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.moment_media import MomentMedia
 from app.models.moment_reactions import MomentReaction
 from app.models.moments import Moment
+from app.repositories.friendships import friendship_repository
 from app.repositories.moment_interactions import moment_media_repository, moment_reaction_repository
 from app.repositories.moments import moment_repository
 from app.repositories.users import user_repository
@@ -34,6 +35,20 @@ class MomentService:
         if author is None:
             raise ValueError("user_not_found")
         return moment_repository.list_for_author(db, author_user_id=author_user_id, limit=50, offset=0)
+
+    def list_private_feed(self, db: Session, viewer_user_id: uuid.UUID) -> list[Moment]:
+        viewer = user_repository.get(db, viewer_user_id)
+        if viewer is None:
+            raise ValueError("user_not_found")
+
+        friendships = friendship_repository.list_for_user(db, user_id=viewer_user_id, limit=100, offset=0)
+        friend_ids: list[uuid.UUID] = []
+        for friendship in friendships:
+            if friendship.state != "accepted":
+                continue
+            friend_ids.append(friendship.user_b_id if friendship.user_a_id == viewer_user_id else friendship.user_a_id)
+
+        return moment_repository.list_for_authors(db, author_user_ids=friend_ids, limit=50)
 
     def update_moment(self, db: Session, moment_id: uuid.UUID, caption_text: str | None) -> Moment:
         moment = moment_repository.get(db, moment_id)

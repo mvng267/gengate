@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 56
+- Batch: 57
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 56 moment posting MVP shell — add backend list contract for moments with image metadata and wire web feed route to compose/test a caption + image shell
+- Scope: batch 57 private friend feed shell — add backend feed contract for accepted-friend moments and wire web `/feed` to load that contract by viewer UUID
 - Status: MVP-testable
 - Files:
   - apps/backend-python/app/modules/moments/router.py
@@ -20,25 +20,30 @@
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` ✅
   - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `9786726` — `batch55: wire friend graph shell`
-  - working tree: bẩn (batch 56 ready to commit)
+  - latest commit: `c4f5fcb` — `batch56: wire moment posting shell`
+  - working tree: bẩn (batch 57 ready to commit)
 - Blocker: none
-- Next: commit batch 56 moment posting slice, then move to next narrow MVP seam: private friend feed shell wired to backend contracts
+- Next: commit batch 57 private friend feed slice, then move to next narrow MVP seam: direct messaging shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
   - friend graph seam remains MVP-testable while batch 56 is opened for the next slice
-- Batch 56 outcome:
-  - backend now supports `GET /moments?author_user_id=<uuid>` returning authored moments with author summary + media items
-  - web `/feed` is now a compose/test shell for caption + image metadata that creates a moment, attaches image metadata, and reloads authored moments
+- Batch 56 handoff:
+  - `c4f5fcb` — `batch56: wire moment posting shell`
+  - moment posting seam remains MVP-testable while batch 57 opens the next feed slice
+- Batch 57 outcome:
+  - backend now supports `GET /moments/feed?viewer_user_id=<uuid>` returning accepted-friend moments only
+  - web `/feed` keeps the authored moment compose shell and now also reloads a private friend feed by viewer UUID
   - this seam is now also **MVP-testable** beyond auth
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
   - test friend graph seam: `http://localhost:3000/profile?user=<uuid>`
-  - test moment seam:
-    1. register a user via `POST /auth/register`
-    2. open `http://localhost:3000/feed`
-    3. paste that user UUID into the form
-    4. submit caption + image storage key metadata
-    5. use reload in the shell to confirm the created moment + image metadata round-trip
+  - test moment authoring seam: `http://localhost:3000/feed`
+  - test private friend feed seam:
+    1. register viewer + friend users
+    2. create and accept a friendship via `/friends/requests` + `/friends/requests/{request_id}/accept`
+    3. create a moment + image for the friend user
+    4. open `http://localhost:3000/feed`
+    5. paste friend UUID into author field if you want to create authored data, and paste viewer UUID into feed viewer field
+    6. click `Reload private friend feed` to confirm only accepted-friend moments appear

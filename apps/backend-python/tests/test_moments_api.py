@@ -104,3 +104,57 @@ def test_list_moments_for_author_includes_media_items() -> None:
     assert payload["items"][0]["media_items"][0]["storage_key"] == "moments/sunset.jpg"
 
     clear_overrides()
+
+
+def test_private_friend_feed_lists_only_accepted_friend_moments() -> None:
+    client = create_test_client()
+
+    viewer = client.post("/auth/register", json={"email": "viewer@example.com", "username": "viewer_u"})
+    friend = client.post("/auth/register", json={"email": "friend@example.com", "username": "friend_u"})
+    stranger = client.post("/auth/register", json={"email": "stranger@example.com", "username": "stranger_u"})
+    viewer_id = viewer.json()["id"]
+    friend_id = friend.json()["id"]
+    stranger_id = stranger.json()["id"]
+
+    request_response = client.post(
+        "/friends/requests",
+        json={"requester_user_id": viewer_id, "receiver_user_id": friend_id},
+    )
+    assert request_response.status_code == 201
+    request_id = request_response.json()["id"]
+    accept_response = client.post(f"/friends/requests/{request_id}/accept")
+    assert accept_response.status_code == 201
+
+    friend_moment = client.post(
+        "/moments",
+        json={"author_user_id": friend_id, "caption_text": "friend-only moment"},
+    )
+    assert friend_moment.status_code == 201
+    friend_moment_id = friend_moment.json()["id"]
+    friend_media = client.post(
+        f"/moments/{friend_moment_id}/media",
+        json={
+            "media_type": "image",
+            "storage_key": "moments/friend-feed.jpg",
+            "mime_type": "image/jpeg",
+            "width": 720,
+            "height": 720,
+        },
+    )
+    assert friend_media.status_code == 201
+
+    stranger_moment = client.post(
+        "/moments",
+        json={"author_user_id": stranger_id, "caption_text": "stranger moment"},
+    )
+    assert stranger_moment.status_code == 201
+
+    feed_response = client.get(f"/moments/feed?viewer_user_id={viewer_id}")
+    assert feed_response.status_code == 200
+    payload = feed_response.json()
+    assert payload["count"] == 1
+    assert payload["items"][0]["caption_text"] == "friend-only moment"
+    assert payload["items"][0]["author"]["id"] == friend_id
+    assert payload["items"][0]["media_items"][0]["storage_key"] == "moments/friend-feed.jpg"
+
+    clear_overrides()

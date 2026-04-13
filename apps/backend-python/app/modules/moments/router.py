@@ -40,13 +40,7 @@ def create_moment(payload: MomentCreateRequest, db: Session = Depends(get_db_ses
     return MomentResponse.model_validate(moment)
 
 
-@router.get("", response_model=MomentListResponse)
-def list_moments(author_user_id: uuid.UUID = Query(...), db: Session = Depends(get_db_session)) -> MomentListResponse:
-    try:
-        moments = moment_service.list_moments(db, author_user_id=author_user_id)
-    except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
-
+def _build_moment_list_response(db: Session, moments: list) -> MomentListResponse:
     items = [
         MomentListItem(
             id=moment.id,
@@ -59,6 +53,26 @@ def list_moments(author_user_id: uuid.UUID = Query(...), db: Session = Depends(g
         for moment in moments
     ]
     return MomentListResponse(count=len(items), items=items)
+
+
+@router.get("", response_model=MomentListResponse)
+def list_moments(author_user_id: uuid.UUID = Query(...), db: Session = Depends(get_db_session)) -> MomentListResponse:
+    try:
+        moments = moment_service.list_moments(db, author_user_id=author_user_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    return _build_moment_list_response(db, moments)
+
+
+@router.get("/feed", response_model=MomentListResponse)
+def list_private_feed(viewer_user_id: uuid.UUID = Query(...), db: Session = Depends(get_db_session)) -> MomentListResponse:
+    try:
+        moments = moment_service.list_private_feed(db, viewer_user_id=viewer_user_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    return _build_moment_list_response(db, moments)
 
 
 @router.patch("/{moment_id}", response_model=MomentResponse)

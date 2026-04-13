@@ -21,5 +21,16 @@ class MomentRepository(BaseRepository[Moment]):
         )
         return list(db.scalars(statement).all())
 
+    def list_for_authors(self, db: Session, author_user_ids: list[uuid.UUID], limit: int = 50) -> list[Moment]:
+        if not author_user_ids:
+            return []
+        statement = (
+            select(Moment)
+            .where(Moment.author_user_id.in_(author_user_ids))
+            .order_by(Moment.created_at.desc())
+            .limit(limit)
+        )
+        return list(db.scalars(statement).all())
+
 
 moment_repository = MomentRepository()

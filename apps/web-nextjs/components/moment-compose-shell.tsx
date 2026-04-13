@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 
-import { createMomentWithImage, listMomentsForAuthor, type MomentListItem } from "@/lib/moments/client";
+import { createMomentWithImage, listMomentsForAuthor, listPrivateFeed, type MomentListItem } from "@/lib/moments/client";
 
 const initialForm = {
   authorUserId: "",
+  viewerUserId: "",
   captionText: "",
   imageStorageKey: "moments/demo-image.jpg",
   imageMimeType: "image/jpeg",
@@ -18,7 +19,9 @@ export function MomentComposeShell() {
   const [status, setStatus] = useState("Provide a real user UUID, caption, and image storage key to test the moment shell.");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingList, setIsLoadingList] = useState(false);
+  const [isLoadingFeed, setIsLoadingFeed] = useState(false);
   const [items, setItems] = useState<MomentListItem[]>([]);
+  const [feedItems, setFeedItems] = useState<MomentListItem[]>([]);
 
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -50,12 +53,27 @@ export function MomentComposeShell() {
     try {
       const nextItems = await listMomentsForAuthor(form.authorUserId.trim());
       setItems(nextItems);
-      setStatus(`Loaded ${nextItems.length} moment(s) for ${form.authorUserId.trim() || "unknown-user"}.`);
+      setStatus(`Loaded ${nextItems.length} authored moment(s) for ${form.authorUserId.trim() || "unknown-user"}.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "moment_shell_list_failed");
     }
 
     setIsLoadingList(false);
+  }
+
+  async function handleReloadFeed() {
+    setIsLoadingFeed(true);
+    setStatus("Reloading private friend feed...");
+
+    try {
+      const nextItems = await listPrivateFeed(form.viewerUserId.trim());
+      setFeedItems(nextItems);
+      setStatus(`Loaded ${nextItems.length} private feed moment(s) for viewer ${form.viewerUserId.trim() || "unknown-user"}.`);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "private_feed_failed");
+    }
+
+    setIsLoadingFeed(false);
   }
 
   return (
@@ -72,6 +90,14 @@ export function MomentComposeShell() {
             value={form.authorUserId}
             onChange={(event) => setForm((current) => ({ ...current, authorUserId: event.target.value }))}
             placeholder="paste registered user uuid"
+          />
+        </label>
+        <label>
+          Feed viewer UUID
+          <input
+            value={form.viewerUserId}
+            onChange={(event) => setForm((current) => ({ ...current, viewerUserId: event.target.value }))}
+            placeholder="paste viewer uuid to load private feed"
           />
         </label>
         <label>
@@ -116,6 +142,9 @@ export function MomentComposeShell() {
         <button type="button" onClick={() => void handleReload()} disabled={isLoadingList}>
           {isLoadingList ? "Reloading..." : "Reload authored moments"}
         </button>
+        <button type="button" onClick={() => void handleReloadFeed()} disabled={isLoadingFeed}>
+          {isLoadingFeed ? "Reloading feed..." : "Reload private friend feed"}
+        </button>
       </form>
 
       <h2>Authored moments</h2>
@@ -127,6 +156,24 @@ export function MomentComposeShell() {
             <li key={item.id}>
               <strong>{item.caption_text ?? "(no caption)"}</strong>
               {" · author: "}
+              {item.author.username ?? item.author.email}
+              {" · media: "}
+              {item.media_items.length}
+              {item.media_items[0] ? ` · first image: ${item.media_items[0].storage_key}` : ""}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h2>Private friend feed</h2>
+      {feedItems.length === 0 ? (
+        <p>No private feed moments loaded yet.</p>
+      ) : (
+        <ul>
+          {feedItems.map((item) => (
+            <li key={item.id}>
+              <strong>{item.caption_text ?? "(no caption)"}</strong>
+              {" · friend author: "}
               {item.author.username ?? item.author.email}
               {" · media: "}
               {item.media_items.length}

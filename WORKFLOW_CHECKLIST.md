@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **56 — moment posting MVP shell slice is open and in progress**.
+- Batch workflow chính thức mới nhất trong checklist/status: **57 — private friend feed shell slice is open and in progress**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **56**
-- Scope hiện tại: moment posting MVP shell — backend list contract for moments with image metadata + web feed route wired to create/test a caption + image shell.
+- Batch workflow chính thức hiện tại: **57**
+- Scope hiện tại: private friend feed shell — backend feed contract for accepted-friend moments + web `/feed` wired to load that contract by viewer UUID.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/backend-python/app/modules/moments/router.py`
@@ -108,12 +108,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` → ✅ pass
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `9786726` — `batch55: wire friend graph shell`
-  - working tree hiện tại: bẩn (batch 56 ready to commit)
+  - commit gần nhất đã chốt: `c4f5fcb` — `batch56: wire moment posting shell`
+  - working tree hiện tại: bẩn (batch 57 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch56 moment posting shell, rồi mở slice kế tiếp cho private friend feed shell
+  - commit batch57 private friend feed shell, rồi mở slice kế tiếp cho direct messaging shell
 
 ## Batch handoff note
 

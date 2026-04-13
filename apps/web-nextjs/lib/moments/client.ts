@@ -97,3 +97,17 @@ export async function listMomentsForAuthor(authorUserId: string): Promise<Moment
 
   return payload.items;
 }
+
+export async function listPrivateFeed(viewerUserId: string): Promise<MomentListItem[]> {
+  const response = await apiRequest(`/moments/feed?viewer_user_id=${encodeURIComponent(viewerUserId)}`);
+  if (!response.ok) {
+    throw new Error(`private_feed_failed:${response.status}`);
+  }
+
+  const payload = (await response.json()) as {
+    count: number;
+    items: MomentListItem[];
+  };
+
+  return payload.items;
+}

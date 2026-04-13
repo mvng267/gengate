@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 56
-- Trục công việc: moment posting MVP shell — giữ friend graph seam đang testable, đồng thời mở slice hẹp kế tiếp cho compose moment với caption + image metadata trên web feed.
+- Batch workflow chính thức hiện tại: 57
+- Trục công việc: private friend feed shell — giữ friend graph + moment posting seams testable, đồng thời mở slice hẹp kế tiếp cho feed contract của accepted-friend moments trên web `/feed`.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -41,14 +41,14 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: batch 56 backend slice đã xong.
-- Kết quả gần nhất: contract `GET /moments?author_user_id=...` đã trả authored moments kèm author summary + media items cho web shell.
-- Trạng thái: complete_batch56.
+- Scope hiện tại: batch 57 backend slice đã xong.
+- Kết quả gần nhất: contract `GET /moments/feed?viewer_user_id=...` đã trả accepted-friend moments cho private feed shell.
+- Trạng thái: complete_batch57.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: batch 56 web slice đã xong.
-- Kết quả gần nhất: `app/feed/page.tsx` đã thành moment compose/test shell tối thiểu cho caption + image metadata.
-- Trạng thái: complete_batch56.
+- Scope hiện tại: batch 57 web slice đã xong.
+- Kết quả gần nhất: `/feed` đã reload được private friend feed bằng viewer UUID trong khi vẫn giữ moment compose shell.
+- Trạng thái: complete_batch57.
 
 ### pikame-ios — iOS
 - Scope hiện tại: idle trong batch 55 slice này để tránh mở nhiều surface cùng lúc.
