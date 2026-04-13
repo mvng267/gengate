@@ -74,7 +74,8 @@ struct InboxPlaceholderView: View {
                         "Recipient device list now auto-reloads (debounced + rate-limited) when `Recipient user UUID` changes, reducing manual reload friction and burst calls in device-key flow.",
                         "When auto reload is skipped by rate-limit guard, a short helper hint appears so testers know why options are not refreshed yet.",
                         "Manual `Reload recipient devices` now explicitly clears skip-hint state before/after reload so UI reflects freshest fetch path.",
-                        "Recipient-device section now surfaces tiny event timestamps for latest auto-reload and rate-limit skip events (bounded visibility window) to help human testers debug behavior quickly without long-run UI noise."
+                        "Recipient-device section now surfaces tiny event timestamps for latest auto-reload and rate-limit skip events (bounded visibility window) to help human testers debug behavior quickly without long-run UI noise.",
+                        "After timestamp hints auto-hide (>20s), the UI shows a brief passive note so testers know it is intentional behavior, not missing data."
                     ]
                 )
 
@@ -329,6 +330,13 @@ struct InboxPlaceholderView: View {
                             }
                         }
 
+                        let hasHiddenAutoReloadTimestampNote: Bool = {
+                            guard let lastRecipientDevicesAutoReloadAt else {
+                                return false
+                            }
+                            return Date().timeIntervalSince(lastRecipientDevicesAutoReloadAt) > 20
+                        }()
+
                         if let lastRecipientDevicesAutoReloadAt {
                             let autoReloadElapsed = Date().timeIntervalSince(lastRecipientDevicesAutoReloadAt)
                             if autoReloadElapsed <= 20 {
@@ -338,6 +346,13 @@ struct InboxPlaceholderView: View {
                             }
                         }
 
+                        let hasHiddenSkipTimestampNote: Bool = {
+                            guard let lastRecipientDevicesRateLimitSkipAt else {
+                                return false
+                            }
+                            return Date().timeIntervalSince(lastRecipientDevicesRateLimitSkipAt) > 20
+                        }()
+
                         if let lastRecipientDevicesRateLimitSkipAt {
                             let skipElapsedSeconds = Date().timeIntervalSince(lastRecipientDevicesRateLimitSkipAt)
                             if skipElapsedSeconds <= 20 {
@@ -345,6 +360,12 @@ struct InboxPlaceholderView: View {
                                     .font(.caption2.monospaced())
                                     .foregroundStyle(.secondary)
                             }
+                        }
+
+                        if hasHiddenAutoReloadTimestampNote || hasHiddenSkipTimestampNote {
+                            Text("Timestamp debug hints tự ẩn sau ~20s để giữ UI gọn; trigger event mới để hiện lại.")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
                         }
 
                         TextField("Wrapped message key blob", text: $wrappedMessageKeyBlobDraft)
