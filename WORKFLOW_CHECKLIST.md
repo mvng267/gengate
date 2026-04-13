@@ -89,19 +89,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **54**
-- Scope hiện tại: web failure cleanup cue parity — restore/refresh failure summaries now keep explicit local-clear cue.
+- Scope hiện tại: failure cleanup cue parity — web + iOS restore/refresh failure summaries now keep explicit local-clear cue.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `25b6fd6` — `batch53: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 54 web failure-summary parity slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `5ddea98` — `batch54: expose failure cleanup cue`
+  - working tree hiện tại: bẩn đúng theo batch 54 iOS failure-summary parity slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit web batch-54 slice này; sau đó inspect iOS restore/refresh failure summaries only if cleanup cue still differs materially from web
+  - commit iOS batch-54 parity follow-up này; sau đó inspect whether backend error payloads should expose a more explicit local-clear cue field for stricter cross-shell contract symmetry
 
 ## Batch handoff note
 

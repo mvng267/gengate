@@ -280,6 +280,7 @@ final class AppSessionStore {
                     refreshOutcomeSummary = [
                         "refresh_result: failed_local_cleared",
                         "backend_detail: \(detail)",
+                        "local_clear_recommended: false",
                         "message: Session đã hết hạn hoặc bị revoke (\(detail)). Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
                     ].joined(separator: "\n")
                 } else {
@@ -287,6 +288,7 @@ final class AppSessionStore {
                     refreshOutcomeSummary = [
                         "refresh_result: failed_local_cleared",
                         "backend_detail: none",
+                        "local_clear_recommended: false",
                         "message: Session đã hết hạn hoặc bị revoke. Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
                     ].joined(separator: "\n")
                 }
@@ -296,6 +298,7 @@ final class AppSessionStore {
                 refreshOutcomeSummary = [
                     "refresh_result: failed_local_cleared",
                     "backend_detail: none",
+                    "local_clear_recommended: false",
                     "message: \(message)"
                 ].joined(separator: "\n")
             }
@@ -363,6 +366,7 @@ final class AppSessionStore {
                     restoreOutcomeSummary = [
                         "restore_result: failed_local_cleared",
                         "backend_detail: \(detail)",
+                        "local_clear_recommended: false",
                         "message: Session đã hết hạn hoặc bị revoke (\(detail)). Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
                     ].joined(separator: "\n")
                 } else {
@@ -370,6 +374,7 @@ final class AppSessionStore {
                     restoreOutcomeSummary = [
                         "restore_result: failed_local_cleared",
                         "backend_detail: none",
+                        "local_clear_recommended: false",
                         "message: Session đã hết hạn hoặc bị revoke. Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
                     ].joined(separator: "\n")
                 }
@@ -379,6 +384,7 @@ final class AppSessionStore {
                 restoreOutcomeSummary = [
                     "restore_result: failed_local_cleared",
                     "backend_detail: none",
+                    "local_clear_recommended: false",
                     "message: \(message)"
                 ].joined(separator: "\n")
             }

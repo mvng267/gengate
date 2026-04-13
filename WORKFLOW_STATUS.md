@@ -2,21 +2,25 @@
 
 - Batch: 54
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 54 web failure cleanup cue parity — restore/refresh failure summaries now keep explicit local-clear cue alongside backend detail so cleared-session outcomes stay structurally consistent
+- Scope: batch 54 failure cleanup cue parity — web + iOS restore/refresh failure summaries now keep explicit local-clear cue alongside backend detail so cleared-session outcomes stay structurally consistent cross-shell
 - Status: verify
 - Files:
   - apps/web-nextjs/app/login/page.tsx
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `25b6fd6` — `batch53: mark workflow complete`
-  - working tree: bẩn đúng theo batch 54 web failure-summary parity slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `5ddea98` — `batch54: expose failure cleanup cue`
+  - working tree: bẩn đúng theo batch 54 iOS failure-summary parity slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit web batch-54 slice này; sau đó inspect iOS restore/refresh failure summaries only if cleanup cue still differs materially from web
+- Next: commit iOS batch-54 parity follow-up này; sau đó inspect whether backend error payloads should expose a more explicit local-clear cue field for stricter cross-shell contract symmetry
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 54 update:
-  - web restore failure outcome nay hiện `local_clear_recommended: false`
-  - web refresh failure outcome nay hiện `local_clear_recommended: false`
-  - web success/failure framing quanh cleared-session outcomes nay đồng đều hơn
+  - web restore failure outcome hiện `local_clear_recommended: false`
+  - web refresh failure outcome hiện `local_clear_recommended: false`
+  - iOS restore failure outcome hiện `local_clear_recommended: false`
+  - iOS refresh failure outcome hiện `local_clear_recommended: false`
+  - failure framing quanh cleared-session outcomes nay đồng đều hơn giữa web và iOS shell
