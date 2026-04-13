@@ -39,12 +39,12 @@ struct InboxPlaceholderView: View {
             VStack(alignment: .leading, spacing: 20) {
                 FeaturePlaceholderView(
                     title: "Inbox",
-                    summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator; realtime delivery remains pending.",
+                    summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
-                        "You can now call `PATCH /conversations/{id}/members/{user_id}/read-cursor` directly from iOS to move read cursor and observe `last_read_by` + focused `read_status(user)` in loaded rows."
+                        "You can now call `PATCH /conversations/{id}/members/{user_id}/read-cursor` directly from iOS to move read cursor and observe `last_read_by` + focused `read_status(user)` + member cursor summary in-shell."
                     ]
                 )
 
@@ -445,6 +445,54 @@ struct InboxPlaceholderView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 12) {
+                    Text("Member read-cursor summary")
+                        .font(.headline)
+
+                    if conversationMembers.isEmpty {
+                        Text("No conversation members loaded yet.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(conversationMembers) { member in
+                            let cursorMessageID = member.lastReadMessageID
+                            let cursorMessage = messageRows.first(where: { $0.id == cursorMessageID })
+                            let isFocusUser = member.userID == resolvedReadStatusFocusUserID
+                            let isAtLatest = cursorMessageID != nil && cursorMessageID == latestLoadedMessageID
+
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("user_id: \(member.userID)")
+                                    .font(.footnote.monospaced())
+                                    .foregroundStyle(.secondary)
+
+                                if isFocusUser {
+                                    Text("focus_user")
+                                        .font(.caption.monospaced())
+                                        .foregroundStyle(.blue)
+                                }
+
+                                Text("last_read_message_id: \(cursorMessageID ?? "(none)")")
+                                    .font(.footnote.monospaced())
+                                    .foregroundStyle(.secondary)
+
+                                if let cursorMessage {
+                                    Text("cursor_payload: \(cursorMessage.payloadText)")
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+
+                                Text("cursor_state: \(isAtLatest ? "at_latest" : "behind_or_unknown")")
+                                    .font(.caption.monospaced())
+                                    .foregroundStyle(isAtLatest ? .green : .orange)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.08))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 12) {
                     Text("Messages")
                         .font(.headline)
 
@@ -621,6 +669,10 @@ struct InboxPlaceholderView: View {
         }
 
         return messageRows.last?.id
+    }
+
+    private var latestLoadedMessageID: String? {
+        messageRows.last?.id
     }
 
     private var isMutatingInbox: Bool {
