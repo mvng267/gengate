@@ -122,7 +122,7 @@ export default function LoginPage() {
         setRestoreOutcomePreview(
           [
             "restore_result: local_restored_valid",
-            `backend_detail: ${result.session.session.session_status}`,
+            `backend_detail: ${result.session.session.backend_detail ?? result.session.session.session_status}`,
             `message: ${restoreMessage}`,
           ].join("\n"),
         );
@@ -190,7 +190,8 @@ export default function LoginPage() {
       setLoginOutcomePreview(
         [
           "login_result: success_persisted",
-          `backend_detail: ${result.payload.session_status}`,
+          `backend_detail: ${result.payload.backend_detail ?? result.payload.session_status}`,
+          `local_clear_recommended: ${result.payload.local_clear_recommended ? "true" : "false"}`,
           `message: ${loginMessage}`,
         ].join("\n"),
       );
@@ -266,18 +267,18 @@ export default function LoginPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-start">
       <section className="flex-1 space-y-4">
         <span className="inline-flex rounded-full border border-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-          Batch 47 · Web logout backend detail signal
+          Batch 48 · Web refresh restore detail cue parity
         </span>
         <h1 className="text-4xl font-black tracking-tight text-black">
-          Web shell nay đọc trực tiếp logout backend detail signal để phân biệt rõ revoke intent từ backend với local clear action và giúp auth loop dễ verify hơn.
+          Web shell nay đọc trực tiếp backend detail cue cho login, refresh, và restore path để phân biệt rõ state do backend xác nhận thay vì chỉ suy từ local session status text.
         </h1>
         <p className="max-w-2xl text-base leading-7 text-neutral-700">
-          Batch 47 ưu tiên 1 follow-up hẹp: khi logout, màn web đọc trực tiếp `backend_detail` và `local_clear_recommended` từ response backend thay vì chỉ suy từ local status text.
+          Batch 48 ưu tiên 1 follow-up hẹp: web shell đọc trực tiếp `backend_detail` và `local_clear_recommended` từ refresh/restore-capable auth responses để verify auth loop rõ hơn.
         </p>
         <ul className="space-y-2 text-sm text-neutral-700">
           <li>• Password/OTP vẫn là placeholder trên UI, chưa dùng cho API ở batch này.</li>
           <li>• Web shell nay có persisted-session inspector, login outcome panel, local clear outcome panel, restore outcome panel, refresh outcome panel, và logout outcome panel để nhìn rõ từng auth action.</li>
-          <li>• Logout outcome nay đọc trực tiếp `backend_detail` + `local_clear_recommended` từ backend contract mới.</li>
+          <li>• Login/refresh/restore outcome nay ưu tiên đọc trực tiếp `backend_detail` + `local_clear_recommended` từ backend contract mới.</li>
           <li>• Redirect đích mặc định vẫn là <code>/feed</code> nếu không có <code>?next=...</code> hợp lệ.</li>
         </ul>
       </section>
@@ -355,7 +356,8 @@ export default function LoginPage() {
                 setLoginOutcomePreview(
                   [
                     "login_result: register_then_sign_in_success",
-                    `backend_detail: ${result.payload.session_status}`,
+                    `backend_detail: ${result.payload.backend_detail ?? result.payload.session_status}`,
+                    `local_clear_recommended: ${result.payload.local_clear_recommended ? "true" : "false"}`,
                     `message: ${loginMessage}`,
                   ].join("\n"),
                 );
@@ -414,7 +416,8 @@ export default function LoginPage() {
                 setRefreshOutcomePreview(
                   [
                     "refresh_result: rotated_local_updated",
-                    `backend_detail: ${result.session.session.session_status}`,
+                    `backend_detail: ${result.session.session.backend_detail ?? result.session.session.session_status}`,
+                    `local_clear_recommended: ${result.session.session.local_clear_recommended ? "true" : "false"}`,
                     "message: Đã manual refresh session với backend và rotate refresh token local.",
                   ].join("\n"),
                 );
@@ -469,7 +472,7 @@ export default function LoginPage() {
           <div className="font-semibold">Status</div>
           <p className={buildStatusClass(statusTone)}>
             {statusMessage ??
-              "Chưa submit. Batch 46 shell này ưu tiên giúp auth E2E flow hiện rõ local clear outcome thật bên cạnh persisted-session state."}
+              "Chưa submit. Batch 48 shell này ưu tiên giúp auth E2E flow hiện rõ backend detail cue thật bên cạnh persisted-session state."}
           </p>
 
           {statusMessage?.includes("đăng nhập lại") ? (

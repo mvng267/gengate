@@ -20,6 +20,8 @@ export type BackendLoginPayload = {
   token_type: string;
   bootstrap_mode: string;
   session_status: string;
+  local_clear_recommended: boolean;
+  backend_detail: string | null;
 };
 
 export type BackendSessionSnapshot = {

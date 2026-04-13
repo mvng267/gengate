@@ -2,23 +2,27 @@
 
 - Batch: 48
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 48 refresh/restore backend detail cue parity — surface explicit backend detail for refresh + restore paths so shell verify flow can distinguish restore vs refresh without inferring only from local status text
+- Scope: batch 48 refresh/restore backend detail cue parity — backend + web now surface explicit backend detail for refresh/restore-capable auth flows so shell verify can distinguish restore vs refresh from server-confirmed cue instead of inferring only from local status text
 - Status: verify
 - Files:
   - apps/backend-python/app/schemas/auth.py
   - apps/backend-python/app/modules/auth/router.py
   - apps/backend-python/tests/test_auth_api.py
+  - apps/web-nextjs/lib/auth/types.ts
+  - apps/web-nextjs/lib/auth/client.ts
+  - apps/web-nextjs/app/login/page.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅
+  - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `ea6c489` — `batch47: mark workflow complete`
-  - working tree: bẩn đúng theo batch 48 backend refresh/restore detail cue slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `d1b95e7` — `batch48: add refresh restore detail cues`
+  - working tree: bẩn đúng theo batch 48 web refresh/restore cue parity slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit backend batch-48 slice này; sau đó follow-up 1 shell lane để đọc `backend_detail` mới từ refresh/restore response directly
+- Next: commit web batch-48 slice này; sau đó follow-up 1 shell lane còn lại (ưu tiên iOS) để đọc `backend_detail` mới từ refresh/restore response directly
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 48 update:
-  - `/auth/refresh` nay trả explicit `backend_detail="refresh_rotated"` và `local_clear_recommended=false`
-  - `/auth/session` nay trả explicit `backend_detail="session_restored"` và `local_clear_recommended=false`
-  - shell layers nay có backend cue parity rõ hơn cho logout + refresh + restore flow
+  - `/auth/refresh` trả explicit `backend_detail="refresh_rotated"` + `local_clear_recommended=false`
+  - `/auth/session` trả explicit `backend_detail="session_restored"` + `local_clear_recommended=false`
+  - web shell nay đọc trực tiếp `backend_detail` + `local_clear_recommended` cho login/register-refresh/restore outcome preview thay vì chỉ lấy `session_status`

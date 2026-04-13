@@ -50,7 +50,9 @@ function isBackendLoginPayload(value: unknown): value is BackendLoginPayload {
     typeof value.expires_in_seconds === "number" &&
     typeof value.token_type === "string" &&
     typeof value.bootstrap_mode === "string" &&
-    typeof value.session_status === "string"
+    typeof value.session_status === "string" &&
+    typeof value.local_clear_recommended === "boolean" &&
+    (typeof value.backend_detail === "string" || value.backend_detail === null)
   );
 }
 
@@ -117,8 +119,8 @@ export function persistAuthSession(payload: BackendLoginPayload): StoredAuthSess
       expires_in_seconds: payload.expires_in_seconds,
       token_type: payload.token_type,
       session_status: payload.session_status,
-      local_clear_recommended: false,
-      backend_detail: null,
+      local_clear_recommended: payload.local_clear_recommended,
+      backend_detail: payload.backend_detail,
     },
   };
 
