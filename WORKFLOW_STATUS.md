@@ -3,7 +3,7 @@
 - Batch: 47
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
 - Scope: batch 47 logout backend detail signal complete — backend + web + iOS all surface explicit backend logout cue instead of inferring only from local status text
-- Status: verify
+- Status: complete
 - Files:
   - apps/backend-python/app/schemas/auth.py
   - apps/backend-python/app/modules/auth/router.py
@@ -20,10 +20,10 @@
   - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `2bb300c` — `batch47: add web logout backend detail signal`
-  - working tree: bẩn đúng theo batch 47 iOS follow-up slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `2690e73` — `batch47: add ios logout backend detail signal`
+  - working tree: sạch trước khi ghi workflow-only closeout marker cho batch 47
 - Blocker: none
-- Next: commit iOS batch-47 slice này; sau đó làm workflow-only closeout marker cho batch 47
+- Next: mở batch 48 với 1 scope hẹp trên backend/session contract — thêm explicit refresh/restore detail cue parity để shell verify path đối chiếu được không chỉ ở logout mà cả refresh/restore
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 47 outcome:
   - backend `/auth/logout` trả explicit `local_clear_recommended=true` và `backend_detail="logout_revoked"`

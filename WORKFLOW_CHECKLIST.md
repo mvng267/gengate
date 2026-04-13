@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 47**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đã chốt batch 47**.
 
 ## Reporting hard rule
 
@@ -89,9 +89,15 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **47**
-- Scope hiện tại: iOS logout backend detail follow-up — read explicit backend logout cue directly into shell outcome.
-- Trạng thái hiện tại: **verify**
+- Scope hiện tại: batch 47 logout backend detail signal complete — backend + web + iOS parity done.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
+  - `apps/backend-python/app/schemas/auth.py`
+  - `apps/backend-python/app/modules/auth/router.py`
+  - `apps/backend-python/tests/test_auth_api.py`
+  - `apps/web-nextjs/lib/auth/types.ts`
+  - `apps/web-nextjs/lib/auth/client.ts`
+  - `apps/web-nextjs/app/login/page.tsx`
   - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
   - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
@@ -99,25 +105,26 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `2bb300c` — `batch47: add web logout backend detail signal`
-  - working tree hiện tại: bẩn đúng theo batch 47 iOS follow-up slice + workflow files, chưa commit
+  - commit code cuối của batch: `2690e73` — `batch47: add ios logout backend detail signal`
+  - working tree: sạch trước khi ghi workflow-only closeout marker
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit iOS batch-47 slice này; sau đó làm workflow-only closeout marker cho batch 47
+  - mở batch 48 với 1 scope hẹp backend/session contract: thêm explicit refresh/restore detail cue parity để shell verify path đối chiếu được không chỉ ở logout mà cả refresh/restore
 
 ## Batch handoff note
 
-- Batch vừa xong: **46**
+- Batch vừa xong: **47**
 - Commit cuối đã chốt:
-  - `b841f1e` — `batch46: add web local clear outcome signal`
-  - `1f2ea9a` — `batch46: add ios local clear outcome signal`
-  - `452385b` — `batch46: mark workflow complete`
+  - `99eaa01` — `batch47: add logout local clear detail contract`
+  - `2bb300c` — `batch47: add web logout backend detail signal`
+  - `2690e73` — `batch47: add ios logout backend detail signal`
 - Test-verify cuối:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → pass
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - chưa có blocker code; next leverage là backend-facing detail contract để auth/session actions dễ đối chiếu end-to-end hơn thay vì chỉ nhìn local shell outcomes
-- Batch kế tiếp: **47**
-- Scope hẹp đầu tiên của batch 47:
-  - backend auth/session contract follow-up để surface detail rõ hơn cho shell verify path, không mở rộng sang UI lớn hay refactor ngang
+  - chưa có blocker code; next leverage là refresh/restore detail parity để end-to-end auth/session verify path đồng bộ hơn, không dừng ở logout
+- Batch kế tiếp: **48**
+- Scope hẹp đầu tiên của batch 48:
+  - backend auth/session contract follow-up để surface explicit detail cue cho refresh/restore path, không mở rộng sang UI lớn hay refactor ngang
