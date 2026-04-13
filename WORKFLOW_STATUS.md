@@ -3,7 +3,7 @@
 - Batch: 46
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
 - Scope: batch 46 local clear outcome signal complete — web + iOS surface dedicated local-session-clear result separate from logout/revoke flow to make auth loop easier to verify
-- Status: verify
+- Status: complete
 - Files:
   - apps/web-nextjs/app/login/page.tsx
   - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
@@ -14,12 +14,12 @@
   - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `b841f1e` — `batch46: add web local clear outcome signal`
-  - working tree: bẩn đúng theo batch 46 iOS local clear outcome parity slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `1f2ea9a` — `batch46: add ios local clear outcome signal`
+  - working tree: sạch trước khi ghi workflow-only closeout marker cho batch 46
 - Blocker: none
-- Next: commit iOS parity slice này; sau đó làm workflow-only closeout marker cho batch 46
+- Next: mở batch 47 với 1 scope hẹp trên backend — thêm endpoint/detail contract để shell đọc được local/session clear intent rõ hơn từ backend-facing auth flow khi cần verify end-to-end
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 46 update:
-  - Web login shell có panel `Local clear outcome` hiển thị riêng local session clear result + backend/detail cue
-  - iOS Session screen nay cũng có card `Local clear outcome` hiển thị riêng local session clear result + backend/detail cue bên cạnh login/restore/refresh/logout outcome và persisted-session snapshot
-  - Hai shell giờ đều phân tách rõ local-only clear khỏi logout/revoke flow để auth loop dễ verify hơn
+- Batch 46 outcome:
+  - web login shell có panel `Local clear outcome` hiển thị riêng local session clear result + backend/detail cue
+  - iOS Session screen có card `Local clear outcome` và action clear-local riêng, hiển thị tách biệt với logout/revoke flow
+  - hai shell giờ cùng phân tách rõ local-only clear khỏi logout/revoke flow để auth loop dễ verify hơn
