@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 104
-- Trục công việc: iOS inbox seam hardening — add optional auto-refresh polling để giảm realtime test friction.
+- Batch workflow chính thức hiện tại: 105
+- Trục công việc: iOS inbox seam hardening — add focused read/unread status indicator để giảm read-cursor test friction.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 104 iOS inbox near-realtime UX hardening.
-- Kết quả gần nhất: Inbox có toggle `Auto refresh every 3s` + silent guarded polling khi idle để thấy message/read-status cập nhật gần realtime.
-- Trạng thái: verify_batch104_ios.
+- Scope hiện tại: batch 105 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: Inbox hiển thị `read_status(<focus_user>): read|unread` trực tiếp trên target message row, fallback focus user = User A.
+- Trạng thái: verify_batch105_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

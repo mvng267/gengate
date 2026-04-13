@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 104
+- Batch: 105
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 104 iOS inbox seam hardening — add optional auto-refresh poll loop for near-realtime message visibility
+- Scope: batch 105 iOS inbox seam hardening — add focused read/unread status indicator per target user/message
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch104 slice)
+  - latest commit: `HEAD` (local batch105 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch105 cho messaging friction tiếp theo (ví dụ highlight unread/read diff rõ hơn) trong iOS inbox shell
+- Next: mở batch106 cho messaging friction tiếp theo (ví dụ compact member read-cursor summary panel) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -147,6 +147,10 @@
   - iOS Inbox adds optional `Auto refresh every 3s` toggle for near-realtime polling while shell is idle
   - auto-refresh loop is guarded to skip while mutation/load is running, reducing overlap/race with manual actions
   - silent reload path avoids noisy error reset during passive polling
+- Batch 105 outcome:
+  - iOS Inbox adds focused read-status indicator `read_status(<user_id>): read|unread` on target message row
+  - operator can set optional `Read-status focus user UUID`; fallback defaults to User A
+  - focused indicator uses same read-cursor source (`conversation_members.last_read_message_id`) so cursor update effect becomes immediately visible in-shell
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -156,7 +160,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, nhập recipient user để load device list (`/auth/devices/{user_id}`), chọn recipient device rồi create/list message device keys, bật `Auto refresh every 3s` để quan sát near-realtime polling, sau đó dùng "Update read cursor" và verify `last_read_by` appears on the target message row
+  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, nhập recipient user để load device list (`/auth/devices/{user_id}`), chọn recipient device rồi create/list message device keys, bật `Auto refresh every 3s` để quan sát near-realtime polling, sau đó dùng "Update read cursor" và verify cả `last_read_by` lẫn `read_status(<focus_user>)` trên target message row
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

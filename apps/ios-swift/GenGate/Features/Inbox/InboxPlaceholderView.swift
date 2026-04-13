@@ -15,6 +15,7 @@ struct InboxPlaceholderView: View {
     @State private var deviceKeyTargetMessageIDDraft: String = ""
     @State private var readCursorTargetUserIDDraft: String = ""
     @State private var readCursorTargetMessageIDDraft: String = ""
+    @State private var readStatusFocusUserIDDraft: String = ""
     @State private var recipientUserIDDraft: String = ""
     @State private var recipientDeviceIDDraft: String = ""
     @State private var recipientDeviceOptions: [InboxDeviceOptionRow] = []
@@ -39,11 +40,11 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
-                        "You can now call `PATCH /conversations/{id}/members/{user_id}/read-cursor` directly from iOS to move read cursor and observe `last_read_by` in loaded rows."
+                        "You can now call `PATCH /conversations/{id}/members/{user_id}/read-cursor` directly from iOS to move read cursor and observe `last_read_by` + focused `read_status(user)` in loaded rows."
                     ]
                 )
 
@@ -304,6 +305,15 @@ struct InboxPlaceholderView: View {
                             .background(Color.secondary.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                        TextField("Read-status focus user UUID (optional, defaults to User A)", text: $readStatusFocusUserIDDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
                         Button {
                             Task {
                                 await updateReadCursor()
@@ -411,6 +421,10 @@ struct InboxPlaceholderView: View {
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
 
+                    Text("Read-status focus user_id: \(resolvedReadStatusFocusUserID ?? "(not resolved)")")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
                     Text("Delete target message_id: \(resolvedMessageToDeleteID ?? "(not resolved)")")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
@@ -477,6 +491,16 @@ struct InboxPlaceholderView: View {
                                     Text("last_read_by: \(readCursorOwners.joined(separator: ", "))")
                                         .font(.footnote)
                                         .foregroundStyle(.secondary)
+                                }
+
+                                if row.id == resolvedReadStatusMessageID,
+                                   let focusUserID = resolvedReadStatusFocusUserID {
+                                    let focusReadState = readCursorOwners.contains(focusUserID) ? "read" : "unread"
+                                    let focusReadColor: Color = focusReadState == "read" ? .green : .orange
+
+                                    Text("read_status(\(focusUserID)): \(focusReadState)")
+                                        .font(.footnote.monospaced())
+                                        .foregroundStyle(focusReadColor)
                                 }
 
                                 Text("message_id: \(row.id)")
@@ -571,6 +595,29 @@ struct InboxPlaceholderView: View {
         let manualMessageID = messageToDeleteIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         if !manualMessageID.isEmpty {
             return manualMessageID
+        }
+
+        return messageRows.last?.id
+    }
+
+    private var resolvedReadStatusFocusUserID: String? {
+        let manualUserID = readStatusFocusUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !manualUserID.isEmpty {
+            return manualUserID
+        }
+
+        let fallbackUserA = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !fallbackUserA.isEmpty {
+            return fallbackUserA
+        }
+
+        return nil
+    }
+
+    private var resolvedReadStatusMessageID: String? {
+        if let targetMessageID = resolvedReadCursorTargetMessageID,
+           !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return targetMessageID
         }
 
         return messageRows.last?.id
