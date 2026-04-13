@@ -38,6 +38,8 @@ struct InboxPlaceholderView: View {
     @State private var autoRefreshEnabled = false
     @State private var lastCursorFormSyncSummary: String?
     @State private var lastCursorFormSyncAt: Date?
+    @State private var lastRecipientDeviceContextResetReason: String?
+    @State private var lastRecipientDeviceContextResetAt: Date?
 
     private let recipientDevicesAutoReloadDebounceNanoseconds: UInt64 = 350_000_000
     private let recipientDevicesAutoReloadMinIntervalSeconds: TimeInterval = 1.0
@@ -48,7 +50,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -80,7 +82,8 @@ struct InboxPlaceholderView: View {
                         "Switching direct-thread identity (`User A`/`User B`) now also clears recipient-device timestamp debug state to avoid cross-thread carry-over.",
                         "Switching direct-thread identity (`User A`/`User B`) now clears recipient-device user/device drafts + options immediately to prevent stale device-target actions before next reload.",
                         "If direct-thread load fails and thread state resets, recipient-device user/device/options are now cleared in the same reset path so stale targets do not leak across recovery flows.",
-                        "After successful thread load, if current recipient user is not in loaded conversation members, recipient-device context is auto-cleared to avoid cross-conversation stale target carry-over."
+                        "After successful thread load, if current recipient user is not in loaded conversation members, recipient-device context is auto-cleared to avoid cross-conversation stale target carry-over.",
+                        "When non-member auto-clear happens, inbox now shows a short inline reset-reason helper note (~20s) so testers know this reset is intentional."
                     ]
                 )
 
@@ -317,6 +320,12 @@ struct InboxPlaceholderView: View {
                             .padding(12)
                             .background(Color.secondary.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        if let recipientDeviceContextResetHintText {
+                            Text(recipientDeviceContextResetHintText)
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
 
                         if !recipientUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
                            !recipientDeviceOptions.isEmpty,
@@ -1055,6 +1064,20 @@ struct InboxPlaceholderView: View {
         return "\(lastCursorFormSyncSummary) · \(Int(elapsed))s ago"
     }
 
+    private var recipientDeviceContextResetHintText: String? {
+        guard let lastRecipientDeviceContextResetReason,
+              let lastRecipientDeviceContextResetAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(lastRecipientDeviceContextResetAt)
+        guard elapsed <= 20 else {
+            return nil
+        }
+
+        return "Recipient-device context reset (\(lastRecipientDeviceContextResetReason)) · \(Int(elapsed))s ago."
+    }
+
     private func prefillUserAFromCurrentSessionIfNeeded() {
         guard userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let currentSessionUserID else {
@@ -1077,12 +1100,20 @@ struct InboxPlaceholderView: View {
         lastRecipientDevicesRateLimitSkipAt = nil
     }
 
-    private func clearRecipientDeviceContext() {
+    private func clearRecipientDeviceContext(reason: String? = nil) {
         recipientDevicesAutoReloadTask?.cancel()
         recipientDevicesAutoReloadTask = nil
         recipientDeviceOptions = []
         recipientDeviceIDDraft = ""
         recipientUserIDDraft = ""
+
+        if let reason {
+            lastRecipientDeviceContextResetReason = reason
+            lastRecipientDeviceContextResetAt = Date()
+        } else {
+            lastRecipientDeviceContextResetReason = nil
+            lastRecipientDeviceContextResetAt = nil
+        }
     }
 
     private func handleDirectThreadIdentityChange() {
@@ -1188,7 +1219,7 @@ struct InboxPlaceholderView: View {
                 if memberUserIDs.contains(resolvedRecipientUserID) {
                     await loadRecipientDevices(silent: true)
                 } else {
-                    clearRecipientDeviceContext()
+                    clearRecipientDeviceContext(reason: "non-member recipient after direct-thread switch")
                 }
             }
         } catch {
