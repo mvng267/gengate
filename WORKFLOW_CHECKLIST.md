@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **126 — iOS inbox recipient-device auto-reload debounce slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **127 — iOS inbox recipient-device auto-reload rate-limit slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **126**
-- Scope hiện tại: iOS inbox read-status UX hardening — auto reload recipient devices khi recipient user đổi với debounce nhẹ.
+- Batch workflow chính thức hiện tại: **127**
+- Scope hiện tại: iOS inbox read-status UX hardening — rate-limit guard cho auto recipient-device reload khi input đổi nhanh.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch126 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch127 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch127 cho messaging friction tiếp theo (rate-limit guard cho auto recipient-device reload để giảm burst khi input thay đổi nhanh) trong iOS inbox shell
+  - mở batch128 cho messaging friction tiếp theo (show helper hint khi auto reload bị skip vì rate-limit guard) trong iOS inbox shell
 
 ## Batch handoff note
 

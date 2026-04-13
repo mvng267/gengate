@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 126
+- Batch: 127
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 126 iOS inbox seam hardening — auto reload recipient devices (debounced) when recipient user changes
+- Scope: batch 127 iOS inbox seam hardening — rate-limit guard for auto recipient-device reload to reduce burst calls on fast input changes
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch126 slice)
+  - latest commit: `HEAD` (local batch127 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch127 cho messaging friction tiếp theo (ví dụ rate-limit guard cho auto recipient-device reload để giảm call burst khi paste/chỉnh nhanh) trong iOS inbox shell
+- Next: mở batch128 cho messaging friction tiếp theo (ví dụ show “auto reload rate-limited” helper text when guarded skip happens) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -235,6 +235,10 @@
   - `Recipient user UUID` đổi sẽ trigger auto reload `/auth/devices/{user_id}` sau debounce ~350ms (không cần bấm reload thủ công cho luồng bình thường)
   - auto-reload task cũ bị cancel khi user tiếp tục gõ/paste, tránh burst call khi input thay đổi liên tục
   - khi view disappear thì auto-reload task bị cancel để tránh side effect ngoài lifecycle
+- Batch 127 outcome:
+  - auto recipient-device reload path now has minimum interval guard (`~1s`) via `lastRecipientDevicesAutoReloadAt`
+  - nếu input thay đổi nhanh trong khoảng rate-limit window, auto reload bị skip an toàn để giảm call burst
+  - debounce + cancel + min-interval guard phối hợp để giữ UX mượt nhưng hạn chế spam `/auth/devices/{user_id}`
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -244,7 +248,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve direct conversation, nhập/paste `Recipient user UUID` rồi chờ ~0.35s để verify recipient devices auto reload (không cần bấm manual reload), đổi nhanh recipient user liên tiếp để verify call cũ bị debounce-cancel (không nhảy loạn options), sau đó chọn device và tiếp tục `Create message-device key`
+  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve direct conversation, nhập/paste `Recipient user UUID` rồi chờ ~0.35s để verify auto reload; sau đó chỉnh nhanh recipient user nhiều lần <1s để verify guard rate-limit skip burst calls; đợi >1s rồi đổi lại để verify auto reload chạy lại bình thường; cuối cùng chọn device và `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

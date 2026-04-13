@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 126
-- Trục công việc: iOS inbox seam hardening — auto recipient-device reload debounce khi đổi recipient user.
+- Batch workflow chính thức hiện tại: 127
+- Trục công việc: iOS inbox seam hardening — rate-limit guard cho auto recipient-device reload.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 126 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: recipient devices auto reload debounced khi recipient user đổi; task cũ bị cancel để tránh call burst.
-- Trạng thái: verify_batch126_ios.
+- Scope hiện tại: batch 127 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: auto recipient-device reload có thêm min-interval guard để giảm call burst khi input đổi nhanh.
+- Trạng thái: verify_batch127_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
