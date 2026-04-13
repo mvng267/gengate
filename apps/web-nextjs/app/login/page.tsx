@@ -63,6 +63,7 @@ export default function LoginPage() {
   const [sessionPreview, setSessionPreview] = useState<string | null>(null);
   const [storedSessionPreview, setStoredSessionPreview] = useState<string | null>(null);
   const [loginOutcomePreview, setLoginOutcomePreview] = useState<string | null>(null);
+  const [localClearOutcomePreview, setLocalClearOutcomePreview] = useState<string | null>(null);
   const [logoutOutcomePreview, setLogoutOutcomePreview] = useState<string | null>(null);
   const [refreshOutcomePreview, setRefreshOutcomePreview] = useState<string | null>(null);
   const [restoreOutcomePreview, setRestoreOutcomePreview] = useState<string | null>(null);
@@ -165,6 +166,7 @@ export default function LoginPage() {
     setStatusMessage(null);
     setSessionPreview(null);
     setLoginOutcomePreview(null);
+    setLocalClearOutcomePreview(null);
     setLogoutOutcomePreview(null);
     setRefreshOutcomePreview(null);
     setRestoreOutcomePreview(null);
@@ -217,6 +219,7 @@ export default function LoginPage() {
   async function handleLogout() {
     setIsLoggingOut(true);
     setLoginOutcomePreview(null);
+    setLocalClearOutcomePreview(null);
     setLogoutOutcomePreview(null);
     setRefreshOutcomePreview(null);
     setRestoreOutcomePreview(null);
@@ -244,6 +247,13 @@ export default function LoginPage() {
     setStatusTone("neutral");
     setStatusMessage("Đã xóa session local đã lưu trên web shell.");
     setLoginOutcomePreview(null);
+    setLocalClearOutcomePreview(
+      [
+        "local_clear_result: local_session_cleared",
+        "backend_detail: none",
+        "message: Đã xóa session local đã lưu trên web shell.",
+      ].join("\n"),
+    );
     setLogoutOutcomePreview(null);
     setRefreshOutcomePreview(null);
     setRestoreOutcomePreview(null);
@@ -255,17 +265,17 @@ export default function LoginPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-start">
       <section className="flex-1 space-y-4">
         <span className="inline-flex rounded-full border border-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-          Batch 45 · Web login outcome signal
+          Batch 46 · Web local clear outcome signal
         </span>
         <h1 className="text-4xl font-black tracking-tight text-black">
-          Web shell nay có thêm login outcome signal riêng để tách kết quả sign-in/register khỏi status text tổng quát và giúp auth loop dễ verify hơn.
+          Web shell nay có thêm local clear outcome signal riêng để tách thao tác xóa session local khỏi logout/revoke flow và giúp auth loop dễ verify hơn.
         </h1>
         <p className="max-w-2xl text-base leading-7 text-neutral-700">
-          Batch 45 ưu tiên thêm 1 action outcome surface hẹp: khi login/register, màn web hiển thị riêng login result và backend detail để auth loop dễ verify hơn.
+          Batch 46 ưu tiên thêm 1 action outcome surface hẹp: khi xóa session local, màn web hiển thị riêng local clear result và backend detail để auth loop dễ verify hơn.
         </p>
         <ul className="space-y-2 text-sm text-neutral-700">
           <li>• Password/OTP vẫn là placeholder trên UI, chưa dùng cho API ở batch này.</li>
-          <li>• Web shell nay có persisted-session inspector, login outcome panel, restore outcome panel, refresh outcome panel, và logout outcome panel để nhìn rõ từng auth action.</li>
+          <li>• Web shell nay có persisted-session inspector, login outcome panel, local clear outcome panel, restore outcome panel, refresh outcome panel, và logout outcome panel để nhìn rõ từng auth action.</li>
           <li>• Redirect đích mặc định vẫn là <code>/feed</code> nếu không có <code>?next=...</code> hợp lệ.</li>
         </ul>
       </section>
@@ -319,6 +329,7 @@ export default function LoginPage() {
               setStatusMessage(null);
               setSessionPreview(null);
               setLoginOutcomePreview(null);
+              setLocalClearOutcomePreview(null);
               setLogoutOutcomePreview(null);
               setRefreshOutcomePreview(null);
               setRestoreOutcomePreview(null);
@@ -379,6 +390,7 @@ export default function LoginPage() {
               setStatusMessage(null);
               setSessionPreview(null);
               setLoginOutcomePreview(null);
+              setLocalClearOutcomePreview(null);
               setLogoutOutcomePreview(null);
               setRefreshOutcomePreview(null);
               setRestoreOutcomePreview(null);
@@ -455,7 +467,7 @@ export default function LoginPage() {
           <div className="font-semibold">Status</div>
           <p className={buildStatusClass(statusTone)}>
             {statusMessage ??
-              "Chưa submit. Batch 45 shell này ưu tiên giúp auth E2E flow hiện rõ login outcome thật bên cạnh persisted-session state."}
+              "Chưa submit. Batch 46 shell này ưu tiên giúp auth E2E flow hiện rõ local clear outcome thật bên cạnh persisted-session state."}
           </p>
 
           {statusMessage?.includes("đăng nhập lại") ? (
@@ -479,6 +491,19 @@ export default function LoginPage() {
             ) : (
               <p className="mt-2 text-xs text-neutral-600">
                 Chưa có login/register attempt nào trong phiên shell hiện tại.
+              </p>
+            )}
+          </div>
+
+          <div className="mt-3">
+            <div className="font-semibold">Local clear outcome</div>
+            {localClearOutcomePreview ? (
+              <pre className="mt-2 overflow-x-auto border border-black bg-neutral-100 p-3 text-xs text-black">
+                {localClearOutcomePreview}
+              </pre>
+            ) : (
+              <p className="mt-2 text-xs text-neutral-600">
+                Chưa có local clear attempt nào trong phiên shell hiện tại.
               </p>
             )}
           </div>

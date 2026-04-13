@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **đã chốt batch 45**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 46**.
 
 ## Reporting hard rule
 
@@ -88,25 +88,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **45**
-- Scope hiện tại: batch 45 login outcome signal complete — web + iOS surface dedicated login/register result + backend/detail cue separate from generic status text to make auth loop easier to verify.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **46**
+- Scope hiện tại: web local clear outcome signal — surface dedicated local-session-clear result separate from logout/revoke flow.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/web-nextjs/app/login/page.tsx`
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
-  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
-  - `WORKFLOW_STATUS.md`
-  - `WORKFLOW_CHECKLIST.md`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `74b1141` — `batch45: add ios login outcome signal`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `75cff32` — `batch45: mark workflow complete`
+  - working tree hiện tại: bẩn đúng theo batch 46 web local clear outcome slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch 46 với 1 scope hẹp: thêm auth outcome/lifecycle cue kế tiếp, ưu tiên reuse pattern panel hiện có và lane chạm ít file hơn
+  - commit web batch-46 local clear outcome slice này; sau đó chọn 1 parity slice hẹp tương ứng trên iOS nếu còn hợp lý
 
 ## Batch handoff note
 
@@ -114,11 +109,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Commit cuối đã chốt:
   - `6f63cc6` — `batch45: add web login outcome signal`
   - `74b1141` — `batch45: add ios login outcome signal`
+  - `75cff32` — `batch45: mark workflow complete`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - chưa có blocker code; next leverage nên là 1 lifecycle cue/outcome nhỏ tiếp theo để auth loop có verify path rõ hơn end-to-end
+  - chưa có blocker code; next leverage là tách rõ local clear outcome khỏi logout/revoke để auth loop nhìn rõ thao tác local-only
 - Batch kế tiếp: **46**
 - Scope hẹp đầu tiên của batch 46:
-  - thêm 1 auth outcome/lifecycle cue nhỏ tiếp theo trên web hoặc iOS, ưu tiên reuse panel pattern hiện có để giữ nhịp batch nhỏ và đóng nhanh
+  - thêm local clear outcome signal trên web trước, vì đã có clear-session action sẵn và chỉ cần reuse panel pattern hiện có

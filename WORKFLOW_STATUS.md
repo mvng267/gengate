@@ -1,25 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 45
+- Batch: 46
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 45 login outcome signal complete — web + iOS surface dedicated login/register result + backend/detail cue separate from generic status text to make auth loop easier to verify
-- Status: complete
+- Scope: batch 46 web local clear outcome signal — web surfaces dedicated local-session-clear result separate from logout/revoke flow to make auth loop easier to verify
+- Status: verify
 - Files:
   - apps/web-nextjs/app/login/page.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `74b1141` — `batch45: add ios login outcome signal`
-  - working tree: sạch
+  - latest commit: `75cff32` — `batch45: mark workflow complete`
+  - working tree: bẩn đúng theo batch 46 web local clear outcome slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 46 với 1 scope hẹp theo hướng auth outcome aggregation hoặc session lifecycle cue tiếp theo để hoàn thiện auth loop verify path
+- Next: commit web batch-46 local clear outcome slice này; sau đó chọn 1 parity slice hẹp tương ứng trên iOS nếu còn hợp lý
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 45 result:
-  - Web login shell có panel `Login outcome` hiển thị riêng login/register result + backend/detail cue
-  - iOS Session screen cũng có card `Login outcome` hiển thị riêng login/register result + backend/detail cue bên cạnh restore/refresh/logout outcome và persisted-session snapshot
-  - Hai shell giờ đều phân tách rõ login outcome khỏi generic status text để auth loop dễ verify hơn
+- Batch 46 update:
+  - Web login shell nay có panel `Local clear outcome` hiển thị riêng local session clear result + backend/detail cue
+  - Local clear outcome được reset hợp lý khi chạy login/register/refresh/logout để tránh lẫn state cũ
+  - Web shell giờ có đủ login/local-clear/restore/refresh/logout outcome panels bên cạnh persisted-session snapshot
