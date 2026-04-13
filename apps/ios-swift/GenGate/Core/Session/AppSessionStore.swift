@@ -105,6 +105,7 @@ final class AppSessionStore {
     var passwordDraft: String = ""
     var statusMessage: String?
     var loginOutcomeSummary: String?
+    var localClearOutcomeSummary: String?
     var logoutOutcomeSummary: String?
     var refreshOutcomeSummary: String?
     var restoreOutcomeSummary: String?
@@ -197,6 +198,7 @@ final class AppSessionStore {
         guard let persisted = loadPersistedSession() else {
             authState = .signedOut
             statusMessage = "Chưa có persisted session local để refresh."
+            localClearOutcomeSummary = nil
             logoutOutcomeSummary = nil
             refreshOutcomeSummary = nil
             return
@@ -358,6 +360,7 @@ final class AppSessionStore {
         authState = .signingIn
         statusMessage = nil
         loginOutcomeSummary = nil
+        localClearOutcomeSummary = nil
         logoutOutcomeSummary = nil
         refreshOutcomeSummary = nil
         restoreOutcomeSummary = nil
@@ -410,6 +413,7 @@ final class AppSessionStore {
         isRegistering = true
         statusMessage = nil
         loginOutcomeSummary = nil
+        localClearOutcomeSummary = nil
         logoutOutcomeSummary = nil
         refreshOutcomeSummary = nil
         restoreOutcomeSummary = nil
@@ -446,6 +450,7 @@ final class AppSessionStore {
         var logoutOutcome: LogoutOutcome?
 
         loginOutcomeSummary = nil
+        localClearOutcomeSummary = nil
         logoutOutcomeSummary = nil
         refreshOutcomeSummary = nil
         restoreOutcomeSummary = nil
@@ -494,6 +499,24 @@ final class AppSessionStore {
         selectedTab = .session
     }
 
+    func clearLocalSession() {
+        clearPersistedSession()
+        authState = .signedOut
+        selectedTab = .session
+        pendingProtectedTab = nil
+        passwordDraft = ""
+        statusMessage = "Đã xóa session local trên iOS shell."
+        loginOutcomeSummary = nil
+        localClearOutcomeSummary = [
+            "local_clear_result: local_session_cleared",
+            "backend_detail: none",
+            "message: Đã xóa session local trên iOS shell."
+        ].joined(separator: "\n")
+        logoutOutcomeSummary = nil
+        refreshOutcomeSummary = nil
+        restoreOutcomeSummary = nil
+    }
+
     func requestProtectedTab(_ tab: AppTab) {
         guard tab != .session else {
             selectedTab = .session
@@ -510,6 +533,7 @@ final class AppSessionStore {
         selectedTab = .session
         statusMessage = "Cần đăng nhập hoặc restore session để mở tab \(tab.displayName)."
         loginOutcomeSummary = nil
+        localClearOutcomeSummary = nil
         logoutOutcomeSummary = nil
         refreshOutcomeSummary = nil
         restoreOutcomeSummary = nil

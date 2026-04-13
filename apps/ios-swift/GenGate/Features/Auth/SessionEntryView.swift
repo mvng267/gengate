@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 45 · iOS login outcome signal")
+            Text("Batch 46 · iOS local clear outcome signal")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -19,7 +19,7 @@ struct SessionEntryView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Batch 45 ưu tiên thêm login outcome surface riêng để nhìn rõ login/register result và backend detail ngay trên màn Session.")
+                    Text("Batch 46 ưu tiên thêm local clear outcome surface riêng để nhìn rõ thao tác xóa session local tách khỏi logout/revoke flow ngay trên màn Session.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -75,6 +75,11 @@ struct SessionEntryView: View {
                     .buttonStyle(.bordered)
                     .disabled(sessionStore.authState == .signingIn || sessionStore.authState == .restoring || sessionStore.isRefreshingSession || sessionStore.isRegistering)
 
+                    Button("Clear local session only") {
+                        sessionStore.clearLocalSession()
+                    }
+                    .buttonStyle(.bordered)
+
                     Text("Session indicator: \(sessionStore.sessionIndicatorLabel)")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
@@ -103,6 +108,12 @@ struct SessionEntryView: View {
                         title: "Login outcome",
                         content: sessionStore.loginOutcomeSummary,
                         emptyState: "Chưa có login/register attempt nào trong phiên shell hiện tại."
+                    )
+
+                    outcomeCard(
+                        title: "Local clear outcome",
+                        content: sessionStore.localClearOutcomeSummary,
+                        emptyState: "Chưa có local clear attempt nào trong phiên shell hiện tại."
                     )
 
                     outcomeCard(
@@ -149,7 +160,7 @@ struct SessionEntryView: View {
                     .font(.footnote.monospaced())
                     .foregroundStyle(.secondary)
 
-                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ có login outcome surface riêng bên cạnh restore/refresh/logout outcome và persisted-session inspector để nhìn rõ từng auth action result.")
+                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ có local clear outcome surface riêng bên cạnh login/restore/refresh/logout outcome và persisted-session inspector để nhìn rõ từng auth action result.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -189,6 +200,12 @@ struct SessionEntryView: View {
                     )
 
                     outcomeCard(
+                        title: "Local clear outcome",
+                        content: sessionStore.localClearOutcomeSummary,
+                        emptyState: "Chưa có local clear attempt nào trong phiên shell hiện tại."
+                    )
+
+                    outcomeCard(
                         title: "Restore outcome",
                         content: sessionStore.restoreOutcomeSummary,
                         emptyState: "Chưa có restore attempt nào trong phiên shell hiện tại."
@@ -221,6 +238,11 @@ struct SessionEntryView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(sessionStore.isRefreshingSession)
+
+                    Button("Clear local session only") {
+                        sessionStore.clearLocalSession()
+                    }
+                    .buttonStyle(.bordered)
 
                     Button("Sign out") {
                         Task {

@@ -89,19 +89,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **46**
-- Scope hiện tại: web local clear outcome signal — surface dedicated local-session-clear result separate from logout/revoke flow.
+- Scope hiện tại: iOS local clear outcome signal parity — surface dedicated local-session-clear result separate from logout/revoke flow to match web.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
+  - web slice trong cùng batch đã verify trước đó: `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `75cff32` — `batch45: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 46 web local clear outcome slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `b841f1e` — `batch46: add web local clear outcome signal`
+  - working tree hiện tại: bẩn đúng theo batch 46 iOS local clear outcome parity slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit web batch-46 local clear outcome slice này; sau đó chọn 1 parity slice hẹp tương ứng trên iOS nếu còn hợp lý
+  - commit iOS parity slice này; sau đó làm workflow-only closeout marker cho batch 46
 
 ## Batch handoff note
 
