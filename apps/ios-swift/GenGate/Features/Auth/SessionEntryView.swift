@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 42 · iOS logout outcome signal")
+            Text("Batch 43 · iOS refresh outcome signal")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -19,7 +19,7 @@ struct SessionEntryView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Batch 42 ưu tiên thêm logout outcome surface riêng để nhìn rõ local clear và backend detail sau logout ngay trên màn Session.")
+                    Text("Batch 43 ưu tiên thêm refresh outcome surface riêng để nhìn rõ refresh result, local update, và backend detail sau manual refresh ngay trên màn Session.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -99,45 +99,23 @@ struct SessionEntryView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Logout outcome")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
+                    outcomeCard(
+                        title: "Refresh outcome",
+                        content: sessionStore.refreshOutcomeSummary,
+                        emptyState: "Chưa có refresh attempt nào trong phiên shell hiện tại."
+                    )
 
-                        if let logoutOutcomeSummary = sessionStore.logoutOutcomeSummary {
-                            Text(logoutOutcomeSummary)
-                                .font(.caption.monospaced())
-                                .textSelection(.enabled)
-                        } else {
-                            Text("Chưa có logout attempt nào trong phiên shell hiện tại.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12)
-                    .background(Color.secondary.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    outcomeCard(
+                        title: "Logout outcome",
+                        content: sessionStore.logoutOutcomeSummary,
+                        emptyState: "Chưa có logout attempt nào trong phiên shell hiện tại."
+                    )
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Persisted session snapshot")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
-
-                        if let persistedSessionSnapshot = sessionStore.persistedSessionSnapshot {
-                            Text(persistedSessionSnapshot)
-                                .font(.caption.monospaced())
-                                .textSelection(.enabled)
-                        } else {
-                            Text("Chưa có persisted session trong local storage.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12)
-                    .background(Color.secondary.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    outcomeCard(
+                        title: "Persisted session snapshot",
+                        content: sessionStore.persistedSessionSnapshot,
+                        emptyState: "Chưa có persisted session trong local storage."
+                    )
                 }
 
             case let .authenticated(userSession):
@@ -159,7 +137,7 @@ struct SessionEntryView: View {
                     .font(.footnote.monospaced())
                     .foregroundStyle(.secondary)
 
-                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ còn có logout outcome surface riêng để nhìn rõ kết quả revoke/detail sau logout bên cạnh persisted-session inspector.")
+                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ còn có refresh outcome surface riêng để nhìn rõ kết quả rotate/detail sau manual refresh bên cạnh logout outcome và persisted-session inspector.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -192,45 +170,23 @@ struct SessionEntryView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Logout outcome")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
+                    outcomeCard(
+                        title: "Refresh outcome",
+                        content: sessionStore.refreshOutcomeSummary,
+                        emptyState: "Chưa có refresh attempt nào trong phiên shell hiện tại."
+                    )
 
-                        if let logoutOutcomeSummary = sessionStore.logoutOutcomeSummary {
-                            Text(logoutOutcomeSummary)
-                                .font(.caption.monospaced())
-                                .textSelection(.enabled)
-                        } else {
-                            Text("Chưa có logout attempt nào trong phiên shell hiện tại.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12)
-                    .background(Color.secondary.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    outcomeCard(
+                        title: "Logout outcome",
+                        content: sessionStore.logoutOutcomeSummary,
+                        emptyState: "Chưa có logout attempt nào trong phiên shell hiện tại."
+                    )
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Persisted session snapshot")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
-
-                        if let persistedSessionSnapshot = sessionStore.persistedSessionSnapshot {
-                            Text(persistedSessionSnapshot)
-                                .font(.caption.monospaced())
-                                .textSelection(.enabled)
-                        } else {
-                            Text("Chưa có persisted session trong local storage.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12)
-                    .background(Color.secondary.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    outcomeCard(
+                        title: "Persisted session snapshot",
+                        content: sessionStore.persistedSessionSnapshot,
+                        emptyState: "Chưa có persisted session trong local storage."
+                    )
 
                     Button {
                         Task {
@@ -255,6 +211,29 @@ struct SessionEntryView: View {
         }
         .padding(20)
         .navigationTitle("Session")
+    }
+
+    @ViewBuilder
+    private func outcomeCard(title: String, content: String?, emptyState: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.footnote)
+                .fontWeight(.semibold)
+
+            if let content {
+                Text(content)
+                    .font(.caption.monospaced())
+                    .textSelection(.enabled)
+            } else {
+                Text(emptyState)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(Color.secondary.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     private func primaryActionTitle(for authState: AppSessionStore.AuthState) -> String {

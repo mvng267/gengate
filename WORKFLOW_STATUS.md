@@ -2,20 +2,24 @@
 
 - Batch: 43
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 43 web refresh outcome signal — surface dedicated backend/detail result after refresh to make auth loop easier to verify
+- Scope: batch 43 refresh outcome signal complete — web + iOS surface dedicated backend/detail result after refresh to make auth loop easier to verify
 - Status: verify
 - Files:
   - apps/web-nextjs/app/login/page.tsx
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `d66414f` — `batch42: mark workflow complete`
-  - working tree: bẩn đúng theo batch 43 web refresh outcome signal slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `97ebdf4` — `batch43: add web refresh outcome signal`
+  - working tree: bẩn đúng theo batch 43 iOS refresh outcome signal parity slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit slice này; sau đó cân nhắc 1 parity slice tương tự trên iOS hoặc chuyển sang restore outcome signal nếu leverage cao hơn
+- Next: commit iOS parity slice này; sau đó làm workflow-only closeout marker cho batch 43
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 43 update:
-  - Web login shell nay có panel `Refresh outcome` hiển thị rõ refresh result + backend detail sau manual refresh
-  - Panel này giúp phân biệt rotate thành công với case refresh token đã mất hiệu lực trước đó
+  - Web login shell có panel `Refresh outcome` hiển thị rõ refresh result + backend detail sau manual refresh
+  - iOS Session screen nay cũng có card `Refresh outcome` hiển thị riêng refresh result + backend detail bên cạnh `Logout outcome` và persisted-session snapshot
+  - Hai shell giờ đều phân biệt rotate thành công với case refresh token đã mất hiệu lực trước đó
