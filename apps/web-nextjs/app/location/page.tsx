@@ -1,10 +1,11 @@
-import { AuthenticatedRouteShell } from "@/components/authenticated-route-shell";
+import { LocationShell } from "@/components/location-shell";
 
 export default function LocationPage() {
   return (
-    <AuthenticatedRouteShell
-      title="Location"
-      summary="Snapshot sharing controls and viewer permissions UI are pending."
-    />
+    <section>
+      <h1>Location</h1>
+      <p>Optional location sharing state shell is now wired for MVP testing.</p>
+      <LocationShell />
+    </section>
   );
 }

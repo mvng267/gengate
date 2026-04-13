@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **59 — notification shell slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **60 — location sharing state shell slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,26 +89,26 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **59**
-- Scope hiện tại: notification shell — web `/notifications` wired to load per-user notifications and toggle read state against existing backend contracts.
+- Batch workflow chính thức hiện tại: **60**
+- Scope hiện tại: location sharing state shell — web `/location` wired to create/load/toggle per-user share state and snapshots against existing backend contracts.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/app/notifications/page.tsx`
-  - `apps/web-nextjs/lib/notifications/client.ts`
-  - `apps/web-nextjs/components/notification-shell.tsx`
+  - `apps/web-nextjs/app/location/page.tsx`
+  - `apps/web-nextjs/lib/location/client.ts`
+  - `apps/web-nextjs/components/location-shell.tsx`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py` → ✅ pass
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_locations_api.py tests/test_location_audience_api.py` → ✅ pass
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `d92b349` — `batch58: wire direct messaging shell`
-  - working tree hiện tại: bẩn (batch 59 ready to commit)
+  - commit gần nhất đã chốt: `697b356` — `batch59: wire notification shell`
+  - working tree hiện tại: bẩn (batch 60 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch59 notification shell, rồi mở slice kế tiếp cho optional location sharing state shell
+  - commit batch60 location sharing state shell; sau đó ưu tiên refinement/cross-surface hardening vì toàn bộ MVP priority seams đã có mặt
 
 ## Batch handoff note
 
