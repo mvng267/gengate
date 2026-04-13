@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **đã complete batch 54 và đang finished/paused cho autopilot**.
+- Batch workflow chính thức mới nhất trong checklist/status: **55 — friend graph MVP shell slice is open and in progress**.
 
 ## Reporting hard rule
 
@@ -89,31 +89,31 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **54**
-- Scope hiện tại: failure cleanup cue parity — backend/web/iOS now expose explicit local-clear cue around invalid or cleared session outcomes, and both web + iOS consume backend 401 metadata in failure summaries.
-- Trạng thái hiện tại: **finished**
+- Batch workflow chính thức hiện tại: **55**
+- Scope hiện tại: friend graph MVP shell — backend list contracts for friend requests/friendships + web profile route wired to inspect that seam via `?user=<uuid>`.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/backend-python/app/main.py`
-  - `apps/backend-python/app/modules/auth/router.py`
-  - `apps/backend-python/tests/test_auth_api.py`
-  - `apps/web-nextjs/lib/auth/types.ts`
-  - `apps/web-nextjs/lib/auth/client.ts`
-  - `apps/web-nextjs/app/login/page.tsx`
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/backend-python/app/modules/friendships/router.py`
+  - `apps/backend-python/app/services/friendships.py`
+  - `apps/backend-python/app/repositories/friendships.py`
+  - `apps/backend-python/app/schemas/friendships.py`
+  - `apps/backend-python/tests/test_friendships_api.py`
+  - `apps/web-nextjs/lib/friends/client.ts`
+  - `apps/web-nextjs/components/friend-graph-shell.tsx`
+  - `apps/web-nextjs/app/profile/page.tsx`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ pass
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_friendships_api.py` → ✅ pass
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `325b8c7` — `batch54: refresh workflow head`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `7c5ecfd` — `batch54: mark autopilot finished`
+  - working tree hiện tại: bẩn (batch 55 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - project đang finished/paused cho autopilot; chỉ mở batch 55 khi có seam end-to-end auth/session mới thật sự còn thiếu
+  - commit batch55 friend graph shell, rồi mở slice kế tiếp cho moment posting image+caption shell
 
 ## Batch handoff note
 
@@ -133,9 +133,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - không còn blocker trực tiếp trong seam batch 54; phần đã làm là parity + contract consumption quanh invalid-session cleanup cue
-  - chưa có seam product mới đủ rõ để mở batch 55 một cách trung thực
+  - batch 54 không còn blocker trực tiếp; override mới từ Vinh yêu cầu tiếp tục autopilot qua seam MVP thật
 - Batch kế tiếp:
-  - chưa mở chính thức
+  - **55**
 - Scope hẹp đầu tiên của batch kế tiếp:
-  - chỉ xác định sau khi main agent đối chiếu workflow truth và tìm được seam end-to-end auth/session mới thực sự còn thiếu
+  - backend friend-request/friendship listing + web profile friend graph shell đọc contract đó để con người test seam social đầu tiên ngoài auth

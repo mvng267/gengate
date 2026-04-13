@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db_session
@@ -9,13 +9,26 @@ from app.schemas.friendships import (
     BlockListResponse,
     BlockResponse,
     FriendRequestCreateRequest,
+    FriendRequestItem,
+    FriendRequestListResponse,
     FriendRequestResponse,
+    FriendUserSummary,
+    FriendshipItem,
+    FriendshipListResponse,
     FriendshipResponse,
 )
+from app.repositories.users import user_repository
 from app.services.blocks import block_service
 from app.services.friendships import friendship_service
 
 router = APIRouter(prefix="/friends", tags=["friendships"])
+
+
+def _build_user_summary(db: Session, user_id: uuid.UUID) -> FriendUserSummary:
+    user = user_repository.get(db, user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="user_not_found")
+    return FriendUserSummary(id=user.id, email=user.email, username=user.username)
 
 
 @router.post("/requests", response_model=FriendRequestResponse, status_code=status.HTTP_201_CREATED)
@@ -35,6 +48,25 @@ def create_friend_request(
     return FriendRequestResponse.model_validate(friend_request)
 
 
+@router.get("/requests", response_model=FriendRequestListResponse)
+def list_friend_requests(user_id: uuid.UUID = Query(...), db: Session = Depends(get_db_session)) -> FriendRequestListResponse:
+    try:
+        requests = friendship_service.list_friend_requests(db, user_id=user_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    items = [
+        FriendRequestItem(
+            id=friend_request.id,
+            status=friend_request.status,
+            requester=_build_user_summary(db, friend_request.requester_user_id),
+            receiver=_build_user_summary(db, friend_request.receiver_user_id),
+        )
+        for friend_request in requests
+    ]
+    return FriendRequestListResponse(count=len(items), items=items)
+
+
 @router.post("/requests/{request_id}/accept", response_model=FriendshipResponse, status_code=status.HTTP_201_CREATED)
 def accept_friend_request(request_id: uuid.UUID, db: Session = Depends(get_db_session)) -> FriendshipResponse:
     try:
@@ -44,10 +76,19 @@ def accept_friend_request(request_id: uuid.UUID, db: Session = Depends(get_db_se
     return FriendshipResponse.model_validate(friendship)
 
 
-@router.get("", response_model=dict)
-def list_friendships(db: Session = Depends(get_db_session)) -> dict[str, int]:
-    friendships = friendship_service.list_friendships(db)
-    return {"count": len(friendships)}
+@router.get("", response_model=FriendshipListResponse)
+def list_friendships(user_id: uuid.UUID | None = Query(default=None), db: Session = Depends(get_db_session)) -> FriendshipListResponse:
+    friendships = friendship_service.list_friendships(db, user_id=user_id)
+    items = [
+        FriendshipItem(
+            id=friendship.id,
+            state=friendship.state,
+            user_a=_build_user_summary(db, friendship.user_a_id),
+            user_b=_build_user_summary(db, friendship.user_b_id),
+        )
+        for friendship in friendships
+    ]
+    return FriendshipListResponse(count=len(items), items=items)
 
 
 @router.post("/blocks", response_model=BlockResponse, status_code=status.HTTP_201_CREATED)

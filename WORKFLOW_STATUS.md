@@ -1,35 +1,41 @@
 # GenGate Workflow Status
 
-- Batch: 54
+- Batch: 55
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 54 failure cleanup cue parity — backend/web/iOS now expose explicit local-clear cue around invalid or cleared session outcomes, and both web + iOS consume backend 401 metadata directly in failure summaries
-- Status: finished
+- Scope: batch 55 friend graph MVP shell — reopen autopilot after auth/session closeout, add backend friend-request/friendship listing contracts and wire web profile route to a testable friend graph shell
+- Status: MVP-testable
 - Files:
-  - apps/backend-python/app/main.py
-  - apps/backend-python/app/modules/auth/router.py
-  - apps/backend-python/tests/test_auth_api.py
-  - apps/web-nextjs/lib/auth/types.ts
-  - apps/web-nextjs/lib/auth/client.ts
-  - apps/web-nextjs/app/login/page.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/backend-python/app/modules/friendships/router.py
+  - apps/backend-python/app/services/friendships.py
+  - apps/backend-python/app/repositories/friendships.py
+  - apps/backend-python/app/schemas/friendships.py
+  - apps/backend-python/tests/test_friendships_api.py
+  - apps/web-nextjs/lib/friends/client.ts
+  - apps/web-nextjs/components/friend-graph-shell.tsx
+  - apps/web-nextjs/app/profile/page.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_friendships_api.py` ✅
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `325b8c7` — `batch54: refresh workflow head`
-  - working tree: sạch
+  - latest commit: `7c5ecfd` — `batch54: mark autopilot finished`
+  - working tree: bẩn (batch 55 ready to commit)
 - Blocker: none
-- Next: project currently finished/paused for autopilot. Do not open batch 55 until a real end-to-end product seam is identified. Do not create more metadata-only churn from stale cron prompts.
+- Next: commit batch 55 friend graph slice, then move to next narrow MVP seam: moment posting with image + caption shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 54 closeout:
-  - backend auth 401 invalid-session payloads giữ `local_clear_recommended: true` + `backend_detail`
-  - web auth client parse structured backend error payload và show cleanup cue từ server metadata
-  - iOS auth client parse structured backend error payload cho restore/refresh/logout unauthorized paths
-  - restore/refresh failure summaries ở web + iOS đều đọc cleanup cue từ backend metadata
-  - artifact build outputs đã được dọn; batch 54 hiện closed sạch
-  - coordinator files (`WORKFLOW_*`, `TEAM_DISPATCH.md`) đã được sync về cùng canonical state
-  - autopilot stop marker: current project state is effectively complete until a new real product gap is identified
+- Batch 55 outcome:
+  - override cũ `finished/paused` theo chỉ đạo mới của Vinh: tiếp tục autopilot qua các seam MVP product, không dừng ở auth/session
+  - seam product đầu tiên sau auth/session đã mở được: friend requests / friend graph shell
+  - backend hiện có list contracts `GET /friends/requests?user_id=<uuid>` và `GET /friends?user_id=<uuid>` với user summaries để web shell render data thật
+  - web `app/profile/page.tsx` hiện đọc seam này qua `?user=<uuid>` và show pending requests + accepted friendships
+  - trạng thái hiện tại đủ để đánh dấu **MVP-testable** cho seam social đầu tiên beyond auth
+- Run/test path:
+  - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
+  - web run: `cd apps/web-nextjs && npm run dev`
+  - seed/test seam:
+    1. register 2 users via `POST /auth/register`
+    2. create request via `POST /friends/requests`
+    3. optionally accept via `POST /friends/requests/{request_id}/accept`
+    4. open `http://localhost:3000/profile?user=<requester-or-receiver-uuid>` to inspect friend graph shell

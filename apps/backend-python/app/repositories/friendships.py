@@ -12,6 +12,16 @@ class FriendRequestRepository(BaseRepository[FriendRequest]):
     def __init__(self) -> None:
         super().__init__(FriendRequest)
 
+    def list_for_user(self, db: Session, user_id: uuid.UUID, limit: int = 100, offset: int = 0) -> list[FriendRequest]:
+        statement = (
+            select(FriendRequest)
+            .where(or_(FriendRequest.requester_user_id == user_id, FriendRequest.receiver_user_id == user_id))
+            .order_by(FriendRequest.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+        return list(db.scalars(statement).all())
+
 
 class FriendshipRepository(BaseRepository[Friendship]):
     def __init__(self) -> None:
@@ -25,6 +35,16 @@ class FriendshipRepository(BaseRepository[Friendship]):
             )
         )
         return db.scalar(statement)
+
+    def list_for_user(self, db: Session, user_id: uuid.UUID, limit: int = 100, offset: int = 0) -> list[Friendship]:
+        statement = (
+            select(Friendship)
+            .where(or_(Friendship.user_a_id == user_id, Friendship.user_b_id == user_id))
+            .order_by(Friendship.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+        return list(db.scalars(statement).all())
 
 
 friend_request_repository = FriendRequestRepository()

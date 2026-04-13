@@ -56,8 +56,16 @@ class FriendshipService:
         db.flush()
         return friendship
 
-    def list_friendships(self, db: Session) -> list[Friendship]:
-        return friendship_repository.list(db, limit=1000, offset=0)
+    def list_friendships(self, db: Session, user_id: uuid.UUID | None = None) -> list[Friendship]:
+        if user_id is None:
+            return friendship_repository.list(db, limit=1000, offset=0)
+        return friendship_repository.list_for_user(db, user_id=user_id, limit=100, offset=0)
+
+    def list_friend_requests(self, db: Session, user_id: uuid.UUID) -> list[FriendRequest]:
+        user = user_repository.get(db, user_id)
+        if user is None:
+            raise ValueError("user_not_found")
+        return friend_request_repository.list_for_user(db, user_id=user_id, limit=100, offset=0)
 
 
 friendship_service = FriendshipService()

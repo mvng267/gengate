@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 54
-- Trục công việc: batch 54 auth/session failure cleanup cue parity đã complete sạch; project hiện finished/paused cho autopilot.
+- Batch workflow chính thức hiện tại: 55
+- Trục công việc: friend graph MVP shell — reopen autopilot sau auth/session, thêm backend list contracts cho friend requests/friendships và wire web profile route thành shell testable qua `?user=<uuid>`.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -34,26 +34,26 @@
 - Blocker/rủi ro còn lại:
   - không còn blocker trực tiếp trong seam batch 54
   - chưa có batch 55 chính thức vì chưa xác nhận được seam end-to-end auth/session mới thực sự còn thiếu
-- Batch kế tiếp: **chưa mở chính thức**
+- Batch kế tiếp: **55**
 - Scope hẹp đầu tiên của batch kế tiếp:
-  - chỉ xác định sau khi main agent đối chiếu workflow truth và tìm được 1 seam product thật sự còn thiếu; không bịa micro-cleanup tiếp cho batch 54
+  - backend friend-request/friendship listing + web profile friend graph shell đọc contract đó; giữ slice hẹp, chưa nhảy sang moments/feed/inbox
 
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: idle, không mở nhịp mới cho đến khi có batch chính thức.
-- Kết quả gần nhất: backend auth 401 invalid-session payloads giữ `local_clear_recommended: true` + `backend_detail`.
-- Trạng thái: finished_batch54.
+- Scope hiện tại: batch 55 backend slice đã xong.
+- Kết quả gần nhất: contract `/friends/requests?user_id=...` và `/friends?user_id=...` đã trả list data có user summaries cho friend graph shell.
+- Trạng thái: complete_batch55.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: idle, không mở nhịp mới cho đến khi có batch chính thức.
-- Kết quả gần nhất: web auth client parse structured backend error payload và surface cleanup cue từ server metadata.
-- Trạng thái: finished_batch54.
+- Scope hiện tại: batch 55 web slice đã xong.
+- Kết quả gần nhất: `app/profile/page.tsx` đã thành friend graph shell tối thiểu đọc backend contract qua query param `?user=<uuid>`.
+- Trạng thái: complete_batch55.
 
 ### pikame-ios — iOS
-- Scope hiện tại: idle, không mở nhịp mới cho đến khi có batch chính thức.
+- Scope hiện tại: idle trong batch 55 slice này để tránh mở nhiều surface cùng lúc.
 - Kết quả gần nhất: iOS auth client parse structured backend error payload cho restore/refresh/logout unauthorized paths.
-- Trạng thái: finished_batch54.
+- Trạng thái: idle_batch55.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
