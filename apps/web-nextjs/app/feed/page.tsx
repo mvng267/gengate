@@ -1,10 +1,11 @@
-import { AuthenticatedRouteShell } from "@/components/authenticated-route-shell";
+import { MomentComposeShell } from "@/components/moment-compose-shell";
 
 export default function FeedPage() {
   return (
-    <AuthenticatedRouteShell
-      title="Feed"
-      summary="Friends-only moment feed UI and data loading are pending."
-    />
+    <section>
+      <h1>Feed</h1>
+      <p>Moment posting with image + caption shell is now wired for MVP testing.</p>
+      <MomentComposeShell />
+    </section>
   );
 }

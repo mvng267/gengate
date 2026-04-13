@@ -29,6 +29,12 @@ class MomentService:
     def get_moment(self, db: Session, moment_id: uuid.UUID) -> Moment | None:
         return moment_repository.get(db, moment_id)
 
+    def list_moments(self, db: Session, author_user_id: uuid.UUID) -> list[Moment]:
+        author = user_repository.get(db, author_user_id)
+        if author is None:
+            raise ValueError("user_not_found")
+        return moment_repository.list_for_author(db, author_user_id=author_user_id, limit=50, offset=0)
+
     def update_moment(self, db: Session, moment_id: uuid.UUID, caption_text: str | None) -> Moment:
         moment = moment_repository.get(db, moment_id)
         if moment is None:

@@ -4,6 +4,12 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 
+class MomentAuthorSummary(BaseModel):
+    id: uuid.UUID
+    email: str
+    username: str | None
+
+
 class MomentCreateRequest(BaseModel):
     author_user_id: uuid.UUID
     caption_text: str | None = None
@@ -46,6 +52,20 @@ class MomentMediaResponse(BaseModel):
 class MomentMediaListResponse(BaseModel):
     count: int
     items: list[MomentMediaResponse]
+
+
+class MomentListItem(BaseModel):
+    id: uuid.UUID
+    caption_text: str | None
+    visibility_scope: str
+    deleted_at: datetime | None
+    author: MomentAuthorSummary
+    media_items: list[MomentMediaResponse]
+
+
+class MomentListResponse(BaseModel):
+    count: int
+    items: list[MomentListItem]
 
 
 class MomentReactionCreateRequest(BaseModel):

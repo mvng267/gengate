@@ -11,7 +11,7 @@ from app.models import all_models
 from app.models.base import Base
 
 
-def test_moment_crud_flow() -> None:
+def create_test_client() -> TestClient:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
         connect_args={"check_same_thread": False},
@@ -32,7 +32,15 @@ def test_moment_crud_flow() -> None:
             db.close()
 
     app.dependency_overrides[get_db_session] = override_db_session
-    client = TestClient(app)
+    return TestClient(app)
+
+
+def clear_overrides() -> None:
+    app.dependency_overrides.clear()
+
+
+def test_moment_crud_flow() -> None:
+    client = create_test_client()
 
     user = client.post("/auth/register", json={"email": "moment-user@example.com", "username": "moment_user"})
     user_id = user.json()["id"]
@@ -58,4 +66,41 @@ def test_moment_crud_flow() -> None:
     delete_response = client.delete(f"/moments/{moment_id}")
     assert delete_response.status_code == 200
 
-    app.dependency_overrides.clear()
+    clear_overrides()
+
+
+def test_list_moments_for_author_includes_media_items() -> None:
+    client = create_test_client()
+
+    user = client.post("/auth/register", json={"email": "moment-list@example.com", "username": "moment_list"})
+    user_id = user.json()["id"]
+    uuid.UUID(user_id)
+
+    create_response = client.post(
+        "/moments",
+        json={"author_user_id": user_id, "caption_text": "sunset caption"},
+    )
+    assert create_response.status_code == 201
+    moment_id = create_response.json()["id"]
+
+    media_response = client.post(
+        f"/moments/{moment_id}/media",
+        json={
+            "media_type": "image",
+            "storage_key": "moments/sunset.jpg",
+            "mime_type": "image/jpeg",
+            "width": 1080,
+            "height": 1350,
+        },
+    )
+    assert media_response.status_code == 201
+
+    list_response = client.get(f"/moments?author_user_id={user_id}")
+    assert list_response.status_code == 200
+    payload = list_response.json()
+    assert payload["count"] == 1
+    assert payload["items"][0]["author"]["id"] == user_id
+    assert payload["items"][0]["caption_text"] == "sunset caption"
+    assert payload["items"][0]["media_items"][0]["storage_key"] == "moments/sunset.jpg"
+
+    clear_overrides()
