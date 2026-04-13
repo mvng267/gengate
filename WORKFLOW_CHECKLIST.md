@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **93 — iOS inbox attachment-create hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **94 — backend+iOS location audience parity hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,28 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **93**
-- Scope hiện tại: iOS inbox attachment-create hardening — enable `POST /messages/{id}/attachments` directly from native inbox shell.
+- Batch workflow chính thức hiện tại: **94**
+- Scope hiện tại: backend+iOS location audience parity hardening — duplicate guard (`audience_exists`) + remove audience action in native Location shell.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
+  - `apps/backend-python/app/modules/locations/router.py`
+  - `apps/backend-python/app/repositories/locations.py`
+  - `apps/backend-python/app/services/locations.py`
+  - `apps/backend-python/tests/test_location_audience_api.py`
+  - `apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_location_audience_api.py` → ✅ pass (3 passed)
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `e4310b1` — `batch92: align ios root tab seam summaries`
-  - working tree hiện tại: bẩn (batch 93 ready to commit)
+  - commit gần nhất đã chốt: `4bc434d` — `batch94: harden location audience duplicate/remove parity`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch93 iOS inbox attachment-create hardening; sau đó tiếp tục theo seam MVP có friction test thật
+  - mở batch95 backend+iOS: de-hardcode iOS backend base URL qua shared environment path (tạm dừng web)
 
 ## Batch handoff note
 

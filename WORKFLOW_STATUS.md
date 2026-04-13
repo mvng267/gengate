@@ -1,21 +1,26 @@
 # GenGate Workflow Status
 
-- Batch: 93
+- Batch: 94
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 93 iOS inbox attachment-create hardening — enable `POST /messages/{id}/attachments` directly from native inbox shell
+- Scope: batch 94 backend+iOS location audience parity hardening — add duplicate guard + native remove action on `/locations/shares/{share_id}/audience/{audience_id}`
 - Status: MVP-testable
 - Files:
-  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
+  - apps/backend-python/app/modules/locations/router.py
+  - apps/backend-python/app/repositories/locations.py
+  - apps/backend-python/app/services/locations.py
+  - apps/backend-python/tests/test_location_audience_api.py
+  - apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_location_audience_api.py` ✅ (3 passed)
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `e4310b1` — `batch92: align ios root tab seam summaries`
-  - working tree: bẩn (batch 93 ready to commit)
+  - latest commit: `4bc434d` — `batch94: harden location audience duplicate/remove parity`
+  - working tree: sạch
 - Blocker: none
-- Next: commit batch 93 iOS inbox attachment-create hardening, then keep advancing only by concrete human-test seams
+- Next: mở batch 95 theo hướng backend+iOS (tạm dừng web): de-hardcode iOS backend base URL qua shared environment path để giảm friction run ngoài localhost
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`

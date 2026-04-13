@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 93
-- Trục công việc: iOS inbox attachment-create hardening — enable native `POST /messages/{id}/attachments` from Inbox shell.
+- Batch workflow chính thức hiện tại: 94
+- Trục công việc: backend+iOS location audience parity hardening — duplicate guard + native audience remove flow.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -41,19 +41,19 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: không mở backend scope mới trong batch 68.
-- Kết quả gần nhất: toàn bộ MVP API seams đã có và verified green cho web consumption.
-- Trạng thái: idle_batch68.
+- Scope hiện tại: batch 94 location audience parity hardening (`audience_exists` 409 guard + duplicate integrity fallback).
+- Kết quả gần nhất: `/locations/shares/{share_id}/audience` trả 409 chuẩn cho duplicate và giữ remove/list parity.
+- Trạng thái: complete_batch94.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: batch 84 web direct-message attachment hardening đã xong.
-- Kết quả gần nhất: inbox shell có thể create/list message attachments cho thread message.
-- Trạng thái: complete_batch84.
+- Scope hiện tại: tạm dừng theo chỉ đạo user.
+- Kết quả gần nhất: batch 84 web direct-message attachment hardening đã xong.
+- Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 93 iOS inbox attachment-create hardening đã xong.
-- Kết quả gần nhất: Inbox shell có thể tạo attachment metadata trực tiếp từ iOS sau khi resolve thread/message.
-- Trạng thái: complete_batch93.
+- Scope hiện tại: batch 94 location shell hardening — thêm remove audience action + audience-id tracking trong UI.
+- Kết quả gần nhất: Location tab có thể add/remove audience ngay trên native shell để verify vòng đời audience state.
+- Trạng thái: complete_batch94.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
