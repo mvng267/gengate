@@ -31,6 +31,7 @@ struct InboxPlaceholderView: View {
     @State private var isCreatingDeviceKey = false
     @State private var isUpdatingReadCursor = false
     @State private var isDeletingMessage = false
+    @State private var autoRefreshEnabled = false
 
     var body: some View {
         ScrollView {
@@ -413,6 +414,20 @@ struct InboxPlaceholderView: View {
                     Text("Delete target message_id: \(resolvedMessageToDeleteID ?? "(not resolved)")")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
+
+                    Toggle(isOn: $autoRefreshEnabled) {
+                        Text("Auto refresh every 3s")
+                            .font(.footnote)
+                            .fontWeight(.semibold)
+                    }
+                    .toggleStyle(.switch)
+                    .disabled(conversationSummary == nil || isLoading)
+
+                    if autoRefreshEnabled {
+                        Text("Auto refresh đang bật: inbox sẽ tự reload mỗi 3 giây khi idle.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: 12) {
@@ -483,6 +498,25 @@ struct InboxPlaceholderView: View {
         .onAppear {
             prefillUserAFromCurrentSessionIfNeeded()
         }
+        .task(id: autoRefreshEnabled) {
+            guard autoRefreshEnabled else {
+                return
+            }
+
+            while autoRefreshEnabled {
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+
+                if !autoRefreshEnabled {
+                    break
+                }
+
+                if conversationSummary == nil || isLoading || isMutatingInbox {
+                    continue
+                }
+
+                await loadInboxThread(silent: true)
+            }
+        }
     }
 
     private var currentSessionUserID: String? {
@@ -542,6 +576,15 @@ struct InboxPlaceholderView: View {
         return messageRows.last?.id
     }
 
+    private var isMutatingInbox: Bool {
+        isSendingMessage ||
+        isCreatingAttachment ||
+        isCreatingDeviceKey ||
+        isUpdatingReadCursor ||
+        isDeletingMessage ||
+        isLoadingRecipientDevices
+    }
+
     private func prefillUserAFromCurrentSessionIfNeeded() {
         guard userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let currentSessionUserID else {
@@ -557,17 +600,21 @@ struct InboxPlaceholderView: View {
         userAIDDraft = currentSessionUserID
     }
 
-    private func loadInboxThread() async {
+    private func loadInboxThread(silent: Bool = false) async {
         let trimmedUserA = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedUserB = userBIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedUserA.isEmpty, !trimmedUserB.isEmpty else {
-            fetchError = "Cần đủ hai user UUID để load direct thread."
+            if !silent {
+                fetchError = "Cần đủ hai user UUID để load direct thread."
+            }
             return
         }
 
         isLoading = true
-        fetchError = nil
+        if !silent {
+            fetchError = nil
+        }
 
         do {
             let apiClient = InboxAPIClient()
@@ -588,16 +635,18 @@ struct InboxPlaceholderView: View {
 
             let resolvedRecipientUserID = recipientUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
             if !resolvedRecipientUserID.isEmpty {
-                await loadRecipientDevices()
+                await loadRecipientDevices(silent: true)
             }
         } catch {
-            conversationSummary = nil
-            conversationMembers = []
-            messageRows = []
-            attachmentMap = [:]
-            deviceKeyMap = [:]
-            recipientDeviceOptions = []
-            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            if !silent {
+                conversationSummary = nil
+                conversationMembers = []
+                messageRows = []
+                attachmentMap = [:]
+                deviceKeyMap = [:]
+                recipientDeviceOptions = []
+                fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            }
         }
 
         isLoading = false
@@ -725,7 +774,7 @@ struct InboxPlaceholderView: View {
         isCreatingDeviceKey = false
     }
 
-    private func loadRecipientDevices() async {
+    private func loadRecipientDevices(silent: Bool = false) async {
         let trimmedRecipientUserID = recipientUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedRecipientUserID.isEmpty else {
@@ -749,7 +798,9 @@ struct InboxPlaceholderView: View {
         } catch {
             recipientDeviceOptions = []
             recipientDeviceIDDraft = ""
-            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            if !silent {
+                fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            }
         }
     }
 

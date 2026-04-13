@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 103
+- Batch: 104
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 103 iOS inbox seam hardening — reduce device-key create friction via recipient-device fetch/picker
+- Scope: batch 104 iOS inbox seam hardening — add optional auto-refresh poll loop for near-realtime message visibility
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch103 slice)
+  - latest commit: `HEAD` (local batch104 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch104 cho messaging realtime friction kế tiếp (web vẫn paused)
+- Next: mở batch105 cho messaging friction tiếp theo (ví dụ highlight unread/read diff rõ hơn) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -143,6 +143,10 @@
   - iOS Inbox device-key form now fetches recipient devices via `GET /auth/devices/{user_id}`
   - Inbox adds recipient-device picker + manual reload action; selected option auto-fills `recipient_device_id`
   - thread reload now refreshes recipient-device options for the selected recipient user to reduce stale-target friction during key create
+- Batch 104 outcome:
+  - iOS Inbox adds optional `Auto refresh every 3s` toggle for near-realtime polling while shell is idle
+  - auto-refresh loop is guarded to skip while mutation/load is running, reducing overlap/race with manual actions
+  - silent reload path avoids noisy error reset during passive polling
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -152,7 +156,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, nhập recipient user để load device list (`/auth/devices/{user_id}`), chọn recipient device rồi create/list message device keys, sau đó dùng "Update read cursor" và verify `last_read_by` appears on the target message row
+  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, nhập recipient user để load device list (`/auth/devices/{user_id}`), chọn recipient device rồi create/list message device keys, bật `Auto refresh every 3s` để quan sát near-realtime polling, sau đó dùng "Update read cursor" và verify `last_read_by` appears on the target message row
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **103 — iOS inbox recipient-device fetch/picker slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **104 — iOS inbox auto-refresh polling slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **103**
-- Scope hiện tại: iOS inbox device-key UX hardening — fetch/picker recipient devices từ `/auth/devices/{user_id}`.
+- Batch workflow chính thức hiện tại: **104**
+- Scope hiện tại: iOS inbox near-realtime UX hardening — thêm auto-refresh poll loop 3s khi idle.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch103 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch104 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch104 cho messaging realtime friction kế tiếp (web paused)
+  - mở batch105 cho messaging friction tiếp theo (highlight unread/read diff rõ hơn) trong iOS inbox shell
 
 ## Batch handoff note
 

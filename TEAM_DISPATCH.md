@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 103
-- Trục công việc: iOS inbox seam hardening — reduce device-key friction bằng recipient-device fetch/picker.
+- Batch workflow chính thức hiện tại: 104
+- Trục công việc: iOS inbox seam hardening — add optional auto-refresh polling để giảm realtime test friction.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 103 iOS inbox device-key UX hardening.
-- Kết quả gần nhất: Inbox đã có recipient-device fetch (`/auth/devices/{user_id}`) + picker + reload action để autofill `recipient_device_id` trước khi create key.
-- Trạng thái: verify_batch103_ios.
+- Scope hiện tại: batch 104 iOS inbox near-realtime UX hardening.
+- Kết quả gần nhất: Inbox có toggle `Auto refresh every 3s` + silent guarded polling khi idle để thấy message/read-status cập nhật gần realtime.
+- Trạng thái: verify_batch104_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
