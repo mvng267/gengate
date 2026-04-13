@@ -89,21 +89,19 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **50**
-- Scope hiện tại: web failed login backend detail parity — preserve + surface explicit backend error detail for failed `/auth/login`.
-- Trạng thái hiện tại: **verify**
+- Scope hiện tại: iOS failed login backend detail parity — preserve + surface explicit backend error detail for failed `/auth/login`.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/lib/auth/types.ts`
-  - `apps/web-nextjs/lib/auth/client.ts`
-  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `1de81b2` — `batch49: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 50 web failed-login detail slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `1a71c48` — `batch50: surface login failure detail`
+  - working tree hiện tại: bẩn đúng theo batch 50 iOS failed-login detail slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit web batch-50 slice này; sau đó decide follow-up lane còn lại (backend hoặc iOS) chỉ nếu cần để keep failed-login detail parity end-to-end
+  - chốt batch 50 bằng commit iOS + workflow; sau đó follow-up clean closeout nếu còn artifact, rồi chọn seam auth shell end-to-end kế tiếp cho batch 51
 
 ## Batch handoff note
 

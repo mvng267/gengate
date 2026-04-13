@@ -81,6 +81,7 @@ final class AppSessionStore {
         case invalidBaseURL
         case invalidResponse
         case unauthorized(detail: String?)
+        case loginRejected(detail: String?)
         case network(String)
 
         var errorDescription: String? {
@@ -94,6 +95,11 @@ final class AppSessionStore {
                     return "Session đã hết hạn hoặc bị revoke (\(detail)). Local session đã được xóa; hãy đăng nhập lại."
                 }
                 return "Session đã hết hạn hoặc bị revoke. Local session đã được xóa; hãy đăng nhập lại."
+            case let .loginRejected(detail):
+                if let detail, !detail.isEmpty {
+                    return "Backend từ chối login với detail \(detail)."
+                }
+                return "Backend từ chối login vì user không tồn tại hoặc auth shell chưa sẵn sàng."
             case let .network(message):
                 return message
             }
@@ -406,10 +412,20 @@ final class AppSessionStore {
         } catch {
             authState = .signedOut
             let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            let backendDetail: String?
+            let loginResult: String
+            if let sessionError = error as? SessionError,
+               case let .loginRejected(detail) = sessionError {
+                backendDetail = detail
+                loginResult = "failed_login_rejected"
+            } else {
+                backendDetail = nil
+                loginResult = "failed"
+            }
             statusMessage = message
             loginOutcomeSummary = [
-                "login_result: failed",
-                "backend_detail: none",
+                "login_result: \(loginResult)",
+                "backend_detail: \(backendDetail ?? "none")",
                 "message: \(message)"
             ].joined(separator: "\n")
         }
@@ -617,6 +633,10 @@ final class AppSessionStore {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw SessionError.invalidResponse
         }
+        if httpResponse.statusCode == 401 || httpResponse.statusCode == 404 {
+            throw SessionError.loginRejected(detail: readErrorDetail(from: data))
+        }
+
         guard httpResponse.statusCode == 200 else {
             throw SessionError.network("Login request failed with status \(httpResponse.statusCode).")
         }

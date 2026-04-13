@@ -2,22 +2,25 @@
 
 - Batch: 50
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 50 failed login backend detail parity — web shell now surfaces explicit backend error detail for failed `/auth/login` instead of collapsing login failure to `backend_detail: none`
-- Status: verify
+- Scope: batch 50 failed login backend detail parity — web + iOS shells now surface explicit backend error detail for failed `/auth/login` instead of collapsing login failure to `backend_detail: none`
+- Status: complete
 - Files:
   - apps/web-nextjs/lib/auth/types.ts
   - apps/web-nextjs/lib/auth/client.ts
   - apps/web-nextjs/app/login/page.tsx
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `1de81b2` — `batch49: mark workflow complete`
-  - working tree: bẩn đúng theo batch 50 web failed-login detail slice + workflow files (chưa commit ở nhịp này)
+  - latest committed slice before this update: `1a71c48` — `batch50: surface login failure detail`
+  - working tree: bẩn đúng theo batch 50 iOS failed-login detail slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit web batch-50 slice này; sau đó decide follow-up lane còn lại (backend hoặc iOS) chỉ nếu cần để keep failed-login detail parity end-to-end
+- Next: chốt batch 50 bằng commit iOS + workflow; sau đó follow-up clean closeout nếu còn artifact, rồi chọn seam auth shell end-to-end kế tiếp cho batch 51
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 50 update:
   - web auth client nay preserve backend error detail cho login 404/401 thay vì nuốt mất code thật
-  - login outcome panel nay hiện `backend_detail: user_not_found` (hoặc detail backend khác) thay vì `none`
+  - iOS auth shell nay map login 404/401 thành `loginRejected(detail)` để surface `backend_detail` thật trong login outcome summary
+  - failed login parity giữa web và iOS đã được align ở mức shell detail cue
