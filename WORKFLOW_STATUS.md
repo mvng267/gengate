@@ -1,22 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 61
+- Batch: 62
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 61 MVP test hub hardening — turn web home into a guided test hub and expose navigation to all MVP seams from one place
+- Scope: batch 62 profile launcher hardening — make web `/profile` a better UUID-driven entry point and cross-link into related MVP seams
 - Status: MVP-testable
 - Files:
-  - apps/web-nextjs/app/page.tsx
-  - apps/web-nextjs/components/app-shell.tsx
+  - apps/web-nextjs/app/profile/page.tsx
+  - apps/web-nextjs/components/friend-graph-shell.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `878e131` — `batch60: wire location sharing shell`
-  - working tree: bẩn (batch 61 ready to commit)
+  - latest commit: `fdce813` — `batch61: add mvp test hub`
+  - working tree: bẩn (batch 62 ready to commit)
 - Blocker: none
-- Next: commit batch 61 MVP test hub hardening; after that, do not open a new core seam unless requirements change — prefer refinement, bug-fixing, or mobile consumption of existing seams
+- Next: commit batch 62 profile launcher hardening; after that, prefer targeted bug-fixes or mobile/client consumption over more web-only navigation polish unless a tester reports friction
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -27,18 +27,12 @@
 - Batch 57 handoff:
   - `4a779eb` — `batch57: wire private friend feed shell`
   - private friend feed seam remains MVP-testable while batch 58 opens direct messaging
-- Batch 61 outcome:
-  - web home `/` is now a guided MVP test hub that links to all current seams in a suggested smoke-test order
-  - global web nav now exposes all MVP seams directly: login, profile, feed, inbox, notifications, location
-  - human testers no longer need to memorize separate routes to walk the MVP
+- Batch 62 outcome:
+  - web `/profile` now gives clearer UUID-driven launch instructions and exposes quick pivots into adjacent MVP seams
+  - friend graph shell now presents follow-on links so a tester can move from one user context into feed, inbox, notifications, and location without hunting through nav
+  - this keeps the MVP test path more coherent without opening a new feature seam
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
-  - MVP hub: `http://localhost:3000/`
-  - smoke path from one entry point:
-    1. `/login`
-    2. `/profile`
-    3. `/feed`
-    4. `/inbox`
-    5. `/notifications`
-    6. `/location`
+  - profile launcher seam: `http://localhost:3000/profile?user=<uuid>`
+  - MVP hub remains: `http://localhost:3000/`

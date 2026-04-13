@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 61
-- Trục công việc: MVP test hub hardening — giữ toàn bộ seams testable và gom lối vào test trên web home `/` để người dùng đi qua MVP từ một chỗ.
+- Batch workflow chính thức hiện tại: 62
+- Trục công việc: profile launcher hardening — giữ toàn bộ seams testable và làm `/profile` thành launcher tốt hơn cho friend graph + seam kế cận.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -41,14 +41,14 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: không mở backend scope mới trong batch 61.
+- Scope hiện tại: không mở backend scope mới trong batch 62.
 - Kết quả gần nhất: toàn bộ MVP API seams đã có và verified green cho web consumption.
-- Trạng thái: idle_batch61.
+- Trạng thái: idle_batch62.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: batch 61 web hardening slice đã xong.
-- Kết quả gần nhất: web home `/` đã thành guided MVP test hub và nav đã lộ đủ các seams.
-- Trạng thái: complete_batch61.
+- Scope hiện tại: batch 62 web hardening slice đã xong.
+- Kết quả gần nhất: `/profile` đã rõ hơn như UUID launcher và có quick pivots sang seams kế cận.
+- Trạng thái: complete_batch62.
 
 ### pikame-ios — iOS
 - Scope hiện tại: idle trong batch 55 slice này để tránh mở nhiều surface cùng lúc.

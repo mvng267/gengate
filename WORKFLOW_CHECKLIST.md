@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **61 — MVP test hub hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **62 — profile launcher hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,24 +89,24 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **61**
-- Scope hiện tại: MVP test hub hardening — web home `/` becomes a guided entry point with navigation to all MVP seams from one place.
+- Batch workflow chính thức hiện tại: **62**
+- Scope hiện tại: profile launcher hardening — web `/profile` becomes a better UUID-driven entry point and links into related seams.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/app/page.tsx`
-  - `apps/web-nextjs/components/app-shell.tsx`
+  - `apps/web-nextjs/app/profile/page.tsx`
+  - `apps/web-nextjs/components/friend-graph-shell.tsx`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `878e131` — `batch60: wire location sharing shell`
-  - working tree hiện tại: bẩn (batch 61 ready to commit)
+  - commit gần nhất đã chốt: `fdce813` — `batch61: add mvp test hub`
+  - working tree hiện tại: bẩn (batch 62 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch61 MVP test hub hardening; sau đó ưu tiên refinement/bug-fix/mobile consumption thay vì mở seam core mới
+  - commit batch62 profile launcher hardening; sau đó ưu tiên bug-fix/mobile consumption thay vì thêm web navigation polish nếu chưa có friction report mới
 
 ## Batch handoff note
 

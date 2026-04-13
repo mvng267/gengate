@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { fetchFriendGraphSnapshot } from "@/lib/friends/client";
 
 type FriendGraphShellProps = {
@@ -21,6 +23,11 @@ export async function FriendGraphShell({ userId }: FriendGraphShellProps) {
         </p>
         <p>
           <strong>Accepted friendships:</strong> {snapshot.friendshipCount}
+        </p>
+
+        <p>
+          Next seam pivots for this profile context: <Link href="/feed">Feed</Link> · <Link href="/inbox">Inbox</Link> ·{" "}
+          <Link href="/notifications">Notifications</Link> · <Link href="/location">Location</Link>
         </p>
 
         <h2>Pending friend requests</h2>
@@ -75,6 +82,10 @@ export async function FriendGraphShell({ userId }: FriendGraphShellProps) {
         <p>
           To test this seam, create/register two users in backend, post <code>/friends/requests</code>, optionally accept one request,
           then reload this page with <code>?user=&lt;uuid&gt;</code>.
+        </p>
+        <p>
+          After friend graph data is visible here, you can pivot to <Link href="/feed">Feed</Link>, <Link href="/inbox">Inbox</Link>,{" "}
+          <Link href="/notifications">Notifications</Link>, and <Link href="/location">Location</Link> from the same test session.
         </p>
       </section>
     );
