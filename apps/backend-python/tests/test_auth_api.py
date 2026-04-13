@@ -68,6 +68,8 @@ def test_auth_login_creates_session_shell_for_existing_user() -> None:
     assert payload["token_type"] == "bearer"
     assert payload["bootstrap_mode"] == "password_stub"
     assert payload["session_status"] == "active"
+    assert payload["local_clear_recommended"] is False
+    assert payload["backend_detail"] is None
     assert payload["expires_in_seconds"] > 0
 
     clear_overrides()
@@ -123,7 +125,7 @@ def test_auth_refresh_rotates_session_and_session_snapshot_reads_active_session(
     assert session_payload["session_id"] == login_payload["session_id"]
     assert session_payload["session_status"] == "active"
     assert session_payload["local_clear_recommended"] is False
-    assert session_payload["backend_detail"] is None
+    assert session_payload["backend_detail"] == "session_restored"
     assert session_payload["expires_in_seconds"] > 0
 
     refresh_response = client.post(
@@ -138,6 +140,8 @@ def test_auth_refresh_rotates_session_and_session_snapshot_reads_active_session(
     assert refresh_payload["refresh_token"] != login_payload["refresh_token"]
     assert refresh_payload["bootstrap_mode"] == "refresh_token"
     assert refresh_payload["session_status"] == "active"
+    assert refresh_payload["local_clear_recommended"] is False
+    assert refresh_payload["backend_detail"] == "refresh_rotated"
     assert refresh_payload["expires_in_seconds"] > 0
 
     stale_refresh_response = client.post(

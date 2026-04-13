@@ -1,32 +1,24 @@
 # GenGate Workflow Status
 
-- Batch: 47
+- Batch: 48
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 47 logout backend detail signal complete — backend + web + iOS all surface explicit backend logout cue instead of inferring only from local status text
-- Status: complete
+- Scope: batch 48 refresh/restore backend detail cue parity — surface explicit backend detail for refresh + restore paths so shell verify flow can distinguish restore vs refresh without inferring only from local status text
+- Status: verify
 - Files:
   - apps/backend-python/app/schemas/auth.py
   - apps/backend-python/app/modules/auth/router.py
   - apps/backend-python/tests/test_auth_api.py
-  - apps/web-nextjs/lib/auth/types.ts
-  - apps/web-nextjs/lib/auth/client.ts
-  - apps/web-nextjs/app/login/page.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅
-  - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `2690e73` — `batch47: add ios logout backend detail signal`
-  - working tree: sạch trước khi ghi workflow-only closeout marker cho batch 47
+  - latest commit: `ea6c489` — `batch47: mark workflow complete`
+  - working tree: bẩn đúng theo batch 48 backend refresh/restore detail cue slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 48 với 1 scope hẹp trên backend/session contract — thêm explicit refresh/restore detail cue parity để shell verify path đối chiếu được không chỉ ở logout mà cả refresh/restore
+- Next: commit backend batch-48 slice này; sau đó follow-up 1 shell lane để đọc `backend_detail` mới từ refresh/restore response directly
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 47 outcome:
-  - backend `/auth/logout` trả explicit `local_clear_recommended=true` và `backend_detail="logout_revoked"`
-  - web logout outcome đọc trực tiếp `backend_detail` + `local_clear_recommended` từ backend response
-  - iOS logout outcome cũng đọc trực tiếp `backend_detail` + `local_clear_recommended` từ backend response
-  - auth loop backend/web/iOS nay đối chiếu rõ hơn giữa revoke intent và local clear outcome
+- Batch 48 update:
+  - `/auth/refresh` nay trả explicit `backend_detail="refresh_rotated"` và `local_clear_recommended=false`
+  - `/auth/session` nay trả explicit `backend_detail="session_restored"` và `local_clear_recommended=false`
+  - shell layers nay có backend cue parity rõ hơn cho logout + refresh + restore flow

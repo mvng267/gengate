@@ -98,6 +98,8 @@ def refresh_session(
         token_type="bearer",
         bootstrap_mode="refresh_token",
         session_status=auth_service.get_session_status(auth_session),
+        local_clear_recommended=False,
+        backend_detail="refresh_rotated",
     )
 
 
@@ -126,6 +128,8 @@ def get_session_snapshot(
         expires_in_seconds=auth_service.get_expires_in_seconds(auth_session),
         token_type="bearer",
         session_status=auth_service.get_session_status(auth_session),
+        local_clear_recommended=False,
+        backend_detail="session_restored",
     )
 
 

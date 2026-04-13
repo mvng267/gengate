@@ -86,6 +86,8 @@ class LoginResponse(BaseModel):
     token_type: str
     bootstrap_mode: str
     session_status: str
+    local_clear_recommended: bool = False
+    backend_detail: str | None = None
 
 
 class RefreshSessionRequest(BaseModel):
