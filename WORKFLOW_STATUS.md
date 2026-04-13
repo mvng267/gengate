@@ -1,21 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 88
+- Batch: 89
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 88 iOS inbox send-message hardening — allow sending text messages directly from native inbox shell after resolving direct thread
+- Scope: batch 89 iOS feed moment-create hardening — allow creating moment + image metadata directly from native feed shell and reloading authored/private feed lists
 - Status: MVP-testable
 - Files:
-  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `4434547` — `batch87: harden ios profile friend request actions`
-  - working tree: bẩn (batch 88 ready to commit)
+  - latest commit: `cd6043a` — `batch88: harden ios inbox send message`
+  - working tree: bẩn (batch 89 ready to commit)
 - Blocker: none
-- Next: commit batch 88 iOS inbox send-message hardening; then continue only with concrete MVP seam gaps
+- Next: commit batch 89 iOS feed moment-create hardening; then continue only with concrete MVP seam gaps
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -86,10 +86,13 @@
 - Batch 87 handoff:
   - `4434547` — `batch87: harden ios profile friend request actions`
   - native profile social seam remains MVP-testable while batch 88 hardens native inbox send flow
-- Batch 88 outcome:
-  - iOS inbox shell now supports sending text messages via `POST /messages` using resolved direct conversation id
-  - native inbox can now perform minimal message mutation + read refresh in one flow
-  - this reduces dependency on web for direct-message MVP testing on iOS
+- Batch 88 handoff:
+  - `cd6043a` — `batch88: harden ios inbox send message`
+  - native inbox mutation seam remains MVP-testable while batch 89 hardens native moment create/feed flow
+- Batch 89 outcome:
+  - iOS feed shell now supports creating moments + image metadata via `POST /moments` and `POST /moments/{id}/media`
+  - iOS feed shell now supports authored moment reload via `GET /moments?author_user_id=<uuid>` alongside private feed reload via `GET /moments/feed`
+  - this reduces dependency on web compose shell for iOS-first moment posting MVP tests
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -97,7 +100,7 @@
   - web MVP hub: `http://localhost:3000/`
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, and load friend graph snapshot
-  - iOS Feed path: open Feed tab, paste a viewer UUID, and load private feed
+  - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
   - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, and load messages
   - iOS Notifications path: open Notifications tab, paste a user UUID, and load notifications
   - iOS Location path: open Location tab, paste an owner UUID, optionally a share UUID, and load location status counts

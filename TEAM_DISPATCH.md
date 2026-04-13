@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 88
-- Trục công việc: iOS inbox send-message hardening — bật text message send trực tiếp trên native inbox shell.
+- Batch workflow chính thức hiện tại: 89
+- Trục công việc: iOS feed moment-create hardening — bật create moment + image metadata trực tiếp trên native feed shell.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: complete_batch84.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 88 iOS inbox send-message hardening đã xong.
-- Kết quả gần nhất: native inbox shell gửi được text message trực tiếp rồi reload thread.
-- Trạng thái: complete_batch88.
+- Scope hiện tại: batch 89 iOS feed moment-create hardening đã xong.
+- Kết quả gần nhất: native feed shell create được moment + image metadata và reload được authored/private feed lists.
+- Trạng thái: complete_batch89.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
