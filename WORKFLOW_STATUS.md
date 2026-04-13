@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 135
+- Batch: 136
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 135 iOS inbox seam hardening — clear recipient-device user/device/options context ngay khi direct-thread identity (User A/User B) đổi
+- Scope: batch 136 iOS inbox seam hardening — clear recipient-device draft/options khi direct-thread load reset/failure để tránh stale target sau lỗi chuyển context
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch135 slice)
+  - latest commit: `HEAD` (local batch136 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch136 cho messaging friction tiếp theo (clear recipient-device draft/options khi thread load reset/failure để tránh stale target sau lỗi chuyển context) trong iOS inbox shell
+- Next: mở batch137 cho messaging friction tiếp theo (khi load thread thành công với direct-conversation mới, auto-clear recipient-device context nếu recipient user không thuộc 2 member IDs hiện tại) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -271,6 +271,10 @@
   - direct-thread identity change handler được nâng cấp thành `handleDirectThreadIdentityChange()` và được bind cho cả input `User A UUID` / `User B UUID`
   - ngoài clear sync/timestamp debug state, handler nay cancel pending recipient-device auto-reload task + reset ngay `Recipient user UUID`, `Recipient device UUID`, và `recipientDeviceOptions`
   - ngăn thao tác `Create message device key` bị dính stale recipient-device context từ thread trước trước khi tester reload context mới
+- Batch 136 outcome:
+  - thêm helper dùng chung `clearRecipientDeviceContext()` để reset đồng bộ recipient-device task + user/device drafts + options
+  - load-thread failure/reset path (`catch` non-silent) nay gọi helper này thay vì chỉ clear options, đảm bảo không giữ lại recipient user/device stale sau lỗi chuyển context
+  - flow recovery sau lỗi load direct-thread giờ yêu cầu tester set lại recipient context mới rõ ràng trước khi tạo message-device key
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -280,7 +284,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, load direct thread A-B, set recipient user/device to load options; sau đó đổi User A hoặc User B sang thread context khác và verify timestamp/passive-note state + recipient user/device/options đều clear ngay theo identity-change path; tiếp tục nhập recipient user phù hợp context mới rồi `Reload recipient devices` + `Create message-device key`
+  - iOS Inbox path: open Inbox tab, load direct thread A-B, set recipient user/device to load options; sau đó đổi User A hoặc User B sang thread context khác và verify timestamp/passive-note state + recipient user/device/options đều clear ngay theo identity-change path; tiếp tục thử nhập pair không hợp lệ để gây load failure và verify recipient user/device/options tiếp tục bị clear ở reset path; cuối cùng nhập recipient user phù hợp context mới rồi `Reload recipient devices` + `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts
