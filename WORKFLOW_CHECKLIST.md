@@ -89,19 +89,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **45**
-- Scope hiện tại: web login outcome signal — surface dedicated login/register result + backend/detail cue separate from generic status text.
+- Scope hiện tại: iOS login outcome signal parity — surface dedicated login/register result + backend/detail cue separate from generic status text to match web.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
+  - web slice trong cùng batch đã verify trước đó: `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `eedd8b7` — `batch44: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 45 web login outcome slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `6f63cc6` — `batch45: add web login outcome signal`
+  - working tree hiện tại: bẩn đúng theo batch 45 iOS login outcome parity slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit web batch-45 login outcome slice này; sau đó chọn 1 parity slice hẹp tương ứng trên iOS hoặc backend nếu cần
+  - commit iOS parity slice này; sau đó làm workflow-only closeout marker cho batch 45
 
 ## Batch handoff note
 

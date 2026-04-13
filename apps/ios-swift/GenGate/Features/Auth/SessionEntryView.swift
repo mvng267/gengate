@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 44 · iOS restore outcome signal")
+            Text("Batch 45 · iOS login outcome signal")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -19,7 +19,7 @@ struct SessionEntryView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Batch 44 ưu tiên thêm restore outcome surface riêng để nhìn rõ restore result, local clear, và backend detail sau restore attempt ngay trên màn Session.")
+                    Text("Batch 45 ưu tiên thêm login outcome surface riêng để nhìn rõ login/register result và backend detail ngay trên màn Session.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -100,6 +100,12 @@ struct SessionEntryView: View {
                     }
 
                     outcomeCard(
+                        title: "Login outcome",
+                        content: sessionStore.loginOutcomeSummary,
+                        emptyState: "Chưa có login/register attempt nào trong phiên shell hiện tại."
+                    )
+
+                    outcomeCard(
                         title: "Restore outcome",
                         content: sessionStore.restoreOutcomeSummary,
                         emptyState: "Chưa có restore attempt nào trong phiên shell hiện tại."
@@ -143,7 +149,7 @@ struct SessionEntryView: View {
                     .font(.footnote.monospaced())
                     .foregroundStyle(.secondary)
 
-                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ còn có restore outcome surface riêng để nhìn rõ kết quả restore/detail sau restore attempt bên cạnh refresh outcome, logout outcome, và persisted-session inspector.")
+                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ có login outcome surface riêng bên cạnh restore/refresh/logout outcome và persisted-session inspector để nhìn rõ từng auth action result.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -175,6 +181,12 @@ struct SessionEntryView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+
+                    outcomeCard(
+                        title: "Login outcome",
+                        content: sessionStore.loginOutcomeSummary,
+                        emptyState: "Chưa có login/register attempt nào trong phiên shell hiện tại."
+                    )
 
                     outcomeCard(
                         title: "Restore outcome",

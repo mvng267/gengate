@@ -104,6 +104,7 @@ final class AppSessionStore {
     var emailDraft: String = ""
     var passwordDraft: String = ""
     var statusMessage: String?
+    var loginOutcomeSummary: String?
     var logoutOutcomeSummary: String?
     var refreshOutcomeSummary: String?
     var restoreOutcomeSummary: String?
@@ -356,6 +357,7 @@ final class AppSessionStore {
     func signIn() async {
         authState = .signingIn
         statusMessage = nil
+        loginOutcomeSummary = nil
         logoutOutcomeSummary = nil
         refreshOutcomeSummary = nil
         restoreOutcomeSummary = nil
@@ -379,10 +381,22 @@ final class AppSessionStore {
             let destination = pendingProtectedTab ?? .feed
             selectedTab = destination
             pendingProtectedTab = nil
-            statusMessage = "Đăng nhập shell thành công, đã lưu session local, và mở tab \(destination.displayName)."
+            let loginMessage = "Đăng nhập shell thành công, đã lưu session local, và mở tab \(destination.displayName)."
+            statusMessage = loginMessage
+            loginOutcomeSummary = [
+                "login_result: success_persisted",
+                "backend_detail: \(response.session_status)",
+                "message: \(loginMessage)"
+            ].joined(separator: "\n")
         } catch {
             authState = .signedOut
-            statusMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            statusMessage = message
+            loginOutcomeSummary = [
+                "login_result: failed",
+                "backend_detail: none",
+                "message: \(message)"
+            ].joined(separator: "\n")
         }
     }
 
@@ -395,6 +409,7 @@ final class AppSessionStore {
 
         isRegistering = true
         statusMessage = nil
+        loginOutcomeSummary = nil
         logoutOutcomeSummary = nil
         refreshOutcomeSummary = nil
         restoreOutcomeSummary = nil
@@ -404,13 +419,25 @@ final class AppSessionStore {
             emailDraft = normalizedEmail
             isRegistering = false
             await signIn()
-            if case .authenticated = authState {
-                statusMessage = "Tạo account shell + đăng nhập thành công; persisted session local đã sẵn sàng."
+            if case let .authenticated(session) = authState {
+                let loginMessage = "Tạo account shell + đăng nhập thành công; persisted session local đã sẵn sàng."
+                statusMessage = loginMessage
+                loginOutcomeSummary = [
+                    "login_result: register_then_sign_in_success",
+                    "backend_detail: \(session.sessionStatus)",
+                    "message: \(loginMessage)"
+                ].joined(separator: "\n")
             }
         } catch {
             isRegistering = false
             authState = .signedOut
-            statusMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            statusMessage = message
+            loginOutcomeSummary = [
+                "login_result: register_then_sign_in_failed",
+                "backend_detail: none",
+                "message: \(message)"
+            ].joined(separator: "\n")
         }
     }
 
@@ -418,6 +445,7 @@ final class AppSessionStore {
         let persistedRefreshToken = loadPersistedSession()?.refreshToken
         var logoutOutcome: LogoutOutcome?
 
+        loginOutcomeSummary = nil
         logoutOutcomeSummary = nil
         refreshOutcomeSummary = nil
         restoreOutcomeSummary = nil
@@ -481,6 +509,7 @@ final class AppSessionStore {
         pendingProtectedTab = tab
         selectedTab = .session
         statusMessage = "Cần đăng nhập hoặc restore session để mở tab \(tab.displayName)."
+        loginOutcomeSummary = nil
         logoutOutcomeSummary = nil
         refreshOutcomeSummary = nil
         restoreOutcomeSummary = nil
