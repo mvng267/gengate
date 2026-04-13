@@ -13,7 +13,7 @@
 
 ## Active batch
 - Batch workflow chính thức hiện tại: 101
-- Trục công việc: backend messaging contract hardening — add direct member read-cursor update endpoint.
+- Trục công việc: backend messaging contract hardening — direct member read-cursor update endpoint (đã hoàn tất, chờ mở batch 102).
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -41,9 +41,9 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: batch 101 backend read-status parity — update direct conversation member read cursor.
-- Kết quả gần nhất: thêm `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` + contract tests pass.
-- Trạng thái: verify_batch101_backend.
+- Scope hiện tại: batch 101 backend read-status parity đã chốt; giữ ổn định contract read-cursor.
+- Kết quả gần nhất: `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` + contract tests pass.
+- Trạng thái: complete_batch101_backend.
 
 ### pikachu-web — frontend web
 - Scope hiện tại: tạm dừng theo chỉ đạo user.
