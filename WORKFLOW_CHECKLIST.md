@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **101 — backend direct-conversation read-cursor contract is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **101 — backend direct-conversation read-cursor contract is complete**.
 
 ## Reporting hard rule
 
@@ -91,7 +91,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch workflow chính thức hiện tại: **101**
 - Scope hiện tại: backend messaging contract parity — update direct member read-cursor cho read-status seam.
-- Trạng thái hiện tại: **verify**
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/backend-python/app/schemas/conversations.py`
   - `apps/backend-python/app/repositories/conversations.py`
@@ -104,12 +104,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` → ✅ pass (2 passed)
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `fe19ace` — `batch100: wire ios inbox message device key controls`
-  - working tree hiện tại: bẩn (batch101 backend read-cursor slice pending commit)
+  - commit gần nhất đã chốt: `e24df01` — `batch101: add direct conversation read cursor update contract`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch101 backend read-cursor slice; sau đó mở batch102 iOS consume read-cursor seam (web paused)
+  - mở batch102 iOS consume read-cursor seam (web paused)
 
 ## Batch handoff note
 

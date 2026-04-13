@@ -3,7 +3,7 @@
 - Batch: 101
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
 - Scope: batch 101 backend messaging contract hardening — add direct-conversation member read-cursor update endpoint for delivery/read-status parity
-- Status: verify
+- Status: complete
 - Files:
   - apps/backend-python/app/schemas/conversations.py
   - apps/backend-python/app/repositories/conversations.py
@@ -16,10 +16,10 @@
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` ✅ (2 passed)
 - Git:
-  - latest commit: `fe19ace` — `batch100: wire ios inbox message device key controls`
-  - working tree: bẩn (batch101 backend read-cursor slice pending commit)
+  - latest commit: `e24df01` — `batch101: add direct conversation read cursor update contract`
+  - working tree: sạch
 - Blocker: none
-- Next: commit batch101 backend read-cursor contract; tiếp tục batch102 iOS inbox consume read-cursor seam (web paused)
+- Next: mở batch102 iOS inbox consume read-cursor seam (web paused)
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -135,7 +135,7 @@
   - iOS Inbox tab now loads `GET /messages/{id}/device-keys` per message row and shows `device_key_count`
   - iOS Inbox tab adds native form to call `POST /messages/{id}/device-keys` (recipient user/device + wrapped key blob)
   - delete flow now clears device-key target draft when deleting the same message to reduce stale target friction
-- Batch 101 outcome (in progress):
+- Batch 101 outcome:
   - backend adds `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` to update direct-thread `last_read_message_id`
   - contract returns `conversation_not_direct` / `message_conversation_mismatch` (400) and not-found classes (404) for parity-safe error mapping
   - conversation member response now includes `last_read_message_id` so clients can render read-status cursor directly
