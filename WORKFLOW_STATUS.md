@@ -1,21 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 70
+- Batch: 71
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 70 web profile launcher hardening — reduce browser-test friction by adding a real UUID launcher form on `/profile`
+- Scope: batch 71 web inbox launcher hardening — reduce browser-test friction by adding user-pair launcher form and query-prefill on `/inbox`
 - Status: MVP-testable
 - Files:
-  - apps/web-nextjs/app/profile/page.tsx
+  - apps/web-nextjs/app/inbox/page.tsx
+  - apps/web-nextjs/components/direct-message-shell.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `422556b` — `batch69: harden ios reader session autofill`
-  - working tree: bẩn (batch 70 ready to commit)
+  - latest commit: `cbe4423` — `batch70: harden web profile launcher`
+  - working tree: bẩn (batch 71 ready to commit)
 - Blocker: none
-- Next: commit batch 70 web profile launcher hardening; after that, prefer concrete human-test bug fixes or one similarly narrow browser UX hardening slice only if it materially improves MVP testing
+- Next: commit batch 71 web inbox launcher hardening; after that, prefer concrete human-test bug fixes or another similarly narrow browser friction fix only if it clearly shortens the MVP test path
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -32,10 +33,13 @@
 - Batch 69 handoff:
   - `422556b` — `batch69: harden ios reader session autofill`
   - iOS reader autofill hardening remains MVP-testable while batch 70 reduces browser-test friction on `/profile`
-- Batch 70 outcome:
-  - web `/profile` now includes a real GET launcher form for entering a user UUID instead of requiring manual query-string editing
-  - browser testers get clearer same-session pivot guidance from Profile into Feed / Inbox / Notifications / Location
-  - this keeps the seam honest while making the MVP web test path faster for humans
+- Batch 70 handoff:
+  - `cbe4423` — `batch70: harden web profile launcher`
+  - profile launcher hardening remains MVP-testable while batch 71 reduces browser friction for the direct messaging seam
+- Batch 71 outcome:
+  - web `/inbox` now includes a real GET launcher form for User A / User B / optional Sender prefill
+  - direct messaging shell accepts query-prefilled IDs so testers can launch and retry user pairs without retyping the whole form
+  - this makes the browser messaging seam faster to exercise while keeping the underlying contracts unchanged
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

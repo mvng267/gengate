@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **70 — web profile launcher hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **71 — web inbox launcher hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,24 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **70**
-- Scope hiện tại: web profile launcher hardening — add a real browser form on `/profile` so testers can launch friend-graph inspection without manual query-string editing.
+- Batch workflow chính thức hiện tại: **71**
+- Scope hiện tại: web inbox launcher hardening — add a real browser form on `/inbox` and query-prefill user pair fields so testers can launch direct-thread inspection without retyping IDs.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/app/profile/page.tsx`
+  - `apps/web-nextjs/app/inbox/page.tsx`
+  - `apps/web-nextjs/components/direct-message-shell.tsx`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `422556b` — `batch69: harden ios reader session autofill`
-  - working tree hiện tại: bẩn (batch 70 ready to commit)
+  - commit gần nhất đã chốt: `cbe4423` — `batch70: harden web profile launcher`
+  - working tree hiện tại: bẩn (batch 71 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch70 web profile launcher hardening; sau đó ưu tiên bug-fix/hardening trực tiếp từ human testing hoặc đúng 1 browser UX friction slice nhỏ tiếp theo nếu thật sự đáng giá
+  - commit batch71 web inbox launcher hardening; sau đó ưu tiên bug-fix/hardening trực tiếp từ human testing hoặc đúng 1 browser friction slice nhỏ tiếp theo nếu thật sự rút ngắn đường test MVP
 
 ## Batch handoff note
 

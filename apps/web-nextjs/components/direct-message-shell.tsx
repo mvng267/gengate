@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   getOrCreateDirectConversation,
@@ -10,6 +10,12 @@ import {
   type MessageItem,
 } from "@/lib/inbox/client";
 
+type DirectMessageShellProps = {
+  initialUserAId?: string;
+  initialUserBId?: string;
+  initialSenderUserId?: string;
+};
+
 const initialForm = {
   userAId: "",
   userBId: "",
@@ -17,8 +23,13 @@ const initialForm = {
   payloadText: "",
 };
 
-export function DirectMessageShell() {
-  const [form, setForm] = useState(initialForm);
+export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", initialSenderUserId = "" }: DirectMessageShellProps) {
+  const [form, setForm] = useState({
+    ...initialForm,
+    userAId: initialUserAId,
+    userBId: initialUserBId,
+    senderUserId: initialSenderUserId || initialUserAId,
+  });
   const [status, setStatus] = useState(
     "Provide two registered user UUIDs to open a direct thread, then send a text message from one member.",
   );
@@ -27,6 +38,17 @@ export function DirectMessageShell() {
   const [isOpening, setIsOpening] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
   const [isSending, setIsSending] = useState(false);
+
+  useEffect(() => {
+    setForm((current) => ({
+      ...current,
+      userAId: initialUserAId,
+      userBId: initialUserBId,
+      senderUserId: initialSenderUserId || initialUserAId,
+    }));
+    setConversation(null);
+    setMessages([]);
+  }, [initialSenderUserId, initialUserAId, initialUserBId]);
 
   async function handleOpenThread() {
     setIsOpening(true);
@@ -103,7 +125,13 @@ export function DirectMessageShell() {
           User A UUID
           <input
             value={form.userAId}
-            onChange={(event) => setForm((current) => ({ ...current, userAId: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                userAId: event.target.value,
+                senderUserId: current.senderUserId || event.target.value,
+              }))
+            }
             placeholder="paste first user uuid"
           />
         </label>
