@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **68 — iOS location status reader slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **69 — iOS reader autofill hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,10 +89,14 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **68**
-- Scope hiện tại: iOS location status reader — Location tab consumes existing location count contracts via a read-only owner UUID shell.
+- Batch workflow chính thức hiện tại: **69**
+- Scope hiện tại: iOS reader autofill hardening — quick-fill current session user UUID into native read-only tabs to reduce manual copy/paste for human testers.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
+  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
+  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
+  - `apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift`
+  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
   - `apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
@@ -100,12 +104,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `c1f8b00` — `batch67: add ios notification center reader`
-  - working tree hiện tại: bẩn (batch 68 ready to commit)
+  - commit gần nhất đã chốt: `320ec1e` — `batch68: add ios location status reader`
+  - working tree hiện tại: bẩn (batch 69 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch68 iOS location status reader; sau đó ưu tiên bug-fix/hardening pass từ tester feedback thay vì mở surface lớn mới
+  - commit batch69 iOS reader autofill hardening; sau đó ưu tiên bug-fix/hardening từ human testing thật hoặc đúng 1 native write seam nhỏ nếu có nhu cầu rõ ràng
 
 ## Batch handoff note
 

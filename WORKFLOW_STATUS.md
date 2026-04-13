@@ -1,10 +1,14 @@
 # GenGate Workflow Status
 
-- Batch: 68
+- Batch: 69
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 68 iOS location status reader — consume existing backend location count contracts from the native Location tab via a read-only owner UUID shell
+- Scope: batch 69 iOS reader autofill hardening — reduce human-test friction by quick-filling current session user UUID into native read-only tabs
 - Status: MVP-testable
 - Files:
+  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
   - apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
@@ -12,10 +16,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `c1f8b00` — `batch67: add ios notification center reader`
-  - working tree: bẩn (batch 68 ready to commit)
+  - latest commit: `320ec1e` — `batch68: add ios location status reader`
+  - working tree: bẩn (batch 69 ready to commit)
 - Blocker: none
-- Next: commit batch 68 iOS location status reader; after that, prefer bug-fix/hardening passes driven by actual human tester friction rather than opening broader new surfaces
+- Next: commit batch 69 iOS reader autofill hardening; after that, prefer actual human-test bug fixes or one small native write seam only if real friction demands it
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -26,10 +30,13 @@
 - Batch 57 handoff:
   - `4a779eb` — `batch57: wire private friend feed shell`
   - private friend feed seam remains MVP-testable while batch 58 opens direct messaging
-- Batch 68 outcome:
-  - iOS Location tab now consumes the backend's current location count contracts through a read-only owner/share UUID status shell
-  - native testers can inspect snapshot counts, total share counts, and optional audience counts without fake map/detail UI
-  - this covers the optional location MVP seam honestly, while preserving clear limits of the current backend read surface
+- Batch 68 handoff:
+  - `320ec1e` — `batch68: add ios location status reader`
+  - location status reader remains MVP-testable while batch 69 reduces human-test friction across the native reader tabs
+- Batch 69 outcome:
+  - iOS Profile / Feed / Notifications / Location tabs now auto-prefill from the current signed-in session user when available
+  - iOS Inbox tab now quick-fills User A from the current signed-in session user
+  - human testers can move from Session into multiple native reader seams with less UUID copy/paste churn
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

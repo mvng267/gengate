@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 68
-- Trục công việc: iOS location status reader — thêm native read-only consumption cho optional location surface bằng status/count shell, không mở map/mutation flow mới.
+- Batch workflow chính thức hiện tại: 69
+- Trục công việc: iOS reader autofill hardening — giảm ma sát human test bằng quick-fill current session user UUID trên các native read-only tabs.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: idle_batch68.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 68 native location status reader slice đã xong.
-- Kết quả gần nhất: Location tab đã đọc được snapshot/share/audience counts qua read-only owner/share UUID flow.
-- Trạng thái: complete_batch68.
+- Scope hiện tại: batch 69 session-user quick-fill hardening đã xong.
+- Kết quả gần nhất: Profile / Feed / Notifications / Location readers auto-prefill từ session hiện tại; Inbox quick-fills User A từ session hiện tại.
+- Trạng thái: complete_batch69.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

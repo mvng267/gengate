@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct NotificationsPlaceholderView: View {
+    @Environment(AppSessionStore.self) private var sessionStore
+
     @State private var userIDDraft: String = ""
     @State private var notificationRows: [NotificationRow] = []
     @State private var fetchError: String?
@@ -33,6 +35,12 @@ struct NotificationsPlaceholderView: View {
                         .background(Color.secondary.opacity(0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                    Button("Use current session user") {
+                        fillFromCurrentSessionUser()
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(currentSessionUserID == nil)
+
                     Button {
                         Task {
                             await loadNotifications()
@@ -43,6 +51,12 @@ struct NotificationsPlaceholderView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(isLoading || userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+                    if let currentSessionUserID {
+                        Text("Current session user_id: \(currentSessionUserID)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                    }
 
                     if let fetchError {
                         Text("Fetch error: \(fetchError)")
@@ -90,6 +104,31 @@ struct NotificationsPlaceholderView: View {
             .padding(20)
         }
         .navigationTitle("Notifications")
+        .onAppear {
+            prefillFromCurrentSessionUserIfNeeded()
+        }
+    }
+
+    private var currentSessionUserID: String? {
+        if case let .authenticated(userSession) = sessionStore.authState {
+            return userSession.userID
+        }
+        return nil
+    }
+
+    private func prefillFromCurrentSessionUserIfNeeded() {
+        guard userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              let currentSessionUserID else {
+            return
+        }
+        userIDDraft = currentSessionUserID
+    }
+
+    private func fillFromCurrentSessionUser() {
+        guard let currentSessionUserID else {
+            return
+        }
+        userIDDraft = currentSessionUserID
     }
 
     private func loadNotifications() async {

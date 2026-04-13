@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct LocationPlaceholderView: View {
+    @Environment(AppSessionStore.self) private var sessionStore
+
     @State private var ownerUserIDDraft: String = ""
     @State private var shareIDDraft: String = ""
     @State private var snapshotCount: Int?
@@ -45,6 +47,12 @@ struct LocationPlaceholderView: View {
                         .background(Color.secondary.opacity(0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                    Button("Use current session user") {
+                        fillFromCurrentSessionUser()
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(currentSessionUserID == nil)
+
                     Button {
                         Task {
                             await loadLocationStatus()
@@ -55,6 +63,12 @@ struct LocationPlaceholderView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(isLoading || ownerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+                    if let currentSessionUserID {
+                        Text("Current session user_id: \(currentSessionUserID)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                    }
 
                     if let fetchError {
                         Text("Fetch error: \(fetchError)")
@@ -77,6 +91,31 @@ struct LocationPlaceholderView: View {
             .padding(20)
         }
         .navigationTitle("Location")
+        .onAppear {
+            prefillFromCurrentSessionUserIfNeeded()
+        }
+    }
+
+    private var currentSessionUserID: String? {
+        if case let .authenticated(userSession) = sessionStore.authState {
+            return userSession.userID
+        }
+        return nil
+    }
+
+    private func prefillFromCurrentSessionUserIfNeeded() {
+        guard ownerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              let currentSessionUserID else {
+            return
+        }
+        ownerUserIDDraft = currentSessionUserID
+    }
+
+    private func fillFromCurrentSessionUser() {
+        guard let currentSessionUserID else {
+            return
+        }
+        ownerUserIDDraft = currentSessionUserID
     }
 
     private func loadLocationStatus() async {

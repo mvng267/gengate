@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct FeedPlaceholderView: View {
+    @Environment(AppSessionStore.self) private var sessionStore
+
     @State private var viewerUserIDDraft: String = ""
     @State private var momentRows: [PrivateFeedMomentRow] = []
     @State private var fetchError: String?
@@ -33,6 +35,12 @@ struct FeedPlaceholderView: View {
                         .background(Color.secondary.opacity(0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                    Button("Use current session user") {
+                        fillFromCurrentSessionUser()
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(currentSessionUserID == nil)
+
                     Button {
                         Task {
                             await loadPrivateFeed()
@@ -43,6 +51,12 @@ struct FeedPlaceholderView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(isLoading || viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+                    if let currentSessionUserID {
+                        Text("Current session user_id: \(currentSessionUserID)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                    }
 
                     if let fetchError {
                         Text("Fetch error: \(fetchError)")
@@ -95,6 +109,31 @@ struct FeedPlaceholderView: View {
             .padding(20)
         }
         .navigationTitle("Feed")
+        .onAppear {
+            prefillFromCurrentSessionUserIfNeeded()
+        }
+    }
+
+    private var currentSessionUserID: String? {
+        if case let .authenticated(userSession) = sessionStore.authState {
+            return userSession.userID
+        }
+        return nil
+    }
+
+    private func prefillFromCurrentSessionUserIfNeeded() {
+        guard viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              let currentSessionUserID else {
+            return
+        }
+        viewerUserIDDraft = currentSessionUserID
+    }
+
+    private func fillFromCurrentSessionUser() {
+        guard let currentSessionUserID else {
+            return
+        }
+        viewerUserIDDraft = currentSessionUserID
     }
 
     private func loadPrivateFeed() async {
