@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 99
-- Trục công việc: backend messaging parity hardening — `/messages/{id}/device-keys` must hide soft-deleted parent messages.
+- Batch workflow chính thức hiện tại: 100
+- Trục công việc: iOS inbox seam hardening — wire message-device-key create/list into native shell flow.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -41,9 +41,9 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: batch 99 backend parity đã chốt — device-key endpoints ẩn parent message soft-delete.
-- Kết quả gần nhất: commit `6560136` guard `deleted_at` cho create/list `/messages/{id}/device-keys` + regression pass.
-- Trạng thái: complete_batch99_backend.
+- Scope hiện tại: giữ ổn định backend outcome batch 99, chưa mở backend scope mới trong batch 100.
+- Kết quả gần nhất: commit `6560136` parity cho `/messages/{id}/device-keys` trên parent soft-delete.
+- Trạng thái: stable_after_batch99.
 
 ### pikachu-web — frontend web
 - Scope hiện tại: tạm dừng theo chỉ đạo user.
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: đã chốt batch 99 iOS run-friction hardening (backend base URL override controls).
-- Kết quả gần nhất: commit `3d5bd8f` đã thêm persisted+validated override UI trên Session tab.
-- Trạng thái: complete_batch99_ios.
+- Scope hiện tại: batch 100 iOS inbox seam hardening — add message-device-key create/list controls.
+- Kết quả gần nhất: Inbox tab đã load device-key list per message và có native create form cho `/messages/{id}/device-keys`.
+- Trạng thái: verify_batch100_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

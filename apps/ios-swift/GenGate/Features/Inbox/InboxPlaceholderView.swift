@@ -8,8 +8,13 @@ struct InboxPlaceholderView: View {
     @State private var conversationSummary: DirectConversationSummary?
     @State private var messageRows: [InboxMessageRow] = []
     @State private var attachmentMap: [String: [InboxAttachmentRow]] = [:]
+    @State private var deviceKeyMap: [String: [InboxDeviceKeyRow]] = [:]
     @State private var messageDraft: String = ""
     @State private var attachmentTargetMessageIDDraft: String = ""
+    @State private var deviceKeyTargetMessageIDDraft: String = ""
+    @State private var recipientUserIDDraft: String = ""
+    @State private var recipientDeviceIDDraft: String = ""
+    @State private var wrappedMessageKeyBlobDraft: String = "ios-demo-wrapped-message-key"
     @State private var messageToDeleteIDDraft: String = ""
     @State private var attachmentTypeDraft: String = "image"
     @State private var attachmentStorageKeyDraft: String = "attachments/ios-demo-image.enc"
@@ -18,6 +23,7 @@ struct InboxPlaceholderView: View {
     @State private var isLoading = false
     @State private var isSendingMessage = false
     @State private var isCreatingAttachment = false
+    @State private var isCreatingDeviceKey = false
     @State private var isDeletingMessage = false
 
     var body: some View {
@@ -168,6 +174,70 @@ struct InboxPlaceholderView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
+                        Text("Create message device key")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+
+                        TextField("Target message UUID (optional, defaults to newest loaded)", text: $deviceKeyTargetMessageIDDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        TextField("Recipient user UUID", text: $recipientUserIDDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        TextField("Recipient device UUID", text: $recipientDeviceIDDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        TextField("Wrapped message key blob", text: $wrappedMessageKeyBlobDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        Button {
+                            Task {
+                                await createMessageDeviceKey()
+                            }
+                        } label: {
+                            Text(isCreatingDeviceKey ? "Creating device key..." : "Create device key")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(
+                            isLoading ||
+                            isSendingMessage ||
+                            isCreatingAttachment ||
+                            isDeletingMessage ||
+                            isCreatingDeviceKey ||
+                            conversationSummary == nil ||
+                            (resolvedDeviceKeyTargetMessageID?.isEmpty ?? true) ||
+                            recipientUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                            recipientDeviceIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                            wrappedMessageKeyBlobDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        )
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Delete message (soft-delete)")
                             .font(.subheadline)
                             .fontWeight(.semibold)
@@ -194,6 +264,7 @@ struct InboxPlaceholderView: View {
                             isLoading ||
                             isSendingMessage ||
                             isCreatingAttachment ||
+                            isCreatingDeviceKey ||
                             isDeletingMessage ||
                             conversationSummary == nil ||
                             (resolvedMessageToDeleteID?.isEmpty ?? true)
@@ -238,6 +309,10 @@ struct InboxPlaceholderView: View {
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
 
+                    Text("Device-key target message_id: \(resolvedDeviceKeyTargetMessageID ?? "(not resolved)")")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
                     Text("Delete target message_id: \(resolvedMessageToDeleteID ?? "(not resolved)")")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
@@ -267,6 +342,17 @@ struct InboxPlaceholderView: View {
 
                                 if let firstAttachment = attachments.first {
                                     Text("first_attachment: \(firstAttachment.attachmentType) · \(firstAttachment.storageKey ?? "(no storage key)")")
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+
+                                let deviceKeys = deviceKeyMap[row.id] ?? []
+                                Text("device_key_count: \(deviceKeys.count)")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+
+                                if let firstDeviceKey = deviceKeys.first {
+                                    Text("first_device_key: recipient_user=\(firstDeviceKey.recipientUserID) · recipient_device=\(firstDeviceKey.recipientDeviceID)")
                                         .font(.footnote)
                                         .foregroundStyle(.secondary)
                                 }
@@ -301,6 +387,15 @@ struct InboxPlaceholderView: View {
 
     private var resolvedAttachmentTargetMessageID: String? {
         let manualMessageID = attachmentTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !manualMessageID.isEmpty {
+            return manualMessageID
+        }
+
+        return messageRows.last?.id
+    }
+
+    private var resolvedDeviceKeyTargetMessageID: String? {
+        let manualMessageID = deviceKeyTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         if !manualMessageID.isEmpty {
             return manualMessageID
         }
@@ -349,16 +444,20 @@ struct InboxPlaceholderView: View {
             let directConversation = try await apiClient.resolveDirectConversation(userAID: trimmedUserA, userBID: trimmedUserB)
             let messages = try await apiClient.fetchMessages(conversationID: directConversation.id)
             var nextAttachmentMap: [String: [InboxAttachmentRow]] = [:]
+            var nextDeviceKeyMap: [String: [InboxDeviceKeyRow]] = [:]
             for message in messages {
                 nextAttachmentMap[message.id] = try await apiClient.fetchAttachments(messageID: message.id)
+                nextDeviceKeyMap[message.id] = try await apiClient.fetchMessageDeviceKeys(messageID: message.id)
             }
             conversationSummary = directConversation
             messageRows = messages
             attachmentMap = nextAttachmentMap
+            deviceKeyMap = nextDeviceKeyMap
         } catch {
             conversationSummary = nil
             messageRows = []
             attachmentMap = [:]
+            deviceKeyMap = [:]
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
 
@@ -442,6 +541,50 @@ struct InboxPlaceholderView: View {
         isCreatingAttachment = false
     }
 
+    private func createMessageDeviceKey() async {
+        guard let targetMessageID = resolvedDeviceKeyTargetMessageID,
+              !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            fetchError = "Cần message UUID hợp lệ để tạo device key."
+            return
+        }
+
+        let trimmedRecipientUserID = recipientUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedRecipientDeviceID = recipientDeviceIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedWrappedBlob = wrappedMessageKeyBlobDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedRecipientUserID.isEmpty else {
+            fetchError = "Recipient user UUID là bắt buộc."
+            return
+        }
+
+        guard !trimmedRecipientDeviceID.isEmpty else {
+            fetchError = "Recipient device UUID là bắt buộc."
+            return
+        }
+
+        guard !trimmedWrappedBlob.isEmpty else {
+            fetchError = "Wrapped message key blob là bắt buộc."
+            return
+        }
+
+        isCreatingDeviceKey = true
+        fetchError = nil
+
+        do {
+            _ = try await InboxAPIClient().createMessageDeviceKey(
+                messageID: targetMessageID,
+                recipientUserID: trimmedRecipientUserID,
+                recipientDeviceID: trimmedRecipientDeviceID,
+                wrappedMessageKeyBlob: trimmedWrappedBlob
+            )
+            await loadInboxThread()
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        isCreatingDeviceKey = false
+    }
+
     private func deleteMessage() async {
         guard let targetMessageID = resolvedMessageToDeleteID,
               !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
@@ -456,6 +599,9 @@ struct InboxPlaceholderView: View {
             try await InboxAPIClient().deleteMessage(messageID: targetMessageID)
             if attachmentTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == targetMessageID {
                 attachmentTargetMessageIDDraft = ""
+            }
+            if deviceKeyTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == targetMessageID {
+                deviceKeyTargetMessageIDDraft = ""
             }
             if messageToDeleteIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == targetMessageID {
                 messageToDeleteIDDraft = ""
@@ -485,6 +631,13 @@ private struct InboxAttachmentRow: Identifiable {
     let id: String
     let attachmentType: String
     let storageKey: String?
+}
+
+private struct InboxDeviceKeyRow: Identifiable {
+    let id: String
+    let messageID: String
+    let recipientUserID: String
+    let recipientDeviceID: String
 }
 
 private struct InboxAPIClient {
@@ -529,6 +682,25 @@ private struct InboxAPIClient {
         let attachment_type: String
         let encrypted_attachment_blob: String
         let storage_key: String?
+    }
+
+    private struct MessageDeviceKeyListResponse: Decodable {
+        let count: Int
+        let items: [MessageDeviceKeyResponse]
+    }
+
+    private struct MessageDeviceKeyResponse: Decodable {
+        let id: String
+        let message_id: String
+        let recipient_user_id: String
+        let recipient_device_id: String
+        let wrapped_message_key_blob: String
+    }
+
+    private struct MessageDeviceKeyCreateRequest: Encodable {
+        let recipient_user_id: String
+        let recipient_device_id: String
+        let wrapped_message_key_blob: String
     }
 
     private struct BackendErrorPayload: Decodable {
@@ -656,6 +828,68 @@ private struct InboxAPIClient {
                     storageKey: $0.storage_key
                 )
             }
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func fetchMessageDeviceKeys(messageID: String) async throws -> [InboxDeviceKeyRow] {
+        let url = try makeURL(path: "/messages/\(messageID)/device-keys")
+        let (data, response) = try await URLSession.shared.data(from: url)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 200 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Message device-key list fetch failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(MessageDeviceKeyListResponse.self, from: data)
+            return payload.items.map {
+                InboxDeviceKeyRow(
+                    id: $0.id,
+                    messageID: $0.message_id,
+                    recipientUserID: $0.recipient_user_id,
+                    recipientDeviceID: $0.recipient_device_id
+                )
+            }
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func createMessageDeviceKey(
+        messageID: String,
+        recipientUserID: String,
+        recipientDeviceID: String,
+        wrappedMessageKeyBlob: String
+    ) async throws -> InboxDeviceKeyRow {
+        let url = try makeURL(path: "/messages/\(messageID)/device-keys")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(
+            MessageDeviceKeyCreateRequest(
+                recipient_user_id: recipientUserID,
+                recipient_device_id: recipientDeviceID,
+                wrapped_message_key_blob: wrappedMessageKeyBlob
+            )
+        )
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 201 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Message device-key create failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(MessageDeviceKeyResponse.self, from: data)
+            return InboxDeviceKeyRow(
+                id: payload.id,
+                messageID: payload.message_id,
+                recipientUserID: payload.recipient_user_id,
+                recipientDeviceID: payload.recipient_device_id
+            )
         } catch {
             throw APIError.invalidResponse
         }

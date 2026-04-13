@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **99 — backend+iOS messaging run-friction parity is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **100 — iOS inbox message-device-key shell parity is in verify**.
 
 ## Reporting hard rule
 
@@ -89,25 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **99**
-- Scope hiện tại: backend messaging parity — chặn `/messages/{id}/device-keys` create/list nếu parent message đã soft-delete.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **100**
+- Scope hiện tại: iOS inbox seam parity — thêm create/list message device keys trực tiếp trên native shell.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/backend-python/app/services/messages.py`
-  - `apps/backend-python/tests/test_messages_api.py`
+  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_messages_api.py` → ✅ pass (13 passed)
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `6560136` — `batch99: hide deleted messages from device key endpoints`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `153c82b` — `chore: sync workflow docs for batch99`
+  - working tree hiện tại: bẩn (batch100 iOS inbox device-key slice pending commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch100 backend+iOS theo seam messaging/realtime friction thật (web paused)
+  - commit batch100 iOS inbox device-key slice; sau đó mở batch101 theo seam messaging/realtime friction thật (web paused)
 
 ## Batch handoff note
 
