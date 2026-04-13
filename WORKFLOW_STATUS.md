@@ -1,25 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 42
+- Batch: 43
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 42 logout outcome signal complete — web + iOS surface dedicated backend/detail result after logout to make auth loop easier to verify
-- Status: complete
+- Scope: batch 43 web refresh outcome signal — surface dedicated backend/detail result after refresh to make auth loop easier to verify
+- Status: verify
 - Files:
   - apps/web-nextjs/app/login/page.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
-  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `9084cc0` — `batch42: add ios logout outcome signal`
-  - working tree: sạch
+  - latest commit: `d66414f` — `batch42: mark workflow complete`
+  - working tree: bẩn đúng theo batch 43 web refresh outcome signal slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 43 với 1 auth behavior slice hẹp có leverage cao hơn; ưu tiên thêm cue/surface cho restore hoặc refresh outcome để auth loop có signal verify mạnh hơn toàn vòng
+- Next: commit slice này; sau đó cân nhắc 1 parity slice tương tự trên iOS hoặc chuyển sang restore outcome signal nếu leverage cao hơn
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 42 outcome:
-  - Web login shell nay có panel `Logout outcome` hiển thị rõ local clear result + backend detail sau logout
-  - iOS Session screen nay cũng có panel `Logout outcome` để nhìn cùng kiểu outcome sau revoke/logout
-  - Batch 42 đã nâng auth shell behavior signal cho logout path lên mức dễ verify hơn trên cả web và iOS
+- Batch 43 update:
+  - Web login shell nay có panel `Refresh outcome` hiển thị rõ refresh result + backend detail sau manual refresh
+  - Panel này giúp phân biệt rotate thành công với case refresh token đã mất hiệu lực trước đó

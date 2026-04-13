@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **batch 42 đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 43**.
 
 ## Reporting hard rule
 
@@ -88,23 +88,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **42**
-- Scope hiện tại: logout outcome signal complete — web + iOS surface dedicated backend/detail result after logout to make auth loop easier to verify.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **43**
+- Scope hiện tại: web refresh outcome signal — surface dedicated backend/detail result after refresh to make auth loop easier to verify.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/web-nextjs/app/login/page.tsx`
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
-  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `9084cc0` — `batch42: add ios logout outcome signal`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `d66414f` — `batch42: mark workflow complete`
+  - working tree hiện tại: bẩn đúng theo batch 43 web refresh outcome signal slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch 43 với 1 auth behavior slice hẹp có leverage cao hơn; ưu tiên thêm cue/surface cho restore hoặc refresh outcome để auth loop có signal verify mạnh hơn toàn vòng
+  - commit slice này; sau đó cân nhắc 1 parity slice tương tự trên iOS hoặc chuyển sang restore outcome signal nếu leverage cao hơn
 
 ## Batch handoff note
 
@@ -112,6 +109,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Commit cuối đã chốt:
   - `f75e5d3` — `batch42: add web logout outcome signal`
   - `9084cc0` — `batch42: add ios logout outcome signal`
+  - `d66414f` — `batch42: mark workflow complete`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
