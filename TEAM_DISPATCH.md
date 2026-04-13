@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 87
-- Trục công việc: iOS profile friend-request action hardening — bật create/accept request trực tiếp trên native profile shell.
+- Batch workflow chính thức hiện tại: 88
+- Trục công việc: iOS inbox send-message hardening — bật text message send trực tiếp trên native inbox shell.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: complete_batch84.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 87 iOS profile friend-request action hardening đã xong.
-- Kết quả gần nhất: native profile shell create/accept được friend request trực tiếp.
-- Trạng thái: complete_batch87.
+- Scope hiện tại: batch 88 iOS inbox send-message hardening đã xong.
+- Kết quả gần nhất: native inbox shell gửi được text message trực tiếp rồi reload thread.
+- Trạng thái: complete_batch88.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

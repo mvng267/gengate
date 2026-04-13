@@ -1,21 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 87
+- Batch: 88
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 87 iOS profile friend-request action hardening — allow creating/accepting friend requests directly from native profile friend graph shell
+- Scope: batch 88 iOS inbox send-message hardening — allow sending text messages directly from native inbox shell after resolving direct thread
 - Status: MVP-testable
 - Files:
-  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `833d1b3` — `batch86: harden ios notifications read toggle`
-  - working tree: bẩn (batch 87 ready to commit)
+  - latest commit: `4434547` — `batch87: harden ios profile friend request actions`
+  - working tree: bẩn (batch 88 ready to commit)
 - Blocker: none
-- Next: commit batch 87 iOS profile friend-request action hardening; then continue only with concrete MVP seam gaps
+- Next: commit batch 88 iOS inbox send-message hardening; then continue only with concrete MVP seam gaps
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -83,10 +83,13 @@
 - Batch 86 handoff:
   - `833d1b3` — `batch86: harden ios notifications read toggle`
   - iOS notifications read/unread mutation remains MVP-testable while batch 87 hardens native friend-request actions on profile shell
-- Batch 87 outcome:
-  - iOS profile friend graph shell now supports creating friend requests via `/friends/requests`
-  - iOS profile shell can accept pending inbound requests via `/friends/requests/{id}/accept`
-  - native social seam on iOS is no longer read-only for friend requests, reducing dependency on web during human tests
+- Batch 87 handoff:
+  - `4434547` — `batch87: harden ios profile friend request actions`
+  - native profile social seam remains MVP-testable while batch 88 hardens native inbox send flow
+- Batch 88 outcome:
+  - iOS inbox shell now supports sending text messages via `POST /messages` using resolved direct conversation id
+  - native inbox can now perform minimal message mutation + read refresh in one flow
+  - this reduces dependency on web for direct-message MVP testing on iOS
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

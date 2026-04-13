@@ -8,8 +8,10 @@ struct InboxPlaceholderView: View {
     @State private var conversationSummary: DirectConversationSummary?
     @State private var messageRows: [InboxMessageRow] = []
     @State private var attachmentMap: [String: [InboxAttachmentRow]] = [:]
+    @State private var messageDraft: String = ""
     @State private var fetchError: String?
     @State private var isLoading = false
+    @State private var isSendingMessage = false
 
     var body: some View {
         ScrollView {
@@ -17,11 +19,11 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox reader. Use two real user UUIDs to resolve a direct conversation and inspect its message list through the same backend contracts already wired for web.",
-                    status: "Status: native inbox is live as a read-only shell; it reads direct thread + messages + attachment metadata while composer/device keys/realtime remain pending.",
+                    status: "Status: native inbox now supports minimal text sending plus message/attachment reading; device keys and realtime remain pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell first calls `/conversations/direct`, then reads `/messages?conversation_id=<uuid>` and per-message `/messages/{id}/attachments`.",
-                        "Use web or backend tools when you need to create/send messages or upload attachments; use this iOS tab to consume resulting message+attachment state natively."
+                        "You can now send text messages as User A via `POST /messages` (with resolved conversation id) directly from iOS; attachment upload still relies on web/backend tools."
                     ]
                 )
 
@@ -63,6 +65,38 @@ struct InboxPlaceholderView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(isLoading || userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || userBIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Send text message as User A")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+
+                        TextField("Message text", text: $messageDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.sentences)
+                            .autocorrectionDisabled(false)
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        Button {
+                            Task {
+                                await sendMessage()
+                            }
+                        } label: {
+                            Text(isSendingMessage ? "Sending message..." : "Send message")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(
+                            isLoading ||
+                            isSendingMessage ||
+                            conversationSummary == nil ||
+                            userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                            messageDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        )
+                    }
 
                     if let currentSessionUserID {
                         Text("Current session user_id: \(currentSessionUserID)")
@@ -202,6 +236,43 @@ struct InboxPlaceholderView: View {
 
         isLoading = false
     }
+
+    private func sendMessage() async {
+        let trimmedUserA = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedPayload = messageDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard let conversationID = conversationSummary?.id else {
+            fetchError = "Load direct thread trước khi gửi message."
+            return
+        }
+
+        guard !trimmedUserA.isEmpty else {
+            fetchError = "User A UUID là bắt buộc để gửi message."
+            return
+        }
+
+        guard !trimmedPayload.isEmpty else {
+            fetchError = "Message text không được để trống."
+            return
+        }
+
+        isSendingMessage = true
+        fetchError = nil
+
+        do {
+            _ = try await InboxAPIClient().createMessage(
+                conversationID: conversationID,
+                senderUserID: trimmedUserA,
+                payloadText: trimmedPayload
+            )
+            messageDraft = ""
+            await loadInboxThread()
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        isSendingMessage = false
+    }
 }
 
 private struct DirectConversationSummary {
@@ -239,6 +310,12 @@ private struct InboxAPIClient {
         let conversation_id: String
         let sender_user_id: String
         let payload_text: String
+    }
+
+    private struct MessageCreateRequest: Encodable {
+        let sender_user_id: String
+        let payload_text: String
+        let conversation_id: String
     }
 
     private struct AttachmentListResponse: Decodable {
@@ -324,6 +401,38 @@ private struct InboxAPIClient {
                     payloadText: $0.payload_text
                 )
             }
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func createMessage(conversationID: String, senderUserID: String, payloadText: String) async throws -> InboxMessageRow {
+        let url = try makeURL(path: "/messages")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(
+            MessageCreateRequest(
+                sender_user_id: senderUserID,
+                payload_text: payloadText,
+                conversation_id: conversationID
+            )
+        )
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 201 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Message create failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(MessageResponse.self, from: data)
+            return InboxMessageRow(
+                id: payload.id,
+                senderUserID: payload.sender_user_id,
+                payloadText: payload.payload_text
+            )
         } catch {
             throw APIError.invalidResponse
         }

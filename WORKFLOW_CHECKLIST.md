@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **87 — iOS profile friend-request action hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **88 — iOS inbox send-message hardening slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **87**
-- Scope hiện tại: iOS profile friend-request action hardening — allow creating/accepting friend requests directly in native profile friend graph shell.
+- Batch workflow chính thức hiện tại: **88**
+- Scope hiện tại: iOS inbox send-message hardening — allow sending text messages directly from native inbox shell.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
+  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `833d1b3` — `batch86: harden ios notifications read toggle`
-  - working tree hiện tại: bẩn (batch 87 ready to commit)
+  - commit gần nhất đã chốt: `4434547` — `batch87: harden ios profile friend request actions`
+  - working tree hiện tại: bẩn (batch 88 ready to commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch87 iOS profile friend-request action hardening; sau đó mở slice mới chỉ khi có MVP seam gap thật từ human testing
+  - commit batch88 iOS inbox send-message hardening; sau đó mở batch mới chỉ khi có MVP seam gap thật từ human testing
 
 ## Batch handoff note
 
