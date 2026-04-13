@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **100 — iOS inbox message-device-key shell parity is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **101 — backend direct-conversation read-cursor contract is in verify**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,27 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **100**
-- Scope hiện tại: iOS inbox seam parity — thêm create/list message device keys trực tiếp trên native shell.
+- Batch workflow chính thức hiện tại: **101**
+- Scope hiện tại: backend messaging contract parity — update direct member read-cursor cho read-status seam.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
+  - `apps/backend-python/app/schemas/conversations.py`
+  - `apps/backend-python/app/repositories/conversations.py`
+  - `apps/backend-python/app/services/conversations.py`
+  - `apps/backend-python/app/modules/conversations/router.py`
+  - `apps/backend-python/tests/test_batch7_conversations_api.py`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/ios-swift && swift build` → ✅ pass
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` → ✅ pass (2 passed)
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `153c82b` — `chore: sync workflow docs for batch99`
-  - working tree hiện tại: bẩn (batch100 iOS inbox device-key slice pending commit)
+  - commit gần nhất đã chốt: `fe19ace` — `batch100: wire ios inbox message device key controls`
+  - working tree hiện tại: bẩn (batch101 backend read-cursor slice pending commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch100 iOS inbox device-key slice; sau đó mở batch101 theo seam messaging/realtime friction thật (web paused)
+  - commit batch101 backend read-cursor slice; sau đó mở batch102 iOS consume read-cursor seam (web paused)
 
 ## Batch handoff note
 

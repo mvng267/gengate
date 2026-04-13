@@ -1,21 +1,25 @@
 # GenGate Workflow Status
 
-- Batch: 100
+- Batch: 101
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 100 iOS inbox seam hardening — wire `/messages/{id}/device-keys` create/list into native Inbox shell for human test parity
+- Scope: batch 101 backend messaging contract hardening — add direct-conversation member read-cursor update endpoint for delivery/read-status parity
 - Status: verify
 - Files:
-  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
+  - apps/backend-python/app/schemas/conversations.py
+  - apps/backend-python/app/repositories/conversations.py
+  - apps/backend-python/app/services/conversations.py
+  - apps/backend-python/app/modules/conversations/router.py
+  - apps/backend-python/tests/test_batch7_conversations_api.py
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` ✅ (2 passed)
 - Git:
-  - latest commit: `153c82b` — `chore: sync workflow docs for batch99`
-  - working tree: bẩn (batch100 iOS inbox device-key slice pending commit)
+  - latest commit: `fe19ace` — `batch100: wire ios inbox message device key controls`
+  - working tree: bẩn (batch101 backend read-cursor slice pending commit)
 - Blocker: none
-- Next: commit batch100 iOS inbox device-key controls; tiếp tục batch101 theo friction messaging/realtime kế tiếp (web paused)
+- Next: commit batch101 backend read-cursor contract; tiếp tục batch102 iOS inbox consume read-cursor seam (web paused)
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -127,10 +131,14 @@
   - iOS Session tab adds editable backend base URL override for shell runs beyond localhost (`3d5bd8f`)
   - backend message device-key create/list now return `message_not_found` when parent message is soft-deleted (same parity as attachment endpoints)
   - regression guard added in `tests/test_messages_api.py` to ensure deleted parent cannot create/list device keys (`6560136`)
-- Batch 100 outcome (in progress):
+- Batch 100 outcome:
   - iOS Inbox tab now loads `GET /messages/{id}/device-keys` per message row and shows `device_key_count`
   - iOS Inbox tab adds native form to call `POST /messages/{id}/device-keys` (recipient user/device + wrapped key blob)
   - delete flow now clears device-key target draft when deleting the same message to reduce stale target friction
+- Batch 101 outcome (in progress):
+  - backend adds `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` to update direct-thread `last_read_message_id`
+  - contract returns `conversation_not_direct` / `message_conversation_mismatch` (400) and not-found classes (404) for parity-safe error mapping
+  - conversation member response now includes `last_read_message_id` so clients can render read-status cursor directly
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -141,5 +149,6 @@
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
   - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, then create/list message device keys on a chosen message
+  - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

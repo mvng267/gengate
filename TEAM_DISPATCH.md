@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 100
-- Trục công việc: iOS inbox seam hardening — wire message-device-key create/list into native shell flow.
+- Batch workflow chính thức hiện tại: 101
+- Trục công việc: backend messaging contract hardening — add direct member read-cursor update endpoint.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -41,9 +41,9 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: giữ ổn định backend outcome batch 99, chưa mở backend scope mới trong batch 100.
-- Kết quả gần nhất: commit `6560136` parity cho `/messages/{id}/device-keys` trên parent soft-delete.
-- Trạng thái: stable_after_batch99.
+- Scope hiện tại: batch 101 backend read-status parity — update direct conversation member read cursor.
+- Kết quả gần nhất: thêm `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` + contract tests pass.
+- Trạng thái: verify_batch101_backend.
 
 ### pikachu-web — frontend web
 - Scope hiện tại: tạm dừng theo chỉ đạo user.
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 100 iOS inbox seam hardening — add message-device-key create/list controls.
-- Kết quả gần nhất: Inbox tab đã load device-key list per message và có native create form cho `/messages/{id}/device-keys`.
-- Trạng thái: verify_batch100_ios.
+- Scope hiện tại: giữ ổn định batch 100 inbox device-key controls; chờ batch 102 consume read-cursor API.
+- Kết quả gần nhất: commit `fe19ace` đã thêm device-key create/list vào Inbox shell.
+- Trạng thái: stable_after_batch100.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

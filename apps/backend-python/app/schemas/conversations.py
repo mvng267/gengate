@@ -32,10 +32,15 @@ class ConversationMemberCreateRequest(BaseModel):
     user_id: uuid.UUID
 
 
+class ConversationMemberReadCursorUpdateRequest(BaseModel):
+    last_read_message_id: uuid.UUID
+
+
 class ConversationMemberResponse(BaseModel):
     id: uuid.UUID
     conversation_id: uuid.UUID
     user_id: uuid.UUID
+    last_read_message_id: uuid.UUID | None = None
 
 
 class ConversationMemberListResponse(BaseModel):

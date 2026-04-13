@@ -67,6 +67,18 @@ class ConversationMemberRepository(BaseRepository[ConversationMember]):
         )
         return db.scalar(statement)
 
+    def update_last_read_message(
+        self,
+        db: Session,
+        member: ConversationMember,
+        *,
+        last_read_message_id: uuid.UUID,
+    ) -> ConversationMember:
+        member.last_read_message_id = last_read_message_id
+        db.add(member)
+        db.flush()
+        return member
+
 
 conversation_repository = ConversationRepository()
 conversation_member_repository = ConversationMemberRepository()

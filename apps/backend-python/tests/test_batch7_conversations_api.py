@@ -59,13 +59,41 @@ def test_batch7_conversations_members_attachments_flow() -> None:
     list_members_response = client.get(f"/conversations/{conversation_id}/members")
     assert list_members_response.status_code == 200
     assert list_members_response.json()["count"] == 2
+    assert list_members_response.json()["items"][0]["last_read_message_id"] is None
 
     create_message_response = client.post(
         "/messages",
-        json={"sender_user_id": user_a_id, "payload_text": "batch7-message"},
+        json={"sender_user_id": user_a_id, "payload_text": "batch7-message", "conversation_id": conversation_id},
     )
     assert create_message_response.status_code == 201
     message_id = create_message_response.json()["id"]
+
+    update_read_cursor_response = client.patch(
+        f"/conversations/{conversation_id}/members/{user_a_id}/read-cursor",
+        json={"last_read_message_id": message_id},
+    )
+    assert update_read_cursor_response.status_code == 200
+    assert update_read_cursor_response.json()["conversation_id"] == conversation_id
+    assert update_read_cursor_response.json()["user_id"] == user_a_id
+    assert update_read_cursor_response.json()["last_read_message_id"] == message_id
+
+    list_members_after_cursor = client.get(f"/conversations/{conversation_id}/members")
+    assert list_members_after_cursor.status_code == 200
+    assert list_members_after_cursor.json()["count"] == 2
+
+    member_after_cursor = next(
+        item for item in list_members_after_cursor.json()["items"] if item["user_id"] == user_a_id
+    )
+    assert member_after_cursor["last_read_message_id"] == message_id
+
+    mismatch_cursor_response = client.patch(
+        f"/conversations/{conversation_id}/members/{user_b_id}/read-cursor",
+        json={"last_read_message_id": str(uuid.uuid4())},
+    )
+    assert mismatch_cursor_response.status_code == 404
+    assert mismatch_cursor_response.json() == {
+        "error": {"code": "message_not_found", "message": "message_not_found"}
+    }
 
     create_attachment_response = client.post(
         f"/messages/{message_id}/attachments",
@@ -81,5 +109,112 @@ def test_batch7_conversations_members_attachments_flow() -> None:
     assert list_attachments_response.status_code == 200
     assert list_attachments_response.json()["count"] == 1
     assert list_attachments_response.json()["items"][0]["attachment_type"] == "image"
+
+    app.dependency_overrides.clear()
+
+
+def test_batch101_direct_member_read_cursor_contract_errors() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    user_a_response = client.post("/auth/register", json={"email": "batch101-a@example.com", "username": "batch101_a"})
+    user_b_response = client.post("/auth/register", json={"email": "batch101-b@example.com", "username": "batch101_b"})
+    user_c_response = client.post("/auth/register", json={"email": "batch101-c@example.com", "username": "batch101_c"})
+    user_a_id = user_a_response.json()["id"]
+    user_b_id = user_b_response.json()["id"]
+    user_c_id = user_c_response.json()["id"]
+
+    direct_response = client.post(
+        "/conversations/direct",
+        json={"user_a_id": user_a_id, "user_b_id": user_b_id},
+    )
+    assert direct_response.status_code == 201
+    direct_conversation_id = direct_response.json()["id"]
+
+    group_response = client.post("/conversations", json={"conversation_type": "group"})
+    assert group_response.status_code == 201
+    group_conversation_id = group_response.json()["id"]
+
+    add_group_member_a = client.post(f"/conversations/{group_conversation_id}/members", json={"user_id": user_a_id})
+    add_group_member_b = client.post(f"/conversations/{group_conversation_id}/members", json={"user_id": user_b_id})
+    assert add_group_member_a.status_code == 201
+    assert add_group_member_b.status_code == 201
+
+    message_response = client.post(
+        "/messages",
+        json={
+            "sender_user_id": user_a_id,
+            "payload_text": "batch101 message",
+            "conversation_id": direct_conversation_id,
+        },
+    )
+    assert message_response.status_code == 201
+    message_id = message_response.json()["id"]
+
+    conversation_not_found = client.patch(
+        f"/conversations/{uuid.uuid4()}/members/{user_a_id}/read-cursor",
+        json={"last_read_message_id": message_id},
+    )
+    assert conversation_not_found.status_code == 404
+    assert conversation_not_found.json() == {
+        "error": {"code": "conversation_not_found", "message": "conversation_not_found"}
+    }
+
+    member_not_found = client.patch(
+        f"/conversations/{direct_conversation_id}/members/{user_c_id}/read-cursor",
+        json={"last_read_message_id": message_id},
+    )
+    assert member_not_found.status_code == 404
+    assert member_not_found.json() == {
+        "error": {"code": "conversation_member_not_found", "message": "conversation_member_not_found"}
+    }
+
+    non_direct_cursor = client.patch(
+        f"/conversations/{group_conversation_id}/members/{user_a_id}/read-cursor",
+        json={"last_read_message_id": message_id},
+    )
+    assert non_direct_cursor.status_code == 400
+    assert non_direct_cursor.json() == {
+        "error": {"code": "conversation_not_direct", "message": "conversation_not_direct"}
+    }
+
+    group_message = client.post(
+        "/messages",
+        json={
+            "sender_user_id": user_a_id,
+            "payload_text": "batch101 group message",
+            "conversation_id": group_conversation_id,
+        },
+    )
+    assert group_message.status_code == 201
+    group_message_id = group_message.json()["id"]
+
+    mismatch_response = client.patch(
+        f"/conversations/{direct_conversation_id}/members/{user_a_id}/read-cursor",
+        json={"last_read_message_id": group_message_id},
+    )
+    assert mismatch_response.status_code == 400
+    assert mismatch_response.json() == {
+        "error": {"code": "message_conversation_mismatch", "message": "message_conversation_mismatch"}
+    }
 
     app.dependency_overrides.clear()

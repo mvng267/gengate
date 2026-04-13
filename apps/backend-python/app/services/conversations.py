@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.models.conversation_members import ConversationMember
 from app.models.conversations import Conversation
 from app.repositories.conversations import conversation_member_repository, conversation_repository
+from app.repositories.messages import message_repository
 from app.repositories.users import user_repository
 
 
@@ -75,6 +76,37 @@ class ConversationService:
             ),
         ]
         return conversation, members
+
+    def update_direct_member_read_cursor(
+        self,
+        db: Session,
+        conversation_id: uuid.UUID,
+        user_id: uuid.UUID,
+        last_read_message_id: uuid.UUID,
+    ) -> ConversationMember:
+        conversation = conversation_repository.get(db, conversation_id)
+        if conversation is None:
+            raise ValueError("conversation_not_found")
+
+        if conversation.conversation_type != "direct":
+            raise ValueError("conversation_not_direct")
+
+        member = conversation_member_repository.get_by_conversation_and_user(db, conversation_id, user_id)
+        if member is None:
+            raise ValueError("conversation_member_not_found")
+
+        message = message_repository.get(db, last_read_message_id)
+        if message is None or message.deleted_at is not None:
+            raise ValueError("message_not_found")
+
+        if message.conversation_id != conversation_id:
+            raise ValueError("message_conversation_mismatch")
+
+        return conversation_member_repository.update_last_read_message(
+            db,
+            member,
+            last_read_message_id=last_read_message_id,
+        )
 
 
 conversation_service = ConversationService()

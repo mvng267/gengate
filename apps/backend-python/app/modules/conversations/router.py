@@ -9,6 +9,7 @@ from app.schemas.conversations import (
     ConversationListResponse,
     ConversationMemberCreateRequest,
     ConversationMemberListResponse,
+    ConversationMemberReadCursorUpdateRequest,
     ConversationMemberResponse,
     ConversationResponse,
     DirectConversationGetOrCreateRequest,
@@ -31,6 +32,7 @@ def to_member_response(member) -> ConversationMemberResponse:
         id=member.id,
         conversation_id=member.conversation_id,
         user_id=member.user_id,
+        last_read_message_id=member.last_read_message_id,
     )
 
 
@@ -100,3 +102,25 @@ def list_members(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     items = [to_member_response(member) for member in members]
     return ConversationMemberListResponse(count=len(items), items=items)
+
+
+@router.patch("/{conversation_id}/members/{user_id}/read-cursor", response_model=ConversationMemberResponse)
+def update_member_read_cursor(
+    conversation_id: uuid.UUID,
+    user_id: uuid.UUID,
+    payload: ConversationMemberReadCursorUpdateRequest,
+    db: Session = Depends(get_db_session),
+) -> ConversationMemberResponse:
+    try:
+        member = conversation_service.update_direct_member_read_cursor(
+            db,
+            conversation_id=conversation_id,
+            user_id=user_id,
+            last_read_message_id=payload.last_read_message_id,
+        )
+    except ValueError as exc:
+        code = str(exc)
+        if code in {"conversation_not_direct", "message_conversation_mismatch"}:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=code)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=code)
+    return to_member_response(member)
