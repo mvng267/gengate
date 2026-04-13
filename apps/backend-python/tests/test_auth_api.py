@@ -150,7 +150,12 @@ def test_auth_refresh_rotates_session_and_session_snapshot_reads_active_session(
     )
     assert stale_refresh_response.status_code == 401
     assert stale_refresh_response.json() == {
-        "error": {"code": "session_revoked", "message": "session_revoked"}
+        "error": {
+            "code": "session_revoked",
+            "message": "session_revoked",
+            "local_clear_recommended": True,
+            "backend_detail": "session_revoked",
+        }
     }
 
     fresh_session_response = client.post(
@@ -201,7 +206,60 @@ def test_auth_logout_revokes_current_session() -> None:
     )
     assert post_logout_session.status_code == 401
     assert post_logout_session.json() == {
-        "error": {"code": "session_revoked", "message": "session_revoked"}
+        "error": {
+            "code": "session_revoked",
+            "message": "session_revoked",
+            "local_clear_recommended": True,
+            "backend_detail": "session_revoked",
+        }
+    }
+
+    clear_overrides()
+
+
+def test_auth_invalid_session_errors_expose_cleanup_cue_metadata() -> None:
+    client = create_test_client()
+
+    session_response = client.post(
+        "/auth/session",
+        json={"refresh_token": "missing-refresh-token"},
+    )
+    assert session_response.status_code == 401
+    assert session_response.json() == {
+        "error": {
+            "code": "session_not_found",
+            "message": "session_not_found",
+            "local_clear_recommended": True,
+            "backend_detail": "session_not_found",
+        }
+    }
+
+    refresh_response = client.post(
+        "/auth/refresh",
+        json={"refresh_token": "missing-refresh-token"},
+    )
+    assert refresh_response.status_code == 401
+    assert refresh_response.json() == {
+        "error": {
+            "code": "session_not_found",
+            "message": "session_not_found",
+            "local_clear_recommended": True,
+            "backend_detail": "session_not_found",
+        }
+    }
+
+    logout_response = client.post(
+        "/auth/logout",
+        json={"refresh_token": "missing-refresh-token"},
+    )
+    assert logout_response.status_code == 401
+    assert logout_response.json() == {
+        "error": {
+            "code": "session_not_found",
+            "message": "session_not_found",
+            "local_clear_recommended": True,
+            "backend_detail": "session_not_found",
+        }
     }
 
     clear_overrides()

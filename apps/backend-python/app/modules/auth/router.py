@@ -31,6 +31,15 @@ from app.services.sessions import session_service
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
+def invalid_session_error(detail: str) -> dict[str, str | bool]:
+    return {
+        "code": detail,
+        "message": detail,
+        "local_clear_recommended": True,
+        "backend_detail": detail,
+    }
+
+
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
 def register(payload: RegisterRequest, db: Session = Depends(get_db_session)) -> RegisterResponse:
     user, created = auth_service.register_user(db, payload.email, payload.username)
@@ -86,7 +95,7 @@ def refresh_session(
     except ValueError as exc:
         detail = str(exc)
         if detail in {"session_not_found", "session_revoked", "session_expired"}:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=invalid_session_error(detail))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
 
     return LoginResponse(
@@ -118,7 +127,7 @@ def get_session_snapshot(
     except ValueError as exc:
         detail = str(exc)
         if detail in {"session_not_found", "session_revoked", "session_expired"}:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=invalid_session_error(detail))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
 
     return SessionSnapshotResponse(
@@ -148,7 +157,7 @@ def logout_session(
     except ValueError as exc:
         detail = str(exc)
         if detail in {"session_not_found", "session_revoked", "session_expired"}:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=invalid_session_error(detail))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
 
     return SessionSnapshotResponse(

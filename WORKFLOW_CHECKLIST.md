@@ -89,21 +89,25 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **54**
-- Scope hiện tại: failure cleanup cue parity — web + iOS restore/refresh failure summaries now keep explicit local-clear cue.
+- Scope hiện tại: failure cleanup cue parity — backend/web/iOS now expose explicit local-clear cue around invalid or cleared session outcomes.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
+  - `apps/backend-python/app/main.py`
+  - `apps/backend-python/app/modules/auth/router.py`
+  - `apps/backend-python/tests/test_auth_api.py`
   - `apps/web-nextjs/app/login/page.tsx`
   - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
 - Test-verify:
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ pass
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `5ddea98` — `batch54: expose failure cleanup cue`
-  - working tree hiện tại: bẩn đúng theo batch 54 iOS failure-summary parity slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `d26f65c` — `batch54: align ios failure cleanup cue`
+  - working tree hiện tại: bẩn đúng theo batch 54 backend cleanup-cue contract slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit iOS batch-54 parity follow-up này; sau đó inspect whether backend error payloads should expose a more explicit local-clear cue field for stricter cross-shell contract symmetry
+  - commit backend batch-54 contract slice này; sau đó inspect whether clients can consume backend unauthorized metadata directly instead of locally hardcoding `local_clear_recommended: false` on failure summaries
 
 ## Batch handoff note
 
