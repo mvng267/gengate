@@ -129,6 +129,7 @@ final class AppSessionStore {
     var pendingProtectedTab: AppTab?
     var emailDraft: String = ""
     var passwordDraft: String = ""
+    var backendBaseURLDraft: String = BackendEnvironment.persistedBaseURLOverride ?? ""
     var statusMessage: String?
     var loginOutcomeSummary: String?
     var localClearOutcomeSummary: String?
@@ -201,6 +202,24 @@ final class AppSessionStore {
         case .authenticated:
             return "Persisted session hợp lệ. Route shell iOS đã có thể mở."
         }
+    }
+
+    var backendBaseURLSummary: String {
+        backendBaseURL?.absoluteString ?? "(invalid backend base URL)"
+    }
+
+    var backendBaseURLSourceSummary: String {
+        if let persisted = BackendEnvironment.persistedBaseURLOverride,
+           let parsed = URL(string: persisted) {
+            return "persisted override: \(parsed.absoluteString)"
+        }
+
+        if let envValue = BackendEnvironment.environmentBaseURLOverride,
+           let parsed = URL(string: envValue) {
+            return "GENGATE_API_BASE_URL: \(parsed.absoluteString)"
+        }
+
+        return "fallback: http://127.0.0.1:8000"
     }
 
     init(
@@ -822,6 +841,27 @@ final class AppSessionStore {
         }
 
         throw SessionError.network("Logout request failed with status \(httpResponse.statusCode).")
+    }
+
+    func updateBackendBaseURLOverride() {
+        do {
+            try BackendEnvironment.savePersistedBaseURLOverride(backendBaseURLDraft)
+            statusMessage = "Đã lưu backend base URL override cho iOS shell. Khởi động lại app để áp dụng toàn bộ tab."
+        } catch {
+            let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            statusMessage = message
+        }
+    }
+
+    func clearBackendBaseURLOverride() {
+        do {
+            try BackendEnvironment.savePersistedBaseURLOverride(nil)
+            backendBaseURLDraft = ""
+            statusMessage = "Đã xóa backend base URL override. iOS shell sẽ quay lại env/fallback sau khi khởi động lại app."
+        } catch {
+            let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            statusMessage = message
+        }
     }
 
     private func makeURL(path: String) throws -> URL {

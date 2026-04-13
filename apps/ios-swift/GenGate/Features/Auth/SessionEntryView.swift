@@ -42,6 +42,8 @@ struct SessionEntryView: View {
                         .background(Color.secondary.opacity(0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                    backendURLControls(sessionStore: sessionStore)
+
                     Button {
                         Task {
                             await sessionStore.signIn()
@@ -151,6 +153,8 @@ struct SessionEntryView: View {
                     Text(userSession.email)
                         .foregroundStyle(.secondary)
 
+                    backendURLControls(sessionStore: sessionStore)
+
                     VStack(alignment: .leading, spacing: 6) {
                         Text("session_id: \(userSession.sessionID)")
                         Text("device_id: \(userSession.deviceID)")
@@ -257,6 +261,48 @@ struct SessionEntryView: View {
         }
         .padding(20)
         .navigationTitle("Session")
+    }
+
+    @ViewBuilder
+    private func backendURLControls(sessionStore: AppSessionStore) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Backend base URL override (optional)")
+                .font(.footnote)
+                .fontWeight(.semibold)
+
+            TextField("https://api.example.com", text: Binding(
+                get: { sessionStore.backendBaseURLDraft },
+                set: { sessionStore.backendBaseURLDraft = $0 }
+            ))
+#if os(iOS)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .keyboardType(.URL)
+#endif
+            .padding(12)
+            .background(Color.secondary.opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+            Text("Current resolved base URL: \(sessionStore.backendBaseURLSummary)")
+                .font(.caption.monospaced())
+                .foregroundStyle(.secondary)
+
+            Text("Source: \(sessionStore.backendBaseURLSourceSummary)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            HStack(spacing: 12) {
+                Button("Save backend URL") {
+                    sessionStore.updateBackendBaseURLOverride()
+                }
+                .buttonStyle(.bordered)
+
+                Button("Clear override") {
+                    sessionStore.clearBackendBaseURLOverride()
+                }
+                .buttonStyle(.bordered)
+            }
+        }
     }
 
     @ViewBuilder
