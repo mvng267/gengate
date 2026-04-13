@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 120
+- Batch: 121
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 120 iOS inbox seam hardening — clear stale read-cursor target message when it disappears from loaded rows
+- Scope: batch 121 iOS inbox seam hardening — clear stale read-cursor target user when it no longer exists in conversation members
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch120 slice)
+  - latest commit: `HEAD` (local batch121 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch121 cho messaging friction tiếp theo (ví dụ clear stale read-cursor target user when not found in conversation members) trong iOS inbox shell
+- Next: mở batch122 cho messaging friction tiếp theo (ví dụ align read-status focus user stale-target guard với member set hiện tại) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -211,6 +211,10 @@
   - successful reload path now validates manual `readCursorTargetMessageIDDraft` against freshly loaded `messageRows`
   - nếu target message thủ công không còn tồn tại trong loaded rows, field tự clear để fallback về newest-message resolution
   - stale target guard giảm lỗi thao tác read-cursor vào message đã biến mất sau delete/reload
+- Batch 121 outcome:
+  - successful reload path now validates manual `readCursorTargetUserIDDraft` against freshly loaded `conversationMembers`
+  - nếu target user thủ công không còn nằm trong members hiện tại, field tự clear để fallback về default resolution (`User A`)
+  - stale user-target guard giảm mismatch giữa read-cursor form và member set thực tế của direct conversation
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -220,7 +224,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, nhập recipient user để load device list (`/auth/devices/{user_id}`), chọn recipient device rồi create/list message device keys, bật `Auto refresh every 3s` để quan sát near-realtime polling, dùng quick presets để chọn read-cursor target user/message (hoặc nhập tay), chạm user row trong `Member read-cursor summary` để sync full cursor form (focus user + cursor target user + optional cursor message), quan sát sync hint `cursor_form_sync: ... · Ns ago` gần form để xác nhận context vừa apply, thử đặt thủ công `Last-read message UUID` thành id cũ rồi delete/reload để verify field tự clear khi id không còn trong loaded rows, sau đó tiếp tục `Update read cursor` / `Mark latest message as read (focus user)` / `Jump focus user to first unread candidate` + verify `last_read_by`, `read_status(<focus_user>)`, `cursor_order_hint`, `unread_behind_cursor`
+  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, send text as User A, create/list attachment metadata, nhập recipient user để load device list (`/auth/devices/{user_id}`), chọn recipient device rồi create/list message device keys, bật `Auto refresh every 3s` để quan sát near-realtime polling, dùng quick presets để chọn read-cursor target user/message (hoặc nhập tay), chạm user row trong `Member read-cursor summary` để sync full cursor form (focus user + cursor target user + optional cursor message), quan sát sync hint `cursor_form_sync: ... · Ns ago` gần form để xác nhận context vừa apply, thử đặt thủ công `Member user UUID` thành user không thuộc thread rồi reload để verify field tự clear về fallback, đồng thời giữ test stale message target guard từ batch120, sau đó tiếp tục `Update read cursor` / `Mark latest message as read (focus user)` / `Jump focus user to first unread candidate` + verify `last_read_by`, `read_status(<focus_user>)`, `cursor_order_hint`, `unread_behind_cursor`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

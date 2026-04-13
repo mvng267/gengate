@@ -42,7 +42,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guard; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -59,7 +59,8 @@ struct InboxPlaceholderView: View {
                         "When direct-thread identity inputs (User A/User B) change, sync hint is cleared immediately to avoid carry-over across threads.",
                         "If thread load fails and conversation state resets, sync hint is also cleared to keep form context truthful.",
                         "If direct conversation member list comes back empty, sync hint is cleared to avoid implying usable read-cursor context.",
-                        "Manual read-cursor target message UUID is now auto-cleared when it no longer exists in loaded message rows (stale target guard)."
+                        "Manual read-cursor target message UUID is now auto-cleared when it no longer exists in loaded message rows (stale target guard).",
+                        "Manual read-cursor target user UUID is now auto-cleared when it no longer belongs to current conversation members."
                     ]
                 )
 
@@ -985,6 +986,12 @@ struct InboxPlaceholderView: View {
             if !manualReadCursorMessageID.isEmpty,
                !messages.contains(where: { $0.id == manualReadCursorMessageID }) {
                 readCursorTargetMessageIDDraft = ""
+            }
+
+            let manualReadCursorUserID = readCursorTargetUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !manualReadCursorUserID.isEmpty,
+               !members.contains(where: { $0.userID == manualReadCursorUserID }) {
+                readCursorTargetUserIDDraft = ""
             }
 
             if members.isEmpty {

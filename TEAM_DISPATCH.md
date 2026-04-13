@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 120
-- Trục công việc: iOS inbox seam hardening — guard stale read-cursor target message khi reload rows.
+- Batch workflow chính thức hiện tại: 121
+- Trục công việc: iOS inbox seam hardening — guard stale read-cursor target user khi reload members.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 120 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: manual read-cursor target message tự clear khi không còn tồn tại trong loaded message rows.
-- Trạng thái: verify_batch120_ios.
+- Scope hiện tại: batch 121 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: manual read-cursor target user tự clear khi không còn thuộc conversation members hiện tại.
+- Trạng thái: verify_batch121_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

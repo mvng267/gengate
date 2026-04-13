@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **120 — iOS inbox stale read-cursor message-target guard slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **121 — iOS inbox stale read-cursor user-target guard slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **120**
-- Scope hiện tại: iOS inbox read-status UX hardening — clear stale manual read-cursor target message when missing from loaded rows.
+- Batch workflow chính thức hiện tại: **121**
+- Scope hiện tại: iOS inbox read-status UX hardening — clear stale manual read-cursor target user when missing from conversation members.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch120 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch121 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch121 cho messaging friction tiếp theo (clear stale read-cursor target user when not found in conversation members) trong iOS inbox shell
+  - mở batch122 cho messaging friction tiếp theo (align read-status focus user stale-target guard với member set hiện tại) trong iOS inbox shell
 
 ## Batch handoff note
 
