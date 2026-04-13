@@ -104,6 +104,7 @@ final class AppSessionStore {
     var emailDraft: String = ""
     var passwordDraft: String = ""
     var statusMessage: String?
+    var logoutOutcomeSummary: String?
     var isRefreshingSession: Bool = false
     var isRegistering: Bool = false
 
@@ -193,6 +194,7 @@ final class AppSessionStore {
         guard let persisted = loadPersistedSession() else {
             authState = .signedOut
             statusMessage = "Chưa có persisted session local để refresh."
+            logoutOutcomeSummary = nil
             return
         }
 
@@ -296,6 +298,7 @@ final class AppSessionStore {
     func signIn() async {
         authState = .signingIn
         statusMessage = nil
+        logoutOutcomeSummary = nil
 
         do {
             let response = try await requestLogin(email: emailDraft)
@@ -332,6 +335,7 @@ final class AppSessionStore {
 
         isRegistering = true
         statusMessage = nil
+        logoutOutcomeSummary = nil
 
         do {
             _ = try await requestRegister(email: normalizedEmail)
@@ -352,6 +356,8 @@ final class AppSessionStore {
         let persistedRefreshToken = loadPersistedSession()?.refreshToken
         var logoutOutcome: LogoutOutcome?
 
+        logoutOutcomeSummary = nil
+
         if let persistedRefreshToken {
             logoutOutcome = try? await requestLogout(refreshToken: persistedRefreshToken)
         }
@@ -363,13 +369,33 @@ final class AppSessionStore {
         if let logoutOutcome {
             if let sessionStatus = logoutOutcome.sessionStatus, !sessionStatus.isEmpty {
                 statusMessage = "Đã logout, backend xác nhận session ở trạng thái \(sessionStatus), và xóa session local trên iOS shell."
+                logoutOutcomeSummary = [
+                    "logout_result: local_cleared",
+                    "backend_detail: \(sessionStatus)",
+                    "message: Đã logout, backend xác nhận session ở trạng thái \(sessionStatus), và xóa session local trên iOS shell."
+                ].joined(separator: "\n")
             } else if let detail = logoutOutcome.detail, !detail.isEmpty {
                 statusMessage = "Backend báo session logout không còn hợp lệ (\(detail)); local session vẫn đã được xóa trên iOS shell."
+                logoutOutcomeSummary = [
+                    "logout_result: local_cleared",
+                    "backend_detail: \(detail)",
+                    "message: Backend báo session logout không còn hợp lệ (\(detail)); local session vẫn đã được xóa trên iOS shell."
+                ].joined(separator: "\n")
             } else {
                 statusMessage = "Đã logout, revoke session hiện tại, và xóa session local trên iOS shell."
+                logoutOutcomeSummary = [
+                    "logout_result: local_cleared",
+                    "backend_detail: none",
+                    "message: Đã logout, revoke session hiện tại, và xóa session local trên iOS shell."
+                ].joined(separator: "\n")
             }
         } else {
             statusMessage = "Đã logout, revoke session hiện tại, và xóa session local trên iOS shell."
+            logoutOutcomeSummary = [
+                "logout_result: local_cleared",
+                "backend_detail: none",
+                "message: Đã logout, revoke session hiện tại, và xóa session local trên iOS shell."
+            ].joined(separator: "\n")
         }
 
         pendingProtectedTab = nil
@@ -391,6 +417,7 @@ final class AppSessionStore {
         pendingProtectedTab = tab
         selectedTab = .session
         statusMessage = "Cần đăng nhập hoặc restore session để mở tab \(tab.displayName)."
+        logoutOutcomeSummary = nil
     }
 
     private func requestRegister(email: String) async throws -> RegisterResponse {

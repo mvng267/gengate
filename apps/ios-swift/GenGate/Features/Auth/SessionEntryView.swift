@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 41 · iOS auth state inspector")
+            Text("Batch 42 · iOS logout outcome signal")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -15,11 +15,11 @@ struct SessionEntryView: View {
             switch sessionStore.authState {
             case .signedOut, .signingIn, .restoring:
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Register + auth state shell")
+                    Text("Register + auth outcome shell")
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Batch 41 ưu tiên thêm persisted-session inspector để nhìn rõ local state trước và sau login, restore, manual refresh, logout, hoặc clear ngay trên màn Session.")
+                    Text("Batch 42 ưu tiên thêm logout outcome surface riêng để nhìn rõ local clear và backend detail sau logout ngay trên màn Session.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -100,6 +100,26 @@ struct SessionEntryView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
+                        Text("Logout outcome")
+                            .font(.footnote)
+                            .fontWeight(.semibold)
+
+                        if let logoutOutcomeSummary = sessionStore.logoutOutcomeSummary {
+                            Text(logoutOutcomeSummary)
+                                .font(.caption.monospaced())
+                                .textSelection(.enabled)
+                        } else {
+                            Text("Chưa có logout attempt nào trong phiên shell hiện tại.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .background(Color.secondary.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Persisted session snapshot")
                             .font(.footnote)
                             .fontWeight(.semibold)
@@ -139,7 +159,7 @@ struct SessionEntryView: View {
                     .font(.footnote.monospaced())
                     .foregroundStyle(.secondary)
 
-                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ còn có persisted-session inspector để nhìn rõ state thật trước/sau restore, refresh, và logout.")
+                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ còn có logout outcome surface riêng để nhìn rõ kết quả revoke/detail sau logout bên cạnh persisted-session inspector.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -171,6 +191,26 @@ struct SessionEntryView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Logout outcome")
+                            .font(.footnote)
+                            .fontWeight(.semibold)
+
+                        if let logoutOutcomeSummary = sessionStore.logoutOutcomeSummary {
+                            Text(logoutOutcomeSummary)
+                                .font(.caption.monospaced())
+                                .textSelection(.enabled)
+                        } else {
+                            Text("Chưa có logout attempt nào trong phiên shell hiện tại.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .background(Color.secondary.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
 
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Persisted session snapshot")

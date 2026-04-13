@@ -89,19 +89,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **42**
-- Scope hiện tại: web logout outcome signal — surface dedicated backend/detail result after logout to make auth loop easier to verify.
+- Scope hiện tại: iOS logout outcome signal — surface dedicated backend/detail result after logout to make auth loop easier to verify.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `f7c50e9` — `batch41: mark workflow complete`
-  - working tree hiện tại: bẩn đúng theo batch 42 web logout outcome signal slice, chưa commit
+  - commit gần nhất đã chốt: `f75e5d3` — `batch42: add web logout outcome signal`
+  - working tree hiện tại: bẩn đúng theo batch 42 iOS logout outcome signal slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó cân nhắc 1 parity slice tương tự trên iOS hoặc chuyển sang auth behavior slice khác có leverage cao
+  - commit slice này; sau đó cân nhắc chốt batch 42 nếu web+iOS logout outcome parity đã đủ, hoặc chọn 1 auth behavior slice hẹp tiếp theo
 
 ## Batch handoff note
 
