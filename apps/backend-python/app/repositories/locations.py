@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
 from app.models.location_share_audience import LocationShareAudience
@@ -21,6 +21,20 @@ class LocationShareAudienceRepository(BaseRepository[LocationShareAudience]):
     def list_by_share_id(self, db: Session, location_share_id: uuid.UUID) -> list[LocationShareAudience]:
         statement = select(LocationShareAudience).where(LocationShareAudience.location_share_id == location_share_id)
         return list(db.scalars(statement).all())
+
+    def get_by_share_and_user(
+        self,
+        db: Session,
+        location_share_id: uuid.UUID,
+        allowed_user_id: uuid.UUID,
+    ) -> LocationShareAudience | None:
+        statement = select(LocationShareAudience).where(
+            and_(
+                LocationShareAudience.location_share_id == location_share_id,
+                LocationShareAudience.allowed_user_id == allowed_user_id,
+            )
+        )
+        return db.scalar(statement)
 
 
 class UserLocationSnapshotRepository(BaseRepository[UserLocationSnapshot]):

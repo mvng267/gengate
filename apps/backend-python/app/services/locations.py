@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.location_share_audience import LocationShareAudience
@@ -59,11 +60,25 @@ class LocationService:
         if allowed_user is None:
             raise ValueError("user_not_found")
 
-        return location_share_audience_repository.create(
+        existing_audience = location_share_audience_repository.get_by_share_and_user(
             db,
             location_share_id=location_share_id,
             allowed_user_id=allowed_user_id,
         )
+        if existing_audience is not None:
+            raise ValueError("audience_exists")
+
+        try:
+            return location_share_audience_repository.create(
+                db,
+                location_share_id=location_share_id,
+                allowed_user_id=allowed_user_id,
+            )
+        except IntegrityError as exc:
+            db.rollback()
+            if self._is_duplicate_audience_constraint(exc):
+                raise ValueError("audience_exists") from exc
+            raise
 
     def list_share_audience(self, db: Session, location_share_id: uuid.UUID) -> list[LocationShareAudience]:
         share = location_share_repository.get(db, location_share_id)
@@ -110,6 +125,22 @@ class LocationService:
 
     def list_snapshots(self, db: Session, owner_user_id: uuid.UUID) -> list[UserLocationSnapshot]:
         return user_location_snapshot_repository.list_by_owner(db, owner_user_id)
+
+    @staticmethod
+    def _is_duplicate_audience_constraint(exc: IntegrityError) -> bool:
+        orig = getattr(exc, "orig", None)
+        diag = getattr(orig, "diag", None)
+        constraint_name = getattr(diag, "constraint_name", None)
+        if constraint_name == "uq_location_share_audience_share_user":
+            return True
+
+        message_detail = str(getattr(diag, "message_detail", "") or "")
+        if "uq_location_share_audience_share_user" in message_detail:
+            return True
+
+        message = str(orig or exc)
+        lowered = message.lower()
+        return "location_share_audience" in lowered and "location_share_id" in lowered and "allowed_user_id" in lowered
 
 
 location_service = LocationService()

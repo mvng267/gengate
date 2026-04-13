@@ -6,15 +6,18 @@ struct LocationPlaceholderView: View {
     @State private var ownerUserIDDraft: String = ""
     @State private var allowedUserIDDraft: String = ""
     @State private var shareIDDraft: String = ""
+    @State private var audienceIDDraft: String = ""
     @State private var snapshotCount: Int?
     @State private var audienceCount: Int?
     @State private var totalShareCount: Int?
     @State private var createdShareID: String?
+    @State private var createdAudienceID: String?
     @State private var fetchError: String?
     @State private var statusMessage: String?
     @State private var isLoading = false
     @State private var isCreatingShare = false
     @State private var isCreatingAudience = false
+    @State private var isRemovingAudience = false
 
     var body: some View {
         ScrollView {
@@ -53,6 +56,15 @@ struct LocationPlaceholderView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
 
                     TextField("Location share UUID (optional)", text: $shareIDDraft)
+#if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+#endif
+                        .padding(12)
+                        .background(Color.secondary.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    TextField("Audience UUID (optional)", text: $audienceIDDraft)
 #if os(iOS)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
@@ -104,9 +116,27 @@ struct LocationPlaceholderView: View {
                     .buttonStyle(.bordered)
                     .disabled(
                         isCreatingAudience ||
+                        isRemovingAudience ||
                         isLoading ||
                         effectiveShareID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
                         allowedUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    )
+
+                    Button {
+                        Task {
+                            await removeAudienceFromShare()
+                        }
+                    } label: {
+                        Text(isRemovingAudience ? "Removing audience..." : "Remove audience from share")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(
+                        isRemovingAudience ||
+                        isCreatingAudience ||
+                        isLoading ||
+                        effectiveShareID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                        effectiveAudienceID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                     )
 
                     if let currentSessionUserID {
@@ -135,6 +165,7 @@ struct LocationPlaceholderView: View {
                     statusRow(label: "owner_user_id", value: ownerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "(not set)" : ownerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines))
                     statusRow(label: "allowed_user_id", value: allowedUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "(optional/not set)" : allowedUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines))
                     statusRow(label: "active_share_id", value: effectiveShareID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "(not set)" : effectiveShareID)
+                    statusRow(label: "active_audience_id", value: effectiveAudienceID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "(not set)" : effectiveAudienceID)
                     statusRow(label: "snapshot_count", value: snapshotCount.map(String.init) ?? "not loaded")
                     statusRow(label: "total_share_count", value: totalShareCount.map(String.init) ?? "not loaded")
                     statusRow(label: "audience_count", value: audienceCount.map(String.init) ?? (effectiveShareID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "share UUID not provided/created" : "not loaded"))
@@ -163,6 +194,15 @@ struct LocationPlaceholderView: View {
         }
 
         return createdShareID ?? ""
+    }
+
+    private var effectiveAudienceID: String {
+        let trimmedManualAudienceID = audienceIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedManualAudienceID.isEmpty {
+            return trimmedManualAudienceID
+        }
+
+        return createdAudienceID ?? ""
     }
 
     private func prefillFromCurrentSessionUserIfNeeded() {
@@ -235,6 +275,8 @@ struct LocationPlaceholderView: View {
             let createdShare = try await LocationStatusAPIClient().createShare(ownerUserID: trimmedOwnerID)
             createdShareID = createdShare.id
             shareIDDraft = createdShare.id
+            createdAudienceID = nil
+            audienceIDDraft = ""
             statusMessage = "Created location share \(createdShare.id). Reloading status..."
             await loadLocationStatus()
         } catch {
@@ -262,14 +304,50 @@ struct LocationPlaceholderView: View {
         fetchError = nil
 
         do {
-            _ = try await LocationStatusAPIClient().createShareAudience(shareID: trimmedShareID, allowedUserID: trimmedAllowedUserID)
-            statusMessage = "Added audience user to share \(trimmedShareID). Reloading status..."
+            let createdAudience = try await LocationStatusAPIClient().createShareAudience(shareID: trimmedShareID, allowedUserID: trimmedAllowedUserID)
+            createdAudienceID = createdAudience.id
+            audienceIDDraft = createdAudience.id
+            statusMessage = "Added audience \(createdAudience.id) to share \(trimmedShareID). Reloading status..."
             await loadLocationStatus()
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
 
         isCreatingAudience = false
+    }
+
+    private func removeAudienceFromShare() async {
+        let trimmedShareID = effectiveShareID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedAudienceID = effectiveAudienceID.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedShareID.isEmpty else {
+            fetchError = "Cần share UUID để xóa audience."
+            return
+        }
+
+        guard !trimmedAudienceID.isEmpty else {
+            fetchError = "Cần audience UUID để xóa khỏi share."
+            return
+        }
+
+        isRemovingAudience = true
+        fetchError = nil
+
+        do {
+            try await LocationStatusAPIClient().removeShareAudience(shareID: trimmedShareID, audienceID: trimmedAudienceID)
+            if createdAudienceID == trimmedAudienceID {
+                createdAudienceID = nil
+            }
+            if audienceIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == trimmedAudienceID {
+                audienceIDDraft = ""
+            }
+            statusMessage = "Removed audience \(trimmedAudienceID) from share \(trimmedShareID). Reloading status..."
+            await loadLocationStatus()
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        isRemovingAudience = false
     }
 
     private func statusRow(label: String, value: String) -> some View {
@@ -326,6 +404,10 @@ private struct LocationStatusAPIClient {
         let id: String
         let location_share_id: String
         let allowed_user_id: String
+    }
+
+    private struct ShareAudienceDeleteResponse: Decodable {
+        let status: String
     }
 
     private struct BackendErrorPayload: Decodable {
@@ -418,6 +500,24 @@ private struct LocationStatusAPIClient {
                 locationShareID: payload.location_share_id,
                 allowedUserID: payload.allowed_user_id
             )
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func removeShareAudience(shareID: String, audienceID: String) async throws {
+        var request = URLRequest(url: try makeURL(path: "/locations/shares/\(shareID)/audience/\(audienceID)"))
+        request.httpMethod = "DELETE"
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 200 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Location share audience remove failed"))
+        }
+
+        do {
+            _ = try JSONDecoder().decode(ShareAudienceDeleteResponse.self, from: data)
         } catch {
             throw APIError.invalidResponse
         }

@@ -60,7 +60,9 @@ def create_location_share_audience(
     try:
         audience = location_service.create_share_audience(db, share_id, payload.allowed_user_id)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+        code = str(exc)
+        status_code = status.HTTP_409_CONFLICT if code == "audience_exists" else status.HTTP_404_NOT_FOUND
+        raise HTTPException(status_code=status_code, detail=code)
     return LocationShareAudienceResponse.model_validate(audience)
 
 
