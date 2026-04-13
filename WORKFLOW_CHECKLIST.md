@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **54**
-- Scope hiện tại: failure cleanup cue parity — backend/web/iOS now expose explicit local-clear cue around invalid or cleared session outcomes, and web consumes backend 401 metadata in failure summaries.
-- Trạng thái hiện tại: **verify**
+- Scope hiện tại: failure cleanup cue parity — backend/web/iOS now expose explicit local-clear cue around invalid or cleared session outcomes, and both web + iOS consume backend 401 metadata in failure summaries.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/backend-python/app/main.py`
   - `apps/backend-python/app/modules/auth/router.py`
@@ -104,12 +104,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `bf0583e` — `batch54: preserve auth cleanup cue metadata`
-  - working tree hiện tại: bẩn đúng theo batch 54 web backend-metadata consumption slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `6dd83ce` — `batch54: consume auth cleanup cue metadata`
+  - working tree hiện tại: bẩn đúng theo batch 54 iOS metadata-consumption slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit web batch-54 metadata-consumption slice này; sau đó inspect whether iOS auth client should also consume backend unauthorized metadata directly instead of keeping local fallback cue logic
+  - commit iOS batch-54 metadata-consumption slice này; sau đó do closure-only run to clean artifacts and mark batch 54 fully closed if repo has no remaining real code seam for this batch
 
 ## Batch handoff note
 

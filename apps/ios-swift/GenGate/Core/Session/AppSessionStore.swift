@@ -74,6 +74,13 @@ final class AppSessionStore {
         let localClearRecommended: Bool
     }
 
+    private struct BackendErrorPayload {
+        let code: String
+        let message: String
+        let backendDetail: String?
+        let localClearRecommended: Bool?
+    }
+
     private struct StoredSession: Codable {
         let userSession: UserSession
     }
@@ -81,7 +88,7 @@ final class AppSessionStore {
     private enum SessionError: LocalizedError {
         case invalidBaseURL
         case invalidResponse
-        case unauthorized(detail: String?)
+        case unauthorized(detail: String?, localClearRecommended: Bool?)
         case loginRejected(detail: String?)
         case registerRejected(detail: String?)
         case network(String)
@@ -92,7 +99,7 @@ final class AppSessionStore {
                 return "Thiếu backend base URL hợp lệ cho auth shell."
             case .invalidResponse:
                 return "Backend auth/session response thiếu field cần thiết."
-            case let .unauthorized(detail):
+            case let .unauthorized(detail, _):
                 if let detail, !detail.isEmpty {
                     return "Session đã hết hạn hoặc bị revoke (\(detail)). Local session đã được xóa; hãy đăng nhập lại."
                 }
@@ -274,13 +281,15 @@ final class AppSessionStore {
             authState = .signedOut
             selectedTab = .session
             if let sessionError = error as? SessionError,
-               case let .unauthorized(detail) = sessionError {
+               case let .unauthorized(detail, localClearRecommended) = sessionError {
+                let localClearValue = (localClearRecommended ?? false) ? "true" : "false"
+                let localClearLine = "local_clear_recommended: \(localClearValue)"
                 if let detail, !detail.isEmpty {
                     statusMessage = "Session đã hết hạn hoặc bị revoke (\(detail)). Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
                     refreshOutcomeSummary = [
                         "refresh_result: failed_local_cleared",
                         "backend_detail: \(detail)",
-                        "local_clear_recommended: false",
+                        localClearLine,
                         "message: Session đã hết hạn hoặc bị revoke (\(detail)). Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
                     ].joined(separator: "\n")
                 } else {
@@ -288,7 +297,7 @@ final class AppSessionStore {
                     refreshOutcomeSummary = [
                         "refresh_result: failed_local_cleared",
                         "backend_detail: none",
-                        "local_clear_recommended: false",
+                        localClearLine,
                         "message: Session đã hết hạn hoặc bị revoke. Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
                     ].joined(separator: "\n")
                 }
@@ -360,13 +369,15 @@ final class AppSessionStore {
             authState = .signedOut
             selectedTab = .session
             if let sessionError = error as? SessionError,
-               case let .unauthorized(detail) = sessionError {
+               case let .unauthorized(detail, localClearRecommended) = sessionError {
+                let localClearValue = (localClearRecommended ?? false) ? "true" : "false"
+                let localClearLine = "local_clear_recommended: \(localClearValue)"
                 if let detail, !detail.isEmpty {
                     statusMessage = "Session đã hết hạn hoặc bị revoke (\(detail)). Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
                     restoreOutcomeSummary = [
                         "restore_result: failed_local_cleared",
                         "backend_detail: \(detail)",
-                        "local_clear_recommended: false",
+                        localClearLine,
                         "message: Session đã hết hạn hoặc bị revoke (\(detail)). Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
                     ].joined(separator: "\n")
                 } else {
@@ -374,7 +385,7 @@ final class AppSessionStore {
                     restoreOutcomeSummary = [
                         "restore_result: failed_local_cleared",
                         "backend_detail: none",
-                        "local_clear_recommended: false",
+                        localClearLine,
                         "message: Session đã hết hạn hoặc bị revoke. Local session đã được xóa; hãy đăng nhập lại để tạo session mới."
                     ].joined(separator: "\n")
                 }
@@ -678,13 +689,38 @@ final class AppSessionStore {
         }
     }
 
-    private func readErrorDetail(from data: Data) -> String? {
-        guard let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let detail = object["detail"] as? String,
-              !detail.isEmpty else {
+    private func readBackendErrorPayload(from data: Data) -> BackendErrorPayload? {
+        guard let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return nil
         }
-        return detail
+
+        if let error = object["error"] as? [String: Any],
+           let code = error["code"] as? String,
+           let message = error["message"] as? String {
+            return BackendErrorPayload(
+                code: code,
+                message: message,
+                backendDetail: error["backend_detail"] as? String,
+                localClearRecommended: error["local_clear_recommended"] as? Bool
+            )
+        }
+
+        if let detail = object["detail"] as? String,
+           !detail.isEmpty {
+            return BackendErrorPayload(
+                code: detail,
+                message: detail,
+                backendDetail: detail,
+                localClearRecommended: nil
+            )
+        }
+
+        return nil
+    }
+
+    private func readErrorDetail(from data: Data) -> String? {
+        let payload = readBackendErrorPayload(from: data)
+        return payload?.backendDetail ?? payload?.code
     }
 
     private func requestRefreshSession(refreshToken: String) async throws -> LoginResponse {
@@ -702,7 +738,11 @@ final class AppSessionStore {
         }
 
         if httpResponse.statusCode == 401 {
-            throw SessionError.unauthorized(detail: readErrorDetail(from: data))
+            let errorPayload = readBackendErrorPayload(from: data)
+            throw SessionError.unauthorized(
+                detail: errorPayload?.backendDetail ?? errorPayload?.code,
+                localClearRecommended: errorPayload?.localClearRecommended
+            )
         }
 
         guard httpResponse.statusCode == 200 else {
@@ -731,7 +771,11 @@ final class AppSessionStore {
         }
 
         if httpResponse.statusCode == 401 {
-            throw SessionError.unauthorized(detail: readErrorDetail(from: data))
+            let errorPayload = readBackendErrorPayload(from: data)
+            throw SessionError.unauthorized(
+                detail: errorPayload?.backendDetail ?? errorPayload?.code,
+                localClearRecommended: errorPayload?.localClearRecommended
+            )
         }
 
         guard httpResponse.statusCode == 200 else {
@@ -769,10 +813,11 @@ final class AppSessionStore {
         }
 
         if httpResponse.statusCode == 401 {
+            let errorPayload = readBackendErrorPayload(from: data)
             return LogoutOutcome(
                 sessionStatus: nil,
-                detail: readErrorDetail(from: data),
-                localClearRecommended: true
+                detail: errorPayload?.backendDetail ?? errorPayload?.code,
+                localClearRecommended: errorPayload?.localClearRecommended ?? true
             )
         }
 
