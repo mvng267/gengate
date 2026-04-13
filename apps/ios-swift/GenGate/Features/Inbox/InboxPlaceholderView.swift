@@ -40,12 +40,13 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
                         "You can now call `PATCH /conversations/{id}/members/{user_id}/read-cursor` directly from iOS to move read cursor and observe `last_read_by` + focused `read_status(user)` + member cursor summary in-shell.",
-                        "Quick action `Mark latest message as read (focus user)` helps testers advance read cursor to newest loaded row with one tap."
+                        "Quick action `Mark latest message as read (focus user)` helps testers advance read cursor to newest loaded row with one tap.",
+                        "Quick preset buttons now let testers pick member/message targets without copy-pasting UUIDs manually."
                     ]
                 )
 
@@ -288,6 +289,34 @@ struct InboxPlaceholderView: View {
                             .font(.subheadline)
                             .fontWeight(.semibold)
 
+                        if !conversationMembers.isEmpty {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Quick member presets")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+
+                                ForEach(conversationMembers) { member in
+                                    Button {
+                                        readCursorTargetUserIDDraft = member.userID
+                                    } label: {
+                                        HStack {
+                                            Text(member.userID)
+                                                .font(.caption.monospaced())
+                                                .lineLimit(1)
+                                            Spacer()
+                                            if member.userID == resolvedReadCursorTargetUserID {
+                                                Text("selected")
+                                                    .font(.caption2)
+                                                    .foregroundStyle(.green)
+                                            }
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    }
+                                    .buttonStyle(.bordered)
+                                }
+                            }
+                        }
+
                         TextField("Member user UUID (defaults to User A)", text: $readCursorTargetUserIDDraft)
 #if os(iOS)
                             .textInputAutocapitalization(.never)
@@ -296,6 +325,32 @@ struct InboxPlaceholderView: View {
                             .padding(12)
                             .background(Color.secondary.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        if !messageRows.isEmpty {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Quick message presets")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+
+                                ForEach(messageRows.suffix(3).reversed()) { message in
+                                    Button {
+                                        readCursorTargetMessageIDDraft = message.id
+                                    } label: {
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(message.id)
+                                                .font(.caption.monospaced())
+                                                .lineLimit(1)
+                                            Text(message.payloadText)
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                                .lineLimit(1)
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    }
+                                    .buttonStyle(.bordered)
+                                }
+                            }
+                        }
 
                         TextField("Last-read message UUID (optional, defaults to newest loaded)", text: $readCursorTargetMessageIDDraft)
 #if os(iOS)
