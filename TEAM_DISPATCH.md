@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 130
-- Trục công việc: iOS inbox seam hardening — event-timestamp helper cho recipient-device auto reload/skip.
+- Batch workflow chính thức hiện tại: 131
+- Trục công việc: iOS inbox seam hardening — cap visibility window cho recipient-device event timestamps.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 130 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: thêm tiny timestamp helper cho auto-reload và rate-limit skip events ở recipient-device section.
-- Trạng thái: verify_batch130_ios.
+- Scope hiện tại: batch 131 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: timestamp helper cho auto-reload/skip chỉ hiện trong window ngắn (<=20s) để giảm UI noise.
+- Trạng thái: verify_batch131_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

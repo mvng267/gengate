@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 130
+- Batch: 131
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 130 iOS inbox seam hardening — expose tiny timestamp helper for recipient-device auto-reload/skip events
+- Scope: batch 131 iOS inbox seam hardening — cap recipient-device event timestamp helper visibility window to reduce long-run UI noise
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch130 slice)
+  - latest commit: `HEAD` (local batch131 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch131 cho messaging friction tiếp theo (ví dụ cap timestamp helper visibility window để tránh noise khi session chạy dài) trong iOS inbox shell
+- Next: mở batch132 cho messaging friction tiếp theo (ví dụ thêm tiny helper text khi timestamp debug hints tự ẩn để tester hiểu đây là behavior chủ động, không phải lỗi) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -251,6 +251,10 @@
   - recipient-device section now shows tiny debug timestamps: `Auto recipient-device reload: Ns ago` and `Rate-limit skip event: Ns ago`
   - tester có thể quan sát nhanh event recency để phân biệt auto-fetch đã chạy hay vừa bị guard skip
   - timestamp helper bổ sung khả năng debug hành vi debounce/rate-limit mà không cần log nội bộ
+- Batch 131 outcome:
+  - debug timestamp hints cho recipient-device events giờ chỉ hiển thị trong visibility window ngắn (<=20s) rồi tự ẩn
+  - giảm UI noise khi tab mở lâu nhưng vẫn giữ đủ thời gian cho tester xác nhận auto-reload/skip recency
+  - hành vi bounded visibility áp dụng đồng đều cho cả auto-reload timestamp và rate-limit skip timestamp
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -260,7 +264,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve direct conversation, nhập/paste `Recipient user UUID` để trigger auto reload và verify dòng `Auto recipient-device reload: Ns ago`; đổi nhanh recipient user để kích hoạt skip và verify `Rate-limit skip event: Ns ago`; bấm `Reload recipient devices` rồi verify timestamp/hint state cập nhật đúng trước khi `Create message-device key`
+  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve direct conversation, nhập/paste `Recipient user UUID` để trigger auto reload và verify dòng `Auto recipient-device reload: Ns ago`; đổi nhanh recipient user để kích hoạt skip và verify `Rate-limit skip event: Ns ago`; chờ >20s để xác nhận hai timestamp hint tự ẩn đúng thiết kế; bấm `Reload recipient devices` và tiếp tục `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

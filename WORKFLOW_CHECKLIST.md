@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **130 — iOS inbox recipient-device event-timestamp helper slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **131 — iOS inbox recipient-device timestamp-visibility cap slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **130**
-- Scope hiện tại: iOS inbox read-status UX hardening — tiny timestamp helper cho recipient-device auto reload / skip events.
+- Batch workflow chính thức hiện tại: **131**
+- Scope hiện tại: iOS inbox read-status UX hardening — cap visibility window cho recipient-device event timestamp helpers.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch130 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch131 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch131 cho messaging friction tiếp theo (cap visibility window cho timestamp helper để giảm UI noise) trong iOS inbox shell
+  - mở batch132 cho messaging friction tiếp theo (tiny helper text khi timestamp hints tự ẩn) trong iOS inbox shell
 
 ## Batch handoff note
 

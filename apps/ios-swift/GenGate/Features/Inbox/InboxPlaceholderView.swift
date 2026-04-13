@@ -48,7 +48,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + tiny event timestamps; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -74,7 +74,7 @@ struct InboxPlaceholderView: View {
                         "Recipient device list now auto-reloads (debounced + rate-limited) when `Recipient user UUID` changes, reducing manual reload friction and burst calls in device-key flow.",
                         "When auto reload is skipped by rate-limit guard, a short helper hint appears so testers know why options are not refreshed yet.",
                         "Manual `Reload recipient devices` now explicitly clears skip-hint state before/after reload so UI reflects freshest fetch path.",
-                        "Recipient-device section now surfaces tiny event timestamps for latest auto-reload and rate-limit skip events to help human testers debug behavior quickly."
+                        "Recipient-device section now surfaces tiny event timestamps for latest auto-reload and rate-limit skip events (bounded visibility window) to help human testers debug behavior quickly without long-run UI noise."
                     ]
                 )
 
@@ -330,17 +330,21 @@ struct InboxPlaceholderView: View {
                         }
 
                         if let lastRecipientDevicesAutoReloadAt {
-                            let autoReloadElapsed = Int(Date().timeIntervalSince(lastRecipientDevicesAutoReloadAt))
-                            Text("Auto recipient-device reload: \(autoReloadElapsed)s ago")
-                                .font(.caption2.monospaced())
-                                .foregroundStyle(.secondary)
+                            let autoReloadElapsed = Date().timeIntervalSince(lastRecipientDevicesAutoReloadAt)
+                            if autoReloadElapsed <= 20 {
+                                Text("Auto recipient-device reload: \(Int(autoReloadElapsed))s ago")
+                                    .font(.caption2.monospaced())
+                                    .foregroundStyle(.secondary)
+                            }
                         }
 
                         if let lastRecipientDevicesRateLimitSkipAt {
-                            let skipElapsedSeconds = Int(Date().timeIntervalSince(lastRecipientDevicesRateLimitSkipAt))
-                            Text("Rate-limit skip event: \(skipElapsedSeconds)s ago")
-                                .font(.caption2.monospaced())
-                                .foregroundStyle(.secondary)
+                            let skipElapsedSeconds = Date().timeIntervalSince(lastRecipientDevicesRateLimitSkipAt)
+                            if skipElapsedSeconds <= 20 {
+                                Text("Rate-limit skip event: \(Int(skipElapsedSeconds))s ago")
+                                    .font(.caption2.monospaced())
+                                    .foregroundStyle(.secondary)
+                            }
                         }
 
                         TextField("Wrapped message key blob", text: $wrappedMessageKeyBlobDraft)
