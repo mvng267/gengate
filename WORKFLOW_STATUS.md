@@ -2,21 +2,24 @@
 
 - Batch: 41
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 41 iOS auth state inspector — expose current persisted-session snapshot directly in Session screen
-- Status: verify
+- Scope: batch 41 auth state inspector complete — web + iOS expose persisted-session snapshot directly for easier auth-loop inspection
+- Status: complete
 - Files:
+  - apps/web-nextjs/app/login/page.tsx
   - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
+  - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `288f57a` — `batch41: add web auth state inspector`
-  - working tree: bẩn đúng theo batch 41 iOS auth state inspector slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `aa60df0` — `batch41: add ios auth state inspector`
+  - working tree: sạch
 - Blocker: none
-- Next: commit slice này; sau đó cân nhắc chốt batch 41 nếu web+iOS state-visibility parity đã đủ, hoặc chọn 1 auth E2E behavior slice hẹp kế tiếp có leverage cao hơn
+- Next: mở batch 42 với 1 auth E2E behavior slice hẹp có leverage cao hơn; ưu tiên thêm 1 state transition cue hoặc action outcome surface giúp validate flow thật chặt hơn thay vì chỉ visibility snapshot
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 41 update:
-  - iOS Session screen nay hiển thị trực tiếp persisted-session snapshot trong local storage
-  - Inspector này dùng cùng stored session data hiện có để quan sát state thật sau login, restore, refresh, logout, và clear local state
+- Batch 41 outcome:
+  - Web login shell nay hiển thị trực tiếp persisted-session snapshot và sync nó sau login, restore, refresh, logout, clear
+  - iOS Session screen nay cũng hiển thị persisted-session snapshot từ local store để quan sát cùng auth loop tương ứng
+  - Batch 41 đã nâng auth shell visibility lên mức dễ kiểm tra state thật hơn trên cả web và iOS

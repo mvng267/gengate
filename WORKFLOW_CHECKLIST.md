@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **đang làm batch 41**.
+- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **batch 41 đã complete**.
 
 ## Reporting hard rule
 
@@ -89,33 +89,34 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **41**
-- Scope hiện tại: iOS auth state inspector — expose current persisted-session snapshot directly in Session screen.
-- Trạng thái hiện tại: **verify**
+- Scope hiện tại: auth state inspector complete — web + iOS expose persisted-session snapshot directly for easier auth-loop inspection.
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
+  - `apps/web-nextjs/app/login/page.tsx`
   - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
   - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `288f57a` — `batch41: add web auth state inspector`
-  - working tree hiện tại: bẩn đúng theo batch 41 iOS auth state inspector slice, chưa commit
+  - commit gần nhất đã chốt: `aa60df0` — `batch41: add ios auth state inspector`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit slice này; sau đó cân nhắc chốt batch 41 nếu web+iOS state-visibility parity đã đủ, hoặc chọn 1 auth E2E behavior slice hẹp kế tiếp có leverage cao hơn
+  - mở batch 42 với 1 auth E2E behavior slice hẹp có leverage cao hơn; ưu tiên thêm 1 state transition cue hoặc action outcome surface giúp validate flow thật chặt hơn thay vì chỉ visibility snapshot
 
 ## Batch handoff note
 
-- Batch vừa xong: **40**
+- Batch vừa xong: **41**
 - Commit cuối đã chốt:
-  - `94d56b4` — `batch40: add web auth e2e shell`
-  - `bb7f576` — `batch40: align ios auth e2e shell`
-  - `f7de6e5` — `batch40: mark workflow complete`
+  - `288f57a` — `batch41: add web auth state inspector`
+  - `aa60df0` — `batch41: add ios auth state inspector`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - chưa có blocker code; batch 41 đang thêm auth E2E state visibility để flow thật dễ kiểm tra hơn
-- Batch kế tiếp: **41**
-- Scope hẹp đầu tiên của batch 41:
-  - thêm 1 surface quan sát state/session rõ hơn trên web hoặc iOS để auth E2E flow hiện trạng thái thật trước/sau restore/refresh/logout dễ kiểm tra hơn
+  - chưa có blocker code; next leverage nên là 1 auth E2E behavior slice có signal mạnh hơn, không chỉ visibility snapshot
+- Batch kế tiếp: **42**
+- Scope hẹp đầu tiên của batch 42:
+  - thêm 1 state transition cue hoặc action outcome surface trên web hoặc iOS để login/restore/refresh/logout path cho tín hiệu verify mạnh hơn
