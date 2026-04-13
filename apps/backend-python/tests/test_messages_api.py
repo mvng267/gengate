@@ -333,6 +333,25 @@ def test_batch21_message_create_reuses_sender_device_and_attachment_missing_pare
         "error": {"code": "message_not_found", "message": "message_not_found"}
     }
 
+    create_attachment_on_deleted = client.post(
+        f"/messages/{first_message_id}/attachments",
+        json={
+            "attachment_type": "image",
+            "encrypted_attachment_blob": "batch21-deleted-message",
+            "storage_key": "attachments/batch21/deleted.enc",
+        },
+    )
+    assert create_attachment_on_deleted.status_code == 404
+    assert create_attachment_on_deleted.json() == {
+        "error": {"code": "message_not_found", "message": "message_not_found"}
+    }
+
+    list_attachment_on_deleted = client.get(f"/messages/{first_message_id}/attachments")
+    assert list_attachment_on_deleted.status_code == 404
+    assert list_attachment_on_deleted.json() == {
+        "error": {"code": "message_not_found", "message": "message_not_found"}
+    }
+
     missing_create_response = client.post(
         f"/messages/{uuid.uuid4()}/attachments",
         json={

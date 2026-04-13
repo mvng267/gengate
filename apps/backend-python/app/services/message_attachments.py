@@ -17,7 +17,7 @@ class MessageAttachmentService:
         storage_key: str | None,
     ) -> MessageAttachment:
         message = message_repository.get(db, message_id)
-        if message is None:
+        if message is None or message.deleted_at is not None:
             raise ValueError("message_not_found")
 
         return message_attachment_repository.create(
@@ -30,7 +30,7 @@ class MessageAttachmentService:
 
     def list_attachments(self, db: Session, message_id: uuid.UUID) -> list[MessageAttachment]:
         message = message_repository.get(db, message_id)
-        if message is None:
+        if message is None or message.deleted_at is not None:
             raise ValueError("message_not_found")
         return message_attachment_repository.list_by_message(db, message_id)
 
