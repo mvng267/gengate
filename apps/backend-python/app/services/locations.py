@@ -92,6 +92,10 @@ class LocationService:
         location_share_id: uuid.UUID,
         audience_id: uuid.UUID,
     ) -> LocationShareAudience:
+        share = location_share_repository.get(db, location_share_id)
+        if share is None:
+            raise ValueError("share_not_found")
+
         audience = location_share_audience_repository.get(db, audience_id)
         if audience is None:
             raise ValueError("audience_not_found")

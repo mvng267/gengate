@@ -160,4 +160,10 @@ def test_location_share_audience_remove_flow_and_duplicate_guard() -> None:
         "error": {"code": "audience_not_found", "message": "audience_not_found"}
     }
 
+    missing_share_remove_response = client.delete(f"/locations/shares/{uuid.uuid4()}/audience/{audience_id}")
+    assert missing_share_remove_response.status_code == 404
+    assert missing_share_remove_response.json() == {
+        "error": {"code": "share_not_found", "message": "share_not_found"}
+    }
+
     app.dependency_overrides.clear()
