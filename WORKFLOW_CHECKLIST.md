@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 53**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đã complete batch 53**.
 
 ## Reporting hard rule
 
@@ -89,32 +89,33 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **53**
-- Scope hiện tại: iOS restore outcome parity — restore summary now surfaces local clear recommendation alongside backend detail.
+- Scope hiện tại: batch 53 closeout — artifact cleanup + truthful workflow finish marker after cross-shell restore outcome parity.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `WORKFLOW_STATUS.md`
+  - `WORKFLOW_CHECKLIST.md`
 - Test-verify:
-  - `cd apps/ios-swift && swift build` → ✅ pass
+  - web: `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - iOS: `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `d5dfaee` — `batch53: expose restore cleanup cue`
-  - working tree hiện tại: bẩn đúng theo batch 53 iOS restore-summary parity slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `90f82b0` — `batch53: align ios restore cleanup cue`
+  - working tree hiện tại: sạch sau khi dọn `apps/ios-swift/.build/` và `apps/web-nextjs/tsconfig.tsbuildinfo`
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - chốt batch 53 bằng commit iOS + workflow; sau đó clean closeout nếu chỉ còn artifact, rồi chọn seam auth/session end-to-end kế tiếp cho batch 54
+  - mở batch 54 với 1 seam auth/session end-to-end mới; ưu tiên logout/refresh failure outcome parity nếu còn cue chưa thẳng hàng giữa backend và shell
 
 ## Batch handoff note
 
-- Batch vừa xong: **52**
+- Batch vừa xong: **53**
 - Commit cuối đã chốt:
-  - `0470cde` — `batch52: expose persisted session detail`
-  - `fe1ae33` — `batch52: align ios persisted session detail`
-  - `ceaf1c0` — `batch52: mark workflow complete`
+  - `d5dfaee` — `batch53: expose restore cleanup cue`
+  - `90f82b0` — `batch53: align ios restore cleanup cue`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - không có blocker code trực tiếp; batch 52 đã khép kín ở mức persisted-session preview parity giữa web và iOS shell
-- Batch kế tiếp: **53**
-- Scope hẹp đầu tiên của batch 53:
-  - expose `local_clear_recommended` trong web restore outcome summary để restore cue thẳng hàng hơn với refresh/persisted-session framing
+  - không có blocker code trực tiếp; batch 53 đã khép kín ở mức restore outcome parity giữa web và iOS shell
+- Batch kế tiếp: **54**
+- Scope hẹp đầu tiên của batch 54:
+  - ưu tiên logout/refresh failure outcome parity giữa backend và web/iOS shell ở nơi summary/message/detail cue còn lệch nhau

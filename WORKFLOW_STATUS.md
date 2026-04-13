@@ -13,12 +13,12 @@
   - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest committed slice before this update: `d5dfaee` — `batch53: expose restore cleanup cue`
-  - working tree: bẩn đúng theo batch 53 iOS restore-summary parity slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `90f82b0` — `batch53: align ios restore cleanup cue`
+  - working tree: sạch
 - Blocker: none
-- Next: chốt batch 53 bằng commit iOS + workflow; sau đó clean closeout nếu chỉ còn artifact, rồi chọn seam auth/session end-to-end kế tiếp cho batch 54
+- Next: mở batch 54 với 1 seam auth/session end-to-end mới; ưu tiên logout/refresh failure outcome parity nếu còn cue chưa thẳng hàng giữa backend và shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 53 update:
-  - web restore outcome preview nay hiện `local_clear_recommended`
+- Batch 53 closeout:
+  - web restore outcome summary nay hiện `local_clear_recommended`
   - iOS restore outcome summary nay hiện `local_clear_recommended`
-  - restore summary parity giữa web và iOS nay đã align ở mức cleanup cue
+  - artifact verify output đã được dọn; batch 53 hiện complete sạch
