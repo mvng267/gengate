@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **142 — iOS inbox compact reset-reason helper-note slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **143 — iOS inbox readable short-caption helper-note mapping slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **142**
-- Scope hiện tại: iOS inbox read-status UX hardening — dùng compact reset-reason label (`non_member_after_switch`) để helper note gọn hơn trên iPhone màn hẹp.
+- Batch workflow chính thức hiện tại: **143**
+- Scope hiện tại: iOS inbox read-status UX hardening — map compact reset-reason label sang human-readable short caption trong helper note.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch142 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch143 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch143 cho messaging friction tiếp theo (map compact reason label sang human-readable short caption trong helper note để giữ gọn nhưng vẫn dễ hiểu cho tester) trong iOS inbox shell
+  - mở batch144 cho messaging friction tiếp theo (thêm unit-like local helper coverage trong iOS view logic cho reason-caption mapping fallback để tránh regress string mismatch) trong iOS inbox shell
 
 ## Batch handoff note
 

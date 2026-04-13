@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 142
+- Batch: 143
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 142 iOS inbox seam hardening — dùng compact reason label cho non-member reset helper note để giảm line-wrap noise trên iPhone màn hình nhỏ
+- Scope: batch 143 iOS inbox seam hardening — map compact reason label sang human-readable short caption trong non-member reset helper note
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch142 slice)
+  - latest commit: `HEAD` (local batch143 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch143 cho messaging friction tiếp theo (map compact reason label sang human-readable short caption trong helper note để giữ gọn nhưng vẫn dễ hiểu cho tester) trong iOS inbox shell
+- Next: mở batch144 cho messaging friction tiếp theo (thêm unit-like local helper coverage trong iOS view logic cho reason-caption mapping fallback để tránh regress string mismatch) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -299,6 +299,10 @@
   - non-member reset reason string được chuyển sang compact label `non_member_after_switch` để helper note ngắn hơn trên màn iPhone hẹp
   - helper note vẫn giữ recipient short-id + elapsed timestamp nên debug context không bị mất thông tin chính
   - update status/bullet copy đồng bộ với compact reason behavior mới để docs/UI không lệch
+- Batch 143 outcome:
+  - thêm helper `recipientResetReasonCaption(_:)` để map compact label sang caption ngắn dễ hiểu cho người test (`non_member_after_switch` → `non-member after switch`)
+  - `recipientDeviceContextResetHintText` nay render caption đã map thay vì raw label, giữ UI dễ đọc mà không làm note dài trở lại
+  - fallback mặc định vẫn trả `reason` gốc cho label chưa map để tránh mất thông tin khi thêm reason mới sau này
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -308,7 +312,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, load direct thread A-B, set recipient user/device to load options; sau đó load direct thread C-D thành công (khác member set) và verify recipient user/device/options bị auto-clear khi recipient user cũ không thuộc member set mới + xuất hiện inline reset helper note với compact reason `non_member_after_switch` kèm recipient short id; tiếp theo nhập recipient user mới hoặc để options refill và verify note chỉ còn hiển thị khi recipient context vẫn rỗng; cuối cùng `Reload recipient devices` + `Create message-device key`
+  - iOS Inbox path: open Inbox tab, load direct thread A-B, set recipient user/device to load options; sau đó load direct thread C-D thành công (khác member set) và verify recipient user/device/options bị auto-clear khi recipient user cũ không thuộc member set mới + xuất hiện inline reset helper note với caption ngắn `non-member after switch` kèm recipient short id; tiếp theo nhập recipient user mới hoặc để options refill và verify note chỉ còn hiển thị khi recipient context vẫn rỗng; cuối cùng `Reload recipient devices` + `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts
