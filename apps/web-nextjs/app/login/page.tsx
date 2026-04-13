@@ -62,6 +62,7 @@ export default function LoginPage() {
   const [statusTone, setStatusTone] = useState<"neutral" | "success" | "error">("neutral");
   const [sessionPreview, setSessionPreview] = useState<string | null>(null);
   const [storedSessionPreview, setStoredSessionPreview] = useState<string | null>(null);
+  const [logoutOutcomePreview, setLogoutOutcomePreview] = useState<string | null>(null);
 
   const nextPath = useMemo(() => {
     const value = searchParams.get("next");
@@ -147,6 +148,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
     setStatusMessage(null);
     setSessionPreview(null);
+    setLogoutOutcomePreview(null);
 
     const result = await loginWithEmailPassword(form);
     if (result.ok) {
@@ -180,12 +182,20 @@ export default function LoginPage() {
 
   async function handleLogout() {
     setIsLoggingOut(true);
+    setLogoutOutcomePreview(null);
     const result = await logoutPersistedSession();
     setStatusTone(result.ok ? "neutral" : "error");
     setStatusMessage(
       result.ok
         ? `${result.message} Bạn có thể đăng nhập lại bất cứ lúc nào.`
         : result.message,
+    );
+    setLogoutOutcomePreview(
+      [
+        `logout_result: ${result.ok ? "local_cleared" : "request_failed_local_cleared"}`,
+        `backend_detail: ${result.backendDetail ?? "none"}`,
+        `message: ${result.message}`,
+      ].join("\n"),
     );
     setSessionPreview(null);
     setStoredSessionPreview(formatStoredSessionPreview());
@@ -196,6 +206,7 @@ export default function LoginPage() {
     clearPersistedAuthSession();
     setStatusTone("neutral");
     setStatusMessage("Đã xóa session local đã lưu trên web shell.");
+    setLogoutOutcomePreview(null);
     setSessionPreview(null);
     setStoredSessionPreview(formatStoredSessionPreview());
   }
@@ -204,17 +215,17 @@ export default function LoginPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-start">
       <section className="flex-1 space-y-4">
         <span className="inline-flex rounded-full border border-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-          Batch 41 · Web auth state inspector
+          Batch 42 · Web logout outcome signal
         </span>
         <h1 className="text-4xl font-black tracking-tight text-black">
-          Web shell nay vừa chạy được auth loop, vừa cho nhìn thẳng persisted session state trước và sau mỗi bước.
+          Web shell nay có thêm logout outcome signal rõ hơn để phân biệt revoke thành công với session đã mất hiệu lực.
         </h1>
         <p className="max-w-2xl text-base leading-7 text-neutral-700">
-          Batch 41 ưu tiên thêm 1 surface quan sát rõ ràng: local persisted session snapshot luôn hiện ngay trên màn để kiểm tra login, restore, refresh rotation, và logout/clear có đang đổi state thật hay không.
+          Batch 42 ưu tiên thêm 1 action outcome surface hẹp: khi logout, màn web hiển thị riêng kết quả local clear và backend detail để auth loop dễ verify hơn.
         </p>
         <ul className="space-y-2 text-sm text-neutral-700">
           <li>• Password/OTP vẫn là placeholder trên UI, chưa dùng cho API ở batch này.</li>
-          <li>• Web shell nay có persisted-session inspector để nhìn local state trước/sau restore, refresh rotation, logout, và clear.</li>
+          <li>• Web shell nay có persisted-session inspector và thêm logout outcome panel để nhìn rõ backend detail sau revoke.</li>
           <li>• Redirect đích mặc định vẫn là <code>/feed</code> nếu không có <code>?next=...</code> hợp lệ.</li>
         </ul>
       </section>
@@ -267,6 +278,7 @@ export default function LoginPage() {
               setIsRegistering(true);
               setStatusMessage(null);
               setSessionPreview(null);
+              setLogoutOutcomePreview(null);
 
               const result = await registerAndLoginWithEmailPassword(form);
               if (result.ok) {
@@ -308,6 +320,7 @@ export default function LoginPage() {
               setIsRefreshing(true);
               setStatusMessage(null);
               setSessionPreview(null);
+              setLogoutOutcomePreview(null);
 
               const result = await refreshPersistedSession();
               if (result.ok) {
@@ -367,7 +380,7 @@ export default function LoginPage() {
           <div className="font-semibold">Status</div>
           <p className={buildStatusClass(statusTone)}>
             {statusMessage ??
-              "Chưa submit. Batch 41 shell này ưu tiên giúp auth E2E flow hiện trạng thái persisted session thật trước/sau mỗi bước."}
+              "Chưa submit. Batch 42 shell này ưu tiên giúp auth E2E flow hiện rõ logout outcome thật bên cạnh persisted-session state."}
           </p>
 
           {statusMessage?.includes("đăng nhập lại") ? (
@@ -381,6 +394,19 @@ export default function LoginPage() {
               {sessionPreview}
             </pre>
           ) : null}
+
+          <div className="mt-3">
+            <div className="font-semibold">Logout outcome</div>
+            {logoutOutcomePreview ? (
+              <pre className="mt-2 overflow-x-auto border border-black bg-neutral-100 p-3 text-xs text-black">
+                {logoutOutcomePreview}
+              </pre>
+            ) : (
+              <p className="mt-2 text-xs text-neutral-600">
+                Chưa có logout attempt nào trong phiên shell hiện tại.
+              </p>
+            )}
+          </div>
 
           <div className="mt-3">
             <div className="font-semibold">Persisted session snapshot</div>

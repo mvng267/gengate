@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất đã chốt trong checklist/status: **batch 41 đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 42**.
 
 ## Reporting hard rule
 
@@ -88,23 +88,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **41**
-- Scope hiện tại: auth state inspector complete — web + iOS expose persisted-session snapshot directly for easier auth-loop inspection.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **42**
+- Scope hiện tại: web logout outcome signal — surface dedicated backend/detail result after logout to make auth loop easier to verify.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/web-nextjs/app/login/page.tsx`
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
-  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `aa60df0` — `batch41: add ios auth state inspector`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `f7c50e9` — `batch41: mark workflow complete`
+  - working tree hiện tại: bẩn đúng theo batch 42 web logout outcome signal slice, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch 42 với 1 auth E2E behavior slice hẹp có leverage cao hơn; ưu tiên thêm 1 state transition cue hoặc action outcome surface giúp validate flow thật chặt hơn thay vì chỉ visibility snapshot
+  - commit slice này; sau đó cân nhắc 1 parity slice tương tự trên iOS hoặc chuyển sang auth behavior slice khác có leverage cao
 
 ## Batch handoff note
 
@@ -112,11 +109,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Commit cuối đã chốt:
   - `288f57a` — `batch41: add web auth state inspector`
   - `aa60df0` — `batch41: add ios auth state inspector`
+  - `f7c50e9` — `batch41: mark workflow complete`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - chưa có blocker code; next leverage nên là 1 auth E2E behavior slice có signal mạnh hơn, không chỉ visibility snapshot
+  - chưa có blocker code; next leverage là auth behavior signal mạnh hơn trên cùng loop
 - Batch kế tiếp: **42**
 - Scope hẹp đầu tiên của batch 42:
   - thêm 1 state transition cue hoặc action outcome surface trên web hoặc iOS để login/restore/refresh/logout path cho tín hiệu verify mạnh hơn
