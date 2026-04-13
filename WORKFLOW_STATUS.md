@@ -10,19 +10,18 @@
   - apps/web-nextjs/app/login/page.tsx
   - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
-  - WORKFLOW_STATUS.md
-  - WORKFLOW_CHECKLIST.md
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅
   - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest committed slice before this update: `7d57c87` — `batch49: align web login detail cue`
-  - working tree: bẩn đúng theo batch 49 iOS login detail cue slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `678ba6a` — `batch49: align ios login detail cue`
+  - working tree: sạch
 - Blocker: none
-- Next: chốt batch 49 bằng commit iOS + workflow; sau đó mở batch 50 với 1 scope hẹp mới quanh auth shell contract/verify gap gần nhất
+- Next: mở batch 50 với 1 scope hẹp mới quanh auth shell contract/verify gap gần nhất; ưu tiên seam end-to-end thật thay vì micro-cleanup
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 49 update:
+- Batch 49 closeout:
   - `/auth/login` trả explicit `backend_detail="login_session_created"` + `local_clear_recommended=false`
   - web shell framing/login outcome align trực tiếp với cue login mới từ backend
   - iOS shell nay persist + surface login `backend_detail` trực tiếp, kể cả register-then-sign-in summary
+  - build artifacts đã được dọn; repo sạch sau khi chốt batch 49

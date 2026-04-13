@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 49**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đã xong batch 49**.
 
 ## Reporting hard rule
 
@@ -89,35 +89,36 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **49**
-- Scope hiện tại: iOS login detail cue parity — persist + surface explicit backend login cue in iOS auth shell and register-then-sign-in summary.
+- Scope hiện tại: batch 49 closeout — artifact cleanup + workflow truth refresh sau khi backend/web/iOS login detail cue parity đã hoàn tất.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
-  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
+  - `WORKFLOW_STATUS.md`
+  - `WORKFLOW_CHECKLIST.md`
 - Test-verify:
-  - `cd apps/ios-swift && swift build` → ✅ pass
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ pass
+  - web: `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - iOS: `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `7d57c87` — `batch49: align web login detail cue`
-  - working tree hiện tại: bẩn đúng theo batch 49 iOS login detail cue slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `678ba6a` — `batch49: align ios login detail cue`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - chốt batch 49 bằng commit iOS + workflow; sau đó mở batch 50 với 1 scope hẹp mới quanh auth shell contract/verify gap gần nhất
+  - mở batch 50 với 1 scope hẹp mới quanh auth shell contract/verify gap gần nhất; ưu tiên seam end-to-end thật thay vì micro-cleanup
 
 ## Batch handoff note
 
-- Batch vừa xong: **48**
+- Batch vừa xong: **49**
 - Commit cuối đã chốt:
-  - `d1b95e7` — `batch48: add refresh restore detail cues`
-  - `67e615e` — `batch48: add web refresh restore detail cues`
-  - `128df67` — `batch48: add ios refresh restore detail cues`
-  - `450152c` — `batch48: mark workflow complete`
+  - `6528d37` — `batch49: add login detail cue`
+  - `7d57c87` — `batch49: align web login detail cue`
+  - `678ba6a` — `batch49: align ios login detail cue`
 - Test-verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → pass
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - không có blocker code trực tiếp; batch 48 đã khép kín ở mức refresh/restore detail cue parity
-- Batch kế tiếp: **49**
-- Scope hẹp đầu tiên của batch 49:
-  - bổ sung explicit login backend detail cue từ backend để shell login flow cũng có cue parity như refresh / restore / logout
+  - không có blocker code trực tiếp; batch 49 đã khép kín ở mức login backend detail cue parity
+- Batch kế tiếp: **50**
+- Scope hẹp đầu tiên đề xuất:
+  - chọn seam auth shell end-to-end gần nhất còn thiếu verify/contract rõ ràng sau login/refresh/restore/logout cue parity, rồi mở đúng 1 lane để nối tiếp
