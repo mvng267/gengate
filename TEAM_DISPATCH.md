@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 65
-- Trục công việc: iOS private feed reader — thêm native read-only consumption cho private friend feed thay vì mở write flow mới.
+- Batch workflow chính thức hiện tại: 66
+- Trục công việc: iOS inbox reader — thêm native read-only consumption cho direct messaging thay vì mở composer/realtime flow mới.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -41,19 +41,19 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: không mở backend scope mới trong batch 65.
+- Scope hiện tại: không mở backend scope mới trong batch 66.
 - Kết quả gần nhất: toàn bộ MVP API seams đã có và verified green cho web consumption.
-- Trạng thái: idle_batch65.
+- Trạng thái: idle_batch66.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: không mở web scope mới trong batch 65.
+- Scope hiện tại: không mở web scope mới trong batch 66.
 - Kết quả gần nhất: `/profile` launcher batch 62 đã xong.
-- Trạng thái: idle_batch65.
+- Trạng thái: idle_batch66.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 65 native private feed reader slice đã xong.
-- Kết quả gần nhất: Feed tab đã đọc được `/moments/feed` qua shell viewer UUID-driven read-only flow.
-- Trạng thái: complete_batch65.
+- Scope hiện tại: batch 66 native inbox reader slice đã xong.
+- Kết quả gần nhất: Inbox tab đã resolve direct conversation và đọc được `/messages` qua read-only user-pair flow.
+- Trạng thái: complete_batch66.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

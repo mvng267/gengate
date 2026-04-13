@@ -1,11 +1,11 @@
 # GenGate Workflow Status
 
-- Batch: 65
+- Batch: 66
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 65 iOS private feed reader — consume existing backend private feed contracts from the native Feed tab via a read-only viewer UUID shell
+- Scope: batch 66 iOS inbox reader — consume existing backend direct conversation and message-list contracts from the native Inbox tab via a read-only user-pair shell
 - Status: MVP-testable
 - Files:
-  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
   - apps/ios-swift/GenGate/App/RootTabView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
@@ -13,10 +13,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `e0bc13c` — `batch64: add ios friend graph reader`
-  - working tree: bẩn (batch 65 ready to commit)
+  - latest commit: `e49324d` — `batch65: add ios private feed reader`
+  - working tree: bẩn (batch 66 ready to commit)
 - Blocker: none
-- Next: commit batch 65 iOS private feed reader; after that, prefer one more narrow native read-only slice for inbox or notifications
+- Next: commit batch 66 iOS inbox reader; after that, prefer a similarly narrow native read-only slice for notifications or location
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -27,10 +27,10 @@
 - Batch 57 handoff:
   - `4a779eb` — `batch57: wire private friend feed shell`
   - private friend feed seam remains MVP-testable while batch 58 opens direct messaging
-- Batch 65 outcome:
-  - iOS Feed tab now consumes live backend private feed contracts through a viewer UUID-driven read-only shell
-  - native testers can inspect friend-only moment captions and media metadata without leaving iOS
-  - this adds a second real iOS social seam beyond auth/session while keeping scope MVP-safe and read-only
+- Batch 66 outcome:
+  - iOS Inbox tab now consumes live backend direct-conversation and message-list contracts through a read-only user-pair shell
+  - native testers can resolve a direct thread and inspect message payloads without leaving iOS
+  - this adds a third real iOS social seam beyond auth/session while keeping composer, device-key, attachment, and realtime flows explicitly out of scope
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -39,3 +39,4 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, and load friend graph snapshot
   - iOS Feed path: open Feed tab, paste a viewer UUID, and load private feed
+  - iOS Inbox path: open Inbox tab, paste two user UUIDs, resolve the direct conversation, and load messages
