@@ -40,7 +40,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap focus/cursor picker + member-cursor message target picker; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -50,7 +50,8 @@ struct InboxPlaceholderView: View {
                         "Member summary now shows cursor ordering hint + unread count behind cursor to spot lagging read state quickly.",
                         "Quick action `Jump focus user to first unread candidate` advances cursor to the earliest unread loaded message for the focus user.",
                         "In member summary, tapping a user row now sets `Read-status focus user UUID` and `Member user UUID` together (no manual paste).",
-                        "Each member card now has quick action to copy its `last_read_message_id` into `Last-read message UUID` target."
+                        "Each member card now has quick action to copy its `last_read_message_id` into `Last-read message UUID` target.",
+                        "Member row tap now applies full read-cursor form context (`Read-status focus user UUID` + `Member user UUID` + optional `Last-read message UUID`)."
                     ]
                 )
 
@@ -573,6 +574,10 @@ struct InboxPlaceholderView: View {
                                 Button {
                                     readStatusFocusUserIDDraft = member.userID
                                     readCursorTargetUserIDDraft = member.userID
+
+                                    if let cursorMessageID {
+                                        readCursorTargetMessageIDDraft = cursorMessageID
+                                    }
                                 } label: {
                                     HStack(spacing: 8) {
                                         Text("user_id: \(member.userID)")
@@ -581,7 +586,7 @@ struct InboxPlaceholderView: View {
 
                                         Spacer()
 
-                                        Text(isFocusUser ? "focus+cursor_user" : "set_focus+cursor_user")
+                                        Text(isFocusUser ? "focus+cursor_form" : "set_focus+cursor_form")
                                             .font(.caption.monospaced())
                                             .foregroundStyle(isFocusUser ? .blue : .secondary)
                                     }
