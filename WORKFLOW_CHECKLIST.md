@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 51**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đã complete batch 51**.
 
 ## Reporting hard rule
 
@@ -89,32 +89,33 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **51**
-- Scope hiện tại: iOS register conflict backend detail parity — preserve + surface explicit backend error detail for failed `/auth/register` conflict.
+- Scope hiện tại: batch 51 closeout — artifact cleanup + truthful workflow finish marker after cross-shell register-conflict detail parity.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `WORKFLOW_STATUS.md`
+  - `WORKFLOW_CHECKLIST.md`
 - Test-verify:
-  - `cd apps/ios-swift && swift build` → ✅ pass
+  - web: `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - iOS: `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `5b3efb3` — `batch51: surface register conflict detail`
-  - working tree hiện tại: bẩn đúng theo batch 51 iOS register-conflict detail slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `e6416a1` — `batch51: align ios register conflict detail`
+  - working tree hiện tại: sạch sau khi dọn `apps/ios-swift/.build/` và `apps/web-nextjs/tsconfig.tsbuildinfo`
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - chốt batch 51 bằng commit iOS + workflow; sau đó follow-up clean closeout nếu còn artifact, rồi chọn seam auth shell end-to-end kế tiếp cho batch 52
+  - mở batch 52 với 1 seam auth/session end-to-end mới; ưu tiên refresh/session restore parity hẹp nếu shell vẫn còn collapse backend detail hoặc thiếu persistence cue
 
 ## Batch handoff note
 
-- Batch vừa xong: **50**
+- Batch vừa xong: **51**
 - Commit cuối đã chốt:
-  - `1a71c48` — `batch50: surface login failure detail`
-  - `33ffb41` — `batch50: align ios login failure detail`
-  - `eee0e27` — `batch50: mark workflow complete`
+  - `5b3efb3` — `batch51: surface register conflict detail`
+  - `e6416a1` — `batch51: align ios register conflict detail`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
-  - không có blocker code trực tiếp; batch 50 đã khép kín ở mức failed-login backend detail parity
-- Batch kế tiếp: **51**
-- Scope hẹp đầu tiên của batch 51:
-  - surface explicit backend error detail cho failed register conflict trên web shell thay vì collapse thành `backend_detail: none`
+  - không có blocker code trực tiếp; batch 51 đã khép kín ở mức register-conflict backend detail parity giữa web và iOS shell
+- Batch kế tiếp: **52**
+- Scope hẹp đầu tiên của batch 52:
+  - ưu tiên refresh/session restore parity tối thiểu giữa backend và web/iOS shell, đặc biệt nơi outcome summary còn thiếu backend detail hoặc persistence cue

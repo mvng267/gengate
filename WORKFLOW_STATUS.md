@@ -14,12 +14,12 @@
   - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest committed slice before this update: `5b3efb3` — `batch51: surface register conflict detail`
-  - working tree: bẩn đúng theo batch 51 iOS register-conflict detail slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `e6416a1` — `batch51: align ios register conflict detail`
+  - working tree: sạch
 - Blocker: none
-- Next: chốt batch 51 bằng commit iOS + workflow; sau đó follow-up clean closeout nếu còn artifact, rồi chọn seam auth shell end-to-end kế tiếp cho batch 52
+- Next: mở batch 52 với 1 seam auth/session end-to-end mới; ưu tiên refresh/session restore parity hẹp nếu shell vẫn còn collapse backend detail hoặc thiếu persistence cue
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 51 update:
-  - web register flow nay preserve backend error detail cho 409 conflict thay vì nuốt mất code thật
-  - iOS auth shell nay map register 409 thành `registerRejected(detail)` để surface `backend_detail` thật trong register-then-sign-in outcome summary
-  - register-conflict detail parity giữa web và iOS đã được align ở mức shell detail cue
+- Batch 51 closeout:
+  - web register conflict nay preserve/surface backend detail thật
+  - iOS register conflict nay preserve/surface backend detail thật
+  - artifact verify output đã được dọn; batch 51 hiện complete sạch
