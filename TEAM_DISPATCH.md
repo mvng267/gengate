@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 60
-- Trục công việc: location sharing state shell — giữ friend graph + moments/feed + inbox + notifications seams testable, đồng thời mở slice hẹp kế tiếp cho per-user location state surface trên web `/location`.
+- Batch workflow chính thức hiện tại: 61
+- Trục công việc: MVP test hub hardening — giữ toàn bộ seams testable và gom lối vào test trên web home `/` để người dùng đi qua MVP từ một chỗ.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -41,14 +41,14 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: batch 60 backend support slice đã xong.
-- Kết quả gần nhất: locations API contract verified green for web shell consumption.
-- Trạng thái: complete_batch60_support.
+- Scope hiện tại: không mở backend scope mới trong batch 61.
+- Kết quả gần nhất: toàn bộ MVP API seams đã có và verified green cho web consumption.
+- Trạng thái: idle_batch61.
 
 ### pikachu-web — frontend web
-- Scope hiện tại: batch 60 web slice đã xong.
-- Kết quả gần nhất: `/location` đã create/toggle share state, add audience, create snapshot, và reload counts theo user UUID.
-- Trạng thái: complete_batch60.
+- Scope hiện tại: batch 61 web hardening slice đã xong.
+- Kết quả gần nhất: web home `/` đã thành guided MVP test hub và nav đã lộ đủ các seams.
+- Trạng thái: complete_batch61.
 
 ### pikame-ios — iOS
 - Scope hiện tại: idle trong batch 55 slice này để tránh mở nhiều surface cùng lúc.

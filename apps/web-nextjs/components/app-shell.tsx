@@ -15,11 +15,13 @@ type AppShellProps = {
 };
 
 const navItems = [
+  { href: "/", label: "MVP Hub" },
   { href: "/login", label: "Login" },
+  { href: "/profile", label: "Profile" },
   { href: "/feed", label: "Feed" },
   { href: "/inbox", label: "Inbox" },
+  { href: "/notifications", label: "Notifications" },
   { href: "/location", label: "Location" },
-  { href: "/profile", label: "Profile" },
 ];
 
 export function AppShell({ children }: AppShellProps) {
