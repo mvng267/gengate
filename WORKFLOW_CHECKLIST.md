@@ -47,7 +47,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **đã complete batch 53**.
+- Batch workflow chính thức mới nhất trong checklist/status: **đang làm batch 54**.
 
 ## Reporting hard rule
 
@@ -88,22 +88,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **53**
-- Scope hiện tại: batch 53 closeout — artifact cleanup + truthful workflow finish marker after cross-shell restore outcome parity.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **54**
+- Scope hiện tại: web failure cleanup cue parity — restore/refresh failure summaries now keep explicit local-clear cue.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `WORKFLOW_STATUS.md`
-  - `WORKFLOW_CHECKLIST.md`
+  - `apps/web-nextjs/app/login/page.tsx`
 - Test-verify:
-  - web: `cd apps/web-nextjs && npm run verify` → ✅ pass
-  - iOS: `cd apps/ios-swift && swift build` → ✅ pass
+  - `cd apps/web-nextjs && npm run verify` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `90f82b0` — `batch53: align ios restore cleanup cue`
-  - working tree hiện tại: sạch sau khi dọn `apps/ios-swift/.build/` và `apps/web-nextjs/tsconfig.tsbuildinfo`
+  - commit gần nhất đã chốt: `25b6fd6` — `batch53: mark workflow complete`
+  - working tree hiện tại: bẩn đúng theo batch 54 web failure-summary parity slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch 54 với 1 seam auth/session end-to-end mới; ưu tiên logout/refresh failure outcome parity nếu còn cue chưa thẳng hàng giữa backend và shell
+  - commit web batch-54 slice này; sau đó inspect iOS restore/refresh failure summaries only if cleanup cue still differs materially from web
 
 ## Batch handoff note
 
@@ -111,6 +109,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Commit cuối đã chốt:
   - `d5dfaee` — `batch53: expose restore cleanup cue`
   - `90f82b0` — `batch53: align ios restore cleanup cue`
+  - `25b6fd6` — `batch53: mark workflow complete`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
@@ -118,4 +117,4 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - không có blocker code trực tiếp; batch 53 đã khép kín ở mức restore outcome parity giữa web và iOS shell
 - Batch kế tiếp: **54**
 - Scope hẹp đầu tiên của batch 54:
-  - ưu tiên logout/refresh failure outcome parity giữa backend và web/iOS shell ở nơi summary/message/detail cue còn lệch nhau
+  - expose explicit `local_clear_recommended` trong web restore/refresh failure summaries để cleared-session outcomes không mất cấu trúc cue

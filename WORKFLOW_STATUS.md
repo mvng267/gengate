@@ -1,24 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 53
+- Batch: 54
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 53 restore outcome parity — web + iOS shells now surface local clear recommendation alongside backend detail in restore summaries so restore cue matches refresh/persisted framing better
-- Status: complete
+- Scope: batch 54 web failure cleanup cue parity — restore/refresh failure summaries now keep explicit local-clear cue alongside backend detail so cleared-session outcomes stay structurally consistent
+- Status: verify
 - Files:
   - apps/web-nextjs/app/login/page.tsx
-  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `90f82b0` — `batch53: align ios restore cleanup cue`
-  - working tree: sạch
+  - latest commit: `25b6fd6` — `batch53: mark workflow complete`
+  - working tree: bẩn đúng theo batch 54 web failure-summary parity slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: mở batch 54 với 1 seam auth/session end-to-end mới; ưu tiên logout/refresh failure outcome parity nếu còn cue chưa thẳng hàng giữa backend và shell
+- Next: commit web batch-54 slice này; sau đó inspect iOS restore/refresh failure summaries only if cleanup cue still differs materially from web
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 53 closeout:
-  - web restore outcome summary nay hiện `local_clear_recommended`
-  - iOS restore outcome summary nay hiện `local_clear_recommended`
-  - artifact verify output đã được dọn; batch 53 hiện complete sạch
+- Batch 54 update:
+  - web restore failure outcome nay hiện `local_clear_recommended: false`
+  - web refresh failure outcome nay hiện `local_clear_recommended: false`
+  - web success/failure framing quanh cleared-session outcomes nay đồng đều hơn
