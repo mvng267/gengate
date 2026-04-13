@@ -1,21 +1,21 @@
 # GenGate Workflow Status
 
-- Batch: 79
+- Batch: 80
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 79 web feed pivot hardening — carry active author/viewer context into nearby launcher links so testers can move out of moments/feed with less UUID retyping
+- Scope: batch 80 web notifications pivot hardening — carry active notification user context into nearby launcher links so testers can move out of notifications with less UUID retyping
 - Status: MVP-testable
 - Files:
-  - apps/web-nextjs/app/feed/page.tsx
+  - apps/web-nextjs/app/notifications/page.tsx
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - web: `cd apps/web-nextjs && npm run verify` ✅
 - Git:
-  - latest commit: `abdad26` — `batch78: harden web inbox pivots`
-  - working tree: bẩn (batch 79 ready to commit)
+  - latest commit: `b8dc422` — `batch79: harden web feed pivots`
+  - working tree: bẩn (batch 80 ready to commit)
 - Blocker: none
-- Next: commit batch 79 web feed pivot hardening; after that, only open another slice if it removes similarly concrete cross-seam friction in human testing
+- Next: commit batch 80 web notifications pivot hardening; after that, only open another slice if it removes similarly concrete cross-seam friction in human testing
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -59,9 +59,12 @@
 - Batch 78 handoff:
   - `abdad26` — `batch78: harden web inbox pivots`
   - inbox pivot hardening remains MVP-testable while batch 79 reduces similar friction from the moments/feed entry point
-- Batch 79 outcome:
-  - `/feed` quick pivots now carry active author/viewer context into profile, inbox, notifications, and location launcher routes
-  - testers can continue cross-seam validation from moments/private-feed testing without retyping the same UUID pair
+- Batch 79 handoff:
+  - `b8dc422` — `batch79: harden web feed pivots`
+  - feed pivot hardening remains MVP-testable while batch 80 reduces similar friction from the notifications entry point
+- Batch 80 outcome:
+  - `/notifications` quick pivots now carry active user context into profile, feed, inbox, and location launcher routes
+  - testers can continue cross-seam validation from notifications without retyping the same UUID
   - this further shortens the real browser smoke path while keeping domain contracts unchanged
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`

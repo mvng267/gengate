@@ -12,6 +12,11 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
   const params = searchParams ? await searchParams : undefined;
   const userId = params?.user?.trim() ?? "";
 
+  const profileHref = userId ? `/profile?user=${encodeURIComponent(userId)}` : "/profile";
+  const feedHref = userId ? `/feed?author=${encodeURIComponent(userId)}&viewer=${encodeURIComponent(userId)}` : "/feed";
+  const inboxHref = userId ? `/inbox?userA=${encodeURIComponent(userId)}&sender=${encodeURIComponent(userId)}` : "/inbox";
+  const locationHref = userId ? `/location?owner=${encodeURIComponent(userId)}` : "/location";
+
   return (
     <section>
       <h1>Notifications</h1>
@@ -41,8 +46,11 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
             Active notifications user: <code>{userId}</code>
           </p>
           <p>
-            Suggested pivots after validating notifications: <Link href="/profile">Profile</Link> · <Link href="/feed">Feed</Link> ·{" "}
-            <Link href="/inbox">Inbox</Link> · <Link href="/location">Location</Link>
+            Suggested pivots after validating notifications: <Link href={profileHref}>Profile</Link> · <Link href={feedHref}>Feed</Link> ·{" "}
+            <Link href={inboxHref}>Inbox</Link> · <Link href={locationHref}>Location</Link>
+          </p>
+          <p>
+            Tip: these pivots now carry the current notifications user forward, so you can keep cross-seam testing without retyping the same UUID.
           </p>
         </>
       ) : (
