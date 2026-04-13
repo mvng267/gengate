@@ -60,11 +60,14 @@ final class AppSessionStore {
         let expires_in_seconds: Int
         let token_type: String
         let session_status: String
+        let local_clear_recommended: Bool
+        let backend_detail: String?
     }
 
     private struct LogoutOutcome {
         let sessionStatus: String?
         let detail: String?
+        let localClearRecommended: Bool
     }
 
     private struct StoredSession: Codable {
@@ -464,26 +467,34 @@ final class AppSessionStore {
         passwordDraft = ""
 
         if let logoutOutcome {
-            if let sessionStatus = logoutOutcome.sessionStatus, !sessionStatus.isEmpty {
-                statusMessage = "Đã logout, backend xác nhận session ở trạng thái \(sessionStatus), và xóa session local trên iOS shell."
-                logoutOutcomeSummary = [
-                    "logout_result: local_cleared",
-                    "backend_detail: \(sessionStatus)",
-                    "message: Đã logout, backend xác nhận session ở trạng thái \(sessionStatus), và xóa session local trên iOS shell."
-                ].joined(separator: "\n")
-            } else if let detail = logoutOutcome.detail, !detail.isEmpty {
-                statusMessage = "Backend báo session logout không còn hợp lệ (\(detail)); local session vẫn đã được xóa trên iOS shell."
+            let backendDetail = logoutOutcome.detail ?? logoutOutcome.sessionStatus
+            let localClearLine = "local_clear_recommended: \(logoutOutcome.localClearRecommended ? "true" : "false")"
+
+            if let detail = backendDetail, !detail.isEmpty {
+                let detailMessage: String
+                if logoutOutcome.sessionStatus != nil {
+                    detailMessage = "Đã logout, backend trả detail \(detail), và xóa session local trên iOS shell."
+                } else {
+                    detailMessage = "Backend báo session logout không còn hợp lệ (\(detail)); local session vẫn đã được xóa trên iOS shell."
+                }
+                let recommendedSuffix = logoutOutcome.localClearRecommended
+                    ? " Backend cũng báo nên clear local session để shell state sạch và dễ verify hơn."
+                    : ""
+                statusMessage = detailMessage + recommendedSuffix
                 logoutOutcomeSummary = [
                     "logout_result: local_cleared",
                     "backend_detail: \(detail)",
-                    "message: Backend báo session logout không còn hợp lệ (\(detail)); local session vẫn đã được xóa trên iOS shell."
+                    localClearLine,
+                    "message: \(detailMessage + recommendedSuffix)"
                 ].joined(separator: "\n")
             } else {
-                statusMessage = "Đã logout, revoke session hiện tại, và xóa session local trên iOS shell."
+                let message = "Đã logout, revoke session hiện tại, và xóa session local trên iOS shell."
+                statusMessage = message
                 logoutOutcomeSummary = [
                     "logout_result: local_cleared",
                     "backend_detail: none",
-                    "message: Đã logout, revoke session hiện tại, và xóa session local trên iOS shell."
+                    localClearLine,
+                    "message: \(message)"
                 ].joined(separator: "\n")
             }
         } else {
@@ -491,6 +502,7 @@ final class AppSessionStore {
             logoutOutcomeSummary = [
                 "logout_result: local_cleared",
                 "backend_detail: none",
+                "local_clear_recommended: false",
                 "message: Đã logout, revoke session hiện tại, và xóa session local trên iOS shell."
             ].joined(separator: "\n")
         }
@@ -689,11 +701,19 @@ final class AppSessionStore {
 
         if httpResponse.statusCode == 200 {
             let snapshot = try JSONDecoder().decode(SessionSnapshotResponse.self, from: data)
-            return LogoutOutcome(sessionStatus: snapshot.session_status, detail: nil)
+            return LogoutOutcome(
+                sessionStatus: snapshot.session_status,
+                detail: snapshot.backend_detail,
+                localClearRecommended: snapshot.local_clear_recommended
+            )
         }
 
         if httpResponse.statusCode == 401 {
-            return LogoutOutcome(sessionStatus: nil, detail: readErrorDetail(from: data))
+            return LogoutOutcome(
+                sessionStatus: nil,
+                detail: readErrorDetail(from: data),
+                localClearRecommended: true
+            )
         }
 
         throw SessionError.network("Logout request failed with status \(httpResponse.statusCode).")

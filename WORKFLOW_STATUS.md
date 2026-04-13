@@ -2,7 +2,7 @@
 
 - Batch: 47
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 47 logout backend detail signal complete on backend + web — shell now reads explicit backend logout cue instead of inferring only from local status text
+- Scope: batch 47 logout backend detail signal complete — backend + web + iOS all surface explicit backend logout cue instead of inferring only from local status text
 - Status: verify
 - Files:
   - apps/backend-python/app/schemas/auth.py
@@ -11,18 +11,22 @@
   - apps/web-nextjs/lib/auth/types.ts
   - apps/web-nextjs/lib/auth/client.ts
   - apps/web-nextjs/app/login/page.tsx
+  - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
+  - apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅
   - web: `cd apps/web-nextjs && npm run verify` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `99eaa01` — `batch47: add logout local clear detail contract`
-  - working tree: bẩn đúng theo batch 47 web follow-up slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `2bb300c` — `batch47: add web logout backend detail signal`
+  - working tree: bẩn đúng theo batch 47 iOS follow-up slice + workflow files (chưa commit ở nhịp này)
 - Blocker: none
-- Next: commit web batch-47 slice này; sau đó làm 1 iOS follow-up tương tự để đọc `backend_detail` + `local_clear_recommended` trực tiếp từ logout response
+- Next: commit iOS batch-47 slice này; sau đó làm workflow-only closeout marker cho batch 47
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 47 update:
+- Batch 47 outcome:
   - backend `/auth/logout` trả explicit `local_clear_recommended=true` và `backend_detail="logout_revoked"`
-  - web logout outcome nay đọc trực tiếp `backend_detail` + `local_clear_recommended` từ response backend
-  - auth loop web/backend nay đối chiếu được rõ hơn giữa revoke intent và local clear outcome
+  - web logout outcome đọc trực tiếp `backend_detail` + `local_clear_recommended` từ backend response
+  - iOS logout outcome cũng đọc trực tiếp `backend_detail` + `local_clear_recommended` từ backend response
+  - auth loop backend/web/iOS nay đối chiếu rõ hơn giữa revoke intent và local clear outcome

@@ -89,22 +89,22 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 ## Current batch slice
 
 - Batch workflow chính thức hiện tại: **47**
-- Scope hiện tại: web logout backend detail follow-up — read explicit backend logout cue directly into shell outcome.
+- Scope hiện tại: iOS logout backend detail follow-up — read explicit backend logout cue directly into shell outcome.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/web-nextjs/lib/auth/types.ts`
-  - `apps/web-nextjs/lib/auth/client.ts`
-  - `apps/web-nextjs/app/login/page.tsx`
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Auth/SessionEntryView.swift`
 - Test-verify:
   - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ pass
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `99eaa01` — `batch47: add logout local clear detail contract`
-  - working tree hiện tại: bẩn đúng theo batch 47 web follow-up slice + workflow files, chưa commit
+  - commit gần nhất đã chốt: `2bb300c` — `batch47: add web logout backend detail signal`
+  - working tree hiện tại: bẩn đúng theo batch 47 iOS follow-up slice + workflow files, chưa commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit web batch-47 slice này; sau đó làm 1 iOS follow-up tương tự để đọc `backend_detail` + `local_clear_recommended` trực tiếp từ logout response
+  - commit iOS batch-47 slice này; sau đó làm workflow-only closeout marker cho batch 47
 
 ## Batch handoff note
 

@@ -7,7 +7,7 @@ struct SessionEntryView: View {
         @Bindable var sessionStore = sessionStore
 
         VStack(alignment: .leading, spacing: 20) {
-            Text("Batch 46 · iOS local clear outcome signal")
+            Text("Batch 47 · iOS logout backend detail signal")
                 .font(.caption)
                 .fontWeight(.bold)
                 .textCase(.uppercase)
@@ -19,7 +19,7 @@ struct SessionEntryView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Batch 46 ưu tiên thêm local clear outcome surface riêng để nhìn rõ thao tác xóa session local tách khỏi logout/revoke flow ngay trên màn Session.")
+                    Text("Batch 47 ưu tiên follow-up logout detail signal: màn Session đọc trực tiếp backend logout cue để phân biệt revoke intent với local clear action ngay trên iOS shell.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
@@ -160,7 +160,7 @@ struct SessionEntryView: View {
                     .font(.footnote.monospaced())
                     .foregroundStyle(.secondary)
 
-                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ có local clear outcome surface riêng bên cạnh login/restore/refresh/logout outcome và persisted-session inspector để nhìn rõ từng auth action result.")
+                    Text("Tabs Feed / Inbox / Location / Profile đã được mở khóa ở mức shell; màn này giờ đọc trực tiếp backend logout detail signal bên cạnh login/restore/refresh/logout/local-clear outcome và persisted-session inspector để nhìn rõ từng auth action result.")
                         .foregroundStyle(.secondary)
 
                     if let pendingProtectedTab = sessionStore.pendingProtectedTab {
