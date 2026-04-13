@@ -3,7 +3,7 @@
 - Batch: 45
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
 - Scope: batch 45 login outcome signal complete — web + iOS surface dedicated login/register result + backend/detail cue separate from generic status text to make auth loop easier to verify
-- Status: verify
+- Status: complete
 - Files:
   - apps/web-nextjs/app/login/page.tsx
   - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
@@ -14,12 +14,12 @@
   - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `6f63cc6` — `batch45: add web login outcome signal`
-  - working tree: bẩn đúng theo batch 45 iOS login outcome parity slice + workflow files (chưa commit ở nhịp này)
+  - latest commit: `74b1141` — `batch45: add ios login outcome signal`
+  - working tree: sạch
 - Blocker: none
-- Next: commit iOS parity slice này; sau đó làm workflow-only closeout marker cho batch 45
+- Next: mở batch 46 với 1 scope hẹp theo hướng auth outcome aggregation hoặc session lifecycle cue tiếp theo để hoàn thiện auth loop verify path
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 45 update:
+- Batch 45 result:
   - Web login shell có panel `Login outcome` hiển thị riêng login/register result + backend/detail cue
-  - iOS Session screen nay cũng có card `Login outcome` hiển thị riêng login/register result + backend/detail cue bên cạnh restore/refresh/logout outcome và persisted-session snapshot
+  - iOS Session screen cũng có card `Login outcome` hiển thị riêng login/register result + backend/detail cue bên cạnh restore/refresh/logout outcome và persisted-session snapshot
   - Hai shell giờ đều phân tách rõ login outcome khỏi generic status text để auth loop dễ verify hơn
