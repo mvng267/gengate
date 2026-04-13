@@ -14,12 +14,13 @@
   - apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
+  - TEAM_DISPATCH.md
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` ✅
   - web: `cd apps/web-nextjs && npm run verify` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `b53608a` — `batch54: consume ios cleanup cue metadata`
+  - latest commit: `9646f1d` — `batch54: sync team dispatch state`
   - working tree: sạch
 - Blocker: none
 - Next: batch 54 đã clean closed; run kế tiếp chỉ mở batch mới nếu workflow truth thực sự cần thêm end-to-end auth/session seam khác, không bịa micro-cleanup tiếp cho batch này
@@ -30,3 +31,4 @@
   - iOS auth client parse structured backend error payload cho restore/refresh/logout unauthorized paths
   - restore/refresh failure summaries ở web + iOS đều đọc cleanup cue từ backend metadata
   - artifact build outputs đã được dọn; batch 54 hiện closed sạch
+  - coordinator files (`WORKFLOW_*`, `TEAM_DISPATCH.md`) đã được sync về cùng canonical state

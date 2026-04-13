@@ -99,12 +99,13 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `apps/web-nextjs/lib/auth/client.ts`
   - `apps/web-nextjs/app/login/page.tsx`
   - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → ✅ pass
   - `cd apps/web-nextjs && npm run verify` → ✅ pass
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `b53608a` — `batch54: consume ios cleanup cue metadata`
+  - commit gần nhất đã chốt: `9646f1d` — `batch54: sync team dispatch state`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
@@ -120,12 +121,15 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `bf0583e` — `batch54: preserve auth cleanup cue metadata`
   - `6dd83ce` — `batch54: consume auth cleanup cue metadata`
   - `b53608a` — `batch54: consume ios cleanup cue metadata`
+  - `41a269c` — `batch54: mark workflow complete`
+  - `9646f1d` — `batch54: sync team dispatch state`
 - Test-verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_auth_api.py` → pass
   - web: `cd apps/web-nextjs && npm run verify` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
   - không còn blocker trực tiếp trong seam batch 54; phần đã làm là parity + contract consumption quanh invalid-session cleanup cue
+  - hiện chỉ còn blocker điều phối: chưa có seam product mới đủ rõ để mở batch 55 một cách trung thực
 - Batch kế tiếp:
   - chưa mở chính thức
 - Scope hẹp đầu tiên của batch kế tiếp:
