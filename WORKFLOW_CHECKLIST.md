@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **75 — web MVP hub hardening slice is complete and MVP-testable**.
+- Batch workflow chính thức mới nhất trong checklist/status: **76 — repo hygiene for MVP testing slice is complete and MVP-testable**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,24 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **75**
-- Scope hiện tại: web MVP hub hardening — refresh `/` so testers can see all launcher routes and query-prefill examples in one place.
+- Batch workflow chính thức hiện tại: **76**
+- Scope hiện tại: repo hygiene for MVP testing — ignore verify-generated build artifacts so the repo stays clean between real implementation slices.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/app/page.tsx`
+  - `.gitignore`
+  - `apps/web-nextjs/.gitignore`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run verify` → ✅ pass
+  - `git status --short` → ✅ chỉ còn file batch 76, artifacts đã dọn
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `58dbaff` — `batch74: harden web location launcher`
-  - working tree hiện tại: bẩn (batch 75 ready to commit)
+  - commit gần nhất đã chốt: `b022001` — `batch75: harden web mvp hub`
+  - working tree hiện tại: bẩn (batch 76 ready to commit; no stray verify artifacts)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch75 web MVP hub hardening; sau đó ưu tiên bug-fix/hardening trực tiếp từ human testing thay vì tiếp tục launcher polish chung chung
+  - commit batch76 repo hygiene; sau đó chỉ mở slice mới nếu là bug-fix/hardening thật từ human testing hoặc issue sản phẩm cụ thể
 
 ## Batch handoff note
 

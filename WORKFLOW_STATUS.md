@@ -1,21 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 75
+- Batch: 76
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 75 web MVP hub hardening — refresh `/` so the main browser entry point documents the new launcher/prefill paths across all core seams
+- Scope: batch 76 repo hygiene for MVP testing — ignore verify-generated build artifacts so working tree stays clean between real slices
 - Status: MVP-testable
 - Files:
-  - apps/web-nextjs/app/page.tsx
+  - .gitignore
+  - apps/web-nextjs/.gitignore
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
-  - web: `cd apps/web-nextjs && npm run verify` ✅
+  - repo: `git status --short` → chỉ còn file batch 76, artifacts đã được dọn ✅
 - Git:
-  - latest commit: `58dbaff` — `batch74: harden web location launcher`
-  - working tree: bẩn (batch 75 ready to commit)
+  - latest commit: `b022001` — `batch75: harden web mvp hub`
+  - working tree: bẩn (batch 76 ready to commit; no stray verify artifacts)
 - Blocker: none
-- Next: commit batch 75 web MVP hub hardening; after that, prefer bug-fix/hardening from real human testing rather than more generic launcher polish
+- Next: commit batch 76 repo hygiene slice; sau đó ưu tiên bug-fix/hardening từ human testing hoặc một issue thật thay vì metadata-only churn
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -47,10 +48,13 @@
 - Batch 74 handoff:
   - `58dbaff` — `batch74: harden web location launcher`
   - location launcher hardening remains MVP-testable while batch 75 refreshes the top-level MVP hub documentation for all launcher paths
-- Batch 75 outcome:
-  - web `/` now documents the launcher route and prefill example for each core MVP seam in one place
-  - browser testers no longer need to remember route/query conventions across Profile / Feed / Inbox / Notifications / Location
-  - this turns the MVP hub into a clearer top-level smoke-test navigator without changing backend contracts or domain behavior
+- Batch 75 handoff:
+  - `b022001` — `batch75: harden web mvp hub`
+  - MVP hub hardening remains testable while batch 76 cleans noisy verify artifacts from repo state
+- Batch 76 outcome:
+  - repo now ignores Swift `.build` artifacts and TypeScript `*.tsbuildinfo`
+  - stray verify outputs were removed so working tree no longer looks dirty for non-product reasons
+  - this reduces false-positive diff noise between real MVP implementation slices
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`

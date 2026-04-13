@@ -7,6 +7,12 @@
 **/*.egg-info/
 *.pyc
 
+# Swift/Xcode build artifacts
+**/.build/
+
+# TypeScript incremental build artifacts
+**/*.tsbuildinfo
+
 # OS/editor
 .DS_Store
 .vscode/
