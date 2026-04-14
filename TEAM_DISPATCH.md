@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 236
-- Trục công việc: location sharing state shell — backend stop-sharing parity bằng audience cleanup khi share inactive.
-- Trạng thái: batch236_complete_location_stop_sharing_audience_cleanup.
+- Batch workflow chính thức hiện tại: 237
+- Trục công việc: notification shell — backend unread-only list parity qua query `unread_only=true`.
+- Trạng thái: batch237_verify_notification_unread_only_list_parity.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -40,6 +40,17 @@
 - Batch kế tiếp: **237**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread-only list parity cho minimal notification surface.
+
+## Batch 237 handoff (open)
+- Batch đang làm: **237**
+- Scope đang chạy:
+  - notification shell: thêm filter query `unread_only` cho `GET /notifications/{user_id}` để parity unread list.
+- Test/verify tạm thời:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k unread_only` ✅ (1 passed, 10 deselected)
+- Blocker/rủi ro hiện tại:
+  - none
+- Bước tiếp theo:
+  - commit batch237 + sync docs trạng thái clean.
 
 ## Batch 234 handoff (closed)
 - Batch vừa xong: **234**

@@ -28,11 +28,11 @@ class NotificationService:
             read_at=None,
         )
 
-    def list_notifications(self, db: Session, user_id: uuid.UUID) -> list[Notification]:
+    def list_notifications(self, db: Session, user_id: uuid.UUID, unread_only: bool = False) -> list[Notification]:
         user = user_repository.get(db, user_id)
         if user is None:
             raise ValueError("user_not_found")
-        return notification_repository.list_by_user_id(db, user_id)
+        return notification_repository.list_by_user_id(db, user_id, unread_only=unread_only)
 
     def get_notification(self, db: Session, notification_id: uuid.UUID) -> Notification | None:
         return notification_repository.get_active(db, notification_id)

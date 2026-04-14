@@ -1,24 +1,28 @@
 # GenGate Workflow Status
 
-- Batch: 236
+- Batch: 237
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 236 location sharing state shell — backend stop-sharing parity: clear audience list when share toggles to inactive.
-- Status: complete
+- Scope: batch 237 notification shell — backend unread-only list parity via query contract.
+- Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - iOS Profile: Session login -> Profile -> load pending requests -> tap `Reject request` ở inbound row -> app auto reload friend graph và request chuyển sang `rejected`.
   - iOS Feed (batch233): khi create moment/media fail, app parse `error.code/error.message` và hiện hint rõ cho `user_not_found`, `moment_not_found`, `validation_error` để tester xử lý đúng bước tiếp theo.
 - Files:
-  - apps/backend-python/app/services/locations.py
-  - apps/backend-python/tests/test_location_audience_api.py
+  - apps/backend-python/app/repositories/notifications.py
+  - apps/backend-python/app/services/notifications.py
+  - apps/backend-python/app/modules/notifications/router.py
+  - apps/backend-python/tests/test_notifications_security_api.py
 - Test:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_location_audience_api.py` ✅ (4 passed)
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k unread_only` ✅ (1 passed, 10 deselected)
 - Git:
   - latest feature commit: `dae57a8` — `batch236: clear location audience when sharing stops`
-  - working tree: clean
+  - working tree: dirty (batch237 verify done, chưa commit)
 - Blocker: none
-- Next: mở batch237 với 1 slice hẹp notification shell.
+- Next: commit batch237 rồi sync workflow docs theo commit mới.
+- Batch 237 handoff (pending close):
+  - (chưa commit) notification list hỗ trợ query `unread_only=true` để chỉ trả unread items.
 - Batch 236 handoff:
   - `dae57a8` — `batch236: clear location audience when sharing stops`
   - stop-sharing now clears share audience entries so backend list/state aligns with inactive sharing semantics.

@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db_session
@@ -38,9 +38,13 @@ def create_notification(
 
 
 @router.get("/{user_id}", response_model=NotificationListResponse)
-def list_notifications(user_id: uuid.UUID, db: Session = Depends(get_db_session)) -> NotificationListResponse:
+def list_notifications(
+    user_id: uuid.UUID,
+    unread_only: bool = Query(default=False),
+    db: Session = Depends(get_db_session),
+) -> NotificationListResponse:
     try:
-        notifications = notification_service.list_notifications(db, user_id)
+        notifications = notification_service.list_notifications(db, user_id, unread_only=unread_only)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     items = [to_notification_response(notification) for notification in notifications]

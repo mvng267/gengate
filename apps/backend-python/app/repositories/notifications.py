@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import Select, select
 from sqlalchemy.orm import Session
 
 from app.models.notifications import Notification
@@ -18,11 +18,13 @@ class NotificationRepository(BaseRepository[Notification]):
         )
         return db.scalar(statement)
 
-    def list_by_user_id(self, db: Session, user_id: uuid.UUID) -> list[Notification]:
-        statement = select(Notification).where(
+    def list_by_user_id(self, db: Session, user_id: uuid.UUID, unread_only: bool = False) -> list[Notification]:
+        statement: Select[tuple[Notification]] = select(Notification).where(
             Notification.user_id == user_id,
             Notification.deleted_at.is_(None),
         )
+        if unread_only:
+            statement = statement.where(Notification.read_at.is_(None))
         return list(db.scalars(statement).all())
 
 
