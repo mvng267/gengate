@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 252
-- Trục công việc: notification shell — web/iOS quick presets for unread filter.
-- Trạng thái: batch252_complete_notification_unread_presets.
+- Batch workflow chính thức hiện tại: 253
+- Trục công việc: notification shell — web/iOS immediate status hint on preset select.
+- Trạng thái: batch253_complete_notification_preset_status_hint.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 253 handoff (closed)
+- Batch vừa xong: **253**
+- Commit đã chốt:
+  - `f9081ef` — `batch253: show status hint when unread preset is selected`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **254**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm tiny selected-state marker gần preset controls để dễ nhận biết mode hiện tại.
 
 ## Batch 252 handoff (closed)
 - Batch vừa xong: **252**

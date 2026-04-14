@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 252
+- Batch: 253
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 252 notification shell — add quick presets for unread filter (`All` / `Unread only`).
+- Scope: batch 253 notification shell — show immediate status hint when unread preset is selected.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,10 +16,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `721661f` — `batch252: add unread filter quick presets in notification shells`
+  - latest feature commit: `f9081ef` — `batch253: show status hint when unread preset is selected`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch253 với 1 slice hẹp notification shell tiếp theo: thêm status hint tức thì khi bấm preset (`All`/`Unread only`) để tester nhận được feedback trước khi bấm Load.
+- Next: mở batch254 với 1 slice hẹp notification shell tiếp theo: thêm tiny selected-state marker gần preset controls để tester nhận biết mode hiện tại mà không nhìn disabled state.
+- Batch 253 handoff:
+  - `f9081ef` — `batch253: show status hint when unread preset is selected`
+  - web/iOS preset `All`/`Unread only` giờ ghi status hint ngay khi bấm, nhắc cần `Load notifications` để refresh window theo filter vừa chọn.
 - Batch 252 handoff:
   - `721661f` — `batch252: add unread filter quick presets in notification shells`
   - web/iOS thêm 2 nút preset `All` và `Unread only` để đổi filter nhanh, tự reset offset về page đầu và giảm ambiguity của toggle-only flow.

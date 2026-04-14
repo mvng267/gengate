@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **252 — notification shell (web/iOS quick presets for unread filter) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **253 — notification shell (web/iOS immediate status hint on preset select) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **252**
-- Scope hiện tại: notification shell — thêm quick presets (`All`/`Unread only`) cho unread filter trên web/iOS.
+- Batch workflow chính thức hiện tại: **253**
+- Scope hiện tại: notification shell — thêm status hint tức thì khi bấm preset (`All`/`Unread only`) trên web/iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/notification-shell.tsx`
@@ -99,18 +99,33 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `721661f` — `batch252: add unread filter quick presets in notification shells`
+  - commit gần nhất đã chốt: `f9081ef` — `batch253: show status hint when unread preset is selected`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch253 với 1 slice hẹp notification shell: thêm status hint tức thì khi bấm preset (`All`/`Unread only`) trước bước Load.
+  - mở batch254 với 1 slice hẹp notification shell: thêm tiny selected-state marker gần preset controls để dễ nhận biết mode hiện tại.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.
   - iOS Feed: tạo/lỗi moment posting flow; nếu backend trả `error.code/error.message` thì UI hiện thông điệp lỗi + hint hành động cho `user_not_found`, `moment_not_found`, `validation_error`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **253**
+- Commit cuối đã chốt:
+  - `f9081ef` — `batch253: show status hint when unread preset is selected`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **254**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm tiny selected-state marker gần preset controls để dễ nhận biết mode hiện tại.
+
+---
 
 - Batch vừa xong: **252**
 - Commit cuối đã chốt:
