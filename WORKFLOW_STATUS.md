@@ -12,8 +12,8 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `(pending local commit for batch197 slice)`
-  - working tree: dirty while editing (will be clean after local commit, chưa push)
+  - latest commit: `21b5517` — `batch197: add branch-summary compact bundle quick copy`
+  - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
 - Next: mở batch198 cho messaging friction tiếp theo (ví dụ thêm quick-copy compact bundle with `use_when + preview only` fallback để dùng khi cần ultra-short ticket note) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
