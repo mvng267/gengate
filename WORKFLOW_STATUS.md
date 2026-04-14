@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 249
+- Batch: 250
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 249 notification shell — add row-level read-state symbols near toggle action.
+- Scope: batch 250 notification shell — include read-state symbols in toggle status copy.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,10 +16,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `0b196ed` — `batch249: add row read-state symbols near toggle action`
+  - latest feature commit: `e35cde6` — `batch250: include read-state symbols in toggle status copy`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch250 với 1 slice hẹp notification shell tiếp theo: thêm status copy sau toggle để nhắc rõ ký hiệu `● read` / `○ unread` cho tester mới vào flow.
+- Next: mở batch251 với 1 slice hẹp notification shell tiếp theo: thêm tiny legend line ngay trên list (`● read`, `○ unread`) để người mới không phải suy nghĩa ký hiệu.
+- Batch 250 handoff:
+  - `e35cde6` — `batch250: include read-state symbols in toggle status copy`
+  - web/iOS status sau toggle đã nhắc trực tiếp `read (●)` / `unread (○)` để đồng bộ với ký hiệu trên nút row.
 - Batch 249 handoff:
   - `0b196ed` — `batch249: add row read-state symbols near toggle action`
   - web/iOS nút toggle read/unread giờ có ký hiệu `●` (read) / `○` (unread) để scan row nhanh khi paging.

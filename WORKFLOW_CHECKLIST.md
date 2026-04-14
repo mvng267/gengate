@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **249 — notification shell (web/iOS row-level read-state symbols near toggle action) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **250 — notification shell (web/iOS toggle status copy includes read-state symbols) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **249**
-- Scope hiện tại: notification shell — thêm lightweight row-level read-state symbol gần nút toggle trên web/iOS.
+- Batch workflow chính thức hiện tại: **250**
+- Scope hiện tại: notification shell — thêm status copy sau toggle với ký hiệu `● read` / `○ unread` trên web/iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/notification-shell.tsx`
@@ -99,18 +99,33 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `0b196ed` — `batch249: add row read-state symbols near toggle action`
+  - commit gần nhất đã chốt: `e35cde6` — `batch250: include read-state symbols in toggle status copy`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch250 với 1 slice hẹp notification shell: thêm status copy sau toggle để nhắc rõ ký hiệu `● read` / `○ unread`.
+  - mở batch251 với 1 slice hẹp notification shell: thêm tiny legend line `● read` / `○ unread` gần danh sách row.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.
   - iOS Feed: tạo/lỗi moment posting flow; nếu backend trả `error.code/error.message` thì UI hiện thông điệp lỗi + hint hành động cho `user_not_found`, `moment_not_found`, `validation_error`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **250**
+- Commit cuối đã chốt:
+  - `e35cde6` — `batch250: include read-state symbols in toggle status copy`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **251**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm tiny legend line `● read` / `○ unread` gần danh sách row.
+
+---
 
 - Batch vừa xong: **249**
 - Commit cuối đã chốt:
