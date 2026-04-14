@@ -71,6 +71,38 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     setStatus("Applied current session user as create author (author_source=session_user).");
   }
 
+  async function applyCurrentSessionUserAsViewerAndLoad() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_viewer_missing_for_quick_apply");
+      return;
+    }
+
+    const draftViewerUserId = form.viewerUserId.trim();
+    const viewerStatus =
+      draftViewerUserId === sessionUserId
+        ? "Viewer already matches current session user (viewer_source=session_user)."
+        : "Applied current session user as feed viewer (viewer_source=session_user).";
+
+    setForm((current) => ({
+      ...current,
+      viewerUserId: sessionUserId,
+    }));
+
+    setIsLoadingFeed(true);
+    setStatus(`${viewerStatus} Reloading private friend feed...`);
+
+    try {
+      const nextItems = await listPrivateFeed(sessionUserId);
+      setFeedItems(nextItems);
+      setStatus(`${viewerStatus} Loaded ${nextItems.length} private feed moment(s) for viewer ${sessionUserId}.`);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "private_feed_failed");
+    }
+
+    setIsLoadingFeed(false);
+  }
+
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
@@ -198,6 +230,13 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         </button>
         <button type="button" onClick={() => void handleReload()} disabled={isLoadingList}>
           {isLoadingList ? "Reloading..." : "Reload authored moments"}
+        </button>
+        <button
+          type="button"
+          onClick={() => void applyCurrentSessionUserAsViewerAndLoad()}
+          disabled={isLoadingFeed || currentSessionUserId.trim().length === 0}
+        >
+          Use current session user as viewer + load
         </button>
         <button type="button" onClick={() => void handleReloadFeed()} disabled={isLoadingFeed}>
           {isLoadingFeed ? "Reloading feed..." : "Reload private friend feed"}
