@@ -676,6 +676,12 @@ struct FeedPlaceholderView: View {
                 .disabled(isLoadingReactions || isCreatingReaction)
             }
 
+            if requireDeleteConfirmation {
+                Text("Row delete đang khóa. Tắt `Require confirmation for row delete` ở form phía trên để mở khoá.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             Button {
                 Task {
                     await createQuickReactionForMoment(row)
