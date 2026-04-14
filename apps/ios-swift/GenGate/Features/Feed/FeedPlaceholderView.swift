@@ -309,6 +309,13 @@ struct FeedPlaceholderView: View {
                             .textSelection(.enabled)
                     }
 
+                    if let privateFeedQuickCopySummary {
+                        Text("Quick copy feed: \(privateFeedQuickCopySummary)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+                    }
+
                     if let fetchError {
                         Text("Fetch error: \(fetchError)")
                             .font(.footnote)
@@ -833,6 +840,15 @@ struct FeedPlaceholderView: View {
         let normalizedCaption = caption.isEmpty ? "(empty)" : caption
 
         return "author=\(normalizedAuthor) | image_url=\(normalizedImageURL) | caption=\(normalizedCaption)"
+    }
+
+    private var privateFeedQuickCopySummary: String? {
+        let viewer = viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedViewer = viewer.isEmpty ? "(empty)" : viewer
+        let feedCount = momentRows.count
+        let firstMomentID = momentRows.first?.id ?? "(none)"
+
+        return "viewer=\(normalizedViewer) | feed_count=\(feedCount) | first_moment_id=\(firstMomentID)"
     }
 
     private var resolvedQuickReactionUserID: String? {

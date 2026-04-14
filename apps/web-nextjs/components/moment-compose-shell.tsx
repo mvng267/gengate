@@ -34,6 +34,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [feedItems, setFeedItems] = useState<MomentListItem[]>([]);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
   const momentPayloadQuickCopy = `author=${form.authorUserId.trim() || "(empty)"} | image_url=${form.imageStorageKey.trim() || "(empty)"} | caption=${form.captionText.trim() || "(empty)"}`;
+  const privateFeedQuickCopy = `viewer=${form.viewerUserId.trim() || "(empty)"} | feed_count=${feedItems.length} | first_moment_id=${feedItems[0]?.id ?? "(none)"}`;
 
   useEffect(() => {
     setForm((current) => ({
@@ -131,6 +132,9 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       <p>{status}</p>
       <p>
         Quick copy payload: <code>{momentPayloadQuickCopy}</code>
+      </p>
+      <p>
+        Quick copy feed: <code>{privateFeedQuickCopy}</code>
       </p>
 
       <form onSubmit={(event) => void handleCreate(event)}>
