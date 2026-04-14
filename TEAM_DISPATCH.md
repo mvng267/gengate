@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 275
-- Trục công việc: direct-message shell — web+iOS add member-row one-tap action to apply selected member cursor message as read-cursor target message.
-- Trạng thái: batch275_complete_dm_member_cursor_message_target_one_tap_web_ios.
+- Batch workflow chính thức hiện tại: 276
+- Trục công việc: direct-message shell — web+iOS add member-row one-tap cursor-context action to apply target user + target message together.
+- Trạng thái: batch276_complete_dm_member_cursor_context_one_tap_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 276 handoff (closed)
+- Batch vừa xong: **276**
+- Commit đã chốt:
+  - `(pending in this run)` — `batch276: add member-cursor context one-tap actions on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **277**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm quick action one-tap apply member cursor context + focus user đồng thời trên web+iOS để rút ngắn verify read_state.
 
 ## Batch 275 handoff (closed)
 - Batch vừa xong: **275**

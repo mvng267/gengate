@@ -411,6 +411,33 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     );
   }
 
+  function applyConversationMemberCursorContextForReadCursor(member: ConversationMemberItem) {
+    const normalizedUserId = member.user_id.trim();
+    const normalizedMessageId = member.last_read_message_id?.trim() ?? "";
+
+    if (!normalizedUserId) {
+      setStatus("member_read_cursor_target_missing_for_context_apply");
+      return;
+    }
+
+    if (!normalizedMessageId) {
+      setStatus("member_read_cursor_target_message_missing_for_context_apply");
+      return;
+    }
+
+    const currentTargetUserId = readCursorTargetUserIdDraft.trim();
+    const currentTargetMessageId = readCursorTargetMessageIdDraft.trim();
+    const alreadyMatched = currentTargetUserId === normalizedUserId && currentTargetMessageId === normalizedMessageId;
+
+    setReadCursorTargetUserIdDraft(normalizedUserId);
+    setReadCursorTargetMessageIdDraft(normalizedMessageId);
+    setStatus(
+      alreadyMatched
+        ? "Read-cursor target user + message already match selected member cursor context (read_cursor_context_source=member_row)."
+        : "Applied selected member cursor context as read-cursor target user + message (read_cursor_context_source=member_row).",
+    );
+  }
+
   function applyCurrentSessionUserForReadCursorAndFocus() {
     const sessionUserId = currentSessionUserId.trim();
     if (!sessionUserId) {
@@ -691,6 +718,13 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
                   disabled={!member.last_read_message_id}
                 >
                   Use member cursor as message target
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyConversationMemberCursorContextForReadCursor(member)}
+                  disabled={!member.last_read_message_id}
+                >
+                  Use member cursor context (target + message)
                 </button>
               </div>
             </li>

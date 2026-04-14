@@ -1541,6 +1541,31 @@ struct InboxPlaceholderView: View {
                                 .buttonStyle(.bordered)
                                 .disabled(cursorMessageID == nil)
 
+                                Button {
+                                    applyConversationMemberCursorContextForReadCursor(memberUserID: member.userID, lastReadMessageID: cursorMessageID)
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Text("Use member cursor context (target + message)")
+                                            .font(.caption)
+
+                                        Spacer()
+
+                                        if let cursorMessageID {
+                                            let isContextSelected = resolvedReadCursorTargetUserID == member.userID && resolvedReadCursorTargetMessageID == cursorMessageID
+                                            Text(isContextSelected ? "context_selected" : "set_context")
+                                                .font(.caption2.monospaced())
+                                                .foregroundStyle(isContextSelected ? .blue : .secondary)
+                                        } else {
+                                            Text("cursor_missing")
+                                                .font(.caption2.monospaced())
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(cursorMessageID == nil)
+
                                 if cursorMessageID == nil {
                                     Text("cursor_message_target: unavailable")
                                         .font(.caption.monospaced())
@@ -3098,6 +3123,34 @@ use_when=\(useWhenText)
             sendStatusHint = "Read-cursor target message already matches selected member cursor message (read_cursor_message_source=member_cursor)."
         } else {
             sendStatusHint = "Applied selected member cursor message as read-cursor target message (read_cursor_message_source=member_cursor)."
+        }
+    }
+
+    private func applyConversationMemberCursorContextForReadCursor(memberUserID: String, lastReadMessageID: String?) {
+        let normalizedUserID = memberUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedMessageID = lastReadMessageID?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+        guard !normalizedUserID.isEmpty else {
+            sendStatusHint = "member_read_cursor_target_missing_for_context_apply"
+            return
+        }
+
+        guard !normalizedMessageID.isEmpty else {
+            sendStatusHint = "member_read_cursor_target_message_missing_for_context_apply"
+            return
+        }
+
+        let currentTargetUserID = readCursorTargetUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentTargetMessageID = readCursorTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let alreadyMatched = currentTargetUserID == normalizedUserID && currentTargetMessageID == normalizedMessageID
+
+        readCursorTargetUserIDDraft = normalizedUserID
+        readCursorTargetMessageIDDraft = normalizedMessageID
+
+        if alreadyMatched {
+            sendStatusHint = "Read-cursor target user + message already match selected member cursor context (read_cursor_context_source=member_row)."
+        } else {
+            sendStatusHint = "Applied selected member cursor context as read-cursor target user + message (read_cursor_context_source=member_row)."
         }
     }
 
