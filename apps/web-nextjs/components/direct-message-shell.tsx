@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { readPersistedAuthSession } from "@/lib/auth/client";
 import {
   createMessageAttachment,
   getOrCreateDirectConversation,
@@ -54,6 +55,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [isSending, setIsSending] = useState(false);
   const [isCreatingAttachment, setIsCreatingAttachment] = useState(false);
   const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
+  const [currentSessionUserId, setCurrentSessionUserId] = useState("");
   const conversationQuickCopy = `user_a=${form.userAId.trim() || "(empty)"} | user_b=${form.userBId.trim() || "(empty)"} | message_count=${messages.length} | last_message_id=${messages[messages.length - 1]?.id ?? "(none)"}`;
 
   useEffect(() => {
@@ -68,6 +70,11 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setAttachmentItems([]);
     setAttachmentForm({ ...initialAttachmentForm });
   }, [initialSenderUserId, initialUserAId, initialUserBId]);
+
+  useEffect(() => {
+    const persistedSession = readPersistedAuthSession();
+    setCurrentSessionUserId(persistedSession?.session.user_id?.trim() ?? "");
+  }, []);
 
   async function handleOpenThread() {
     setIsOpening(true);
@@ -121,24 +128,58 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
 
   async function handleSendMessage(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    await sendMessageWithCurrentSender();
+  }
+
+  async function applyCurrentSessionUserAsSenderAndSend() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_sender_missing_for_quick_apply");
+      return;
+    }
+
     if (!conversation) {
       setStatus("open_thread_first");
       return;
     }
 
+    const senderStatus =
+      form.senderUserId.trim() === sessionUserId
+        ? "Sender already matches current session user (sender_source=session_user)."
+        : "Applied current session user as sender (sender_source=session_user).";
+
+    setForm((current) => ({
+      ...current,
+      senderUserId: sessionUserId,
+    }));
+
+    setStatus(`${senderStatus} Sending direct message shell...`);
+    await sendMessageWithCurrentSender({ senderUserIdOverride: sessionUserId, statusPrefix: senderStatus });
+  }
+
+  async function sendMessageWithCurrentSender(input?: { senderUserIdOverride?: string; statusPrefix?: string }) {
+    if (!conversation) {
+      setStatus("open_thread_first");
+      return;
+    }
+
+    const senderUserId = input?.senderUserIdOverride ?? form.senderUserId.trim();
+    const statusPrefix = input?.statusPrefix?.trim();
+
     setIsSending(true);
-    setStatus("Sending direct message shell...");
+    setStatus(statusPrefix ? `${statusPrefix} Sending direct message shell...` : "Sending direct message shell...");
 
     try {
       const created = await sendMessage({
         conversationId: conversation.id,
-        senderUserId: form.senderUserId.trim(),
+        senderUserId,
         payloadText: form.payloadText.trim(),
       });
       setMessages((current) => [created, ...current]);
       setAttachmentForm((current) => ({ ...current, targetMessageId: current.targetMessageId || created.id }));
       setForm((current) => ({ ...current, payloadText: "" }));
-      setStatus(`Sent message ${created.id} into direct thread ${conversation.id}.`);
+      const sentStatus = `Sent message ${created.id} into direct thread ${conversation.id}.`;
+      setStatus(statusPrefix ? `${statusPrefix} ${sentStatus}` : sentStatus);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "message_create_failed");
     }
@@ -254,6 +295,13 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
             placeholder="type a direct message"
           />
         </label>
+        <button
+          type="button"
+          onClick={() => void applyCurrentSessionUserAsSenderAndSend()}
+          disabled={isSending || !conversation || currentSessionUserId.trim().length === 0}
+        >
+          Use current session user as sender + send
+        </button>
         <button type="submit" disabled={isSending || !conversation}>
           {isSending ? "Sending..." : "Send text message"}
         </button>
