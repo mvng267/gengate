@@ -1465,6 +1465,23 @@ struct InboxPlaceholderView: View {
                                     .font(.footnote.monospaced())
                                     .foregroundStyle(.secondary)
 
+                                Button {
+                                    applyConversationMemberAsReadFocusUser(member.userID)
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Text("Use member as read focus user")
+                                            .font(.caption)
+
+                                        Spacer()
+
+                                        Text(resolvedReadStatusFocusUserID == member.userID ? "focus_selected" : "set_focus")
+                                            .font(.caption2.monospaced())
+                                            .foregroundStyle(resolvedReadStatusFocusUserID == member.userID ? .blue : .secondary)
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .buttonStyle(.bordered)
+
                                 if let cursorMessageID {
                                     Button {
                                         readCursorTargetMessageIDDraft = cursorMessageID
@@ -2968,6 +2985,23 @@ use_when=\(useWhenText)
 
         readStatusFocusUserIDDraft = currentSessionUserID
         sendStatusHint = focusStatus
+    }
+
+    private func applyConversationMemberAsReadFocusUser(_ memberUserID: String) {
+        let normalizedMemberUserID = memberUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedMemberUserID.isEmpty else {
+            sendStatusHint = "member_focus_user_missing"
+            return
+        }
+
+        let currentFocusUserID = readStatusFocusUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if currentFocusUserID == normalizedMemberUserID {
+            sendStatusHint = "Read focus user already matches selected member (focus_user_source=member_row)."
+        } else {
+            sendStatusHint = "Applied selected member as read focus user (focus_user_source=member_row)."
+        }
+
+        readStatusFocusUserIDDraft = normalizedMemberUserID
     }
 
     private func applyCurrentSessionUserAsReadCursorTargetAndFocusUser() {

@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 271
+- Batch: 272
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 271 direct-message shell — add quick-copy line chuẩn hóa read-cursor apply result (`target_user + applied_message + focus_user + read_state`) on web+iOS.
+- Scope: batch 272 direct-message shell — add member-row quick action to set read focus user (focus_user_source=member_row) on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -17,10 +17,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `0a0ff0d` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
-  - working tree: clean after batch271 commit
+  - latest feature commit: `(pending in this run)` — `batch272: add member-row quick focus-user actions on web and ios`
+  - working tree: dirty (2 files) before commit
 - Blocker: none
-- Next: mở batch272 với 1 slice hẹp direct-message shell: thêm quick action set focus user theo selected member row parity (web+iOS) để giảm nhập tay khi verify read-state transitions.
+- Next: mở batch273 với 1 slice hẹp direct-message shell: thêm quick action đồng bộ selected member vào read-cursor target user parity (web+iOS) để test read-cursor updates nhanh hơn.
+- Batch 272 handoff:
+  - `(pending in this run)` — `batch272: add member-row quick focus-user actions on web and ios`
+  - web/iOS member summary thêm action `Use member as read focus user`, set status source marker `focus_user_source=member_row` để giảm nhập tay khi retest read-state.
 - Batch 271 handoff:
   - `0a0ff0d` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
   - web/iOS inbox shell thêm line + clipboard action `Quick copy read-cursor apply result` với format chuẩn `target_user + applied_message + focus_user + read_state`.
