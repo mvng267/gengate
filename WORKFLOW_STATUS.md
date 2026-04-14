@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 162
+- Batch: 163
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 162 iOS inbox seam hardening — align first-option empty-state source hint to `short-id` wording
+- Scope: batch 163 iOS inbox seam hardening — align status summary wording with source-hint `short-id` consistency
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch162 slice)
+  - latest commit: `HEAD` (local batch163 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch163 cho messaging friction tiếp theo (ví dụ đồng bộ nhãn `short-id` trong status summary line để mô tả capability nhất quán hơn) trong iOS inbox shell
+- Next: mở batch164 cho messaging friction tiếp theo (ví dụ thêm testcase-like checklist line cho source-hint branch matrix để verify thủ công nhanh hơn) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -379,6 +379,10 @@
   - first-option empty-state source hint nay đổi prefix từ `short` sang `short-id` để đồng bộ wording với các nhánh source hint còn lại
   - hoàn tất nhất quán label `short-id` trên các state: same-as-first / in-sync non-first / manual out-of-options / empty-state-first-option
   - không đổi logic selection; chỉ là caption consistency slice
+- Batch 163 outcome:
+  - status summary line được rút gọn/đồng bộ thành phrase thống nhất: `source-hint short-id consistency across first-option/in-sync/manual/fallback states`
+  - bullets bổ sung note rõ việc đồng bộ wording giữa phần source-hint runtime và status capability text
+  - không đổi hành vi UI/action; chỉ tăng độ nhất quán mô tả để tester đọc status nhanh hơn
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -388,7 +392,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, load direct thread A-B; verify empty-state fallback `short-id chưa khả dụng`, rồi `Reload recipient devices` để thấy hint first-option cũng dùng prefix `short-id`; chọn một device option hợp lệ nhưng không phải first để verify nhánh in-sync non-first vẫn dùng `short-id`; nhập manual/stale UUID ngoài options để verify nhánh manual cũng dùng cùng prefix; cuối cùng bấm dynamic first-valid action để quay lại first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.` trước khi `Create message-device key`
+  - iOS Inbox path: open Inbox tab, load direct thread A-B; verify source-hint branch matrix dùng `short-id` nhất quán ở first-option/in-sync/manual và fallback `short-id chưa khả dụng`; đồng thời check summary text trong màn Inbox đã phản ánh phrase consistency mới; cuối cùng bấm dynamic first-valid action để quay lại first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.` trước khi `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts
