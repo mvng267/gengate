@@ -692,10 +692,23 @@ struct FeedPlaceholderView: View {
                 .disabled(isLoadingReactions || isCreatingReaction)
             }
 
-            if requireDeleteConfirmation {
-                Text("Row delete đang khóa. Tắt `Require confirmation for row delete` ở form phía trên để mở khoá.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            HStack(spacing: 8) {
+                Text(requireDeleteConfirmation ? "Locked" : "Unlocked")
+                    .font(.caption2.monospaced())
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(requireDeleteConfirmation ? Color.orange.opacity(0.2) : Color.green.opacity(0.2))
+                    .foregroundStyle(requireDeleteConfirmation ? .orange : .green)
+                    .clipShape(Capsule())
+
+                Text(
+                    requireDeleteConfirmation
+                        ? "Row delete đang khóa. Tắt `Require confirmation for row delete` ở form phía trên để mở khoá."
+                        : "Row delete đã mở khoá. Có thể dùng `Delete this moment` ngay tại row này."
+                )
+                .font(.caption)
+                .foregroundStyle(requireDeleteConfirmation ? .orange : .green)
             }
 
             Button {
