@@ -1,15 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 230
+- Batch: 231
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 230 iOS feed UX hardening — add row-level lock-state badge near delete action (`Delete lock: Locked/Unlocked`)
+- Scope: batch 231 iOS feed UX hardening — align row lock-state copy with toggle status text (`Delete lock: Locked/Unlocked`)
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
   - iOS: Session login -> Feed -> load private feed/authored moments.
-  - Verify mỗi row hiển thị badge lock-state (`Delete lock: Locked` hoặc `Delete lock: Unlocked`).
-  - Bật/tắt toggle `Require confirmation for row delete` và xác nhận badge đổi trạng thái tức thời.
-  - Khi unlock, vẫn tap được `Delete this moment`; khi lock, CTA chuyển `🔒 Unlock to delete`.
+  - Lock ON: row hint hiển thị `Delete lock: Locked` + copy hướng dẫn unlock.
+  - Lock OFF: row hint hiển thị `Delete lock: Unlocked` + copy `Row delete ready...`.
+  - CTA vẫn đúng: lock ON -> `🔒 Unlock to delete`, lock OFF -> `Delete this moment`.
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
   - WORKFLOW_STATUS.md
@@ -18,13 +18,17 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `a53dc6d` — `batch230: add row lock-state badge near delete action`
-  - working tree: bẩn (docs batch230 in progress, chưa commit)
+  - latest feature commit: `d3a491f` — `batch231: align row lock-state copy with toggle status text`
+  - working tree: bẩn (docs batch231 in progress, chưa commit)
 - Blocker: none
-- Next: commit docs batch230 rồi mở batch231 cho friction slice hẹp kế tiếp
+- Next: commit docs batch231 rồi mở batch232 cho friction slice hẹp kế tiếp
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 230 handoff:
+- Batch 231 handoff:
   - pending (in progress)
+  - aligned row lock-state wording with toggle status semantics to reduce retest mismatch.
+- Batch 230 handoff:
+  - `a53dc6d` — `batch230: add row lock-state badge near delete action`
+  - `2f308f0` — `batch230: sync workflow docs after lock-state badge`
   - added always-visible lock-state badge right at row-level action area to reduce missed state during fast scrolling.
 - Batch 229 handoff:
   - `df805ad` — `batch229: tint row delete readiness hint by lock state`

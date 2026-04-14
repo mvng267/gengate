@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **230 — iOS row-level lock-state badge added near delete actions (MVP-testable)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **231 — iOS row lock-state copy aligned with toggle status wording (MVP-testable)**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **230**
-- Scope hiện tại: iOS feed UX hardening — thêm badge lock-state ngay gần row delete action để operator biết trạng thái lock/unlock tại chỗ.
+- Batch workflow chính thức hiện tại: **231**
+- Scope hiện tại: iOS feed UX hardening — đồng bộ wording row lock-state hint với semantics toggle để giảm mơ hồ khi retest nhanh.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
@@ -100,20 +100,35 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `a53dc6d` — `batch230: add row lock-state badge near delete action`
-  - working tree hiện tại: bẩn (docs batch230 đang cập nhật, chưa commit)
+  - commit gần nhất đã chốt: `d3a491f` — `batch231: align row lock-state copy with toggle status text`
+  - working tree hiện tại: bẩn (docs batch231 đang cập nhật, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit docs batch230 rồi mở batch231 cho 1 friction slice hẹp kế tiếp.
+  - commit docs batch231 rồi mở batch232 cho 1 friction slice hẹp kế tiếp.
 - MVP-testable run/test path (human):
-  - iOS Session login -> Feed -> load moments -> verify badge `Delete lock: Locked/Unlocked` đổi theo toggle -> unlock rồi tap `Delete this moment`.
+  - iOS Session login -> Feed -> load moments -> lock ON thấy `Delete lock: Locked` -> lock OFF thấy `Delete lock: Unlocked` + `Row delete ready...` -> unlock rồi tap `Delete this moment`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **231**
+- Commit cuối đã chốt:
+  - `d3a491f` — `batch231: align row lock-state copy with toggle status text`
+- Test-verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **232**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - quay lại seam social ưu tiên cao (friend graph/moment/feed/DM) với 1 slice wiring nhỏ beyond auth/session.
+
+---
 
 - Batch vừa xong: **230**
 - Commit cuối đã chốt:
   - `a53dc6d` — `batch230: add row lock-state badge near delete action`
+  - `2f308f0` — `batch230: sync workflow docs after lock-state badge`
 - Test-verify cuối:
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:

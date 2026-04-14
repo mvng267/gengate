@@ -12,14 +12,27 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 231
-- Trục công việc: iOS feed UX hardening — đồng bộ style/copy lock-state badge để nhất quán với status copy khi thao tác liên tiếp.
-- Trạng thái: in_progress_batch231_ios.
+- Batch workflow chính thức hiện tại: 232
+- Trục công việc: chuyển trọng tâm lại seam social ưu tiên cao (friend/moment/feed/DM) bằng 1 slice wiring nhỏ, tránh drift vào iOS copy-only.
+- Trạng thái: planned_batch232_social_seam.
+
+## Batch 231 handoff (closed)
+- Batch vừa xong: **231**
+- Commit đã push:
+  - `d3a491f` — `batch231: align row lock-state copy with toggle status text`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **232**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - lấy 1 friction point ở social seam hiện có (ưu tiên friend graph hoặc moment posting shell) để tăng độ end-to-end testable beyond auth.
 
 ## Batch 230 handoff (closed)
 - Batch vừa xong: **230**
 - Commit đã push:
   - `a53dc6d` — `batch230: add row lock-state badge near delete action`
+  - `2f308f0` — `batch230: sync workflow docs after lock-state badge`
 - Test/verify cuối:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Blocker/rủi ro còn lại:
@@ -244,9 +257,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 231 iOS feed UX hardening.
-- Kết quả gần nhất: batch 230 thêm lock-state badge ngay gần row delete action.
-- Trạng thái: in_progress_batch231_ios.
+- Scope hiện tại: batch 232 social seam pivot planning.
+- Kết quả gần nhất: batch 231 đồng bộ row lock-state copy với semantics toggle status.
+- Trạng thái: planned_batch232_social_seam.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
