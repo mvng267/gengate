@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **220 — iOS profile status summary now includes selected pending pair mode (same/reverse) in verify (MVP-testable)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **221 — iOS feed quick-fill create-author from selected moment row is in verify (MVP-testable)**.
 
 ## Reporting hard rule
 
@@ -89,40 +89,40 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **220**
-- Scope hiện tại: iOS profile friend graph UX hardening — hiển thị pending pair mode (same/reverse) ngay trong status summary sau khi preset.
+- Batch workflow chính thức hiện tại: **221**
+- Scope hiện tại: iOS feed UX hardening — thêm row-level action để fill `Author user UUID` từ moment author đang chọn.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
+  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `13d7a42` — `batch220: show ios pending pair mode in snapshot summary`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `71a42b3` — `batch220: sync workflow docs after ios pair mode summary`
+  - working tree hiện tại: bẩn (đang có thay đổi batch221, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch221 cho 1 friction slice hẹp kế tiếp.
+  - commit local batch221 rồi mở batch222 cho 1 friction slice hẹp kế tiếp.
 - MVP-testable run/test path (human):
-  - iOS Session login -> Profile -> load friend graph -> bấm `Use same pair`/`Use reverse pair` -> verify status summary thêm `pending pair mode: same|reverse` trước khi send/accept.
+  - iOS Session login -> Feed -> load moments -> bấm `Use author for create` ở row -> verify `Author user UUID` được fill + nút đổi `Author selected`, rồi create/reload moment flow.
 
 ## Batch handoff note
 
-- Batch vừa xong: **219**
+- Batch vừa xong: **220**
 - Commit cuối đã chốt:
-  - `e01f7ea` — `batch219: show selected state for ios pending pair presets`
-  - `dad9ec4` — `batch219: sync workflow docs for ios preset selection feedback`
+  - `13d7a42` — `batch220: show ios pending pair mode in snapshot summary`
+  - `71a42b3` — `batch220: sync workflow docs after ios pair mode summary`
 - Test-verify cuối:
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
   - none
 - Batch kế tiếp:
-  - **220**
+  - **221**
 - Scope hẹp đầu tiên của batch kế tiếp:
-  - thêm mode marker vào status summary (`pending pair mode: same|reverse`) để tester nhìn trạng thái active mà không cần đọc label từng nút.
+  - thêm row-level action `Use author for create` để giảm copy/paste author UUID khi test create moment từ feed row context.
 
 ---
 

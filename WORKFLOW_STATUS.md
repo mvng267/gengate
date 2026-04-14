@@ -1,30 +1,30 @@
 # GenGate Workflow Status
 
-- Batch: 220
+- Batch: 221
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 220 iOS profile friend-graph UX hardening — show selected pending pair mode directly in status summary
+- Scope: batch 221 iOS feed UX hardening — quick-fill create author from selected moment row
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
-  - iOS: Session login -> Profile -> load friend graph -> chọn pending request row.
-  - Tap `Use same pair` hoặc `Use reverse pair`.
-  - Verify status summary now appends pair mode (`pending pair mode: same` / `pending pair mode: reverse`) next to selected requester/receiver IDs.
-  - Continue with `Send friend request`/`Accept request` to validate flow remains intact.
+  - iOS: Session login -> Feed -> load private feed/authored moments.
+  - Ở row moment bất kỳ, tap `Use author for create` để fill `Author user UUID` cho form tạo moment.
+  - Verify nút đổi thành `Author selected` khi draft trùng author đang chọn, rồi tạo/reload moment flow như cũ.
 - Files:
-  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `13d7a42` — `batch220: show ios pending pair mode in snapshot summary`
-  - working tree: sạch
+  - latest commit: `71a42b3` — `batch220: sync workflow docs after ios pair mode summary`
+  - working tree: bẩn (batch221 changes in progress, chưa commit, chưa push)
 - Blocker: none
-- Next: mở batch221 cho 1 friction slice hẹp tiếp theo trong friend graph / feed seam MVP
+- Next: chốt batch221 (commit local) rồi mở batch222 cho 1 friction slice hẹp tiếp theo trong feed / inbox seam MVP
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 220 handoff:
   - `13d7a42` — `batch220: show ios pending pair mode in snapshot summary`
+  - `71a42b3` — `batch220: sync workflow docs after ios pair mode summary`
   - snapshot summary now exposes current pending pair mode (`same` / `reverse`) after preset selection for faster operator confirmation.
 - Batch 219 handoff:
   - `e01f7ea` — `batch219: show selected state for ios pending pair presets`

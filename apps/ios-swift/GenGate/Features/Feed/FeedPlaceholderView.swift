@@ -549,6 +549,15 @@ struct FeedPlaceholderView: View {
                 .buttonStyle(.bordered)
 
                 Button {
+                    useMomentAuthorAsCreateAuthor(row)
+                } label: {
+                    Text(normalizedAuthorUserIDDraft == row.authorID ? "Author selected" : "Use author for create")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .disabled(isCreatingMoment || normalizedAuthorUserIDDraft == row.authorID)
+
+                Button {
                     Task {
                         await loadReactionsForMoment(row)
                     }
@@ -608,6 +617,10 @@ struct FeedPlaceholderView: View {
         reactionTypeDraft
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .lowercased()
+    }
+
+    private var normalizedAuthorUserIDDraft: String {
+        authorUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private var normalizedReactionTargetMomentIDDraft: String {
@@ -738,6 +751,17 @@ struct FeedPlaceholderView: View {
 
     private func useMomentAsReactionTarget(_ row: PrivateFeedMomentRow) {
         reactionTargetMomentIDDraft = row.id
+    }
+
+    private func useMomentAuthorAsCreateAuthor(_ row: PrivateFeedMomentRow) {
+        let trimmedAuthorID = row.authorID.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedAuthorID.isEmpty else {
+            return
+        }
+
+        authorUserIDDraft = trimmedAuthorID
+        statusMessage = "Create author set from selected moment author."
+        fetchError = nil
     }
 
     private func loadReactionsForMoment(_ row: PrivateFeedMomentRow) async {

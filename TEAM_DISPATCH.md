@@ -12,9 +12,22 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 220
-- Trục công việc: iOS profile friend graph UX hardening — show selected pending pair mode in status summary.
-- Trạng thái: verify_batch220_ios (đã commit local, chưa push).
+- Batch workflow chính thức hiện tại: 221
+- Trục công việc: iOS feed UX hardening — quick-fill create author from selected moment row.
+- Trạng thái: verify_batch221_ios.
+
+## Batch 220 handoff (closed)
+- Batch vừa xong: **220**
+- Commit đã push:
+  - `13d7a42` — `batch220: show ios pending pair mode in snapshot summary`
+  - `71a42b3` — `batch220: sync workflow docs after ios pair mode summary`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **221**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - thêm row-level action `Use author for create` trên Feed moment row để giảm copy/paste author UUID khi test create flow.
 
 ## Batch 219 handoff (closed)
 - Batch vừa xong: **219**
@@ -104,9 +117,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 220 iOS profile friend graph UX hardening.
-- Kết quả gần nhất: batch 219 đã thêm selected-state feedback cho preset mode (`Using same pair` / `Using reverse pair`).
-- Trạng thái: verify_batch220_ios.
+- Scope hiện tại: batch 221 iOS feed UX hardening.
+- Kết quả gần nhất: thêm action `Use author for create` + trạng thái `Author selected` trên moment row.
+- Trạng thái: verify_batch221_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
