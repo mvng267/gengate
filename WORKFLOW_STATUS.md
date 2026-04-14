@@ -15,10 +15,13 @@
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` ✅ (4 passed)
 - Git:
-  - latest feature commit: `44c6097` — `batch233: sync workflow docs after moment posting error clarity`
-  - working tree: dirty (batch234 complete, chưa commit)
+  - latest feature commit: `910a899` — `batch234: hide soft-deleted moments from list and feed`
+  - working tree: dirty (workflow docs sync in progress)
 - Blocker: none
 - Next: mở batch235 với 1 slice hẹp direct messaging shell (ưu tiên hidden deleted messages parity check ở list/read path).
+- Batch 234 handoff:
+  - `910a899` — `batch234: hide soft-deleted moments from list and feed`
+  - backend list/feed moments now exclude soft-deleted entries (`deleted_at is null`) with regression test coverage on authored list + private friend feed.
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 232 handoff:
   - `3738b54` — `batch232: wire friend-request reject flow across backend and ios`

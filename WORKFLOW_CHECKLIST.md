@@ -98,8 +98,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` → ✅ `4 passed`
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `44c6097` — `batch233: sync workflow docs after moment posting error clarity`
-  - working tree hiện tại: bẩn (batch234 complete, chưa commit)
+  - commit gần nhất đã chốt: `910a899` — `batch234: hide soft-deleted moments from list and feed`
+  - working tree hiện tại: bẩn (đang sync workflow docs sau commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
@@ -110,6 +110,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Feed: tạo/lỗi moment posting flow; nếu backend trả `error.code/error.message` thì UI hiện thông điệp lỗi + hint hành động cho `user_not_found`, `moment_not_found`, `validation_error`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **234**
+- Commit cuối đã chốt:
+  - `910a899` — `batch234: hide soft-deleted moments from list and feed`
+- Test-verify cuối:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` → 4 passed
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **235**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct messaging shell: parity check deleted-message visibility path ở list/read backend.
+
+---
 
 - Batch vừa xong: **233**
 - Commit cuối đã chốt:

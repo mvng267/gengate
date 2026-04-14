@@ -19,7 +19,7 @@
 ## Batch 234 handoff (closed)
 - Batch vừa xong: **234**
 - Commit đã chốt:
-  - pending_commit_batch234
+  - `910a899` — `batch234: hide soft-deleted moments from list and feed`
 - Test/verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` ✅ (4 passed)
 - Blocker/rủi ro còn lại:
