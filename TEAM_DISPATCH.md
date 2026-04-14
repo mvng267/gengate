@@ -56,7 +56,7 @@
 ## Batch 275 handoff (closed)
 - Batch vừa xong: **275**
 - Commit đã chốt:
-  - `(pending in this run)` — `batch275: add member-cursor message-target one-tap actions on web and ios`
+  - `c827afa` — `batch275: add member-cursor message-target one-tap actions on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅

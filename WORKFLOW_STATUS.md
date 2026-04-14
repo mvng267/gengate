@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(pending in this run)` — `batch275: add member-cursor message-target one-tap actions on web and ios`
-  - working tree: dirty (2 files) before commit
+  - latest feature commit: `c827afa` — `batch275: add member-cursor message-target one-tap actions on web and ios`
+  - working tree: clean after batch275 commit
 - Blocker: none
 - Next: mở batch276 với 1 slice hẹp direct-message shell: thêm one-tap action apply member cursor message + member user đồng thời vào read-cursor target form để giảm thêm thao tác setup mark-read case.
 - Batch 275 handoff:
-  - `(pending in this run)` — `batch275: add member-cursor message-target one-tap actions on web and ios`
+  - `c827afa` — `batch275: add member-cursor message-target one-tap actions on web and ios`
   - web/iOS member summary thêm action `Use member cursor as message target`, cho phép set nhanh read-cursor target message từ `last_read_message_id` của member row.
 - Batch 274 handoff:
   - `514f34e` — `batch274: add member-row one-tap target-focus actions on web and ios`
