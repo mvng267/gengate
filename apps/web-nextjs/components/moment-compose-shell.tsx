@@ -31,6 +31,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [isLoadingFeed, setIsLoadingFeed] = useState(false);
   const [items, setItems] = useState<MomentListItem[]>([]);
   const [feedItems, setFeedItems] = useState<MomentListItem[]>([]);
+  const momentPayloadQuickCopy = `author=${form.authorUserId.trim() || "(empty)"} | image_url=${form.imageStorageKey.trim() || "(empty)"} | caption=${form.captionText.trim() || "(empty)"}`;
 
   useEffect(() => {
     setForm((current) => ({
@@ -101,6 +102,9 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         <strong>Status:</strong> moment posting shell now wires caption + image metadata to backend contracts.
       </p>
       <p>{status}</p>
+      <p>
+        Quick copy payload: <code>{momentPayloadQuickCopy}</code>
+      </p>
 
       <form onSubmit={(event) => void handleCreate(event)}>
         <label>

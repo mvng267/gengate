@@ -296,6 +296,13 @@ struct FeedPlaceholderView: View {
                             .foregroundStyle(.secondary)
                     }
 
+                    if let momentCreateQuickCopySummary {
+                        Text("Quick copy payload: \(momentCreateQuickCopySummary)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+                    }
+
                     if let fetchError {
                         Text("Fetch error: \(fetchError)")
                             .font(.footnote)
@@ -804,6 +811,22 @@ struct FeedPlaceholderView: View {
         return (momentRows + authoredMomentRows)
             .first(where: { $0.id == targetMomentID })?
             .authorID
+    }
+
+    private var momentCreateQuickCopySummary: String? {
+        let author = normalizedAuthorUserIDDraft
+        let imageURL = imageStorageKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let caption = captionDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !author.isEmpty || !imageURL.isEmpty || !caption.isEmpty else {
+            return nil
+        }
+
+        let normalizedAuthor = author.isEmpty ? "(empty)" : author
+        let normalizedImageURL = imageURL.isEmpty ? "(empty)" : imageURL
+        let normalizedCaption = caption.isEmpty ? "(empty)" : caption
+
+        return "author=\(normalizedAuthor) | image_url=\(normalizedImageURL) | caption=\(normalizedCaption)"
     }
 
     private var resolvedQuickReactionUserID: String? {
