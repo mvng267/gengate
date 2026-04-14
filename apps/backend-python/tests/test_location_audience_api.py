@@ -167,3 +167,62 @@ def test_location_share_audience_remove_flow_and_duplicate_guard() -> None:
     }
 
     app.dependency_overrides.clear()
+
+
+def test_deactivating_share_clears_existing_audience() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    owner = client.post("/auth/register", json={"email": "aud-stop-owner@example.com", "username": "aud_stop_owner"})
+    friend = client.post("/auth/register", json={"email": "aud-stop-friend@example.com", "username": "aud_stop_friend"})
+    assert owner.status_code == 201
+    assert friend.status_code == 201
+
+    owner_id = owner.json()["id"]
+    friend_id = friend.json()["id"]
+
+    share_response = client.post(
+        "/locations/shares",
+        json={"owner_user_id": owner_id, "is_active": True, "sharing_mode": "custom_list"},
+    )
+    assert share_response.status_code == 201
+    share_id = share_response.json()["id"]
+
+    add_audience_response = client.post(
+        f"/locations/shares/{share_id}/audience",
+        json={"allowed_user_id": friend_id},
+    )
+    assert add_audience_response.status_code == 201
+
+    audience_before_stop = client.get(f"/locations/shares/{share_id}/audience")
+    assert audience_before_stop.status_code == 200
+    assert audience_before_stop.json()["count"] == 1
+
+    stop_share_response = client.patch(f"/locations/shares/{share_id}", json={"is_active": False})
+    assert stop_share_response.status_code == 200
+    assert stop_share_response.json()["is_active"] is False
+
+    audience_after_stop = client.get(f"/locations/shares/{share_id}/audience")
+    assert audience_after_stop.status_code == 200
+    assert audience_after_stop.json()["count"] == 0
+
+    app.dependency_overrides.clear()

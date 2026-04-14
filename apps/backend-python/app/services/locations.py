@@ -41,7 +41,15 @@ class LocationService:
 
         if is_active is None:
             return share
-        return location_share_repository.update(db, share, is_active=is_active)
+
+        updated_share = location_share_repository.update(db, share, is_active=is_active)
+
+        if is_active is False:
+            audience = location_share_audience_repository.list_by_share_id(db, share_id)
+            for item in audience:
+                location_share_audience_repository.delete(db, item)
+
+        return updated_share
 
     def list_shares(self, db: Session) -> list[LocationShare]:
         return location_share_repository.list(db, limit=1000, offset=0)

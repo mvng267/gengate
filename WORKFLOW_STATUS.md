@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 235
+- Batch: 236
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 235 direct messaging shell — backend enforce direct-member read-cursor ownership (`last_read_message_id` phải thuộc cùng direct conversation).
+- Scope: batch 236 location sharing state shell — backend stop-sharing parity: clear audience list when share toggles to inactive.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -10,17 +10,21 @@
   - iOS Profile: Session login -> Profile -> load pending requests -> tap `Reject request` ở inbound row -> app auto reload friend graph và request chuyển sang `rejected`.
   - iOS Feed (batch233): khi create moment/media fail, app parse `error.code/error.message` và hiện hint rõ cho `user_not_found`, `moment_not_found`, `validation_error` để tester xử lý đúng bước tiếp theo.
 - Files:
-  - apps/backend-python/app/services/conversations.py
-  - apps/backend-python/tests/test_batch7_conversations_api.py
+  - apps/backend-python/app/services/locations.py
+  - apps/backend-python/tests/test_location_audience_api.py
 - Test:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` ✅ (3 passed)
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_location_audience_api.py` ✅ (4 passed)
 - Git:
-  - latest feature commit: `2c4c637` — `batch235: clear stale read cursor when message is deleted`
-  - working tree: dirty (workflow docs sync in progress)
+  - latest feature commit: `0bdd965` — `batch235: sync workflow docs after read-cursor cleanup`
+  - working tree: dirty (batch236 complete, chưa commit)
 - Blocker: none
-- Next: mở batch236 với 1 slice hẹp location sharing state shell (ưu tiên stop-sharing contract parity).
+- Next: mở batch237 với 1 slice hẹp notification shell.
+- Batch 236 handoff:
+  - pending_commit_batch236
+  - stop-sharing now clears share audience entries so backend list/state aligns with inactive sharing semantics.
 - Batch 235 handoff:
   - `2c4c637` — `batch235: clear stale read cursor when message is deleted`
+  - `0bdd965` — `batch235: sync workflow docs after read-cursor cleanup`
   - direct-message read cursor now auto-clears when target message is deleted to keep member cursor summary parity with message visibility rules.
 - Batch 234 handoff:
   - `910a899` — `batch234: hide soft-deleted moments from list and feed`

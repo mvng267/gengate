@@ -12,9 +12,34 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 235
-- Trục công việc: direct messaging shell — backend clear stale read-cursor khi message đã soft-delete.
-- Trạng thái: batch235_complete_direct_read_cursor_deleted_message_parity.
+- Batch workflow chính thức hiện tại: 236
+- Trục công việc: location sharing state shell — backend stop-sharing parity bằng audience cleanup khi share inactive.
+- Trạng thái: batch236_complete_location_stop_sharing_audience_cleanup.
+
+## Batch 235 handoff (closed)
+- Batch vừa xong: **235**
+- Commit đã chốt:
+  - `2c4c637` — `batch235: clear stale read cursor when message is deleted`
+  - `0bdd965` — `batch235: sync workflow docs after read-cursor cleanup`
+- Test/verify cuối:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` ✅ (3 passed)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **236**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - location sharing state shell: stop-sharing contract parity cho list/state response.
+
+## Batch 236 handoff (closed)
+- Batch vừa xong: **236**
+- Commit đã chốt:
+  - pending_commit_batch236
+- Test/verify cuối:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_location_audience_api.py` ✅ (4 passed)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **237**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: unread-only list parity cho minimal notification surface.
 
 ## Batch 234 handoff (closed)
 - Batch vừa xong: **234**
