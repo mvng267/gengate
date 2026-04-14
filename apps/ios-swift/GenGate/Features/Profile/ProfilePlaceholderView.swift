@@ -10,6 +10,7 @@ struct ProfilePlaceholderView: View {
     @State private var pendingRequestRows: [FriendRequestRow] = []
     @State private var friendshipRows: [FriendshipRow] = []
     @State private var fetchError: String?
+    @State private var statusMessage: String?
     @State private var isLoading = false
     @State private var isCreatingRequest = false
     @State private var busyAcceptRequestID: String?
@@ -99,10 +100,22 @@ struct ProfilePlaceholderView: View {
                             .foregroundStyle(.secondary)
                     }
 
+                    if let statusMessage {
+                        Text(statusMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     if let fetchError {
                         Text("Fetch error: \(fetchError)")
                             .font(.footnote)
                             .foregroundStyle(.orange)
+                    }
+
+                    if let friendRequestErrorHint {
+                        Text("Friend-request hint: \(friendRequestErrorHint)")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
                     }
 
                     if let pendingRequestCount, let friendshipCount {
@@ -186,6 +199,26 @@ struct ProfilePlaceholderView: View {
         return nil
     }
 
+    private var friendRequestErrorHint: String? {
+        guard let fetchError else {
+            return nil
+        }
+
+        if fetchError.contains("friend_request_already_pending") {
+            return "Pending request already exists for this pair. Try accept existing request instead of creating a new one."
+        }
+
+        if fetchError.contains("friendship_already_exists") {
+            return "Users are already friends. Create request is no longer needed."
+        }
+
+        if fetchError.contains("invalid_request") {
+            return "Requester and receiver must be different users."
+        }
+
+        return nil
+    }
+
     private func prefillFromCurrentSessionUserIfNeeded() {
         guard userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let currentSessionUserID else {
@@ -210,7 +243,8 @@ struct ProfilePlaceholderView: View {
 
         isLoading = true
         if let statusMessage {
-            fetchError = statusMessage
+            self.statusMessage = statusMessage
+            fetchError = nil
         } else {
             fetchError = nil
         }
@@ -221,14 +255,12 @@ struct ProfilePlaceholderView: View {
             friendshipCount = snapshot.friendshipCount
             pendingRequestRows = snapshot.pendingRequests
             friendshipRows = snapshot.friendships
-            if statusMessage != nil {
-                fetchError = nil
-            }
         } catch {
             pendingRequestCount = nil
             friendshipCount = nil
             pendingRequestRows = []
             friendshipRows = []
+            self.statusMessage = nil
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
 
@@ -245,6 +277,7 @@ struct ProfilePlaceholderView: View {
         }
 
         isCreatingRequest = true
+        statusMessage = nil
         fetchError = nil
 
         do {
@@ -268,6 +301,7 @@ struct ProfilePlaceholderView: View {
         }
 
         busyAcceptRequestID = requestID
+        statusMessage = nil
         fetchError = nil
 
         do {

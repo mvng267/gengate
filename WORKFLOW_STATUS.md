@@ -1,28 +1,29 @@
 # GenGate Workflow Status
 
-- Batch: 214
+- Batch: 215
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 214 backend friend-graph seam hardening — block duplicate pending friend requests and duplicate post-friendship requests
+- Scope: batch 215 iOS profile friend-graph UX hardening — show clear hints for friend-request dedupe error codes
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
-  - Backend: register two users -> create friend request once -> retry same pair (both directions) should return `friend_request_already_pending` -> accept request -> retry create should return `friendship_already_exists`.
-  - iOS/Web shells can consume clearer backend errors for friend-request flows.
+  - iOS: Session login -> Profile -> load friend graph -> create duplicate request -> verify backend error plus readable hint (`pending request already exists` / `users are already friends`).
+  - Backend dedupe guards from batch 214 remain active.
 - Files:
-  - apps/backend-python/app/services/friendships.py
-  - apps/backend-python/app/repositories/friendships.py
-  - apps/backend-python/tests/test_friendships_api.py
+  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_friendships_api.py` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `6c7f0bb` — `batch213: add ios quick reaction log clear action`
-  - working tree: bẩn (batch214 changes in progress, chưa commit, chưa push)
+  - latest commit: `eafe97e` — `batch214: harden friend request dedupe guards`
+  - working tree: bẩn (batch215 changes in progress, chưa commit, chưa push)
 - Blocker: none
-- Next: chốt batch214 (commit local) rồi mở batch215 cho 1 friction slice hẹp tiếp theo trong friend graph / feed seam MVP
+- Next: chốt batch215 (commit local) rồi mở batch216 cho 1 friction slice hẹp tiếp theo trong friend graph / feed seam MVP
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 214 handoff:
+  - `eafe97e` — `batch214: harden friend request dedupe guards`
+  - backend dedupe errors remain MVP-testable while batch 215 adds iOS-friendly hint mapping for those error codes.
 - Batch 213 handoff:
   - `6c7f0bb` — `batch213: add ios quick reaction log clear action`
   - quick-react log reset remains MVP-testable while batch 214 hardens backend friend-request dedupe behavior.
