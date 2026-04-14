@@ -13,6 +13,7 @@ struct FeedPlaceholderView: View {
     @State private var imageMimeTypeDraft: String = "image/jpeg"
     @State private var imageWidthDraft: String = "1080"
     @State private var imageHeightDraft: String = "1350"
+    @State private var deleteMomentIDDraft: String = ""
     @State private var reactionTargetMomentIDDraft: String = ""
     @State private var reactionUserIDDraft: String = ""
     @State private var reactionTypeDraft: String = "heart"
@@ -26,6 +27,7 @@ struct FeedPlaceholderView: View {
     @State private var isLoading = false
     @State private var isLoadingAuthoredMoments = false
     @State private var isCreatingMoment = false
+    @State private var isDeletingMoment = false
     @State private var isLoadingReactions = false
     @State private var isCreatingReaction = false
     @State private var quickReactionMomentIDInFlight: String?
@@ -200,6 +202,30 @@ struct FeedPlaceholderView: View {
                             isLoadingAuthoredMoments ||
                             isCreatingMoment ||
                             authorUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        )
+
+                        TextField("Moment ID to delete", text: $deleteMomentIDDraft)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        Button {
+                            Task {
+                                await deleteMoment()
+                            }
+                        } label: {
+                            Text(isDeletingMoment ? "Deleting moment..." : "Delete moment")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(
+                            isDeletingMoment ||
+                            isCreatingMoment ||
+                            deleteMomentIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                         )
                     }
 
@@ -558,6 +584,15 @@ struct FeedPlaceholderView: View {
                 .disabled(isCreatingMoment || normalizedAuthorUserIDDraft == row.authorID)
 
                 Button {
+                    useMomentIDForDelete(row)
+                } label: {
+                    Text(normalizedDeleteMomentIDDraft == row.id ? "Delete id selected" : "Use row id for delete")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .disabled(isDeletingMoment || normalizedDeleteMomentIDDraft == row.id)
+
+                Button {
                     Task {
                         await loadReactionsForMoment(row)
                     }
@@ -621,6 +656,10 @@ struct FeedPlaceholderView: View {
 
     private var normalizedAuthorUserIDDraft: String {
         authorUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var normalizedDeleteMomentIDDraft: String {
+        deleteMomentIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private var normalizedReactionTargetMomentIDDraft: String {
@@ -761,6 +800,17 @@ struct FeedPlaceholderView: View {
 
         authorUserIDDraft = trimmedAuthorID
         statusMessage = "Create author set from selected moment author."
+        fetchError = nil
+    }
+
+    private func useMomentIDForDelete(_ row: PrivateFeedMomentRow) {
+        let trimmedMomentID = row.id.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedMomentID.isEmpty else {
+            return
+        }
+
+        deleteMomentIDDraft = trimmedMomentID
+        statusMessage = "Delete moment id set from selected row."
         fetchError = nil
     }
 
@@ -1044,6 +1094,39 @@ struct FeedPlaceholderView: View {
 
         isCreatingReaction = false
     }
+
+    private func deleteMoment() async {
+        let trimmedMomentID = deleteMomentIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedMomentID.isEmpty else {
+            fetchError = "Moment ID là bắt buộc để delete moment."
+            return
+        }
+
+        isDeletingMoment = true
+        fetchError = nil
+
+        do {
+            _ = try await PrivateFeedAPIClient().deleteMoment(momentID: trimmedMomentID)
+            statusMessage = "Deleted moment \(trimmedMomentID). Reloading lists..."
+
+            if reactionTargetMomentIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == trimmedMomentID {
+                reactionTargetMomentIDDraft = ""
+                reactionRows = []
+            }
+
+            if !viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                await loadPrivateFeed()
+            }
+
+            if !authorUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                await loadAuthoredMoments()
+            }
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        isDeletingMoment = false
+    }
 }
 
 private struct PrivateFeedMomentRow: Identifiable {
@@ -1223,6 +1306,33 @@ private struct PrivateFeedAPIClient {
         do {
             let payload = try JSONDecoder().decode(MomentReactionResponse.self, from: data)
             return MomentReactionRow(id: payload.id, userID: payload.user_id, reactionType: payload.reaction_type)
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func deleteMoment(momentID: String) async throws -> PrivateFeedMomentRow {
+        var request = URLRequest(url: try makeURL(path: "/moments/\(momentID)"))
+        request.httpMethod = "DELETE"
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 200 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Moment delete failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(MomentListItem.self, from: data)
+            return PrivateFeedMomentRow(
+                id: payload.id,
+                authorID: payload.author.id,
+                authorLabel: payload.author.username ?? payload.author.email,
+                caption: payload.caption_text ?? "(no caption)",
+                visibilityScope: payload.visibility_scope,
+                mediaCount: payload.media_items.count,
+                firstMediaKey: payload.media_items.first?.storage_key
+            )
         } catch {
             throw APIError.invalidResponse
         }
