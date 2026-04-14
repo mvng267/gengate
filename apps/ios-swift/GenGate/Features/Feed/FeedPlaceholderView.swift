@@ -620,6 +620,14 @@ struct FeedPlaceholderView: View {
                 .font(.caption.monospaced())
                 .foregroundStyle(.secondary)
 
+            Text(requireDeleteConfirmation ? "Delete lock: Locked" : "Delete lock: Unlocked")
+                .font(.caption2.weight(.semibold))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .foregroundStyle(requireDeleteConfirmation ? .orange : .green)
+                .background((requireDeleteConfirmation ? Color.orange : Color.green).opacity(0.12))
+                .clipShape(Capsule())
+
             HStack(spacing: 8) {
                 Button {
                     useMomentAsReactionTarget(row)
