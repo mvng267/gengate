@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **226 — iOS row delete now shows explicit lock hint copy (`Unlock to delete`) while confirmation toggle is on (MVP-testable)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **228 — iOS row delete lock toggle now emits immediate status feedback (MVP-testable)**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **226**
-- Scope hiện tại: iOS feed UX hardening — thêm safety copy trực tiếp trên row-delete CTA (`Unlock to delete`) khi lock toggle đang bật để giảm mơ hồ disable-state.
+- Batch workflow chính thức hiện tại: **228**
+- Scope hiện tại: iOS feed UX hardening — thêm status copy tức thời khi toggle lock của row delete đổi trạng thái để tester biết ngay đã unlock hay re-lock.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
@@ -100,20 +100,49 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `a96ada2` — `batch226: add unlock hint copy for row delete lock`
-  - working tree hiện tại: bẩn (docs batch226 đang cập nhật, chưa commit)
+  - commit gần nhất đã chốt: `af92ad2` — `batch228: show status when row delete lock toggles`
+  - working tree hiện tại: bẩn (docs batch228 đang cập nhật, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit docs batch226 rồi mở batch227 cho 1 friction slice hẹp kế tiếp.
+  - commit docs batch228 rồi mở batch229 cho 1 friction slice hẹp kế tiếp.
 - MVP-testable run/test path (human):
-  - iOS Session login -> Feed -> load moments -> verify toggle `Require confirmation for row delete` bật thì CTA row-delete hiện `Unlock to delete` (disabled) -> tắt toggle để CTA đổi `Delete this moment` -> tap delete.
+  - iOS Session login -> Feed -> load moments -> bật/tắt `Require confirmation for row delete` và verify status copy đổi tức thời (unlock/re-lock) -> unlock xong tap `Delete this moment`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **228**
+- Commit cuối đã chốt:
+  - `af92ad2` — `batch228: show status when row delete lock toggles`
+- Test-verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **229**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - thêm visual emphasis nhẹ cho trạng thái unlock (ví dụ caption tint theo lock/unlock) để giảm bỏ sót status text khi test nhanh.
+
+---
+
+- Batch vừa xong: **227**
+- Commit cuối đã chốt:
+  - `19198e9` — `batch227: add inline hint for row delete unlock path`
+- Test-verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **228**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - thêm trạng thái hint ngắn khi toggle vừa chuyển từ lock -> unlock (status copy) để tester biết row delete đã sẵn sàng.
+
+---
 
 - Batch vừa xong: **226**
 - Commit cuối đã chốt:
   - `a96ada2` — `batch226: add unlock hint copy for row delete lock`
+  - `b1aaadf` — `batch226: sync workflow docs after row delete unlock hint`
 - Test-verify cuối:
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:

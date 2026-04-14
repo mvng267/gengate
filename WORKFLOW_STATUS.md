@@ -1,15 +1,16 @@
 # GenGate Workflow Status
 
-- Batch: 226
+- Batch: 228
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 226 iOS feed UX hardening — show explicit lock hint copy (`Unlock to delete`) on row delete CTA when confirmation lock is enabled
+- Scope: batch 228 iOS feed UX hardening — emit immediate status copy when row-delete lock toggle changes so tester gets instant readiness feedback
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
   - iOS: Session login -> Feed -> load private feed/authored moments.
-  - Mặc định toggle `Require confirmation for row delete` bật: mỗi row hiển thị CTA `Unlock to delete` và không cho tap delete.
-  - Tắt toggle để CTA đổi về `Delete this moment`, rồi tap để thực thi one-tap delete.
-  - Verify in-flight label `Deleting this moment...` + status success row-delete.
+  - Bật/tắt `Require confirmation for row delete` và quan sát status message đổi ngay:
+    - unlock: `Row delete unlocked. You can tap \`Delete this moment\` on a row now.`
+    - lock lại: `Row delete lock is on again.`
+  - Khi unlock, row CTA đổi sang `Delete this moment`; khi lock, CTA quay về `🔒 Unlock to delete`.
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
   - WORKFLOW_STATUS.md
@@ -18,13 +19,20 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `a96ada2` — `batch226: add unlock hint copy for row delete lock`
-  - working tree: bẩn (batch226 docs in progress, chưa commit)
+  - latest feature commit: `af92ad2` — `batch228: show status when row delete lock toggles`
+  - working tree: bẩn (docs batch228 in progress, chưa commit)
 - Blocker: none
-- Next: commit docs batch226 rồi mở batch227 cho friction slice hẹp kế tiếp
+- Next: commit docs batch228 rồi mở batch229 cho friction slice hẹp kế tiếp
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 226 handoff:
+- Batch 228 handoff:
   - pending (in progress)
+  - added immediate status feedback on lock toggle change so tester instantly knows whether row delete is armed or re-locked.
+- Batch 227 handoff:
+  - `19198e9` — `batch227: add inline hint for row delete unlock path`
+  - added inline row-action hint so operator sees unlock path without scrolling back to the form toggle.
+- Batch 226 handoff:
+  - `a96ada2` — `batch226: add unlock hint copy for row delete lock`
+  - `b1aaadf` — `batch226: sync workflow docs after row delete unlock hint`
   - row delete CTA now shows explicit lock hint `Unlock to delete` while confirmation toggle is enabled; reduces ambiguity of disabled destructive action.
 - Batch 225 handoff:
   - `cdb8cb6` — `batch225: gate row delete behind confirmation toggle`

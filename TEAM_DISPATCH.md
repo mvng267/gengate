@@ -12,14 +12,39 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 227
-- Trục công việc: iOS feed UX hardening — thêm inline hint gần row actions để nhắc cách mở khoá row delete (tắt toggle confirmation) mà không phải kéo lên form.
-- Trạng thái: in_progress_batch227_ios.
+- Batch workflow chính thức hiện tại: 229
+- Trục công việc: iOS feed UX hardening — thêm visual emphasis nhẹ theo lock/unlock state để operator không bỏ sót trạng thái row delete readiness.
+- Trạng thái: in_progress_batch229_ios.
+
+## Batch 228 handoff (closed)
+- Batch vừa xong: **228**
+- Commit đã push:
+  - `af92ad2` — `batch228: show status when row delete lock toggles`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **229**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - thêm emphasis UI nhẹ cho trạng thái unlock/re-lock để tester bắt tín hiệu nhanh hơn khi thao tác liên tiếp.
+
+## Batch 227 handoff (closed)
+- Batch vừa xong: **227**
+- Commit đã push:
+  - `19198e9` — `batch227: add inline hint for row delete unlock path`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **228**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - thêm status hint ngắn khi toggle vừa chuyển sang unlock để tránh tester bấm lại row trước khi nhìn thấy CTA đổi trạng thái.
 
 ## Batch 226 handoff (closed)
 - Batch vừa xong: **226**
 - Commit đã push:
   - `a96ada2` — `batch226: add unlock hint copy for row delete lock`
+  - `b1aaadf` — `batch226: sync workflow docs after row delete unlock hint`
 - Test/verify cuối:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Blocker/rủi ro còn lại:
@@ -193,9 +218,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 227 iOS feed UX hardening.
-- Kết quả gần nhất: batch 226 thêm lock-hint copy `Unlock to delete` ngay trên row delete CTA khi toggle confirmation đang bật.
-- Trạng thái: in_progress_batch227_ios.
+- Scope hiện tại: batch 229 iOS feed UX hardening.
+- Kết quả gần nhất: batch 228 thêm status feedback tức thời khi toggle row-delete lock đổi trạng thái (unlock/re-lock).
+- Trạng thái: in_progress_batch229_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
