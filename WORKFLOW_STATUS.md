@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 157
+- Batch: 158
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 157 iOS inbox seam hardening — add short-id fragment in empty-state first-option source hint for scan consistency
+- Scope: batch 158 iOS inbox seam hardening — add explicit short-id-unavailable fallback label for empty-state source hint without first option
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch157 slice)
+  - latest commit: `HEAD` (local batch158 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch158 cho messaging friction tiếp theo (ví dụ thêm short-id cho empty-state hint khi chưa chọn và chưa có first option để đồng nhất pattern fallback) trong iOS inbox shell
+- Next: mở batch159 cho messaging friction tiếp theo (ví dụ thêm nhãn ngắn cho case manual UUID/out-of-options để cân bằng readability giữa các source states) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -359,6 +359,10 @@
   - empty-state source hint khi đã có first option nay hiển thị thêm short-id: `first option: <full_uuid>, short: <abcd…wxyz>`
   - đồng bộ scan pattern với các hint same-as-first đã có short-id, giúp tester đọc nhanh hơn trên màn hẹp
   - không đổi logic selection/re-apply; chỉ nâng readability của hint text trong trạng thái chưa chọn
+- Batch 158 outcome:
+  - empty-state source hint khi chưa có first option nay thêm fallback label rõ nghĩa: `short-id chưa khả dụng`
+  - giúp tester phân biệt nhanh giữa case có thể scan short-id và case cần load devices trước khi có target hợp lệ
+  - giữ nguyên hành vi form/device selection; chỉ tăng clarity của hint line ở fallback state
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -368,7 +372,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, load direct thread A-B; trước khi load devices, verify helper-note nhắc `load devices` trong empty-options context; sau khi `Reload recipient devices` và trước khi chọn device, verify empty-state source hint có cả `first option` full UUID + `short`; tiếp đó bấm dynamic first-valid action để chọn first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.`; thử manual/stale UUID rồi quay lại first option để verify hint/notes đúng ngữ cảnh trước khi `Create message-device key`
+  - iOS Inbox path: open Inbox tab, load direct thread A-B; trước khi load devices, verify source hint hiển thị fallback `short-id chưa khả dụng` + helper-note `load devices`; sau khi `Reload recipient devices` và trước khi chọn device, verify source hint chuyển sang dạng có `first option` + `short`; tiếp đó bấm dynamic first-valid action để chọn first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.`; thử manual/stale UUID rồi quay lại first option để verify hint/notes đúng ngữ cảnh trước khi `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts
