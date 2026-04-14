@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 248
+- Batch: 249
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 248 notification shell — clarify quick-apply copy when session user is unchanged.
+- Scope: batch 249 notification shell — add row-level read-state symbols near toggle action.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,10 +16,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `dde8939` — `batch248: clarify quick-apply copy when session user unchanged`
+  - latest feature commit: `0b196ed` — `batch249: add row read-state symbols near toggle action`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch249 với 1 slice hẹp notification shell tiếp theo: thêm lightweight row-level read-state symbol near button label để scan unread/read nhanh hơn khi retest paging.
+- Next: mở batch250 với 1 slice hẹp notification shell tiếp theo: thêm status copy sau toggle để nhắc rõ ký hiệu `● read` / `○ unread` cho tester mới vào flow.
+- Batch 249 handoff:
+  - `0b196ed` — `batch249: add row read-state symbols near toggle action`
+  - web/iOS nút toggle read/unread giờ có ký hiệu `●` (read) / `○` (unread) để scan row nhanh khi paging.
 - Batch 248 handoff:
   - `dde8939` — `batch248: clarify quick-apply copy when session user unchanged`
   - web/iOS quick-apply giờ báo rõ `already selected` vs `applied current session user` trước khi reload first page.

@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 248
-- Trục công việc: notification shell — web/iOS quick-apply unchanged-user copy clarity.
-- Trạng thái: batch248_complete_notification_quick_apply_copy_clarity.
+- Batch workflow chính thức hiện tại: 249
+- Trục công việc: notification shell — web/iOS row-level read-state symbols near toggle action.
+- Trạng thái: batch249_complete_notification_read_state_symbols.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 249 handoff (closed)
+- Batch vừa xong: **249**
+- Commit đã chốt:
+  - `0b196ed` — `batch249: add row read-state symbols near toggle action`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **250**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm status copy sau toggle để nhắc rõ ký hiệu `● read` / `○ unread`.
 
 ## Batch 248 handoff (closed)
 - Batch vừa xong: **248**
