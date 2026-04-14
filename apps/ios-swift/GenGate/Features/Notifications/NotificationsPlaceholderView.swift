@@ -92,6 +92,22 @@ struct NotificationsPlaceholderView: View {
                         .toggleStyle(.switch)
 
                     HStack(spacing: 10) {
+                        Button("All") {
+                            pageUnreadOnly = false
+                            pageOffsetDraft = "0"
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(!pageUnreadOnly)
+
+                        Button("Unread only") {
+                            pageUnreadOnly = true
+                            pageOffsetDraft = "0"
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(pageUnreadOnly)
+                    }
+
+                    HStack(spacing: 10) {
                         Button("First page") {
                             pageOffsetDraft = "0"
                         }

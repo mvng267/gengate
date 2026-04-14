@@ -244,6 +244,34 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
           />
           Load unread only
         </label>
+        <div>
+          <button
+            type="button"
+            onClick={() =>
+              setPagination((current) => ({
+                ...current,
+                unreadOnly: false,
+                offset: 0,
+              }))
+            }
+            disabled={!pagination.unreadOnly}
+          >
+            All
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              setPagination((current) => ({
+                ...current,
+                unreadOnly: true,
+                offset: 0,
+              }))
+            }
+            disabled={pagination.unreadOnly}
+          >
+            Unread only
+          </button>
+        </div>
         <label>
           User UUID
           <input
