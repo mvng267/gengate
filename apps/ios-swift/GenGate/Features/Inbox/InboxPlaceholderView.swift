@@ -1591,6 +1591,30 @@ struct InboxPlaceholderView: View {
                                 .buttonStyle(.bordered)
                                 .disabled(cursorMessageID == nil)
 
+                                Button {
+                                    applyConversationMemberCursorContextFocusAndMarkRead(memberUserID: member.userID, lastReadMessageID: cursorMessageID)
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Text("Use member cursor context + focus + mark read")
+                                            .font(.caption)
+
+                                        Spacer()
+
+                                        if isUpdatingReadCursor {
+                                            Text("updating")
+                                                .font(.caption2.monospaced())
+                                                .foregroundStyle(.secondary)
+                                        } else {
+                                            Text("apply_and_mark")
+                                                .font(.caption2.monospaced())
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(cursorMessageID == nil || isUpdatingReadCursor)
+
                                 if cursorMessageID == nil {
                                     Text("cursor_message_target: unavailable")
                                         .font(.caption.monospaced())
@@ -3206,6 +3230,38 @@ use_when=\(useWhenText)
             sendStatusHint = "Read-cursor target user + message + focus already match selected member cursor context (read_cursor_context_focus_source=member_row)."
         } else {
             sendStatusHint = "Applied selected member cursor context + focus user (read_cursor_context_focus_source=member_row)."
+        }
+    }
+
+    private func applyConversationMemberCursorContextFocusAndMarkRead(memberUserID: String, lastReadMessageID: String?) {
+        let normalizedUserID = memberUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedMessageID = lastReadMessageID?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+        guard !normalizedUserID.isEmpty else {
+            sendStatusHint = "member_read_cursor_target_missing_for_context_focus_auto_apply"
+            return
+        }
+
+        guard !normalizedMessageID.isEmpty else {
+            sendStatusHint = "member_read_cursor_target_message_missing_for_context_focus_auto_apply"
+            return
+        }
+
+        let currentTargetUserID = readCursorTargetUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentTargetMessageID = readCursorTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentFocusUserID = readStatusFocusUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let alreadyMatched = currentTargetUserID == normalizedUserID && currentTargetMessageID == normalizedMessageID && currentFocusUserID == normalizedUserID
+
+        readCursorTargetUserIDDraft = normalizedUserID
+        readCursorTargetMessageIDDraft = normalizedMessageID
+        readStatusFocusUserIDDraft = normalizedUserID
+
+        sendStatusHint = alreadyMatched
+            ? "Read-cursor context + focus already match selected member; marking read now (read_cursor_context_focus_auto_source=member_row)."
+            : "Applied selected member cursor context + focus and marking read now (read_cursor_context_focus_auto_source=member_row)."
+
+        Task {
+            await performReadCursorUpdate(targetUserID: normalizedUserID, targetMessageID: normalizedMessageID)
         }
     }
 

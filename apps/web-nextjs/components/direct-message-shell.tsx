@@ -470,6 +470,42 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     );
   }
 
+  async function applyConversationMemberCursorContextFocusAndMarkRead(member: ConversationMemberItem) {
+    const normalizedUserId = member.user_id.trim();
+    const normalizedMessageId = member.last_read_message_id?.trim() ?? "";
+
+    if (!normalizedUserId) {
+      setStatus("member_read_cursor_target_missing_for_context_focus_auto_apply");
+      return;
+    }
+
+    if (!normalizedMessageId) {
+      setStatus("member_read_cursor_target_message_missing_for_context_focus_auto_apply");
+      return;
+    }
+
+    const currentTargetUserId = readCursorTargetUserIdDraft.trim();
+    const currentTargetMessageId = readCursorTargetMessageIdDraft.trim();
+    const currentFocusUserId = readStatusFocusUserIdDraft.trim();
+    const alreadyMatched =
+      currentTargetUserId === normalizedUserId &&
+      currentTargetMessageId === normalizedMessageId &&
+      currentFocusUserId === normalizedUserId;
+
+    setReadCursorTargetUserIdDraft(normalizedUserId);
+    setReadCursorTargetMessageIdDraft(normalizedMessageId);
+    setReadStatusFocusUserIdDraft(normalizedUserId);
+
+    await updateReadCursorForTargetUserAndMessage({
+      targetUserId: normalizedUserId,
+      targetMessageId: normalizedMessageId,
+      focusUserId: normalizedUserId,
+      statusPrefix: alreadyMatched
+        ? "Read-cursor context + focus already match selected member; marking read now (read_cursor_context_focus_auto_source=member_row)."
+        : "Applied selected member cursor context + focus and marking read now (read_cursor_context_focus_auto_source=member_row).",
+    });
+  }
+
   function applyCurrentSessionUserForReadCursorAndFocus() {
     const sessionUserId = currentSessionUserId.trim();
     if (!sessionUserId) {
@@ -490,26 +526,38 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     );
   }
 
-  async function handleMarkResolvedTargetMessageAsReadForResolvedTargetUser() {
+  async function updateReadCursorForTargetUserAndMessage(input: {
+    targetUserId: string;
+    targetMessageId: string;
+    focusUserId?: string;
+    statusPrefix?: string;
+  }) {
     if (!conversation) {
       setStatus("open_thread_first");
       return;
     }
 
-    const targetUserId = resolvedReadCursorTargetUserId.trim();
+    const targetUserId = input.targetUserId.trim();
     if (!targetUserId) {
       setStatus("read_cursor_target_user_required");
       return;
     }
 
-    const targetMessageId = resolvedReadCursorTargetMessageId.trim();
+    const targetMessageId = input.targetMessageId.trim();
     if (!targetMessageId) {
       setStatus("read_cursor_target_message_required");
       return;
     }
 
+    const statusPrefix = input.statusPrefix?.trim();
+    const normalizedFocusUserId = input.focusUserId?.trim() || resolvedReadCursorFocusUserId.trim();
+
     setIsUpdatingReadCursor(true);
-    setStatus(`Updating read cursor for ${targetUserId} to message ${targetMessageId}...`);
+    setStatus(
+      statusPrefix
+        ? `${statusPrefix} Updating read cursor for ${targetUserId} to message ${targetMessageId}...`
+        : `Updating read cursor for ${targetUserId} to message ${targetMessageId}...`,
+    );
 
     try {
       const updated = await updateConversationMemberReadCursor({
@@ -521,7 +569,6 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       const nextMembers = conversationMembers.map((member) => (member.id === updated.id ? updated : member));
       setConversationMembers(nextMembers);
 
-      const normalizedFocusUserId = resolvedReadCursorFocusUserId.trim();
       const normalizedAppliedMessageId = updated.last_read_message_id ?? "(none)";
 
       let appliedReadState = "unknown";
@@ -537,14 +584,20 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
         `target_user=${updated.user_id} | applied_message=${normalizedAppliedMessageId} | focus_user=${normalizedFocusUserId || "(none)"} | read_state=${appliedReadState}`,
       );
 
-      setStatus(
-        `Updated read cursor for ${updated.user_id} to ${updated.last_read_message_id ?? "(none)"} in thread ${conversation.id}.`,
-      );
+      const successStatus = `Updated read cursor for ${updated.user_id} to ${updated.last_read_message_id ?? "(none)"} in thread ${conversation.id}.`;
+      setStatus(statusPrefix ? `${statusPrefix} ${successStatus}` : successStatus);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "conversation_member_read_cursor_update_failed");
     }
 
     setIsUpdatingReadCursor(false);
+  }
+
+  async function handleMarkResolvedTargetMessageAsReadForResolvedTargetUser() {
+    await updateReadCursorForTargetUserAndMessage({
+      targetUserId: resolvedReadCursorTargetUserId,
+      targetMessageId: resolvedReadCursorTargetMessageId,
+    });
   }
 
   async function handleCopyReadCursorQuickCopy() {
@@ -764,6 +817,13 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
                   disabled={!member.last_read_message_id}
                 >
                   Use member cursor context + focus
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void applyConversationMemberCursorContextFocusAndMarkRead(member)}
+                  disabled={!member.last_read_message_id || isUpdatingReadCursor}
+                >
+                  {isUpdatingReadCursor ? "Applying context + focus + mark..." : "Use member cursor context + focus + mark read"}
                 </button>
               </div>
             </li>

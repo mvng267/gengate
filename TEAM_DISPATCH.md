@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 277
-- Trục công việc: direct-message shell — web+iOS add member-row one-tap cursor-context+focus action to apply target user + target message + focus user together.
-- Trạng thái: batch277_complete_dm_member_cursor_context_focus_one_tap_web_ios.
+- Batch workflow chính thức hiện tại: 278
+- Trục công việc: direct-message shell — web+iOS add member-row one-tap cursor-context+focus+mark action to apply target user + target message + focus user then trigger read-cursor update immediately.
+- Trạng thái: batch278_complete_dm_member_cursor_context_focus_auto_mark_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 278 handoff (closed)
+- Batch vừa xong: **278**
+- Commit đã chốt:
+  - `(pending in this run)` — `batch278: add member-cursor context-focus auto-mark actions on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **279**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm one-tap auto-mark action dùng latest loaded message cho focus user trên web+iOS để cover case member cursor message trống.
 
 ## Batch 277 handoff (closed)
 - Batch vừa xong: **277**
