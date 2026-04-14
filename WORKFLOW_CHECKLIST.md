@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **260 — moment-posting shell (web/iOS session-user author quick preset + author-source status) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **261 — private-feed shell (web/iOS quick-copy feed summary line) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **260**
-- Scope hiện tại: moment-posting shell — thêm quick preset dùng current session user làm create author + status copy rõ `author_source=session_user` trên web+iOS.
+- Batch workflow chính thức hiện tại: **261**
+- Scope hiện tại: private-feed shell — thêm quick-copy list summary (`viewer + feed_count + first_moment_id`) trên web+iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/moment-compose-shell.tsx`
@@ -99,18 +99,33 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `9614a3b` — `batch260: add session-user author quick preset in moment shells`
+  - commit gần nhất đã chốt: `4c02683` — `batch261: add private-feed quick-copy summaries in moment shells`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch261 với 1 slice hẹp private-feed shell: thêm quick-copy list summary (viewer + feed_count + first_moment_id) trên web+iOS.
+  - mở batch262 với 1 slice hẹp private-feed shell: thêm quick action `Use current session user as viewer + load` trên web.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
-  - Web Feed: bấm quick preset session author -> verify status `author_source=session_user` + quick-copy payload đổi `author=...` -> bấm create moment.
-  - iOS Feed: bấm quick preset session author -> verify status `author_source=session_user` + quick-copy payload đổi `author=...` -> bấm create moment + image.
+  - Web Feed: nhập viewer -> reload private feed -> verify quick-copy feed line `viewer/feed_count/first_moment_id`.
+  - iOS Feed: nhập viewer -> load private feed -> verify quick-copy feed line `viewer/feed_count/first_moment_id`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **261**
+- Commit cuối đã chốt:
+  - `4c02683` — `batch261: add private-feed quick-copy summaries in moment shells`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **262**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - private-feed shell: thêm quick action `Use current session user as viewer + load` trên web.
+
+---
 
 - Batch vừa xong: **260**
 - Commit cuối đã chốt:

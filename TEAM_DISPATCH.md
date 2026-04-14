@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 260
-- Trục công việc: moment-posting shell — web/iOS add session-user author quick preset + explicit author-source status for create flow.
-- Trạng thái: batch260_complete_moment_posting_session_author_quick_preset.
+- Batch workflow chính thức hiện tại: 261
+- Trục công việc: private-feed shell — web/iOS add quick-copy feed summary line for load parity reporting.
+- Trạng thái: batch261_complete_private_feed_quick_copy_summary.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 261 handoff (closed)
+- Batch vừa xong: **261**
+- Commit đã chốt:
+  - `4c02683` — `batch261: add private-feed quick-copy summaries in moment shells`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **262**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - private-feed shell: thêm quick action `Use current session user as viewer + load` trên web.
 
 ## Batch 260 handoff (closed)
 - Batch vừa xong: **260**
