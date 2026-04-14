@@ -75,6 +75,29 @@ struct NotificationsPlaceholderView: View {
                     Toggle("Load unread only", isOn: $pageUnreadOnly)
                         .toggleStyle(.switch)
 
+                    HStack(spacing: 10) {
+                        Button("First page") {
+                            pageOffsetDraft = "0"
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled((Int(pageOffsetDraft) ?? 0) <= 0)
+
+                        Button("Prev page") {
+                            let currentOffset = max(Int(pageOffsetDraft) ?? 0, 0)
+                            let currentLimit = min(max(Int(pageLimitDraft) ?? 20, 1), 200)
+                            pageOffsetDraft = String(max(0, currentOffset - currentLimit))
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled((Int(pageOffsetDraft) ?? 0) <= 0)
+
+                        Button("Next page") {
+                            let currentOffset = max(Int(pageOffsetDraft) ?? 0, 0)
+                            let currentLimit = min(max(Int(pageLimitDraft) ?? 20, 1), 200)
+                            pageOffsetDraft = String(currentOffset + currentLimit)
+                        }
+                        .buttonStyle(.bordered)
+                    }
+
                     Button("Use current session user") {
                         fillFromCurrentSessionUser()
                     }
@@ -277,7 +300,7 @@ struct NotificationsPlaceholderView: View {
                 unreadOnly: pageUnreadOnly
             )
             mutatingNotificationIDs = []
-            statusMessage = "Loaded \(payload.count) notification(s). Page unread: \(payload.unreadCount). Total unread: \(payload.totalUnreadCount). Page window limit=\(safeLimit), offset=\(safeOffset), unread_only=\(pageUnreadOnly ? "true" : "false")."
+            statusMessage = "Loaded \(payload.count) notification(s). Page unread: \(payload.unreadCount). Total unread: \(payload.totalUnreadCount). Page window limit=\(safeLimit), offset=\(safeOffset), unread_only=\(pageUnreadOnly ? "true" : "false"). Use First/Prev/Next to move paging window quickly."
         } catch {
             notificationRows = []
             listMeta = nil

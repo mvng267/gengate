@@ -152,6 +152,43 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
             }}
           />
         </label>
+        <div>
+          <button
+            type="button"
+            onClick={() =>
+              setPagination((current) => ({
+                ...current,
+                offset: 0,
+              }))
+            }
+            disabled={pagination.offset === 0}
+          >
+            First page
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              setPagination((current) => ({
+                ...current,
+                offset: Math.max(0, current.offset - current.limit),
+              }))
+            }
+            disabled={pagination.offset === 0}
+          >
+            Prev page
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              setPagination((current) => ({
+                ...current,
+                offset: current.offset + current.limit,
+              }))
+            }
+          >
+            Next page
+          </button>
+        </div>
         <label>
           <input
             type="checkbox"
