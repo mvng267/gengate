@@ -437,7 +437,9 @@ struct FeedPlaceholderView: View {
 
     @ViewBuilder
     private func momentRow(_ row: PrivateFeedMomentRow) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        let isReactionTargetSelected = normalizedReactionTargetMomentIDDraft == row.id
+
+        VStack(alignment: .leading, spacing: 8) {
             Text(row.authorLabel)
                 .font(.subheadline)
                 .fontWeight(.semibold)
@@ -454,6 +456,27 @@ struct FeedPlaceholderView: View {
             Text("moment_id: \(row.id)")
                 .font(.caption.monospaced())
                 .foregroundStyle(.secondary)
+
+            HStack(spacing: 8) {
+                Button {
+                    useMomentAsReactionTarget(row)
+                } label: {
+                    Text(isReactionTargetSelected ? "Reaction target selected" : "Use as reaction target")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+
+                Button {
+                    Task {
+                        await loadReactionsForMoment(row)
+                    }
+                } label: {
+                    Text(isLoadingReactions && isReactionTargetSelected ? "Loading reactions..." : "Load reactions for this moment")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .disabled(isLoadingReactions || isCreatingReaction)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
@@ -584,6 +607,15 @@ struct FeedPlaceholderView: View {
         }
 
         reactionUserIDDraft = selectedReactionTargetMomentAuthorID
+    }
+
+    private func useMomentAsReactionTarget(_ row: PrivateFeedMomentRow) {
+        reactionTargetMomentIDDraft = row.id
+    }
+
+    private func loadReactionsForMoment(_ row: PrivateFeedMomentRow) async {
+        reactionTargetMomentIDDraft = row.id
+        await loadMomentReactions()
     }
 
     private func synchronizeReactionTargetWithLoadedMoments() {
