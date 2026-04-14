@@ -1,14 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 222
+- Batch: 223
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 222 iOS feed UX hardening — quick-fill delete moment id from selected row context + inline delete action
+- Scope: batch 223 iOS feed UX hardening — add quick delete target presets and clearer selected/unchanged status copy
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
   - iOS: Session login -> Feed -> load private feed/authored moments.
-  - Ở row moment bất kỳ, tap `Use row id for delete` để fill nhanh `Moment ID to delete`.
-  - Tap `Delete moment`; verify status báo xóa thành công và list authored/private feed được reload.
+  - Verify section `Quick delete presets from loaded rows` xuất hiện dưới field `Moment ID to delete`.
+  - Tap 1 preset chip để fill delete target; tap lại cùng row `Use row id for delete` thì status báo `Delete target unchanged (already selected)`.
+  - Tap `Delete moment`; verify list reload như cũ.
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
   - WORKFLOW_STATUS.md
@@ -17,13 +18,17 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `acda01f` — `batch222: add ios feed row shortcut for moment delete`
-  - working tree: sạch
+  - latest feature commit: `9bfc007` — `batch223: add ios quick presets for delete target`
+  - working tree: bẩn (batch223 docs in progress, chưa commit)
 - Blocker: none
-- Next: mở batch223 cho 1 friction slice hẹp tiếp theo trong feed / inbox seam MVP
+- Next: commit/push docs batch223 rồi mở batch224 cho friction slice hẹp kế tiếp
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 223 handoff:
+  - pending (in progress)
+  - added `Quick delete presets from loaded rows` chips + clearer unchanged-copy when operator re-selects same delete target.
 - Batch 222 handoff:
   - `acda01f` — `batch222: add ios feed row shortcut for moment delete`
+  - `1f5a0aa` — `batch222: sync workflow docs after ios delete shortcut`
   - feed shell now includes `Use row id for delete` row shortcut + inline delete action wired to `DELETE /moments/{id}` and reloads private/authored lists after success.
 - Batch 221 handoff:
   - `129619a` — `batch221: add ios feed row action to fill create author`

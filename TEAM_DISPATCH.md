@@ -12,14 +12,28 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 222
-- Trục công việc: iOS feed UX hardening — quick-fill delete moment id from selected row context + inline delete action.
-- Trạng thái: verify_batch222_ios (đã commit local, chưa push).
+- Batch workflow chính thức hiện tại: 224
+- Trục công việc: iOS feed UX hardening — one-tap row-level delete action (`Delete this moment`) để giảm thêm 1 thao tác thủ công.
+- Trạng thái: in_progress_batch224_ios.
+
+## Batch 223 handoff (closed)
+- Batch vừa xong: **223**
+- Commit đã push:
+  - `9bfc007` — `batch223: add ios quick presets for delete target`
+  - `14e06c3` — `batch223: sync workflow docs after ios delete presets`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **224**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - thêm row-level action `Delete this moment` one-tap từ row context, hạn chế nhập tay lại khi tester đã chọn đúng row.
 
 ## Batch 222 handoff (closed)
 - Batch vừa xong: **222**
-- Commit local đã chốt (chưa push):
+- Commit đã push:
   - `acda01f` — `batch222: add ios feed row shortcut for moment delete`
+  - `1f5a0aa` — `batch222: sync workflow docs after ios delete shortcut`
 - Test/verify cuối:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Blocker/rủi ro còn lại:
@@ -141,9 +155,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 222 iOS feed UX hardening.
-- Kết quả gần nhất: batch 222 thêm shortcut `Use row id for delete` + delete action trực tiếp từ Feed shell (`DELETE /moments/{id}`).
-- Trạng thái: verify_batch222_ios (local commit, chưa push).
+- Scope hiện tại: batch 224 iOS feed UX hardening.
+- Kết quả gần nhất: batch 223 thêm quick delete preset chips + status copy rõ hơn khi re-select delete target.
+- Trạng thái: in_progress_batch224_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
