@@ -46,7 +46,7 @@ def list_notifications(
     db: Session = Depends(get_db_session),
 ) -> NotificationListResponse:
     try:
-        notifications = notification_service.list_notifications(
+        notifications, total_unread_count = notification_service.list_notifications(
             db,
             user_id,
             unread_only=unread_only,
@@ -57,7 +57,12 @@ def list_notifications(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     items = [to_notification_response(notification) for notification in notifications]
     unread_count = sum(1 for notification in notifications if notification.read_at is None)
-    return NotificationListResponse(count=len(items), unread_count=unread_count, items=items)
+    return NotificationListResponse(
+        count=len(items),
+        unread_count=unread_count,
+        total_unread_count=total_unread_count,
+        items=items,
+    )
 
 
 @router.get("/item/{notification_id}", response_model=NotificationResponse)

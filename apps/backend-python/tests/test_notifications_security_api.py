@@ -710,6 +710,7 @@ def test_batch17_notifications_unread_and_delete_lifecycle_endpoints() -> None:
     assert list_notifications_response.status_code == 200
     assert list_notifications_response.json()["count"] == 1
     assert list_notifications_response.json()["unread_count"] == 1
+    assert list_notifications_response.json()["total_unread_count"] == 1
     assert list_notifications_response.json()["items"][0]["id"] == second_notification_id
 
     app.dependency_overrides.clear()
@@ -911,12 +912,14 @@ def test_notifications_list_unread_only_query_parity() -> None:
     assert all_notifications_response.status_code == 200
     assert all_notifications_response.json()["count"] == 2
     assert all_notifications_response.json()["unread_count"] == 1
+    assert all_notifications_response.json()["total_unread_count"] == 1
 
     unread_only_response = client.get(f"/notifications/{user_id}?unread_only=true")
     assert unread_only_response.status_code == 200
     unread_items = unread_only_response.json()["items"]
     assert unread_only_response.json()["count"] == 1
     assert unread_only_response.json()["unread_count"] == 1
+    assert unread_only_response.json()["total_unread_count"] == 1
     assert unread_items[0]["id"] == second_notification_id
     assert unread_items[0]["read_at"] is None
 
@@ -928,6 +931,7 @@ def test_notifications_list_unread_only_query_parity() -> None:
     unread_after_toggle_ids = {item["id"] for item in unread_only_after_toggle_response.json()["items"]}
     assert unread_only_after_toggle_response.json()["count"] == 2
     assert unread_only_after_toggle_response.json()["unread_count"] == 2
+    assert unread_only_after_toggle_response.json()["total_unread_count"] == 2
     assert unread_after_toggle_ids == {first_notification_id, second_notification_id}
 
     app.dependency_overrides.clear()
@@ -986,11 +990,13 @@ def test_notifications_list_unread_count_stays_zero_when_all_are_read() -> None:
     assert all_notifications_response.status_code == 200
     assert all_notifications_response.json()["count"] == 2
     assert all_notifications_response.json()["unread_count"] == 0
+    assert all_notifications_response.json()["total_unread_count"] == 0
 
     unread_only_response = client.get(f"/notifications/{user_id}?unread_only=true")
     assert unread_only_response.status_code == 200
     assert unread_only_response.json()["count"] == 0
     assert unread_only_response.json()["unread_count"] == 0
+    assert unread_only_response.json()["total_unread_count"] == 0
 
     app.dependency_overrides.clear()
 
@@ -1052,6 +1058,7 @@ def test_notifications_list_pagination_and_sorting_parity() -> None:
     assert page_one_response.status_code == 200
     assert page_one_response.json()["count"] == 2
     assert page_one_response.json()["unread_count"] == 1
+    assert page_one_response.json()["total_unread_count"] == 2
     page_one_ids = [item["id"] for item in page_one_response.json()["items"]]
     assert page_one_ids == [third_notification_id, second_notification_id]
 
@@ -1059,6 +1066,7 @@ def test_notifications_list_pagination_and_sorting_parity() -> None:
     assert page_two_response.status_code == 200
     assert page_two_response.json()["count"] == 1
     assert page_two_response.json()["unread_count"] == 1
+    assert page_two_response.json()["total_unread_count"] == 2
     page_two_ids = [item["id"] for item in page_two_response.json()["items"]]
     assert page_two_ids == [first_notification_id]
 
@@ -1066,6 +1074,7 @@ def test_notifications_list_pagination_and_sorting_parity() -> None:
     assert unread_page_one_response.status_code == 200
     assert unread_page_one_response.json()["count"] == 1
     assert unread_page_one_response.json()["unread_count"] == 1
+    assert unread_page_one_response.json()["total_unread_count"] == 2
     unread_page_one_ids = [item["id"] for item in unread_page_one_response.json()["items"]]
     assert unread_page_one_ids == [third_notification_id]
 
@@ -1073,6 +1082,7 @@ def test_notifications_list_pagination_and_sorting_parity() -> None:
     assert unread_page_two_response.status_code == 200
     assert unread_page_two_response.json()["count"] == 1
     assert unread_page_two_response.json()["unread_count"] == 1
+    assert unread_page_two_response.json()["total_unread_count"] == 2
     unread_page_two_ids = [item["id"] for item in unread_page_two_response.json()["items"]]
     assert unread_page_two_ids == [first_notification_id]
 

@@ -37,17 +37,19 @@ class NotificationService:
         unread_only: bool = False,
         limit: int = 100,
         offset: int = 0,
-    ) -> list[Notification]:
+    ) -> tuple[list[Notification], int]:
         user = user_repository.get(db, user_id)
         if user is None:
             raise ValueError("user_not_found")
-        return notification_repository.list_by_user_id(
+        notifications = notification_repository.list_by_user_id(
             db,
             user_id,
             unread_only=unread_only,
             limit=limit,
             offset=offset,
         )
+        total_unread_count = notification_repository.count_by_user_id(db, user_id, unread_only=True)
+        return notifications, total_unread_count
 
     def get_notification(self, db: Session, notification_id: uuid.UUID) -> Notification | None:
         return notification_repository.get_active(db, notification_id)
