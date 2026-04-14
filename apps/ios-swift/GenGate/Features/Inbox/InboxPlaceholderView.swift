@@ -122,7 +122,8 @@ struct InboxPlaceholderView: View {
                         "Status summary wording is now compacted into a single source-hint consistency phrase to match current `short-id`-normalized behavior across all branches.",
                         "Recipient-device section now shows a compact source-hint verify matrix so testers can quickly map current state against expected hint fragment before executing device-key actions.",
                         "Added quick action `Copy source hint` to copy the current runtime source-hint string for bug reports and triage notes.",
-                        "Added quick action `Copy source-hint report payload` to capture a compact triage line (recipient user/device short-id + branch hint + timestamp).",
+                        "Added quick action `Copy source-hint report payload` to capture a compact triage line (branch key + recipient user/device short-id + hint + timestamp).",
+                        "Recipient-device section now shows `Source-hint branch key` (e.g. `empty-first`, `sync-first`, `sync-nonfirst`, `manual-oob`) to map UI state quickly with payload logs.",
                         "After copy, short-lived feedback lines show elapsed time + short fragment so testers can confirm exactly what was captured.",
                         "Recipient-device section now shows a compact selection-source hint so testers know whether current `Recipient device UUID` is in-sync with loaded options or still a manual out-of-options value.",
                         "One-tap action `Clear recipient device UUID` helps testers reset stale/manual device input instantly before selecting a fresh option."
@@ -419,6 +420,12 @@ struct InboxPlaceholderView: View {
                             Text(recipientDeviceSelectionSourceHintText)
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
+
+                            if let recipientDeviceSourceHintBranchKey {
+                                Text("Source-hint branch key: \(recipientDeviceSourceHintBranchKey)")
+                                    .font(.caption2.monospaced())
+                                    .foregroundStyle(.secondary)
+                            }
 
                             VStack(alignment: .leading, spacing: 8) {
                                 Button {
@@ -1226,8 +1233,31 @@ struct InboxPlaceholderView: View {
         return "Copied source hint (\(Int(elapsed))s ago): \(shortCaption(lastRecipientDeviceSourceHintCopyText, limit: 88))"
     }
 
+    private var recipientDeviceSourceHintBranchKey: String? {
+        let trimmedRecipientDeviceID = recipientDeviceIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedRecipientDeviceID.isEmpty else {
+            if firstRecipientDeviceOptionID != nil {
+                return "empty-first"
+            }
+            return "empty-none"
+        }
+
+        if let firstRecipientDeviceOptionID,
+           trimmedRecipientDeviceID == firstRecipientDeviceOptionID {
+            return "sync-first"
+        }
+
+        if recipientDeviceOptions.contains(where: { $0.id == trimmedRecipientDeviceID }) {
+            return "sync-nonfirst"
+        }
+
+        return "manual-oob"
+    }
+
     private var recipientDeviceSourceHintReportPayloadText: String? {
-        guard let sourceHintText = recipientDeviceSelectionSourceHintText else {
+        guard let sourceHintText = recipientDeviceSelectionSourceHintText,
+              let branchKey = recipientDeviceSourceHintBranchKey else {
             return nil
         }
 
@@ -1238,7 +1268,7 @@ struct InboxPlaceholderView: View {
         let trimmedSourceHintText = sourceHintText.trimmingCharacters(in: .whitespacesAndNewlines)
         let timestamp = Self.recipientSourceHintReportTimestampFormatter.string(from: Date())
 
-        return "[inbox-source-hint] ts=\(timestamp) recipient_user=\(recipientUserShort) recipient_device=\(recipientDeviceShort) hint=\(trimmedSourceHintText)"
+        return "[inbox-source-hint] ts=\(timestamp) branch=\(branchKey) recipient_user=\(recipientUserShort) recipient_device=\(recipientDeviceShort) hint=\(trimmedSourceHintText)"
     }
 
     private var recipientDeviceSourceHintReportPayloadCopiedFeedbackText: String? {
