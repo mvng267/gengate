@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 158
+- Batch: 159
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 158 iOS inbox seam hardening — add explicit short-id-unavailable fallback label for empty-state source hint without first option
+- Scope: batch 159 iOS inbox seam hardening — add compact manual out-of-options source label with short-id
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch158 slice)
+  - latest commit: `HEAD` (local batch159 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch159 cho messaging friction tiếp theo (ví dụ thêm nhãn ngắn cho case manual UUID/out-of-options để cân bằng readability giữa các source states) trong iOS inbox shell
+- Next: mở batch160 cho messaging friction tiếp theo (ví dụ thêm short-id cho nhánh in-sync non-first để cân bằng toàn bộ source states) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -363,6 +363,10 @@
   - empty-state source hint khi chưa có first option nay thêm fallback label rõ nghĩa: `short-id chưa khả dụng`
   - giúp tester phân biệt nhanh giữa case có thể scan short-id và case cần load devices trước khi có target hợp lệ
   - giữ nguyên hành vi form/device selection; chỉ tăng clarity của hint line ở fallback state
+- Batch 159 outcome:
+  - source hint cho case manual UUID nằm ngoài options nay dùng nhãn gọn + short-id: `manual UUID/out-of-options (short: <abcd…wxyz>)`
+  - giúp tester scan mismatch nhanh hơn mà không cần đọc full manual UUID ở mỗi lần kiểm tra
+  - không đổi behavior validation/fallback; chỉ chuẩn hoá readability giữa các source states
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -372,7 +376,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, load direct thread A-B; trước khi load devices, verify source hint hiển thị fallback `short-id chưa khả dụng` + helper-note `load devices`; sau khi `Reload recipient devices` và trước khi chọn device, verify source hint chuyển sang dạng có `first option` + `short`; tiếp đó bấm dynamic first-valid action để chọn first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.`; thử manual/stale UUID rồi quay lại first option để verify hint/notes đúng ngữ cảnh trước khi `Create message-device key`
+  - iOS Inbox path: open Inbox tab, load direct thread A-B; verify empty-state fallback `short-id chưa khả dụng`, rồi `Reload recipient devices` để thấy hint có `first option + short`; nhập manual/stale UUID ngoài options và verify hint chuyển thành `manual UUID/out-of-options (short: <id>)`; sau đó bấm dynamic first-valid action để quay lại first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.` trước khi `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

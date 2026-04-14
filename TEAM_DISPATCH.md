@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 158
-- Trục công việc: iOS inbox seam hardening — thêm fallback label `short-id chưa khả dụng` cho empty-state source hint.
+- Batch workflow chính thức hiện tại: 159
+- Trục công việc: iOS inbox seam hardening — thêm nhãn gọn + short-id cho source hint manual out-of-options.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 158 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: empty-state khi chưa có first option nay hiển thị rõ `short-id chưa khả dụng` để tránh hiểu nhầm scan target.
-- Trạng thái: verify_batch158_ios.
+- Scope hiện tại: batch 159 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: case manual/out-of-options nay có source label ngắn + short-id để scan mismatch nhanh hơn.
+- Trạng thái: verify_batch159_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
