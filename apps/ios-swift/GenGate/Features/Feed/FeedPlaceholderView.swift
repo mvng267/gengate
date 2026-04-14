@@ -31,6 +31,7 @@ struct FeedPlaceholderView: View {
     @State private var isLoadingReactions = false
     @State private var isCreatingReaction = false
     @State private var quickReactionMomentIDInFlight: String?
+    @State private var deleteMomentIDInFlight: String?
     @State private var quickReactionPreferMomentAuthor = false
     @State private var quickReactionRefreshMode: QuickReactionRefreshMode = .both
 
@@ -627,6 +628,28 @@ struct FeedPlaceholderView: View {
 
                 Button {
                     Task {
+                        await deleteMomentFromRow(row)
+                    }
+                } label: {
+                    Text(
+                        deleteMomentIDInFlight == row.id
+                            ? "Deleting this moment..."
+                            : "Delete this moment"
+                    )
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
+                .disabled(
+                    isDeletingMoment ||
+                    deleteMomentIDInFlight != nil ||
+                    isCreatingMoment ||
+                    isCreatingReaction ||
+                    isLoadingReactions
+                )
+
+                Button {
+                    Task {
                         await loadReactionsForMoment(row)
                     }
                 } label: {
@@ -1144,14 +1167,36 @@ struct FeedPlaceholderView: View {
             return
         }
 
+        await performDeleteMoment(momentID: trimmedMomentID, origin: .manual)
+    }
+
+    private func deleteMomentFromRow(_ row: PrivateFeedMomentRow) async {
+        let trimmedMomentID = row.id.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedMomentID.isEmpty else {
+            return
+        }
+
+        deleteMomentIDDraft = trimmedMomentID
+        await performDeleteMoment(momentID: trimmedMomentID, origin: .row)
+    }
+
+    private enum DeleteMomentOrigin {
+        case manual
+        case row
+    }
+
+    private func performDeleteMoment(momentID: String, origin: DeleteMomentOrigin) async {
         isDeletingMoment = true
+        deleteMomentIDInFlight = origin == .row ? momentID : nil
         fetchError = nil
 
         do {
-            _ = try await PrivateFeedAPIClient().deleteMoment(momentID: trimmedMomentID)
-            statusMessage = "Deleted moment \(trimmedMomentID). Reloading lists..."
+            _ = try await PrivateFeedAPIClient().deleteMoment(momentID: momentID)
+            statusMessage = origin == .row
+                ? "Deleted moment \(momentID) from row action. Reloading lists..."
+                : "Deleted moment \(momentID). Reloading lists..."
 
-            if reactionTargetMomentIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == trimmedMomentID {
+            if reactionTargetMomentIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == momentID {
                 reactionTargetMomentIDDraft = ""
                 reactionRows = []
             }
@@ -1167,6 +1212,7 @@ struct FeedPlaceholderView: View {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
 
+        deleteMomentIDInFlight = nil
         isDeletingMoment = false
     }
 }
