@@ -1278,6 +1278,15 @@ struct InboxPlaceholderView: View {
                         Text("Current session user_id: \(currentSessionUserID)")
                             .font(.footnote.monospaced())
                             .foregroundStyle(.secondary)
+
+                        Button {
+                            applyCurrentSessionUserAsReadStatusFocusUser()
+                        } label: {
+                            Text("Use current session user as read focus user")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(isLoading || conversationSummary == nil)
                     }
 
                     if let sendStatusHint {
@@ -2908,6 +2917,23 @@ use_when=\(useWhenText)
         userAIDDraft = currentSessionUserID
         sendStatusHint = "\(senderStatus) Sending direct message shell..."
         await sendMessage(senderUserIDOverride: currentSessionUserID, statusPrefix: senderStatus)
+    }
+
+    private func applyCurrentSessionUserAsReadStatusFocusUser() {
+        guard let currentSessionUserID else {
+            sendStatusHint = "session_focus_user_missing_for_quick_apply"
+            return
+        }
+
+        let focusStatus: String
+        if readStatusFocusUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == currentSessionUserID {
+            focusStatus = "Read focus user already matches current session user (focus_user_source=session_user)."
+        } else {
+            focusStatus = "Applied current session user as read focus user (focus_user_source=session_user)."
+        }
+
+        readStatusFocusUserIDDraft = currentSessionUserID
+        sendStatusHint = focusStatus
     }
 
     private func clearCursorFormSyncHintIfIdentityChanged() {

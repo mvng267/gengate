@@ -59,13 +59,15 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [isCreatingAttachment, setIsCreatingAttachment] = useState(false);
   const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
+  const [readStatusFocusUserIdDraft, setReadStatusFocusUserIdDraft] = useState("");
   const [lastSendQuickCopy, setLastSendQuickCopy] = useState("sender=(none) | message_id=(none)");
   const [lastReadCursorQuickCopy, setLastReadCursorQuickCopy] = useState(
     "focus_user=(none) | resolved_message=(none) | read_state=unknown",
   );
   const conversationQuickCopy = `user_a=${form.userAId.trim() || "(empty)"} | user_b=${form.userBId.trim() || "(empty)"} | message_count=${messages.length} | last_message_id=${messages[messages.length - 1]?.id ?? "(none)"}`;
 
-  const resolvedReadCursorFocusUserId = form.userAId.trim() || currentSessionUserId.trim() || "";
+  const resolvedReadCursorFocusUserId =
+    readStatusFocusUserIdDraft.trim() || form.userAId.trim() || currentSessionUserId.trim() || "";
   const resolvedReadCursorMessageId = messages[messages.length - 1]?.id ?? "";
 
   const focusReadState = (() => {
@@ -94,6 +96,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setAttachmentItems([]);
     setConversationMembers([]);
     setAttachmentForm({ ...initialAttachmentForm });
+    setReadStatusFocusUserIdDraft("");
     setLastSendQuickCopy("sender=(none) | message_id=(none)");
     setLastReadCursorQuickCopy("focus_user=(none) | resolved_message=(none) | read_state=unknown");
   }, [initialSenderUserId, initialUserAId, initialUserBId]);
@@ -311,6 +314,22 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     );
   }
 
+  function applyCurrentSessionUserAsReadFocusUser() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_focus_user_missing_for_quick_apply");
+      return;
+    }
+
+    const focusStatus =
+      readStatusFocusUserIdDraft.trim() === sessionUserId
+        ? "Read focus user already matches current session user (focus_user_source=session_user)."
+        : "Applied current session user as read focus user (focus_user_source=session_user).";
+
+    setReadStatusFocusUserIdDraft(sessionUserId);
+    setStatus(focusStatus);
+  }
+
   async function handleCopyReadCursorQuickCopy() {
     await copyToClipboard(
       lastReadCursorQuickCopy,
@@ -341,6 +360,24 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       <button type="button" onClick={() => void handleCopyReadCursorQuickCopy()}>
         Copy quick read cursor
       </button>
+
+      <div>
+        <label>
+          Read-status focus user UUID (optional, defaults to User A/session user)
+          <input
+            value={readStatusFocusUserIdDraft}
+            onChange={(event) => setReadStatusFocusUserIdDraft(event.target.value)}
+            placeholder="focus user for read-state summary"
+          />
+        </label>
+        <button
+          type="button"
+          onClick={() => applyCurrentSessionUserAsReadFocusUser()}
+          disabled={currentSessionUserId.trim().length === 0}
+        >
+          Use current session user as read focus user
+        </button>
+      </div>
 
       <div>
         <label>

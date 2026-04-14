@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 268
-- Trục công việc: direct-message shell — web+iOS add quick-copy read-cursor focus summary (`focus_user + resolved_message + read_state`).
-- Trạng thái: batch268_complete_dm_read_cursor_quick_copy_summary_web_ios.
+- Batch workflow chính thức hiện tại: 269
+- Trục công việc: direct-message shell — web+iOS add quick action using current session user for read-status focus user.
+- Trạng thái: batch269_complete_dm_session_user_read_focus_quick_action_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 269 handoff (closed)
+- Batch vừa xong: **269**
+- Commit đã chốt:
+  - `PENDING_COMMIT` — `batch269: add session-user read-focus quick action on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **270**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm quick action web+iOS đồng bộ apply session user cho cả `Member user UUID` (read-cursor update target) cùng `Read-status focus user` để retest read-cursor parity không cần nhập tay.
 
 ## Batch 268 handoff (closed)
 - Batch vừa xong: **268**

@@ -1,27 +1,29 @@
 # GenGate Workflow Status
 
-- Batch: 268
+- Batch: 269
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 268 direct-message shell — add quick-copy read-cursor focus summary (`focus_user + resolved_message + read_state`) on web+iOS.
+- Scope: batch 269 direct-message shell — add quick action to apply current session user as read-status focus user on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
-  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> `Reload thread messages` -> verify line `Quick copy read cursor`; bấm `Copy quick read cursor` và paste format `focus_user=... | resolved_message=... | read_state=read|unread|unknown`.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> verify line `Quick copy read cursor`; bấm `Copy quick read cursor` và paste format `focus_user=... | resolved_message=... | read_state=read|unread|unknown`.
+  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> bấm `Use current session user as read focus user` -> verify status có `focus_user_source=session_user` -> `Copy quick read cursor` và paste format `focus_user=... | resolved_message=... | read_state=read|unread|unknown`.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read focus user` -> verify status hint có `focus_user_source=session_user` -> `Copy quick read cursor` và paste format `focus_user=... | resolved_message=... | read_state=read|unread|unknown`.
 - Files:
-  - apps/web-nextjs/lib/inbox/client.ts
   - apps/web-nextjs/components/direct-message-shell.tsx
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `da1c27a` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
-  - working tree: clean after batch268 commit
+  - latest feature commit: `PENDING_COMMIT` — `batch269: add session-user read-focus quick action on web and ios`
+  - working tree: dirty (feature + workflow docs staged for commit)
 - Blocker: none
-- Next: mở batch269 với 1 slice hẹp direct-message shell: thêm quick action web+iOS dùng current session user làm focus user cho read-state summary để giảm nhập tay khi retest.
+- Next: mở batch270 với 1 slice hẹp direct-message shell: thêm quick action web+iOS đồng bộ apply session user cho cả `Member user UUID` (read-cursor update target) cùng `Read-status focus user` để retest read-cursor parity không cần nhập tay.
+- Batch 269 handoff:
+  - `PENDING_COMMIT` — `batch269: add session-user read-focus quick action on web and ios`
+  - web/iOS inbox shell đều có action `Use current session user as read focus user` và status hint/source marker `focus_user_source=session_user` để verify nhanh trước khi copy quick read-cursor summary.
 - Batch 268 handoff:
   - `da1c27a` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
   - web inbox shell đã wire `GET /conversations/{id}/members`, hiển thị `last_read_message_id/last_read_by`, và có quick-copy read-cursor line + clipboard action.
