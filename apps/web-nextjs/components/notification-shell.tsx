@@ -28,6 +28,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   });
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [listMeta, setListMeta] = useState<Pick<NotificationListPayload, "count" | "unread_count" | "total_unread_count"> | null>(null);
+  const [pagination, setPagination] = useState({ limit: 20, offset: 0 });
   const [status, setStatus] = useState("Provide a real user UUID to load notifications or create a minimal notification shell item.");
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -40,6 +41,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     }));
     setItems([]);
     setListMeta(null);
+    setPagination({ limit: 20, offset: 0 });
   }, [initialUserId]);
 
   async function handleLoad() {
@@ -47,7 +49,10 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     setStatus("Loading notifications...");
 
     try {
-      const payload = await listNotifications(form.userId.trim());
+      const payload = await listNotifications(form.userId.trim(), {
+        limit: pagination.limit,
+        offset: pagination.offset,
+      });
       setItems(payload.items);
       setListMeta({
         count: payload.count,
@@ -56,7 +61,8 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       });
       setStatus(
         `Loaded ${payload.count} notification(s) for ${form.userId.trim() || "unknown-user"}. ` +
-          `Page unread: ${payload.unread_count}. Total unread: ${payload.total_unread_count}.`,
+          `Page unread: ${payload.unread_count}. Total unread: ${payload.total_unread_count}. ` +
+          `Page window limit=${pagination.limit}, offset=${pagination.offset}.`,
       );
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "notifications_list_failed");
@@ -109,6 +115,43 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
 
       <form onSubmit={(event) => void handleCreate(event)}>
         <label>
+          Page limit
+          <input
+            type="number"
+            min={1}
+            max={200}
+            value={pagination.limit}
+            onChange={(event) => {
+              const value = Number(event.target.value);
+              if (Number.isNaN(value)) {
+                return;
+              }
+              setPagination((current) => ({
+                ...current,
+                limit: Math.min(200, Math.max(1, value)),
+              }));
+            }}
+          />
+        </label>
+        <label>
+          Page offset
+          <input
+            type="number"
+            min={0}
+            value={pagination.offset}
+            onChange={(event) => {
+              const value = Number(event.target.value);
+              if (Number.isNaN(value)) {
+                return;
+              }
+              setPagination((current) => ({
+                ...current,
+                offset: Math.max(0, value),
+              }));
+            }}
+          />
+        </label>
+        <label>
           User UUID
           <input
             value={form.userId}
@@ -142,7 +185,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       <h2>Notifications</h2>
       {listMeta ? (
         <p>
-          Page count: <strong>{listMeta.count}</strong> · Page unread: <strong>{listMeta.unread_count}</strong> · Total unread: <strong>{listMeta.total_unread_count}</strong>
+          Page count: <strong>{listMeta.count}</strong> · Page unread: <strong>{listMeta.unread_count}</strong> · Total unread: <strong>{listMeta.total_unread_count}</strong> · Limit: <strong>{pagination.limit}</strong> · Offset: <strong>{pagination.offset}</strong>
         </p>
       ) : null}
       {items.length === 0 ? (

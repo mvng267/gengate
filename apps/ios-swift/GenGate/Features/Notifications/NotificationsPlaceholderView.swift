@@ -8,6 +8,8 @@ struct NotificationsPlaceholderView: View {
     @State private var createPayloadDraft: String = "hello from ios notifications shell"
     @State private var notificationRows: [NotificationRow] = []
     @State private var listMeta: NotificationListMeta?
+    @State private var pageLimitDraft: String = "20"
+    @State private var pageOffsetDraft: String = "0"
     @State private var mutatingNotificationIDs: Set<String> = []
     @State private var fetchError: String?
     @State private var statusMessage: String?
@@ -40,6 +42,34 @@ struct NotificationsPlaceholderView: View {
                         .padding(12)
                         .background(Color.secondary.opacity(0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Page limit")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            TextField("20", text: $pageLimitDraft)
+#if os(iOS)
+                                .keyboardType(.numberPad)
+#endif
+                                .padding(10)
+                                .background(Color.secondary.opacity(0.12))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Page offset")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            TextField("0", text: $pageOffsetDraft)
+#if os(iOS)
+                                .keyboardType(.numberPad)
+#endif
+                                .padding(10)
+                                .background(Color.secondary.opacity(0.12))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
+                    }
 
                     Button("Use current session user") {
                         fillFromCurrentSessionUser()
@@ -121,7 +151,7 @@ struct NotificationsPlaceholderView: View {
                         .foregroundStyle(.secondary)
 
                     if let listMeta {
-                        Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount)")
+                        Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount) · Limit: \(listMeta.limit) · Offset: \(listMeta.offset)")
                             .font(.footnote.monospaced())
                             .foregroundStyle(.secondary)
                     }
@@ -216,19 +246,32 @@ struct NotificationsPlaceholderView: View {
             return
         }
 
+        let parsedLimit = Int(pageLimitDraft.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 20
+        let parsedOffset = Int(pageOffsetDraft.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+        let safeLimit = min(max(parsedLimit, 1), 200)
+        let safeOffset = max(parsedOffset, 0)
+        pageLimitDraft = String(safeLimit)
+        pageOffsetDraft = String(safeOffset)
+
         isLoading = true
         fetchError = nil
 
         do {
-            let payload = try await NotificationsAPIClient().fetchNotifications(userID: trimmedUserID)
+            let payload = try await NotificationsAPIClient().fetchNotifications(
+                userID: trimmedUserID,
+                limit: safeLimit,
+                offset: safeOffset
+            )
             notificationRows = payload.items
             listMeta = NotificationListMeta(
                 count: payload.count,
                 unreadCount: payload.unreadCount,
-                totalUnreadCount: payload.totalUnreadCount
+                totalUnreadCount: payload.totalUnreadCount,
+                limit: safeLimit,
+                offset: safeOffset
             )
             mutatingNotificationIDs = []
-            statusMessage = "Loaded \(payload.count) notification(s). Page unread: \(payload.unreadCount). Total unread: \(payload.totalUnreadCount)."
+            statusMessage = "Loaded \(payload.count) notification(s). Page unread: \(payload.unreadCount). Total unread: \(payload.totalUnreadCount). Page window limit=\(safeLimit), offset=\(safeOffset)."
         } catch {
             notificationRows = []
             listMeta = nil
@@ -314,6 +357,8 @@ private struct NotificationListMeta {
     let count: Int
     let unreadCount: Int
     let totalUnreadCount: Int
+    let limit: Int
+    let offset: Int
 }
 
 private struct NotificationListPayload {
@@ -402,8 +447,11 @@ private struct NotificationsAPIClient {
 
     private let baseURL = BackendEnvironment.apiBaseURL
 
-    func fetchNotifications(userID: String) async throws -> NotificationListPayload {
-        let url = try makeURL(path: "/notifications/\(userID)")
+    func fetchNotifications(userID: String, limit: Int, offset: Int) async throws -> NotificationListPayload {
+        let url = try makeURL(path: "/notifications/\(userID)", queryItems: [
+            URLQueryItem(name: "limit", value: String(limit)),
+            URLQueryItem(name: "offset", value: String(offset)),
+        ])
         let (data, response) = try await URLSession.shared.data(from: url)
         let httpResponse = try requireHTTPResponse(response)
 
@@ -490,12 +538,22 @@ private struct NotificationsAPIClient {
         )
     }
 
-    private func makeURL(path: String) throws -> URL {
+    private func makeURL(path: String, queryItems: [URLQueryItem] = []) throws -> URL {
         guard let baseURL else {
             throw APIError.invalidBaseURL
         }
 
-        return baseURL.appendingPathComponent(path)
+        let base = baseURL.appendingPathComponent(path)
+        guard var components = URLComponents(url: base, resolvingAgainstBaseURL: false) else {
+            throw APIError.invalidBaseURL
+        }
+        if !queryItems.isEmpty {
+            components.queryItems = queryItems
+        }
+        guard let url = components.url else {
+            throw APIError.invalidBaseURL
+        }
+        return url
     }
 
     private func requireHTTPResponse(_ response: URLResponse) throws -> HTTPURLResponse {

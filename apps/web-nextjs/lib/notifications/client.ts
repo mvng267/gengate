@@ -15,8 +15,30 @@ export type NotificationListPayload = {
   items: NotificationItem[];
 };
 
-export async function listNotifications(userId: string): Promise<NotificationListPayload> {
-  const response = await apiRequest(`/notifications/${encodeURIComponent(userId)}`);
+export type NotificationListQuery = {
+  limit?: number;
+  offset?: number;
+};
+
+function toNotificationListQueryString(query?: NotificationListQuery): string {
+  if (!query) {
+    return "";
+  }
+
+  const params = new URLSearchParams();
+  if (query.limit !== undefined) {
+    params.set("limit", String(query.limit));
+  }
+  if (query.offset !== undefined) {
+    params.set("offset", String(query.offset));
+  }
+
+  const queryString = params.toString();
+  return queryString ? `?${queryString}` : "";
+}
+
+export async function listNotifications(userId: string, query?: NotificationListQuery): Promise<NotificationListPayload> {
+  const response = await apiRequest(`/notifications/${encodeURIComponent(userId)}${toNotificationListQueryString(query)}`);
   if (!response.ok) {
     throw new Error(`notifications_list_failed:${response.status}`);
   }
