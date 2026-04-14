@@ -12,8 +12,8 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `(pending local commit for batch189 slice)`
-  - working tree: dirty while editing (will be clean after local commit, chưa push)
+  - latest commit: `691dfed` — `batch189: add preview-pair-lite inline scan block`
+  - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
 - Next: mở batch190 cho messaging friction tiếp theo (ví dụ thêm quick-copy riêng cho tag header của `preview-pair-lite` để phân tách block nhanh trong note dài) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
