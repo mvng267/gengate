@@ -12,8 +12,8 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `(pending local commit for batch194 slice)`
-  - working tree: dirty while editing (will be clean after local commit, chưa push)
+  - latest commit: `2875af4` — `batch194: add branch-use-when-preview quick copy`
+  - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
 - Next: mở batch195 cho messaging friction tiếp theo (ví dụ thêm quick-copy block summary có tag header + `branch/use_when/preview` để dán nguyên cụm vào ticket note) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
