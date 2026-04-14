@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 150
-- Trục công việc: iOS inbox seam hardening — thêm inline target subtitle cho dynamic first-valid recipient-device action.
+- Batch workflow chính thức hiện tại: 151
+- Trục công việc: iOS inbox seam hardening — thêm short-id cạnh full UUID trong dynamic first-valid subtitle để tăng tốc scan.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 150 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: dynamic first-valid action có subtitle hiển thị rõ target first-option UUID trước khi apply để tester tự tin hơn khi thao tác.
-- Trạng thái: verify_batch150_ios.
+- Scope hiện tại: batch 151 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: subtitle của dynamic first-valid action hiển thị cả full UUID + short-id để tester scan nhanh hơn trên màn hẹp trước khi apply.
+- Trạng thái: verify_batch151_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
