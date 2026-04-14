@@ -48,6 +48,19 @@ struct FeedPlaceholderView: View {
                 return "Refresh both lists"
             }
         }
+
+        var shortLabel: String {
+            switch self {
+            case .none:
+                return "none"
+            case .privateFeed:
+                return "private"
+            case .authored:
+                return "authored"
+            case .both:
+                return "both"
+            }
+        }
     }
 
     var body: some View {
@@ -711,16 +724,18 @@ struct FeedPlaceholderView: View {
     private func createQuickReactionForMoment(_ row: PrivateFeedMomentRow) async {
         let trimmedReactionType = normalizedReactionTypeDraft
         guard !trimmedReactionType.isEmpty else {
-            fetchError = "Reaction type là bắt buộc để quick react từ moment row."
+            setQuickReactionError("missing_reaction_type")
             return
         }
 
         let quickReactionUserID = resolvedQuickReactionUserID(for: row)
 
         guard let quickReactionUserID else {
-            fetchError = quickReactionPreferMomentAuthor
-                ? "Author user UUID của moment là bắt buộc khi bật quick react prefer author."
-                : "Reaction user UUID hoặc session user là bắt buộc để quick react từ moment row."
+            setQuickReactionError(
+                quickReactionPreferMomentAuthor
+                    ? "missing_author_user"
+                    : "missing_reaction_user"
+            )
             return
         }
 
@@ -736,7 +751,7 @@ struct FeedPlaceholderView: View {
                 reactionType: trimmedReactionType
             )
 
-            statusMessage = "Quick reacted moment \(row.id). Reloading reactions..."
+            statusMessage = "qr:ok moment=\(shortIdentifier(row.id)) mode=\(quickReactionRefreshMode.shortLabel) refreshing=reactions"
             await loadMomentReactions()
 
             var refreshedTargets: [String] = []
@@ -746,7 +761,7 @@ struct FeedPlaceholderView: View {
                 break
             case .privateFeed:
                 if !viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    refreshedTargets.append("private feed")
+                    refreshedTargets.append("private")
                     await loadPrivateFeed()
                 }
             case .authored:
@@ -756,7 +771,7 @@ struct FeedPlaceholderView: View {
                 }
             case .both:
                 if !viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    refreshedTargets.append("private feed")
+                    refreshedTargets.append("private")
                     await loadPrivateFeed()
                 }
 
@@ -767,16 +782,25 @@ struct FeedPlaceholderView: View {
             }
 
             if fetchError == nil {
-                let refreshedSummary = refreshedTargets.isEmpty
-                    ? "none"
-                    : refreshedTargets.joined(separator: ", ")
-                statusMessage = "Quick reacted moment \(row.id). Refresh mode: \(quickReactionRefreshMode.label). Refreshed \(refreshedTargets.count) list(s): \(refreshedSummary)."
+                let refreshedSummary = refreshedTargets.isEmpty ? "none" : refreshedTargets.joined(separator: "+")
+                statusMessage = "qr:ok moment=\(shortIdentifier(row.id)) mode=\(quickReactionRefreshMode.shortLabel) refreshed=\(refreshedTargets.count) targets=\(refreshedSummary)"
             }
         } catch {
-            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            setQuickReactionError(
+                "request_failed",
+                detail: (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            )
         }
 
         quickReactionMomentIDInFlight = nil
+    }
+
+    private func setQuickReactionError(_ code: String, detail: String? = nil) {
+        if let detail, !detail.isEmpty {
+            fetchError = "qr:err code=\(code) detail=\(detail)"
+        } else {
+            fetchError = "qr:err code=\(code)"
+        }
     }
 
     private func synchronizeReactionTargetWithLoadedMoments() {

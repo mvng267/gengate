@@ -1,12 +1,12 @@
 # GenGate Workflow Status
 
-- Batch: 210
+- Batch: 211
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 210 iOS feed seam friction reduction — expose quick-react refresh outcome summary in status message
+- Scope: batch 211 iOS feed seam friction reduction — normalize quick-react status/error message format
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
-  - iOS: Session login -> Feed -> load private/authored moments -> set quick-react refresh mode -> quick react from row -> verify status message shows applied mode + refreshed list count/targets.
+  - iOS: Session login -> Feed -> load private/authored moments -> quick react from row -> verify compact status (`qr:ok ...`) and error (`qr:err ...`) messages for rapid multi-run testing.
   - Web/backend seams from prior batches remain runnable for friend graph/moments/inbox/location/notifications.
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
@@ -16,11 +16,14 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `7d83a25` — `batch209: add ios feed row refresh mode context hint`
-  - working tree: bẩn (batch210 changes in progress, chưa commit, chưa push)
+  - latest commit: `ce16b12` — `batch210: add ios feed quick reaction refresh outcome status`
+  - working tree: bẩn (batch211 changes in progress, chưa commit, chưa push)
 - Blocker: none
-- Next: chốt batch210 (commit local) rồi mở batch211 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
+- Next: chốt batch211 (commit local) rồi mở batch212 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 210 handoff:
+  - `ce16b12` — `batch210: add ios feed quick reaction refresh outcome status`
+  - refresh outcome summary remains MVP-testable while batch 211 normalizes quick-react status/error message format.
 - Batch 209 handoff:
   - `7d83a25` — `batch209: add ios feed row refresh mode context hint`
   - row-level refresh-mode context hint remains MVP-testable while batch 210 adds explicit refresh outcome summary after quick react.
