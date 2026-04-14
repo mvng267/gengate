@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **241 — notification shell (web/iOS contract adoption cho total unread summary) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **243 — notification shell (web/iOS unread-only toggle controls cho filter contract) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **241**
-- Scope hiện tại: notification shell — web/iOS contract adoption cho `total_unread_count`.
+- Batch workflow chính thức hiện tại: **243**
+- Scope hiện tại: notification shell — thêm unread-only toggle controls trên web/iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/lib/notifications/client.ts`
@@ -100,18 +100,48 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `b033484` — `batch241: adopt total unread summary in web and ios notification shells`
+  - commit gần nhất đã chốt: `ac02f36` — `batch243: add unread-only filter controls to web and ios notification shells`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch242 với 1 slice hẹp notification shell: thêm pagination controls (`limit`/`offset`) trên web/iOS để bám sát contract paged list.
+  - mở batch244 với 1 slice hẹp notification shell: thêm preset quick offsets (first/next/prev) trên web/iOS list controls.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.
   - iOS Feed: tạo/lỗi moment posting flow; nếu backend trả `error.code/error.message` thì UI hiện thông điệp lỗi + hint hành động cho `user_not_found`, `moment_not_found`, `validation_error`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **243**
+- Commit cuối đã chốt:
+  - `ac02f36` — `batch243: add unread-only filter controls to web and ios notification shells`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **244**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm preset quick offsets (first/next/prev) trên web/iOS list controls.
+
+---
+
+- Batch vừa xong: **242**
+- Commit cuối đã chốt:
+  - `d594ffa` — `batch242: add pagination controls to web and ios notification shells`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **243**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm `unread_only` toggle trên web/iOS list controls.
+
+---
 
 - Batch vừa xong: **241**
 - Commit cuối đã chốt:

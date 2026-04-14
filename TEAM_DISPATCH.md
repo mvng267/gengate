@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 241
-- Trục công việc: notification shell — web/iOS contract adoption cho paged `total_unread_count` summary.
-- Trạng thái: batch241_complete_notification_contract_adoption.
+- Batch workflow chính thức hiện tại: 243
+- Trục công việc: notification shell — web/iOS unread-only toggle controls cho paged list filter contract.
+- Trạng thái: batch243_complete_notification_unread_filter_controls.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,32 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 243 handoff (closed)
+- Batch vừa xong: **243**
+- Commit đã chốt:
+  - `ac02f36` — `batch243: add unread-only filter controls to web and ios notification shells`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **244**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm preset quick offsets (first/next/prev) trên web/iOS list controls.
+
+## Batch 242 handoff (closed)
+- Batch vừa xong: **242**
+- Commit đã chốt:
+  - `d594ffa` — `batch242: add pagination controls to web and ios notification shells`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **243**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm `unread_only` toggle trên web/iOS list controls.
 
 ## Batch 241 handoff (closed)
 - Batch vừa xong: **241**

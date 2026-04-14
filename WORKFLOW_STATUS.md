@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 241
+- Batch: 243
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 241 notification shell — web/iOS contract adoption for paged `total_unread_count` summary.
+- Scope: batch 243 notification shell — add web/iOS unread-only toggle controls for paged list filter contract.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -17,10 +17,16 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `b033484` — `batch241: adopt total unread summary in web and ios notification shells`
+  - latest feature commit: `ac02f36` — `batch243: add unread-only filter controls to web and ios notification shells`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch242 với 1 slice hẹp notification shell tiếp theo: thêm pagination controls (`limit`/`offset`) trên web/iOS để khai thác ổn định contract list paged.
+- Next: mở batch244 với 1 slice hẹp notification shell tiếp theo: thêm preset quick offsets (first/next/prev) trên web/iOS để giảm nhập tay khi test paging.
+- Batch 243 handoff:
+  - `ac02f36` — `batch243: add unread-only filter controls to web and ios notification shells`
+  - web/iOS notification shell đã thêm toggle `unread_only` và truyền query filter cùng pagination window.
+- Batch 242 handoff:
+  - `d594ffa` — `batch242: add pagination controls to web and ios notification shells`
+  - web/iOS notification shell đã thêm input `limit`/`offset`, gửi query paged list và hiển thị page window trong summary/status.
 - Batch 241 handoff:
   - `b033484` — `batch241: adopt total unread summary in web and ios notification shells`
   - web/iOS đã parse + hiển thị `unread_count` và `total_unread_count` từ backend list payload, có fallback local count nếu field chưa có.
