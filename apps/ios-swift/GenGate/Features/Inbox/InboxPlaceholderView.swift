@@ -1639,6 +1639,30 @@ struct InboxPlaceholderView: View {
                                 .buttonStyle(.bordered)
                                 .disabled((latestLoadedMessageID?.isEmpty ?? true) || isUpdatingReadCursor)
 
+                                Button {
+                                    applyConversationMemberFirstUnreadFocusAndMarkRead(memberUserID: member.userID)
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Text("Use member focus + first unread + mark read")
+                                            .font(.caption)
+
+                                        Spacer()
+
+                                        if isUpdatingReadCursor {
+                                            Text("updating")
+                                                .font(.caption2.monospaced())
+                                                .foregroundStyle(.secondary)
+                                        } else {
+                                            Text("first_unread+focus")
+                                                .font(.caption2.monospaced())
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled((firstUnreadMessageIDForFocusUser?.isEmpty ?? true) || isUpdatingReadCursor)
+
                                 if cursorMessageID == nil {
                                     Text("cursor_message_target: unavailable")
                                         .font(.caption.monospaced())
@@ -3316,6 +3340,39 @@ use_when=\(useWhenText)
         sendStatusHint = alreadyMatched
             ? "Member focus + latest loaded message already match current read-cursor context; marking read now (read_cursor_latest_focus_auto_source=member_row)."
             : "Applied member focus + latest loaded message and marking read now (read_cursor_latest_focus_auto_source=member_row)."
+
+        Task {
+            await performReadCursorUpdate(targetUserID: normalizedUserID, targetMessageID: normalizedMessageID)
+        }
+    }
+
+    private func applyConversationMemberFirstUnreadFocusAndMarkRead(memberUserID: String) {
+        let normalizedUserID = memberUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !normalizedUserID.isEmpty else {
+            sendStatusHint = "member_focus_user_missing_for_first_unread_auto_mark"
+            return
+        }
+
+        guard let firstUnreadMessageID = firstUnreadMessageIDForFocusUser,
+              !firstUnreadMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            sendStatusHint = "first_unread_candidate_missing_for_member_focus_auto_mark"
+            return
+        }
+
+        let normalizedMessageID = firstUnreadMessageID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentTargetUserID = readCursorTargetUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentTargetMessageID = readCursorTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentFocusUserID = readStatusFocusUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let alreadyMatched = currentTargetUserID == normalizedUserID && currentTargetMessageID == normalizedMessageID && currentFocusUserID == normalizedUserID
+
+        readCursorTargetUserIDDraft = normalizedUserID
+        readCursorTargetMessageIDDraft = normalizedMessageID
+        readStatusFocusUserIDDraft = normalizedUserID
+
+        sendStatusHint = alreadyMatched
+            ? "Member focus + first unread candidate already match current read-cursor context; marking read now (read_cursor_first_unread_focus_auto_source=member_row)."
+            : "Applied member focus + first unread candidate and marking read now (read_cursor_first_unread_focus_auto_source=member_row)."
 
         Task {
             await performReadCursorUpdate(targetUserID: normalizedUserID, targetMessageID: normalizedMessageID)

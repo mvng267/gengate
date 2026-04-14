@@ -80,6 +80,35 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const latestLoadedMessageId = messages[messages.length - 1]?.id ?? "";
   const resolvedReadCursorTargetMessageId = readCursorTargetMessageIdDraft.trim() || latestLoadedMessageId;
 
+  const firstUnreadCandidateMessageIdForFocusUser = (() => {
+    if (!resolvedReadCursorFocusUserId) {
+      return "";
+    }
+
+    const focusMember = conversationMembers.find((member) => member.user_id === resolvedReadCursorFocusUserId);
+    const cursorMessageId = focusMember?.last_read_message_id?.trim() ?? "";
+
+    if (messages.length === 0) {
+      return "";
+    }
+
+    if (!cursorMessageId) {
+      return messages[0]?.id ?? "";
+    }
+
+    const cursorIndex = messages.findIndex((message) => message.id === cursorMessageId);
+    if (cursorIndex < 0) {
+      return messages[0]?.id ?? "";
+    }
+
+    const unreadIndex = cursorIndex + 1;
+    if (unreadIndex >= messages.length) {
+      return "";
+    }
+
+    return messages[unreadIndex]?.id ?? "";
+  })();
+
   const focusReadState = (() => {
     if (!resolvedReadCursorFocusUserId || !resolvedReadCursorTargetMessageId) {
       return "unknown";
@@ -542,6 +571,42 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     });
   }
 
+  async function applyConversationMemberFirstUnreadFocusAndMarkRead(member: ConversationMemberItem) {
+    const normalizedUserId = member.user_id.trim();
+
+    if (!normalizedUserId) {
+      setStatus("member_focus_user_missing_for_first_unread_auto_mark");
+      return;
+    }
+
+    const normalizedMessageId = firstUnreadCandidateMessageIdForFocusUser.trim();
+    if (!normalizedMessageId) {
+      setStatus("first_unread_candidate_missing_for_member_focus_auto_mark");
+      return;
+    }
+
+    const currentTargetUserId = readCursorTargetUserIdDraft.trim();
+    const currentTargetMessageId = readCursorTargetMessageIdDraft.trim();
+    const currentFocusUserId = readStatusFocusUserIdDraft.trim();
+    const alreadyMatched =
+      currentTargetUserId === normalizedUserId &&
+      currentTargetMessageId === normalizedMessageId &&
+      currentFocusUserId === normalizedUserId;
+
+    setReadCursorTargetUserIdDraft(normalizedUserId);
+    setReadCursorTargetMessageIdDraft(normalizedMessageId);
+    setReadStatusFocusUserIdDraft(normalizedUserId);
+
+    await updateReadCursorForTargetUserAndMessage({
+      targetUserId: normalizedUserId,
+      targetMessageId: normalizedMessageId,
+      focusUserId: normalizedUserId,
+      statusPrefix: alreadyMatched
+        ? "Member focus + first unread candidate already match current read-cursor context; marking read now (read_cursor_first_unread_focus_auto_source=member_row)."
+        : "Applied member focus + first unread candidate and marking read now (read_cursor_first_unread_focus_auto_source=member_row).",
+    });
+  }
+
   function applyCurrentSessionUserForReadCursorAndFocus() {
     const sessionUserId = currentSessionUserId.trim();
     if (!sessionUserId) {
@@ -731,6 +796,30 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
         >
           {isUpdatingReadCursor ? "Marking target as read..." : "Mark target message as read (target user)"}
         </button>
+        <button
+          type="button"
+          onClick={() =>
+            void updateReadCursorForTargetUserAndMessage({
+              targetUserId: resolvedReadCursorFocusUserId,
+              targetMessageId: firstUnreadCandidateMessageIdForFocusUser,
+              focusUserId: resolvedReadCursorFocusUserId,
+              statusPrefix: "Applying focus user + first unread candidate and marking read now (read_cursor_first_unread_focus_source=focus_user).",
+            })
+          }
+          disabled={
+            isUpdatingReadCursor ||
+            !conversation ||
+            resolvedReadCursorFocusUserId.length === 0 ||
+            firstUnreadCandidateMessageIdForFocusUser.length === 0
+          }
+        >
+          {isUpdatingReadCursor ? "Jumping to first unread..." : "Jump focus user to first unread candidate"}
+        </button>
+        {firstUnreadCandidateMessageIdForFocusUser ? (
+          <p>
+            First unread candidate message_id: <code>{firstUnreadCandidateMessageIdForFocusUser}</code>
+          </p>
+        ) : null}
       </div>
 
       <div>
@@ -867,6 +956,15 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
                   disabled={latestLoadedMessageId.length === 0 || isUpdatingReadCursor}
                 >
                   {isUpdatingReadCursor ? "Applying latest + focus + mark..." : "Use member focus + latest loaded + mark read"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void applyConversationMemberFirstUnreadFocusAndMarkRead(member)}
+                  disabled={firstUnreadCandidateMessageIdForFocusUser.length === 0 || isUpdatingReadCursor}
+                >
+                  {isUpdatingReadCursor
+                    ? "Applying first unread + focus + mark..."
+                    : "Use member focus + first unread + mark read"}
                 </button>
               </div>
             </li>

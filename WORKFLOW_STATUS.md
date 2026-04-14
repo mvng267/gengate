@@ -1,15 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 279
+- Batch: 280
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 279 direct-message shell — add one-tap member-row latest-loaded+focus+mark action to apply target user + latest loaded message + focus user then trigger read-cursor update immediately when member cursor message is empty (read_cursor_latest_focus_auto_source=member_row) on web+iOS.
+- Scope: batch 280 direct-message shell — add one-tap member-row first-unread+focus+mark action to apply target user + first unread candidate + focus user then trigger read-cursor update immediately (read_cursor_first_unread_focus_auto_source=member_row) on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
-  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> trong `Conversation members` bấm `Use member focus + latest loaded + mark read` (hoặc `Use member cursor context + focus + mark read`) -> verify status có `read_cursor_latest_focus_auto_source=member_row` (hoặc `read_cursor_context_focus_auto_source=member_row`) và read cursor updated ngay không cần bấm thêm `Mark target message as read (target user)`.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> trong `Member read-cursor summary` bấm `Use member focus + latest loaded + mark read` (hoặc `Use member cursor context + focus + mark read`) -> verify status hint có `read_cursor_latest_focus_auto_source=member_row` (hoặc `read_cursor_context_focus_auto_source=member_row`) và read cursor updated ngay không cần bấm thêm `Update read cursor`.
+  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> bấm `Jump focus user to first unread candidate` hoặc trong `Conversation members` bấm `Use member focus + first unread + mark read` -> verify status có `read_cursor_first_unread_focus_source=focus_user` hoặc `read_cursor_first_unread_focus_auto_source=member_row` và read cursor advance theo first unread candidate.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Jump focus user to first unread candidate` hoặc trong `Member read-cursor summary` bấm `Use member focus + first unread + mark read` -> verify status hint có `read_cursor_first_unread_focus_auto_source=member_row` và read cursor advance theo first unread candidate.
 - Files:
   - apps/web-nextjs/components/direct-message-shell.tsx
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -17,10 +17,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `bcaf55f` — `batch279: add member latest-loaded focus auto-mark actions on web and ios`
-  - working tree: clean after batch279 commit
+  - latest feature commit: `(pending in this run)` — `batch280: add member first-unread focus auto-mark actions on web and ios`
+  - working tree: clean after batch280 commit
 - Blocker: none
-- Next: mở batch280 với 1 slice hẹp direct-message shell: thêm one-tap action set member focus + first unread candidate rồi auto-mark read trên web+iOS để cover parity jump-first-unread.
+- Next: mở batch281 với 1 slice hẹp direct-message shell: thêm status hint/read-state copy marker sau jump-first-unread để giảm ambiguity khi verify multi-user parity trên web+iOS.
+- Batch 280 handoff:
+  - `(pending in this run)` — `batch280: add member first-unread focus auto-mark actions on web and ios`
+  - web/iOS member summary thêm action `Use member focus + first unread + mark read` và web read-cursor form thêm quick action `Jump focus user to first unread candidate` để đẩy cursor theo unread candidate trong một thao tác.
 - Batch 279 handoff:
   - `bcaf55f` — `batch279: add member latest-loaded focus auto-mark actions on web and ios`
   - web/iOS member summary thêm action `Use member focus + latest loaded + mark read`, cho phép fallback khi `last_read_message_id` trống mà vẫn apply focus + mark-read ngay theo latest loaded message.
