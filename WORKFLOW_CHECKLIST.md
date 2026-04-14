@@ -99,7 +99,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `(pending in this run)` — `batch280: add member first-unread focus auto-mark actions on web and ios`
+  - commit gần nhất đã chốt: `c71f16b` — `batch280: add member first-unread focus auto-mark actions on web and ios`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
@@ -115,7 +115,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch vừa xong: **280**
 - Commit cuối đã chốt:
-  - `(pending in this run)` — `batch280: add member first-unread focus auto-mark actions on web and ios`
+  - `c71f16b` — `batch280: add member first-unread focus auto-mark actions on web and ios`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass

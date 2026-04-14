@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(pending in this run)` — `batch280: add member first-unread focus auto-mark actions on web and ios`
+  - latest feature commit: `c71f16b` — `batch280: add member first-unread focus auto-mark actions on web and ios`
   - working tree: clean after batch280 commit
 - Blocker: none
 - Next: mở batch281 với 1 slice hẹp direct-message shell: thêm status hint/read-state copy marker sau jump-first-unread để giảm ambiguity khi verify multi-user parity trên web+iOS.
 - Batch 280 handoff:
-  - `(pending in this run)` — `batch280: add member first-unread focus auto-mark actions on web and ios`
+  - `c71f16b` — `batch280: add member first-unread focus auto-mark actions on web and ios`
   - web/iOS member summary thêm action `Use member focus + first unread + mark read` và web read-cursor form thêm quick action `Jump focus user to first unread candidate` để đẩy cursor theo unread candidate trong một thao tác.
 - Batch 279 handoff:
   - `bcaf55f` — `batch279: add member latest-loaded focus auto-mark actions on web and ios`

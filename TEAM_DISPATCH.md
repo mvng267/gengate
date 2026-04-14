@@ -56,7 +56,7 @@
 ## Batch 280 handoff (closed)
 - Batch vừa xong: **280**
 - Commit đã chốt:
-  - `(pending in this run)` — `batch280: add member first-unread focus auto-mark actions on web and ios`
+  - `c71f16b` — `batch280: add member first-unread focus auto-mark actions on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
