@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **172 — iOS inbox inline source-hint triage-line preview slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **173 — iOS inbox prefix-free source-hint triage-body quick-copy slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **172**
-- Scope hiện tại: iOS inbox read-status UX hardening — thêm triage line preview inline để scan nhanh trước khi copy.
+- Batch workflow chính thức hiện tại: **173**
+- Scope hiện tại: iOS inbox read-status UX hardening — thêm one-tap copy triage body không prefix để dán issue title/body gọn hơn.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch172 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch173 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch173 cho messaging friction tiếp theo (thêm one-tap copy triage preview sans prefix để paste issue title/body gọn hơn) trong iOS inbox shell
+  - mở batch174 cho messaging friction tiếp theo (thêm side-by-side preview triage line + triage body để so sánh nhanh) trong iOS inbox shell
 
 ## Batch handoff note
 
