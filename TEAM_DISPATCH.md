@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 237
-- Trục công việc: notification shell — backend unread-only list parity qua query `unread_only=true`.
-- Trạng thái: batch237_complete_notification_unread_only_list_parity.
+- Batch workflow chính thức hiện tại: 238
+- Trục công việc: notification shell — backend unread summary/count parity trên list response.
+- Trạng thái: batch238_verify_notification_unread_summary_count_parity.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,17 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 238 handoff (open)
+- Batch đang làm: **238**
+- Scope đang chạy:
+  - `GET /notifications/{user_id}` trả thêm `unread_count` trong list response.
+- Test/verify tạm thời:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k "notifications_list_unread"` ✅ (2 passed, 10 deselected)
+- Blocker/rủi ro hiện tại:
+  - none
+- Bước tiếp theo:
+  - commit batch238 + sync docs trạng thái clean.
 
 ## Batch 234 handoff (closed)
 - Batch vừa xong: **234**

@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **237 — notification shell đang mở (unread-only list parity ở backend)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **238 — notification shell đang mở (unread summary/count parity ở backend)**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,22 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **237**
-- Scope hiện tại: notification shell — backend unread-only list parity qua query `unread_only` cho endpoint list.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **238**
+- Scope hiện tại: notification shell — backend unread summary/count parity trên list response.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/backend-python/app/repositories/notifications.py`
-  - `apps/backend-python/app/services/notifications.py`
+  - `apps/backend-python/app/schemas/notifications.py`
   - `apps/backend-python/app/modules/notifications/router.py`
   - `apps/backend-python/tests/test_notifications_security_api.py`
 - Test-verify:
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k unread_only` → ✅ `1 passed, 10 deselected`
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k "notifications_list_unread"` → ✅ `2 passed, 10 deselected`
 - Git mốc gần nhất:
   - commit gần nhất đã chốt: `99da484` — `batch237: add unread-only filter for notifications list`
-  - working tree hiện tại: sạch
+  - working tree hiện tại: bẩn (batch238 verify xong, chờ commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở 1 slice hẹp notification shell cho unread summary/count parity.
+  - commit batch238 rồi sync workflow docs theo commit mới.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.

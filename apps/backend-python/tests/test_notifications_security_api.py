@@ -86,6 +86,7 @@ def test_notifications_device_keys_and_recovery_material_flow() -> None:
     list_notifications_response = client.get(f"/notifications/{user_id}")
     assert list_notifications_response.status_code == 200
     assert list_notifications_response.json()["count"] == 1
+    assert list_notifications_response.json()["unread_count"] == 1
 
     read_notification_response = client.patch(f"/notifications/{notification_id}/read")
     assert read_notification_response.status_code == 200
@@ -708,6 +709,7 @@ def test_batch17_notifications_unread_and_delete_lifecycle_endpoints() -> None:
     list_notifications_response = client.get(f"/notifications/{user_id}")
     assert list_notifications_response.status_code == 200
     assert list_notifications_response.json()["count"] == 1
+    assert list_notifications_response.json()["unread_count"] == 1
     assert list_notifications_response.json()["items"][0]["id"] == second_notification_id
 
     app.dependency_overrides.clear()
@@ -908,11 +910,13 @@ def test_notifications_list_unread_only_query_parity() -> None:
     all_notifications_response = client.get(f"/notifications/{user_id}")
     assert all_notifications_response.status_code == 200
     assert all_notifications_response.json()["count"] == 2
+    assert all_notifications_response.json()["unread_count"] == 1
 
     unread_only_response = client.get(f"/notifications/{user_id}?unread_only=true")
     assert unread_only_response.status_code == 200
     unread_items = unread_only_response.json()["items"]
     assert unread_only_response.json()["count"] == 1
+    assert unread_only_response.json()["unread_count"] == 1
     assert unread_items[0]["id"] == second_notification_id
     assert unread_items[0]["read_at"] is None
 
@@ -923,6 +927,69 @@ def test_notifications_list_unread_only_query_parity() -> None:
     assert unread_only_after_toggle_response.status_code == 200
     unread_after_toggle_ids = {item["id"] for item in unread_only_after_toggle_response.json()["items"]}
     assert unread_only_after_toggle_response.json()["count"] == 2
+    assert unread_only_after_toggle_response.json()["unread_count"] == 2
     assert unread_after_toggle_ids == {first_notification_id, second_notification_id}
+
+    app.dependency_overrides.clear()
+
+
+def test_notifications_list_unread_count_stays_zero_when_all_are_read() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    user_response = client.post(
+        "/auth/register",
+        json={"email": "batch238-notify@example.com", "username": "batch238_notify"},
+    )
+    assert user_response.status_code == 201
+    user_id = user_response.json()["id"]
+
+    first_notification_response = client.post(
+        "/notifications",
+        json={"user_id": user_id, "notification_type": "friend_request", "payload_json": {"x": 1}},
+    )
+    second_notification_response = client.post(
+        "/notifications",
+        json={"user_id": user_id, "notification_type": "moment_like", "payload_json": {"x": 2}},
+    )
+    assert first_notification_response.status_code == 201
+    assert second_notification_response.status_code == 201
+
+    first_notification_id = first_notification_response.json()["id"]
+    second_notification_id = second_notification_response.json()["id"]
+
+    first_read_response = client.patch(f"/notifications/{first_notification_id}/read")
+    second_read_response = client.patch(f"/notifications/{second_notification_id}/read")
+    assert first_read_response.status_code == 200
+    assert second_read_response.status_code == 200
+
+    all_notifications_response = client.get(f"/notifications/{user_id}")
+    assert all_notifications_response.status_code == 200
+    assert all_notifications_response.json()["count"] == 2
+    assert all_notifications_response.json()["unread_count"] == 0
+
+    unread_only_response = client.get(f"/notifications/{user_id}?unread_only=true")
+    assert unread_only_response.status_code == 200
+    assert unread_only_response.json()["count"] == 0
+    assert unread_only_response.json()["unread_count"] == 0
 
     app.dependency_overrides.clear()

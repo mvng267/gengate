@@ -1,26 +1,27 @@
 # GenGate Workflow Status
 
-- Batch: 237
+- Batch: 238
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 237 notification shell — backend unread-only list parity via query contract.
-- Status: complete
+- Scope: batch 238 notification shell — backend unread summary/count parity on list response.
+- Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - iOS Profile: Session login -> Profile -> load pending requests -> tap `Reject request` ở inbound row -> app auto reload friend graph và request chuyển sang `rejected`.
   - iOS Feed (batch233): khi create moment/media fail, app parse `error.code/error.message` và hiện hint rõ cho `user_not_found`, `moment_not_found`, `validation_error` để tester xử lý đúng bước tiếp theo.
 - Files:
-  - apps/backend-python/app/repositories/notifications.py
-  - apps/backend-python/app/services/notifications.py
+  - apps/backend-python/app/schemas/notifications.py
   - apps/backend-python/app/modules/notifications/router.py
   - apps/backend-python/tests/test_notifications_security_api.py
 - Test:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k unread_only` ✅ (1 passed, 10 deselected)
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k "notifications_list_unread"` ✅ (2 passed, 10 deselected)
 - Git:
   - latest feature commit: `99da484` — `batch237: add unread-only filter for notifications list`
-  - working tree: clean
+  - working tree: dirty (batch238 verify done, chưa commit)
 - Blocker: none
-- Next: mở batch238 với 1 slice hẹp notification shell (unread summary/count parity).
+- Next: commit batch238 rồi sync workflow docs theo commit mới.
+- Batch 238 handoff (pending close):
+  - (chưa commit) `GET /notifications/{user_id}` trả thêm `unread_count` để client lấy unread summary trực tiếp.
 - Batch 237 handoff:
   - `99da484` — `batch237: add unread-only filter for notifications list`
   - notification list hỗ trợ query `unread_only=true` để chỉ trả unread items.

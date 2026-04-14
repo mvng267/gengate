@@ -48,7 +48,8 @@ def list_notifications(
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     items = [to_notification_response(notification) for notification in notifications]
-    return NotificationListResponse(count=len(items), items=items)
+    unread_count = sum(1 for notification in notifications if notification.read_at is None)
+    return NotificationListResponse(count=len(items), unread_count=unread_count, items=items)
 
 
 @router.get("/item/{notification_id}", response_model=NotificationResponse)
