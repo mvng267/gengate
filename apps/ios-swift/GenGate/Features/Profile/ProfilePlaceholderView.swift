@@ -395,6 +395,15 @@ struct ProfilePlaceholderView: View {
             friendshipCount = snapshot.friendshipCount
             pendingRequestRows = snapshot.pendingRequests
             friendshipRows = snapshot.friendships
+
+            let pendingInboundCount = snapshot.pendingRequests.filter {
+                $0.status == "pending" && $0.receiverUserID == trimmedUserID
+            }.count
+            let pendingOutboundCount = snapshot.pendingRequests.filter {
+                $0.status == "pending" && $0.requesterUserID == trimmedUserID
+            }.count
+
+            self.statusMessage = "Loaded friend graph: \(snapshot.requestCount) pending request(s), \(snapshot.friendshipCount) accepted friendship(s) · inbound: \(pendingInboundCount) · outbound: \(pendingOutboundCount)."
         } catch {
             pendingRequestCount = nil
             friendshipCount = nil

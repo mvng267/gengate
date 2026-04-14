@@ -50,8 +50,28 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
     try {
       const nextSnapshot = await fetchFriendGraphSnapshot(userId);
       setSnapshot(nextSnapshot);
+
+      const pendingBreakdown = nextSnapshot.pendingRequests.reduce(
+        (acc, request) => {
+          if (request.status !== "pending") {
+            return acc;
+          }
+
+          if (request.receiver.id === userId) {
+            acc.inbound += 1;
+          }
+
+          if (request.requester.id === userId) {
+            acc.outbound += 1;
+          }
+
+          return acc;
+        },
+        { inbound: 0, outbound: 0 },
+      );
+
       setStatus(
-        `Loaded friend graph: ${nextSnapshot.requestCount} pending request(s), ${nextSnapshot.friendshipCount} accepted friendship(s).`,
+        `Loaded friend graph: ${nextSnapshot.requestCount} pending request(s), ${nextSnapshot.friendshipCount} accepted friendship(s) · inbound: ${pendingBreakdown.inbound} · outbound: ${pendingBreakdown.outbound}.`,
       );
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "friend_graph_fetch_failed");
