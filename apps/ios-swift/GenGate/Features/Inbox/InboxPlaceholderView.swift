@@ -88,6 +88,8 @@ struct InboxPlaceholderView: View {
     @State private var lastRecipientDeviceSourceHintBranchUseWhenPreviewSummaryCopyText: String?
     @State private var lastRecipientDeviceSourceHintBranchUseWhenPreviewTaggedBlockCopyAt: Date?
     @State private var lastRecipientDeviceSourceHintBranchUseWhenPreviewTaggedBlockCopyText: String?
+    @State private var lastRecipientDeviceSourceHintBranchSummaryTagHeaderCopyAt: Date?
+    @State private var lastRecipientDeviceSourceHintBranchSummaryTagHeaderCopyText: String?
 
     private let recipientDevicesAutoReloadDebounceNanoseconds: UInt64 = 350_000_000
     private let recipientDevicesAutoReloadMinIntervalSeconds: TimeInterval = 1.0
@@ -104,7 +106,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset + empty-context-only helper-note visibility + short recipient-id mismatch hint + compact helper-note reason + readable short-caption mapping + recipient quick-member presets + dynamic first-valid-device apply/re-apply action + first-option inline subtitle (full + short id) + emphasized short-id line + source-hint short-id consistency across first-option/in-sync/manual/fallback states + same-as-first skip helper-note + empty-options reapply guidance + source-hint verify matrix + branch-key legend + matrix snapshot quick-copy + triage-line quick-copy + triage-line body quick-copy + triage preview line-vs-body block + compact diff hint + usage guidance note + usage-note quick-copy + triage-kit quick-copy + triage-kit compact preview + triage-kit preview quick-copy + preview delta marker + preview-delta quick-copy + preview-pair quick-copy + preview-pair use marker + preview-pair use-marker quick-copy + preview-pair-lite quick-copy + preview-pair-lite preview-line quick-copy + preview-pair-lite tag-header quick-copy + preview-pair-lite use-when-line quick-copy + preview-pair-lite condensed-line quick-copy + branch-preview token quick-copy + branch-use-when-preview quick-copy + branch-use-when-preview tagged-block quick-copy + preview-pair-lite inline scan block + selection-source hint + one-tap device UUID clear action; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset + empty-context-only helper-note visibility + short recipient-id mismatch hint + compact helper-note reason + readable short-caption mapping + recipient quick-member presets + dynamic first-valid-device apply/re-apply action + first-option inline subtitle (full + short id) + emphasized short-id line + source-hint short-id consistency across first-option/in-sync/manual/fallback states + same-as-first skip helper-note + empty-options reapply guidance + source-hint verify matrix + branch-key legend + matrix snapshot quick-copy + triage-line quick-copy + triage-line body quick-copy + triage preview line-vs-body block + compact diff hint + usage guidance note + usage-note quick-copy + triage-kit quick-copy + triage-kit compact preview + triage-kit preview quick-copy + preview delta marker + preview-delta quick-copy + preview-pair quick-copy + preview-pair use marker + preview-pair use-marker quick-copy + preview-pair-lite quick-copy + preview-pair-lite preview-line quick-copy + preview-pair-lite tag-header quick-copy + preview-pair-lite use-when-line quick-copy + preview-pair-lite condensed-line quick-copy + branch-preview token quick-copy + branch-use-when-preview quick-copy + branch-use-when-preview tagged-block quick-copy + branch-summary tag-header quick-copy + preview-pair-lite inline scan block + selection-source hint + one-tap device UUID clear action; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -188,6 +190,7 @@ struct InboxPlaceholderView: View {
                         "Added quick action `Copy source-hint branch-preview token` to copy short token `branch=<key> | preview=...` for quick issue label/summary tagging.",
                         "Added quick action `Copy source-hint branch-use-when-preview` to copy one-line heading `branch=<key> | use_when=... | preview=...` for issue summary blocks.",
                         "Added quick action `Copy source-hint branch-use-when-preview tagged` to copy one compact tagged block (`[inbox-source-hint-triage-branch-summary]` + branch/use_when/preview line) for ticket note paste.",
+                        "Added quick action `Copy source-hint branch-summary tag` to copy only tag header `[inbox-source-hint-triage-branch-summary]` for flexible note composition.",
                         "Triage preview now renders inline `preview-pair-lite` block so testers can scan payload content before tapping copy.",
                         "After copy, short-lived feedback lines show elapsed time + short fragment so testers can confirm exactly what was captured.",
                         "Recipient-device section now shows a compact selection-source hint so testers know whether current `Recipient device UUID` is in-sync with loaded options or still a manual out-of-options value.",
@@ -678,6 +681,15 @@ struct InboxPlaceholderView: View {
                                 }
                                 .buttonStyle(.bordered)
                                 .disabled(recipientDeviceSourceHintBranchUseWhenPreviewTaggedBlockText == nil)
+
+                                Button {
+                                    copyRecipientDeviceSourceHintBranchSummaryTagHeader()
+                                } label: {
+                                    Text("Copy source-hint branch-summary tag")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(recipientDeviceSourceHintBranchSummaryTagHeaderText == nil)
                             }
 
                             if let recipientDeviceSourceHintCopiedFeedbackText {
@@ -802,6 +814,12 @@ struct InboxPlaceholderView: View {
 
                             if let recipientDeviceSourceHintBranchUseWhenPreviewTaggedBlockCopiedFeedbackText {
                                 Text(recipientDeviceSourceHintBranchUseWhenPreviewTaggedBlockCopiedFeedbackText)
+                                    .font(.caption2.monospaced())
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            if let recipientDeviceSourceHintBranchSummaryTagHeaderCopiedFeedbackText {
+                                Text(recipientDeviceSourceHintBranchSummaryTagHeaderCopiedFeedbackText)
                                     .font(.caption2.monospaced())
                                     .foregroundStyle(.secondary)
                             }
@@ -1850,11 +1868,20 @@ use_when=\(useWhenText)
     }
 
     private var recipientDeviceSourceHintBranchUseWhenPreviewTaggedBlockText: String? {
-        guard let summaryLineText = recipientDeviceSourceHintBranchUseWhenPreviewSummaryText else {
+        guard let summaryLineText = recipientDeviceSourceHintBranchUseWhenPreviewSummaryText,
+              let tagHeaderText = recipientDeviceSourceHintBranchSummaryTagHeaderText else {
             return nil
         }
 
-        return "[inbox-source-hint-triage-branch-summary]\n\(summaryLineText)"
+        return "\(tagHeaderText)\n\(summaryLineText)"
+    }
+
+    private var recipientDeviceSourceHintBranchSummaryTagHeaderText: String? {
+        guard recipientDeviceSourceHintBranchUseWhenPreviewSummaryText != nil else {
+            return nil
+        }
+
+        return "[inbox-source-hint-triage-branch-summary]"
     }
 
     private var recipientDeviceSourceHintReportPayloadCopiedFeedbackText: String? {
@@ -2121,6 +2148,20 @@ use_when=\(useWhenText)
         }
 
         return "Copied branch-use-when-preview tagged (\(Int(elapsed))s ago): \(shortCaption(lastRecipientDeviceSourceHintBranchUseWhenPreviewTaggedBlockCopyText, limit: 96))"
+    }
+
+    private var recipientDeviceSourceHintBranchSummaryTagHeaderCopiedFeedbackText: String? {
+        guard let lastRecipientDeviceSourceHintBranchSummaryTagHeaderCopyAt,
+              let lastRecipientDeviceSourceHintBranchSummaryTagHeaderCopyText else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(lastRecipientDeviceSourceHintBranchSummaryTagHeaderCopyAt)
+        guard elapsed <= 12 else {
+            return nil
+        }
+
+        return "Copied branch-summary tag (\(Int(elapsed))s ago): \(shortCaption(lastRecipientDeviceSourceHintBranchSummaryTagHeaderCopyText, limit: 96))"
     }
 
     private var resolvedReadStatusMessageID: String? {
@@ -2529,6 +2570,22 @@ use_when=\(useWhenText)
 
         lastRecipientDeviceSourceHintBranchUseWhenPreviewTaggedBlockCopyText = normalizedBranchUseWhenPreviewTaggedBlockText
         lastRecipientDeviceSourceHintBranchUseWhenPreviewTaggedBlockCopyAt = Date()
+    }
+
+    private func copyRecipientDeviceSourceHintBranchSummaryTagHeader() {
+        guard let branchSummaryTagHeaderText = recipientDeviceSourceHintBranchSummaryTagHeaderText else {
+            return
+        }
+
+        let normalizedBranchSummaryTagHeaderText = branchSummaryTagHeaderText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedBranchSummaryTagHeaderText.isEmpty else {
+            return
+        }
+
+        writeToClipboard(normalizedBranchSummaryTagHeaderText)
+
+        lastRecipientDeviceSourceHintBranchSummaryTagHeaderCopyText = normalizedBranchSummaryTagHeaderText
+        lastRecipientDeviceSourceHintBranchSummaryTagHeaderCopyAt = Date()
     }
 
     private func writeToClipboard(_ text: String) {
