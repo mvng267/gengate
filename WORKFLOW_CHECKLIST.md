@@ -100,8 +100,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `(pending local commit for batch191 slice)`
-  - working tree hiện tại: dirty trong lúc edit batch191; sẽ sạch sau commit local, chưa push
+  - commit gần nhất đã chốt: `77b9a9e` — `batch191: add preview-pair-lite use-when line quick copy`
+  - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
