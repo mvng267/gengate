@@ -73,6 +73,12 @@ struct ProfilePlaceholderView: View {
                             .background(Color.secondary.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                        if isSelfFriendRequestDraft {
+                            Text("Requester và receiver đang trùng nhau; đổi receiver để gửi request hợp lệ.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
                         HStack(spacing: 8) {
                             Button {
                                 swapRequesterAndReceiver()
@@ -101,7 +107,8 @@ struct ProfilePlaceholderView: View {
                                 isCreatingRequest ||
                                 isLoading ||
                                 userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-                                receiverUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                                receiverUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                                isSelfFriendRequestDraft
                             )
                         }
                     }
@@ -235,6 +242,12 @@ struct ProfilePlaceholderView: View {
         return nil
     }
 
+    private var isSelfFriendRequestDraft: Bool {
+        let requesterUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let receiverUserID = receiverUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        return !requesterUserID.isEmpty && requesterUserID == receiverUserID
+    }
+
     private func prefillFromCurrentSessionUserIfNeeded() {
         guard userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let currentSessionUserID else {
@@ -303,6 +316,12 @@ struct ProfilePlaceholderView: View {
 
         guard !requesterUserID.isEmpty, !receiverUserID.isEmpty else {
             fetchError = "Cần requester và receiver UUID để tạo friend request."
+            return
+        }
+
+        guard requesterUserID != receiverUserID else {
+            statusMessage = nil
+            fetchError = "friend_request_invalid_request code=invalid_request detail=requester và receiver phải khác nhau"
             return
         }
 
