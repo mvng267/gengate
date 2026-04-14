@@ -1,25 +1,28 @@
 # GenGate Workflow Status
 
-- Batch: 258
+- Batch: 259
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 258 friend-graph shell — add quick-copy summary line (user + pending inbound/outbound/total + accepted count) for fast retest reporting.
+- Scope: batch 259 moment-posting shell — add quick-copy payload summary (author + image_url + caption) for fast create-flow reporting.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
-  - Web Profile (`/profile?user=<uuid>`): load snapshot -> thấy `Quick copy: user=... | pending_inbound=... | pending_outbound=... | pending_total=... | accepted=...`.
-  - iOS Profile: Session login -> Profile -> load pending requests -> verify dòng `Quick copy: user=... | pending_inbound=... | pending_outbound=... | pending_total=... | accepted=...`.
+  - Web Feed (`/feed`): nhập author/caption/image key -> verify dòng `Quick copy payload: author=... | image_url=... | caption=...` trước khi bấm `Create moment + image shell`.
+  - iOS Feed: mở tab Feed -> nhập author/caption/image key -> verify dòng `Quick copy payload: author=... | image_url=... | caption=...` trước khi bấm `Create moment + image`.
 - Files:
-  - apps/web-nextjs/components/friend-graph-shell.tsx
-  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
+  - apps/web-nextjs/components/moment-compose-shell.tsx
+  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `16a8ff4` — `batch258: add quick-copy friend graph summary line`
+  - latest feature commit: `f42dc59` — `batch259: add quick-copy moment payload summaries`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch259 với 1 slice hẹp moment-posting shell: thêm quick-copy payload summary (author + image_url + caption) để tester báo cáo create path nhanh.
+- Next: mở batch260 với 1 slice hẹp moment-posting shell: thêm quick preset button dùng session user làm author + emit status rõ `author source` khi apply.
+- Batch 259 handoff:
+  - `f42dc59` — `batch259: add quick-copy moment payload summaries`
+  - web/iOS moment-posting shell giờ có dòng quick-copy payload `author/image_url/caption` để report create path nhanh trước khi submit.
 - Batch 258 handoff:
   - `16a8ff4` — `batch258: add quick-copy friend graph summary line`
   - web/iOS friend-graph shell giờ có dòng `Quick copy` chuẩn hoá key/value để copy/paste report nhanh sau mỗi lần load snapshot.

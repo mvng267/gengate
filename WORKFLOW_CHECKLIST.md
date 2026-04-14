@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **258 — friend-graph shell (web/iOS quick-copy summary line) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **259 — moment-posting shell (web/iOS quick-copy payload summary) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,28 +89,43 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **258**
-- Scope hiện tại: friend-graph shell — thêm quick-copy line chứa user + pending inbound/outbound/total + accepted count trên web+iOS.
+- Batch workflow chính thức hiện tại: **259**
+- Scope hiện tại: moment-posting shell — thêm quick-copy payload summary (author + image_url + caption) trên web+iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/components/friend-graph-shell.tsx`
-  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
+  - `apps/web-nextjs/components/moment-compose-shell.tsx`
+  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `16a8ff4` — `batch258: add quick-copy friend graph summary line`
+  - commit gần nhất đã chốt: `f42dc59` — `batch259: add quick-copy moment payload summaries`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch259 với 1 slice hẹp moment-posting shell: thêm quick-copy payload summary (author + image_url + caption).
+  - mở batch260 với 1 slice hẹp moment-posting shell: thêm quick preset dùng session user làm author + status copy nguồn author.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
-  - Web Profile: load friend graph -> copy dòng `Quick copy` để report nhanh pending/accepted counts.
-  - iOS Profile: Session -> Profile -> load graph -> verify dòng `Quick copy` + reject inbound pending row.
+  - Web Feed: nhập author/caption/image key -> verify dòng quick-copy payload -> bấm create moment.
+  - iOS Feed: nhập author/caption/image key -> verify dòng quick-copy payload -> bấm create moment + image.
 
 ## Batch handoff note
+
+- Batch vừa xong: **259**
+- Commit cuối đã chốt:
+  - `f42dc59` — `batch259: add quick-copy moment payload summaries`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **260**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - moment-posting shell: thêm quick preset dùng session user làm author + status copy nguồn author.
+
+---
 
 - Batch vừa xong: **258**
 - Commit cuối đã chốt:

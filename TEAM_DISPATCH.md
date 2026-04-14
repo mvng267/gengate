@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 258
-- Trục công việc: friend-graph shell — web/iOS add quick-copy summary line for pending/accepted reporting.
-- Trạng thái: batch258_complete_friend_graph_quick_copy_summary_line.
+- Batch workflow chính thức hiện tại: 259
+- Trục công việc: moment-posting shell — web/iOS add quick-copy payload summary for create-flow reporting.
+- Trạng thái: batch259_complete_moment_posting_quick_copy_payload_summary.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 259 handoff (closed)
+- Batch vừa xong: **259**
+- Commit đã chốt:
+  - `f42dc59` — `batch259: add quick-copy moment payload summaries`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **260**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - moment-posting shell: thêm quick preset dùng session user làm author + status copy nguồn author.
 
 ## Batch 258 handoff (closed)
 - Batch vừa xong: **258**
