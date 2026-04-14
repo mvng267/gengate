@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **256 — friend-graph shell (web/iOS inbound/outbound pending summary line) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **257 — friend-graph shell (web/iOS inbound/outbound breakdown in load status text) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **256**
-- Scope hiện tại: friend-graph shell — thêm pending summary line (`Inbound pending`/`Outbound pending`/`Total pending`) trên web+iOS Profile.
+- Batch workflow chính thức hiện tại: **257**
+- Scope hiện tại: friend-graph shell — thêm inbound/outbound pending breakdown trực tiếp vào status message sau load trên web+iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/friend-graph-shell.tsx`
@@ -99,18 +99,33 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `a8ff434` — `batch256: add inbound outbound pending summaries to friend graph shells`
+  - commit gần nhất đã chốt: `35c63e9` — `batch257: add pending direction breakdown to friend graph load status`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch257 với 1 slice hẹp friend-graph shell: thêm inbound/outbound breakdown trực tiếp vào status message sau load để copy/paste kết quả test nhanh.
+  - mở batch258 với 1 slice hẹp friend-graph shell: thêm quick-copy line chứa user + pending inbound/outbound + accepted count.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.
   - iOS Feed: tạo/lỗi moment posting flow; nếu backend trả `error.code/error.message` thì UI hiện thông điệp lỗi + hint hành động cho `user_not_found`, `moment_not_found`, `validation_error`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **257**
+- Commit cuối đã chốt:
+  - `35c63e9` — `batch257: add pending direction breakdown to friend graph load status`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **258**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - friend-graph shell: thêm quick-copy line chứa user + pending inbound/outbound + accepted count.
+
+---
 
 - Batch vừa xong: **256**
 - Commit cuối đã chốt:

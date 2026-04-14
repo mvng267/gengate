@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 256
+- Batch: 257
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 256 friend-graph shell — add inbound/outbound pending summary line for quick accept/reject retest.
+- Scope: batch 257 friend-graph shell — include inbound/outbound pending breakdown directly in load status text.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,10 +16,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `a8ff434` — `batch256: add inbound outbound pending summaries to friend graph shells`
+  - latest feature commit: `35c63e9` — `batch257: add pending direction breakdown to friend graph load status`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch257 với 1 slice hẹp friend-graph shell: thêm pending breakdown theo role ngay trong status text sau load (`inbound/outbound`) để tester chụp kết quả nhanh không cần đọc section riêng.
+- Next: mở batch258 với 1 slice hẹp friend-graph shell: thêm quick-copy line chứa user + pending inbound/outbound + accepted count để gửi report test nhanh.
+- Batch 257 handoff:
+  - `35c63e9` — `batch257: add pending direction breakdown to friend graph load status`
+  - web/iOS status sau `Load friend graph` giờ có thêm `inbound/outbound` breakdown ngay trong status text, hỗ trợ copy/paste kết quả nhanh.
 - Batch 256 handoff:
   - `a8ff434` — `batch256: add inbound outbound pending summaries to friend graph shells`
   - web/iOS friend-graph shell giờ có dòng `Pending summary: Inbound/Outbound/Total` sau khi load snapshot, giúp retest accept/reject pair nhanh hơn.
