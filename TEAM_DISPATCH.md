@@ -12,8 +12,20 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 217
-- Trục công việc: iOS profile friend graph UX hardening — preset requester/receiver from selected pending request để giảm thao tác copy UUID.
+- Batch workflow chính thức hiện tại: 218
+- Trục công việc: iOS profile friend graph UX hardening — split pending-request preset into same/reverse pair modes.
+
+## Batch 217 handoff (closed)
+- Batch vừa xong: **217**
+- Commit đã push:
+  - `7bbd5cd` — `batch217: preset ios friend request pair from pending row`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **218**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - tách preset pending request thành 2 mode `Use same pair` / `Use reverse pair` để thao tác đúng chiều nhanh hơn.
 
 ## Batch 216 handoff (closed)
 - Batch vừa xong: **216**
@@ -65,9 +77,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 217 iOS profile friend graph UX hardening.
-- Kết quả gần nhất: batch 216 đã thêm swap, self-request guard, và giữ receiver để retest dedupe.
-- Trạng thái: in_progress_batch217_ios.
+- Scope hiện tại: batch 218 iOS profile friend graph UX hardening.
+- Kết quả gần nhất: batch 218 thêm 2 preset mode (`Use same pair` / `Use reverse pair`) trên pending request row.
+- Trạng thái: verify_batch218_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

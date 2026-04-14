@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **216 — iOS profile requester/receiver swap quick action slice is in verify (MVP-testable)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **218 — iOS pending-request preset modes (same/reverse pair) slice is in verify (MVP-testable)**.
 
 ## Reporting hard rule
 
@@ -89,27 +89,41 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **217**
-- Scope hiện tại: iOS profile friend graph UX hardening — preset requester/receiver từ pending request row.
-- Trạng thái hiện tại: **in_progress**
+- Batch workflow chính thức hiện tại: **218**
+- Scope hiện tại: iOS profile friend graph UX hardening — tách preset pending request thành same/reverse pair.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/ios-swift && swift build` → ✅ pass (baseline batch216)
+  - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã push: `b46705d` — `batch216: keep receiver id for dedupe retest`
-  - working tree hiện tại: bẩn (đang có thay đổi batch217, chưa commit)
+  - commit gần nhất local: `ef9152c` — `batch218: add ios pending request pair preset modes`
+  - working tree hiện tại: bẩn (workflow docs đang cập nhật)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - hoàn tất UI preset pair từ pending request, chạy `swift build`, commit batch217 rồi push.
+  - push batch218 rồi mở batch219 cho 1 friction slice hẹp kế tiếp.
 - MVP-testable run/test path (human):
-  - iOS Session login -> Profile -> load friend graph -> bấm `Use this pair` tại 1 pending request -> form requester/receiver được điền sẵn để thao tác nhanh.
+  - iOS Session login -> Profile -> load friend graph -> ở pending request row bấm `Use same pair` hoặc `Use reverse pair` -> form requester/receiver được điền theo đúng mode trước khi send/accept.
 
 ## Batch handoff note
+
+- Batch vừa xong: **217**
+- Commit cuối đã chốt:
+  - `7bbd5cd` — `batch217: preset ios friend request pair from pending row`
+- Test-verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **218**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - tách preset pending request thành 2 mode rõ ràng (`Use same pair` / `Use reverse pair`) để giảm nhầm chiều requester/receiver khi retest.
+
+---
 
 - Batch vừa xong: **54**
 - Commit cuối đã chốt:

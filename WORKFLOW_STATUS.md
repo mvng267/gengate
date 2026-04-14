@@ -1,26 +1,31 @@
 # GenGate Workflow Status
 
-- Batch: 217
+- Batch: 218
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 217 iOS profile friend-graph UX hardening — preset requester/receiver from pending request row
-- Status: in_progress
+- Scope: batch 218 iOS profile friend-graph UX hardening — split pending request presets into same/reverse pair modes
+- Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
-  - iOS: Session login -> Profile -> load friend graph -> chọn 1 pending request -> tap `Use this pair` để đổ requester/receiver vào form -> thao tác send/swap/accept nhanh hơn.
-  - Batch 216 flow (swap + self-request guard + keep receiver) vẫn giữ nguyên.
+  - iOS: Session login -> Profile -> load friend graph -> chọn 1 pending request.
+  - Tap `Use same pair` để điền requester/receiver đúng chiều request gốc.
+  - Tap `Use reverse pair` để điền chiều ngược nhanh cho retest dedupe/2-way flow.
+  - Sau đó dùng `Send friend request` hoặc `Accept request` như cũ.
 - Files:
   - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅ (last batch216 baseline)
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `b46705d` — `batch216: keep receiver id for dedupe retest`
-  - working tree: bẩn (batch217 changes in progress)
+  - latest commit: `ef9152c` — `batch218: add ios pending request pair preset modes`
+  - working tree: bẩn (workflow docs pending update)
 - Blocker: none
-- Next: chốt batch217 (commit local) rồi verify/push
+- Next: sync flow docs batch218 -> push
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 217 handoff:
+  - `7bbd5cd` — `batch217: preset ios friend request pair from pending row`
+  - pending-request rows now provide preset to fill requester/receiver quickly before send/swap/accept actions.
 - Batch 216 handoff:
   - `90d0dc0` — `batch216: add ios friend request swap quick action`
   - `42e42d5` — `batch216: guard ios self friend request draft`
