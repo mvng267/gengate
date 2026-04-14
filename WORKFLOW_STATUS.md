@@ -1,12 +1,12 @@
 # GenGate Workflow Status
 
-- Batch: 209
+- Batch: 210
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 209 iOS feed seam friction reduction — show active quick-react refresh mode in row action context
+- Scope: batch 210 iOS feed seam friction reduction — expose quick-react refresh outcome summary in status message
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
-  - iOS: Session login -> Feed -> load private/authored moments -> set quick-react refresh mode (none/private/authored/both) -> check row context hint -> quick react from row -> verify reactions + expected list refresh behavior.
+  - iOS: Session login -> Feed -> load private/authored moments -> set quick-react refresh mode -> quick react from row -> verify status message shows applied mode + refreshed list count/targets.
   - Web/backend seams from prior batches remain runnable for friend graph/moments/inbox/location/notifications.
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
@@ -16,11 +16,14 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `2f0a2ee` — `batch208: add ios feed selective quick reaction refresh mode`
-  - working tree: bẩn (batch209 changes in progress, chưa commit, chưa push)
+  - latest commit: `7d83a25` — `batch209: add ios feed row refresh mode context hint`
+  - working tree: bẩn (batch210 changes in progress, chưa commit, chưa push)
 - Blocker: none
-- Next: chốt batch209 (commit local) rồi mở batch210 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
+- Next: chốt batch210 (commit local) rồi mở batch211 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 209 handoff:
+  - `7d83a25` — `batch209: add ios feed row refresh mode context hint`
+  - row-level refresh-mode context hint remains MVP-testable while batch 210 adds explicit refresh outcome summary after quick react.
 - Batch 208 handoff:
   - `2f0a2ee` — `batch208: add ios feed selective quick reaction refresh mode`
   - selective quick-react refresh mode remains MVP-testable while batch 209 adds row-level refresh-mode context hint.

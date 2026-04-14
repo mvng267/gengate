@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **209 — iOS feed row-level quick-react refresh-context hint slice is in verify (MVP-testable)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **210 — iOS feed quick-react refresh outcome summary slice is in verify (MVP-testable)**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **209**
-- Scope hiện tại: iOS feed seam friction reduction — hiển thị rõ quick-react refresh mode ngay trong row action context để tester thấy mode hiện hành trước khi bấm quick react.
+- Batch workflow chính thức hiện tại: **210**
+- Scope hiện tại: iOS feed seam friction reduction — bổ sung status message sau quick react thể hiện mode refresh đã áp dụng + số list thực tế đã refresh để verify nhanh không cần suy luận từ UI.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
@@ -100,14 +100,14 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `2f0a2ee` — `batch208: add ios feed selective quick reaction refresh mode`
-  - working tree hiện tại: bẩn (đang có thay đổi batch209, chưa commit)
+  - commit gần nhất đã chốt: `7d83a25` — `batch209: add ios feed row refresh mode context hint`
+  - working tree hiện tại: bẩn (đang có thay đổi batch210, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit local batch209 rồi mở batch210 cho 1 friction slice hẹp tiếp theo ở feed/inbox seam MVP
+  - commit local batch210 rồi mở batch211 cho 1 friction slice hẹp tiếp theo ở feed/inbox seam MVP
 - MVP-testable run/test path (human):
-  - iOS Session login -> Feed -> load private/authored moments -> chọn quick-react refresh mode -> quan sát row hint mode -> quick react from row -> verify reactions + đúng behavior refresh theo mode đã chọn.
+  - iOS Session login -> Feed -> load private/authored moments -> chọn quick-react refresh mode -> quick react from row -> verify status message có mode + refreshed list count/targets.
 
 ## Batch handoff note
 

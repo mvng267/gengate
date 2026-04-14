@@ -739,25 +739,38 @@ struct FeedPlaceholderView: View {
             statusMessage = "Quick reacted moment \(row.id). Reloading reactions..."
             await loadMomentReactions()
 
+            var refreshedTargets: [String] = []
+
             switch quickReactionRefreshMode {
             case .none:
                 break
             case .privateFeed:
                 if !viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    refreshedTargets.append("private feed")
                     await loadPrivateFeed()
                 }
             case .authored:
                 if !authorUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    refreshedTargets.append("authored")
                     await loadAuthoredMoments()
                 }
             case .both:
                 if !viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    refreshedTargets.append("private feed")
                     await loadPrivateFeed()
                 }
 
                 if !authorUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    refreshedTargets.append("authored")
                     await loadAuthoredMoments()
                 }
+            }
+
+            if fetchError == nil {
+                let refreshedSummary = refreshedTargets.isEmpty
+                    ? "none"
+                    : refreshedTargets.joined(separator: ", ")
+                statusMessage = "Quick reacted moment \(row.id). Refresh mode: \(quickReactionRefreshMode.label). Refreshed \(refreshedTargets.count) list(s): \(refreshedSummary)."
             }
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
