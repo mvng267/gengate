@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from app.models.conversation_members import ConversationMember
@@ -78,6 +78,17 @@ class ConversationMemberRepository(BaseRepository[ConversationMember]):
         db.add(member)
         db.flush()
         return member
+
+    def clear_last_read_message_references(
+        self,
+        db: Session,
+        *,
+        message_id: uuid.UUID,
+    ) -> None:
+        statement = update(ConversationMember).where(
+            ConversationMember.last_read_message_id == message_id
+        ).values(last_read_message_id=None)
+        db.execute(statement)
 
 
 conversation_repository = ConversationRepository()

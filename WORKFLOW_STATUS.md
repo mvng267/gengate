@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 234
+- Batch: 235
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 234 private friend feed seam — backend lọc moment soft-delete (`deleted_at is null`) khỏi `/moments` và `/moments/feed`.
+- Scope: batch 235 direct messaging shell — backend enforce direct-member read-cursor ownership (`last_read_message_id` phải thuộc cùng direct conversation).
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -10,15 +10,18 @@
   - iOS Profile: Session login -> Profile -> load pending requests -> tap `Reject request` ở inbound row -> app auto reload friend graph và request chuyển sang `rejected`.
   - iOS Feed (batch233): khi create moment/media fail, app parse `error.code/error.message` và hiện hint rõ cho `user_not_found`, `moment_not_found`, `validation_error` để tester xử lý đúng bước tiếp theo.
 - Files:
-  - apps/backend-python/app/repositories/moments.py
-  - apps/backend-python/tests/test_moments_api.py
+  - apps/backend-python/app/services/conversations.py
+  - apps/backend-python/tests/test_batch7_conversations_api.py
 - Test:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` ✅ (4 passed)
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` ✅ (3 passed)
 - Git:
-  - latest feature commit: `910a899` — `batch234: hide soft-deleted moments from list and feed`
-  - working tree: dirty (workflow docs sync in progress)
+  - latest feature commit: `dd7c66d` — `batch234: sync workflow docs after private feed soft-delete filter`
+  - working tree: dirty (batch235 complete, chưa commit)
 - Blocker: none
-- Next: mở batch235 với 1 slice hẹp direct messaging shell (ưu tiên hidden deleted messages parity check ở list/read path).
+- Next: mở batch236 với 1 slice hẹp location sharing state shell (ưu tiên stop-sharing contract parity).
+- Batch 235 handoff:
+  - pending_commit_batch235
+  - direct-message read cursor now auto-clears when target message is deleted to keep member cursor summary parity with message visibility rules.
 - Batch 234 handoff:
   - `910a899` — `batch234: hide soft-deleted moments from list and feed`
   - backend list/feed moments now exclude soft-deleted entries (`deleted_at is null`) with regression test coverage on authored list + private friend feed.

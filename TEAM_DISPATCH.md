@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 234
-- Trục công việc: private friend feed shell — backend filter soft-delete để feed/list không trả moment đã xóa mềm.
-- Trạng thái: batch234_complete_private_feed_soft_delete_filter.
+- Batch workflow chính thức hiện tại: 235
+- Trục công việc: direct messaging shell — backend clear stale read-cursor khi message đã soft-delete.
+- Trạng thái: batch235_complete_direct_read_cursor_deleted_message_parity.
 
 ## Batch 234 handoff (closed)
 - Batch vừa xong: **234**
@@ -284,9 +284,9 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: đã chốt batch 234 backend slice cho private feed/list soft-delete filter.
-- Kết quả gần nhất: repository filter + tests cho moments list/feed đã pass.
-- Trạng thái: batch234_complete_private_feed_soft_delete_filter_backend.
+- Scope hiện tại: đã chốt batch 235 direct messaging backend slice cho stale read-cursor cleanup.
+- Kết quả gần nhất: delete message sẽ clear `last_read_message_id` references + regression test pass.
+- Trạng thái: batch235_complete_direct_read_cursor_deleted_message_parity_backend.
 
 ### pikachu-web — frontend web
 - Scope hiện tại: tạm dừng theo chỉ đạo user.

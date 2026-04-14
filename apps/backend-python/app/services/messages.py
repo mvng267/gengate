@@ -154,6 +154,12 @@ class MessageService:
         message = message_repository.get(db, message_id)
         if message is None or message.deleted_at is not None:
             raise ValueError("message_not_found")
+
+        conversation_member_repository.clear_last_read_message_references(
+            db,
+            message_id=message_id,
+        )
+
         return message_repository.soft_delete(db, message)
 
     def get_message(self, db: Session, message_id: uuid.UUID) -> Message | None:

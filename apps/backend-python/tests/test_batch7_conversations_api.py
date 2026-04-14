@@ -218,3 +218,81 @@ def test_batch101_direct_member_read_cursor_contract_errors() -> None:
     }
 
     app.dependency_overrides.clear()
+
+
+def test_deleted_message_clears_member_read_cursor_reference() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    user_a_response = client.post(
+        "/auth/register",
+        json={"email": "batch235-cursor-a@example.com", "username": "batch235_cursor_a"},
+    )
+    user_b_response = client.post(
+        "/auth/register",
+        json={"email": "batch235-cursor-b@example.com", "username": "batch235_cursor_b"},
+    )
+    assert user_a_response.status_code == 201
+    assert user_b_response.status_code == 201
+
+    user_a_id = user_a_response.json()["id"]
+    user_b_id = user_b_response.json()["id"]
+
+    direct_response = client.post(
+        "/conversations/direct",
+        json={"user_a_id": user_a_id, "user_b_id": user_b_id},
+    )
+    assert direct_response.status_code == 201
+    conversation_id = direct_response.json()["id"]
+
+    message_response = client.post(
+        "/messages",
+        json={
+            "sender_user_id": user_a_id,
+            "payload_text": "batch235 cursor reset target",
+            "conversation_id": conversation_id,
+        },
+    )
+    assert message_response.status_code == 201
+    message_id = message_response.json()["id"]
+
+    update_cursor_response = client.patch(
+        f"/conversations/{conversation_id}/members/{user_b_id}/read-cursor",
+        json={"last_read_message_id": message_id},
+    )
+    assert update_cursor_response.status_code == 200
+    assert update_cursor_response.json()["last_read_message_id"] == message_id
+
+    delete_message_response = client.delete(f"/messages/{message_id}")
+    assert delete_message_response.status_code == 200
+    assert delete_message_response.json() == {"status": "deleted"}
+
+    members_after_delete = client.get(f"/conversations/{conversation_id}/members")
+    assert members_after_delete.status_code == 200
+    assert members_after_delete.json()["count"] == 2
+
+    user_b_member = next(
+        item for item in members_after_delete.json()["items"] if item["user_id"] == user_b_id
+    )
+    assert user_b_member["last_read_message_id"] is None
+
+    app.dependency_overrides.clear()
