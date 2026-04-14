@@ -1,4 +1,9 @@
 import SwiftUI
+#if os(iOS)
+import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
 struct InboxPlaceholderView: View {
     @Environment(AppSessionStore.self) private var sessionStore
@@ -41,6 +46,8 @@ struct InboxPlaceholderView: View {
     @State private var lastRecipientDeviceContextResetReason: String?
     @State private var lastRecipientDeviceContextResetAt: Date?
     @State private var lastRecipientDeviceContextResetUserID: String?
+    @State private var lastRecipientDeviceSourceHintCopyAt: Date?
+    @State private var lastRecipientDeviceSourceHintCopyText: String?
 
     private let recipientDevicesAutoReloadDebounceNanoseconds: UInt64 = 350_000_000
     private let recipientDevicesAutoReloadMinIntervalSeconds: TimeInterval = 1.0
@@ -106,6 +113,8 @@ struct InboxPlaceholderView: View {
                         "First-option empty-state source hint now also uses `short-id` prefix (instead of `short`) so all source-hint branches share identical wording.",
                         "Status summary wording is now compacted into a single source-hint consistency phrase to match current `short-id`-normalized behavior across all branches.",
                         "Recipient-device section now shows a compact source-hint verify matrix so testers can quickly map current state against expected hint fragment before executing device-key actions.",
+                        "Added quick action `Copy source hint` to copy the current runtime source-hint string for bug reports and triage notes.",
+                        "After copy, a short-lived feedback line shows elapsed time + short hint fragment so testers can confirm exactly what was captured.",
                         "Recipient-device section now shows a compact selection-source hint so testers know whether current `Recipient device UUID` is in-sync with loaded options or still a manual out-of-options value.",
                         "One-tap action `Clear recipient device UUID` helps testers reset stale/manual device input instantly before selecting a fresh option."
                     ]
@@ -401,6 +410,20 @@ struct InboxPlaceholderView: View {
                             Text(recipientDeviceSelectionSourceHintText)
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
+
+                            Button {
+                                copyRecipientDeviceSourceHint(recipientDeviceSelectionSourceHintText)
+                            } label: {
+                                Text("Copy source hint")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.bordered)
+
+                            if let recipientDeviceSourceHintCopiedFeedbackText {
+                                Text(recipientDeviceSourceHintCopiedFeedbackText)
+                                    .font(.caption2.monospaced())
+                                    .foregroundStyle(.secondary)
+                            }
                         }
 
                         Text("Source-hint verify matrix: empty+first→`first option ... short-id`; empty+no-options→`short-id chưa khả dụng`; in-sync+first→`same as first option`; in-sync+non-first→`in-sync, short-id`; manual/out-of-options→`manual UUID/out-of-options`.")
@@ -1163,6 +1186,20 @@ struct InboxPlaceholderView: View {
         return nil
     }
 
+    private var recipientDeviceSourceHintCopiedFeedbackText: String? {
+        guard let lastRecipientDeviceSourceHintCopyAt,
+              let lastRecipientDeviceSourceHintCopyText else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(lastRecipientDeviceSourceHintCopyAt)
+        guard elapsed <= 12 else {
+            return nil
+        }
+
+        return "Copied source hint (\(Int(elapsed))s ago): \(shortCaption(lastRecipientDeviceSourceHintCopyText, limit: 88))"
+    }
+
     private var resolvedReadStatusMessageID: String? {
         if let targetMessageID = resolvedReadCursorTargetMessageID,
            !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -1234,6 +1271,34 @@ struct InboxPlaceholderView: View {
         let prefix = trimmedUserID.prefix(4)
         let suffix = trimmedUserID.suffix(4)
         return "\(prefix)…\(suffix)"
+    }
+
+    private func shortCaption(_ text: String, limit: Int) -> String {
+        let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmedText.count > limit else {
+            return trimmedText
+        }
+
+        let headCount = max(limit - 1, 0)
+        let head = trimmedText.prefix(headCount)
+        return "\(head)…"
+    }
+
+    private func copyRecipientDeviceSourceHint(_ hintText: String) {
+        let normalizedText = hintText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            return
+        }
+
+#if os(iOS)
+        UIPasteboard.general.string = normalizedText
+#elseif os(macOS)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(normalizedText, forType: .string)
+#endif
+
+        lastRecipientDeviceSourceHintCopyText = normalizedText
+        lastRecipientDeviceSourceHintCopyAt = Date()
     }
 
     private func recipientResetReasonCaption(_ reason: String) -> String {
