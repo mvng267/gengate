@@ -14,7 +14,7 @@
 ## Active batch
 - Batch workflow chính thức hiện tại: 237
 - Trục công việc: notification shell — backend unread-only list parity qua query `unread_only=true`.
-- Trạng thái: batch237_verify_notification_unread_only_list_parity.
+- Trạng thái: batch237_complete_notification_unread_only_list_parity.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -41,16 +41,17 @@
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread-only list parity cho minimal notification surface.
 
-## Batch 237 handoff (open)
-- Batch đang làm: **237**
-- Scope đang chạy:
-  - notification shell: thêm filter query `unread_only` cho `GET /notifications/{user_id}` để parity unread list.
-- Test/verify tạm thời:
+## Batch 237 handoff (closed)
+- Batch vừa xong: **237**
+- Commit đã chốt:
+  - `99da484` — `batch237: add unread-only filter for notifications list`
+- Test/verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k unread_only` ✅ (1 passed, 10 deselected)
-- Blocker/rủi ro hiện tại:
+- Blocker/rủi ro còn lại:
   - none
-- Bước tiếp theo:
-  - commit batch237 + sync docs trạng thái clean.
+- Batch kế tiếp: **238**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
 
 ## Batch 234 handoff (closed)
 - Batch vừa xong: **234**

@@ -3,7 +3,7 @@
 - Batch: 237
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
 - Scope: batch 237 notification shell — backend unread-only list parity via query contract.
-- Status: verify
+- Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
@@ -17,12 +17,13 @@
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k unread_only` ✅ (1 passed, 10 deselected)
 - Git:
-  - latest feature commit: `dae57a8` — `batch236: clear location audience when sharing stops`
-  - working tree: dirty (batch237 verify done, chưa commit)
+  - latest feature commit: `99da484` — `batch237: add unread-only filter for notifications list`
+  - working tree: clean
 - Blocker: none
-- Next: commit batch237 rồi sync workflow docs theo commit mới.
-- Batch 237 handoff (pending close):
-  - (chưa commit) notification list hỗ trợ query `unread_only=true` để chỉ trả unread items.
+- Next: mở batch238 với 1 slice hẹp notification shell (unread summary/count parity).
+- Batch 237 handoff:
+  - `99da484` — `batch237: add unread-only filter for notifications list`
+  - notification list hỗ trợ query `unread_only=true` để chỉ trả unread items.
 - Batch 236 handoff:
   - `dae57a8` — `batch236: clear location audience when sharing stops`
   - stop-sharing now clears share audience entries so backend list/state aligns with inactive sharing semantics.

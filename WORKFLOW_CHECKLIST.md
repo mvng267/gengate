@@ -91,7 +91,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch workflow chính thức hiện tại: **237**
 - Scope hiện tại: notification shell — backend unread-only list parity qua query `unread_only` cho endpoint list.
-- Trạng thái hiện tại: **verify**
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/backend-python/app/repositories/notifications.py`
   - `apps/backend-python/app/services/notifications.py`
@@ -100,18 +100,32 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k unread_only` → ✅ `1 passed, 10 deselected`
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `dae57a8` — `batch236: clear location audience when sharing stops`
-  - working tree hiện tại: bẩn (batch237 verify xong, chờ commit)
+  - commit gần nhất đã chốt: `99da484` — `batch237: add unread-only filter for notifications list`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch237 rồi sync workflow docs theo commit mới.
+  - mở 1 slice hẹp notification shell cho unread summary/count parity.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.
   - iOS Feed: tạo/lỗi moment posting flow; nếu backend trả `error.code/error.message` thì UI hiện thông điệp lỗi + hint hành động cho `user_not_found`, `moment_not_found`, `validation_error`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **237**
+- Commit cuối đã chốt:
+  - `99da484` — `batch237: add unread-only filter for notifications list`
+- Test-verify cuối:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k unread_only` → 1 passed, 10 deselected
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **238**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: unread summary/count parity để client không phải tự count local.
+
+---
 
 - Batch vừa xong: **235**
 - Commit cuối đã chốt:
