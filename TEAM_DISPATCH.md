@@ -14,7 +14,7 @@
 ## Active batch
 - Batch workflow chính thức hiện tại: 238
 - Trục công việc: notification shell — backend unread summary/count parity trên list response.
-- Trạng thái: batch238_verify_notification_unread_summary_count_parity.
+- Trạng thái: batch238_complete_notification_unread_summary_count_parity.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -53,16 +53,17 @@
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
 
-## Batch 238 handoff (open)
-- Batch đang làm: **238**
-- Scope đang chạy:
-  - `GET /notifications/{user_id}` trả thêm `unread_count` trong list response.
-- Test/verify tạm thời:
+## Batch 238 handoff (closed)
+- Batch vừa xong: **238**
+- Commit đã chốt:
+  - `f2540dc` — `batch238: add unread count to notifications list response`
+- Test/verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k "notifications_list_unread"` ✅ (2 passed, 10 deselected)
-- Blocker/rủi ro hiện tại:
+- Blocker/rủi ro còn lại:
   - none
-- Bước tiếp theo:
-  - commit batch238 + sync docs trạng thái clean.
+- Batch kế tiếp: **239**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: sorting/pagination parity cho list contract.
 
 ## Batch 234 handoff (closed)
 - Batch vừa xong: **234**

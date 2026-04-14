@@ -3,7 +3,7 @@
 - Batch: 238
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
 - Scope: batch 238 notification shell — backend unread summary/count parity on list response.
-- Status: verify
+- Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
@@ -16,12 +16,13 @@
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k "notifications_list_unread"` ✅ (2 passed, 10 deselected)
 - Git:
-  - latest feature commit: `99da484` — `batch237: add unread-only filter for notifications list`
-  - working tree: dirty (batch238 verify done, chưa commit)
+  - latest feature commit: `f2540dc` — `batch238: add unread count to notifications list response`
+  - working tree: clean
 - Blocker: none
-- Next: commit batch238 rồi sync workflow docs theo commit mới.
-- Batch 238 handoff (pending close):
-  - (chưa commit) `GET /notifications/{user_id}` trả thêm `unread_count` để client lấy unread summary trực tiếp.
+- Next: mở batch239 với 1 slice hẹp notification shell (sorting/pagination parity cho list contract).
+- Batch 238 handoff:
+  - `f2540dc` — `batch238: add unread count to notifications list response`
+  - `GET /notifications/{user_id}` trả thêm `unread_count` để client lấy unread summary trực tiếp.
 - Batch 237 handoff:
   - `99da484` — `batch237: add unread-only filter for notifications list`
   - notification list hỗ trợ query `unread_only=true` để chỉ trả unread items.
