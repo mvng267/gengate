@@ -72,8 +72,21 @@ def accept_friend_request(request_id: uuid.UUID, db: Session = Depends(get_db_se
     try:
         friendship = friendship_service.accept_request(db, request_id)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+        code = str(exc)
+        status_code = status.HTTP_400_BAD_REQUEST if code == "request_not_pending" else status.HTTP_404_NOT_FOUND
+        raise HTTPException(status_code=status_code, detail=code)
     return FriendshipResponse.model_validate(friendship)
+
+
+@router.post("/requests/{request_id}/reject", response_model=FriendRequestResponse)
+def reject_friend_request(request_id: uuid.UUID, db: Session = Depends(get_db_session)) -> FriendRequestResponse:
+    try:
+        friend_request = friendship_service.reject_request(db, request_id)
+    except ValueError as exc:
+        code = str(exc)
+        status_code = status.HTTP_400_BAD_REQUEST if code == "request_not_pending" else status.HTTP_404_NOT_FOUND
+        raise HTTPException(status_code=status_code, detail=code)
+    return FriendRequestResponse.model_validate(friend_request)
 
 
 @router.get("", response_model=FriendshipListResponse)

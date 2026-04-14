@@ -14,6 +14,7 @@ struct ProfilePlaceholderView: View {
     @State private var isLoading = false
     @State private var isCreatingRequest = false
     @State private var busyAcceptRequestID: String?
+    @State private var busyRejectRequestID: String?
 
     var body: some View {
         ScrollView {
@@ -21,11 +22,11 @@ struct ProfilePlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Profile",
                     summary: "iOS native friend graph reader. Use a real user UUID to inspect pending requests and accepted friendships through the same backend contracts already used by web.",
-                    status: "Status: native friend graph shell now supports create/accept friend-request actions; profile editing and broader iOS domain clients are still pending.",
+                    status: "Status: native friend graph shell now supports create/accept/reject friend-request actions; profile editing and broader iOS domain clients are still pending.",
                     bullets: [
                         "Use the Session tab first to create or restore a session if you want the protected iOS shell context.",
                         "Paste a backend user UUID below, then fetch pending requests and friendships for that user.",
-                        "You can now create friend requests via `/friends/requests` and accept pending inbound requests via `/friends/requests/{id}/accept` directly from this tab."
+                        "You can now create friend requests via `/friends/requests`, accept pending inbound requests via `/friends/requests/{id}/accept`, and reject pending inbound requests via `/friends/requests/{id}/reject` directly from this tab."
                     ]
                 )
 
@@ -199,16 +200,37 @@ struct ProfilePlaceholderView: View {
                                     }
 
                                     if row.canAccept {
-                                        Button {
-                                            Task {
-                                                await acceptFriendRequest(requestID: row.id)
+                                        HStack(spacing: 8) {
+                                            Button {
+                                                Task {
+                                                    await acceptFriendRequest(requestID: row.id)
+                                                }
+                                            } label: {
+                                                Text(busyAcceptRequestID == row.id ? "Accepting..." : "Accept request")
+                                                    .frame(maxWidth: .infinity)
                                             }
-                                        } label: {
-                                            Text(busyAcceptRequestID == row.id ? "Accepting..." : "Accept request")
-                                                .frame(maxWidth: .infinity)
+                                            .buttonStyle(.bordered)
+                                            .disabled(
+                                                isLoading ||
+                                                busyAcceptRequestID == row.id ||
+                                                busyRejectRequestID == row.id
+                                            )
+
+                                            Button(role: .destructive) {
+                                                Task {
+                                                    await rejectFriendRequest(requestID: row.id)
+                                                }
+                                            } label: {
+                                                Text(busyRejectRequestID == row.id ? "Rejecting..." : "Reject request")
+                                                    .frame(maxWidth: .infinity)
+                                            }
+                                            .buttonStyle(.bordered)
+                                            .disabled(
+                                                isLoading ||
+                                                busyAcceptRequestID == row.id ||
+                                                busyRejectRequestID == row.id
+                                            )
                                         }
-                                        .buttonStyle(.bordered)
-                                        .disabled(isLoading || busyAcceptRequestID == row.id)
                                     }
                                 }
                             }
@@ -262,6 +284,10 @@ struct ProfilePlaceholderView: View {
 
         if fetchError.contains("friendship_already_exists") {
             return "Users are already friends. Create request is no longer needed."
+        }
+
+        if fetchError.contains("request_not_pending") {
+            return "This request is no longer pending. Reload friend graph to continue."
         }
 
         if fetchError.contains("invalid_request") {
@@ -436,6 +462,26 @@ struct ProfilePlaceholderView: View {
         busyAcceptRequestID = nil
     }
 
+    private func rejectFriendRequest(requestID: String) async {
+        guard !requestID.isEmpty else {
+            fetchError = "Friend request id không hợp lệ."
+            return
+        }
+
+        busyRejectRequestID = requestID
+        statusMessage = nil
+        fetchError = nil
+
+        do {
+            try await FriendGraphAPIClient().rejectFriendRequest(requestID: requestID)
+            await loadFriendGraph(statusMessage: "Friend request rejected. Reloading friend graph...")
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        busyRejectRequestID = nil
+    }
+
     private func seamRow(title: String, state: String, detail: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
@@ -529,6 +575,12 @@ private struct FriendGraphAPIClient {
     }
 
     private struct BackendErrorPayload: Decodable {
+        struct ErrorDetail: Decodable {
+            let code: String
+            let message: String
+        }
+
+        let error: ErrorDetail?
         let detail: String?
     }
 
@@ -623,6 +675,24 @@ private struct FriendGraphAPIClient {
         }
     }
 
+    func rejectFriendRequest(requestID: String) async throws {
+        var request = URLRequest(url: try makeURL(path: "/friends/requests/\(requestID)/reject"))
+        request.httpMethod = "POST"
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 200 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Friend request reject failed"))
+        }
+
+        do {
+            _ = try JSONDecoder().decode(FriendRequestCreateResponse.self, from: data)
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
     private func fetchFriendRequests(userID: String) async throws -> FriendRequestListResponse {
         let url = try makeURL(path: "/friends/requests", userID: userID)
         let (data, response) = try await URLSession.shared.data(from: url)
@@ -686,10 +756,15 @@ private struct FriendGraphAPIClient {
     }
 
     private func readErrorMessage(from data: Data, statusCode: Int, prefix: String) -> String {
-        if let payload = try? JSONDecoder().decode(BackendErrorPayload.self, from: data),
-           let detail = payload.detail,
-           !detail.isEmpty {
-            return "\(prefix): \(statusCode) (\(detail))"
+        if let payload = try? JSONDecoder().decode(BackendErrorPayload.self, from: data) {
+            if let detail = payload.detail, !detail.isEmpty {
+                return "\(prefix): \(statusCode) (\(detail))"
+            }
+
+            if let error = payload.error {
+                let message = error.message.isEmpty ? error.code : error.message
+                return "\(prefix): \(statusCode) (\(error.code): \(message))"
+            }
         }
 
         return "\(prefix): \(statusCode)"
