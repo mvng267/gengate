@@ -1,12 +1,11 @@
 # GenGate Workflow Status
 
-- Batch: 199
+- Batch: 200
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 199 iOS feed seam hardening — add moment reactions create/list shell wired to backend contracts
+- Scope: batch 200 iOS feed seam friction reduction — add quick reaction presets/chips for moment reactions shell
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
-  - apps/ios-swift/GenGate/App/RootTabView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
@@ -14,9 +13,9 @@
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
   - latest commit: `cde18e1` — `batch199: add ios feed reactions create/list shell`
-  - working tree: sạch (sau commit local, chưa push)
+  - working tree: bẩn (batch200 changes in progress, chưa commit, chưa push)
 - Blocker: none
-- Next: mở batch200 cho feed seam friction tiếp theo (ví dụ thêm quick reaction presets/chips để giảm typing khi verify API `/moments/{id}/reactions`) trong iOS feed shell
+- Next: chốt batch200 (commit local) rồi mở batch201 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`

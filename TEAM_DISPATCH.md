@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 199
-- Trục công việc: iOS feed seam hardening — thêm moment reactions create/list shell wired backend contracts.
+- Batch workflow chính thức hiện tại: 200
+- Trục công việc: iOS feed seam friction reduction — quick reaction presets/chips for reactions shell.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 199 iOS feed seam hardening.
-- Kết quả gần nhất: thêm reaction shell cho moments gồm create/list (`POST/GET /moments/{id}/reactions`) + autofill actions (`Use latest loaded moment`, `Use session user for reaction`) + reaction rows render để verify nhanh.
-- Trạng thái: verify_batch199_ios.
+- Scope hiện tại: batch 200 iOS feed seam friction reduction.
+- Kết quả gần nhất: thêm quick reaction presets/chips (`heart`, `fire`, `smile`, `wow`, `clap`) để set nhanh `reaction_type` khi test create/list reactions.
+- Trạng thái: verify_batch200_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

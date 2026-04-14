@@ -13,6 +13,7 @@ struct FeedPlaceholderView: View {
     @State private var reactionTargetMomentIDDraft: String = ""
     @State private var reactionUserIDDraft: String = ""
     @State private var reactionTypeDraft: String = "heart"
+    private let quickReactionPresets: [String] = ["heart", "fire", "smile", "wow", "clap"]
     @State private var momentRows: [PrivateFeedMomentRow] = []
     @State private var authoredMomentRows: [PrivateFeedMomentRow] = []
     @State private var reactionRows: [MomentReactionRow] = []
@@ -214,6 +215,31 @@ struct FeedPlaceholderView: View {
                         .background(Color.secondary.opacity(0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(quickReactionPresets, id: \.self) { preset in
+                                let isSelected = normalizedReactionTypeDraft == preset
+                                Button {
+                                    reactionTypeDraft = preset
+                                } label: {
+                                    Text(preset)
+                                        .font(.footnote.monospaced())
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .foregroundStyle(isSelected ? .primary : .secondary)
+                                        .background(
+                                            isSelected
+                                                ? Color.accentColor.opacity(0.22)
+                                                : Color.secondary.opacity(0.12)
+                                        )
+                                        .clipShape(Capsule())
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+
                     HStack(spacing: 10) {
                         Button {
                             fillReactionFromLatestMoment()
@@ -362,6 +388,12 @@ struct FeedPlaceholderView: View {
 
     private var latestLoadedMomentID: String? {
         momentRows.first?.id ?? authoredMomentRows.first?.id
+    }
+
+    private var normalizedReactionTypeDraft: String {
+        reactionTypeDraft
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
     }
 
     private func prefillFromCurrentSessionUserIfNeeded() {

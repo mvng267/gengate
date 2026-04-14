@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **199 — iOS feed reactions create/list shell slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **200 — iOS feed quick reaction presets/chips slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,12 +89,11 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **199**
-- Scope hiện tại: iOS feed seam hardening — thêm moment reactions create/list shell (`POST/GET /moments/{id}/reactions`) với autofill actions.
+- Batch workflow chính thức hiện tại: **200**
+- Scope hiện tại: iOS feed seam friction reduction — thêm quick reaction presets/chips cho reaction type khi verify `POST/GET /moments/{id}/reactions`.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
-  - `apps/ios-swift/GenGate/App/RootTabView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
@@ -102,11 +101,11 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
   - commit gần nhất đã chốt: `cde18e1` — `batch199: add ios feed reactions create/list shell`
-  - working tree hiện tại: sạch (sau commit local, chưa push)
+  - working tree hiện tại: bẩn (đang có thay đổi batch200, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch200 cho feed friction tiếp theo (quick reaction presets/chips để giảm typing khi verify reactions API)
+  - commit local batch200 rồi mở batch201 cho 1 friction slice hẹp tiếp theo ở feed/inbox seam MVP
 
 ## Batch handoff note
 
