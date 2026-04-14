@@ -14,7 +14,19 @@
 ## Active batch
 - Batch workflow chính thức hiện tại: 222
 - Trục công việc: iOS feed UX hardening — quick-fill delete moment id from selected row context + inline delete action.
-- Trạng thái: verify_batch222_ios.
+- Trạng thái: verify_batch222_ios (đã commit local, chưa push).
+
+## Batch 222 handoff (closed)
+- Batch vừa xong: **222**
+- Commit đã push:
+  - `acda01f` — `batch222: add ios feed row shortcut for moment delete`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **223**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - thêm selected-state feedback cho preset delete id + status copy rõ ràng hơn cho delete retest liên tiếp.
 
 ## Batch 221 handoff (closed)
 - Batch vừa xong: **221**
@@ -131,7 +143,7 @@
 ### pikame-ios — iOS
 - Scope hiện tại: batch 222 iOS feed UX hardening.
 - Kết quả gần nhất: batch 222 thêm shortcut `Use row id for delete` + delete action trực tiếp từ Feed shell (`DELETE /moments/{id}`).
-- Trạng thái: verify_batch222_ios.
+- Trạng thái: verify_batch222_ios (local commit, chưa push).
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
