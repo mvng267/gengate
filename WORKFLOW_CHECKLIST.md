@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **263 — direct-message shell (web+iOS quick-copy conversation summary) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **264 — direct-message shell (web quick session-sender send action) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,29 +89,41 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **263**
-- Scope hiện tại: direct-message shell — thêm quick-copy conversation summary (`user_a + user_b + message_count + last_message_id`) trên web+iOS.
+- Batch workflow chính thức hiện tại: **264**
+- Scope hiện tại: direct-message shell — thêm quick action web `Use current session user as sender + send`.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/direct-message-shell.tsx`
-  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
-  - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `2e3ab8b` — `batch263: add direct-message quick-copy conversation summaries`
+  - commit gần nhất đã chốt: `93a12b5` — `batch264: add session-sender quick send action in web dm shell`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch264 với 1 slice hẹp direct-message shell: thêm quick action web `Use current session user as sender + send` để parity thao tác nhanh với iOS sender mặc định User A.
+  - mở batch265 với 1 slice hẹp direct-message shell: thêm quick action iOS `Use current session user as User A + send` để parity thao tác gửi nhanh với web.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed: bấm quick action `Use current session user as viewer + load` -> verify status `viewer_source=session_user` + feed reload.
-  - Web Inbox: nhập user A/B -> `Open direct thread` -> verify quick-copy conversation line `user_a/user_b/message_count/last_message_id`.
+  - Web Inbox: nhập user A/B -> `Open direct thread` -> nhập message text -> bấm `Use current session user as sender + send` -> verify status chứa `sender_source=session_user` + message được gửi.
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> verify quick-copy conversation line `user_a/user_b/message_count/last_message_id`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **264**
+- Commit cuối đã chốt:
+  - `93a12b5` — `batch264: add session-sender quick send action in web dm shell`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **265**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm quick action iOS `Use current session user as User A + send` để parity thao tác gửi nhanh với web.
+
+---
 
 - Batch vừa xong: **263**
 - Commit cuối đã chốt:
