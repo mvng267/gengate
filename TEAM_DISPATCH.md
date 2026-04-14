@@ -12,15 +12,28 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 224
-- Trục công việc: iOS feed UX hardening — one-tap row-level delete action (`Delete this moment`) để giảm thêm 1 thao tác thủ công.
-- Trạng thái: in_progress_batch224_ios.
+- Batch workflow chính thức hiện tại: 225
+- Trục công việc: iOS feed UX hardening — add confirm safety toggle cho one-tap row delete để giảm rủi ro xóa nhầm.
+- Trạng thái: in_progress_batch225_ios.
+
+## Batch 224 handoff (closed)
+- Batch vừa xong: **224**
+- Commit đã push:
+  - `a2dc93f` — `batch224: add ios one-tap delete from feed row`
+  - `3f0266a` — `batch224: sync workflow docs after ios one-tap delete`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **225**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - thêm confirm safety toggle cho one-tap row delete để chỉ enable delete khi tester bật xác nhận chủ động.
 
 ## Batch 223 handoff (closed)
 - Batch vừa xong: **223**
 - Commit đã push:
   - `9bfc007` — `batch223: add ios quick presets for delete target`
-  - `14e06c3` — `batch223: sync workflow docs after ios delete presets`
+  - `45ee0c5` — `batch223: sync workflow docs after ios delete presets`
 - Test/verify cuối:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Blocker/rủi ro còn lại:

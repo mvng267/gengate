@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **223 — iOS feed quick delete presets for delete target + clearer selected/unchanged status copy is in verify (MVP-testable)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **224 — iOS feed one-tap row-level delete action (`Delete this moment`) is in verify (MVP-testable)**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **223**
-- Scope hiện tại: iOS feed UX hardening — thêm quick delete presets từ loaded rows + status copy rõ hơn khi re-select cùng delete target.
+- Batch workflow chính thức hiện tại: **224**
+- Scope hiện tại: iOS feed UX hardening — thêm row-level one-tap delete action `Delete this moment` để giảm thao tác tay ở flow delete.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
@@ -100,20 +100,35 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `9bfc007` — `batch223: add ios quick presets for delete target`
-  - working tree hiện tại: bẩn (đang có thay đổi docs batch223, chưa commit)
+  - commit gần nhất đã chốt: `a2dc93f` — `batch224: add ios one-tap delete from feed row`
+  - working tree hiện tại: bẩn (đang có thay đổi docs batch224, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit + push docs batch223 rồi mở batch224 cho 1 friction slice hẹp kế tiếp.
+  - commit + push docs batch224 rồi mở batch225 cho 1 friction slice hẹp kế tiếp.
 - MVP-testable run/test path (human):
-  - iOS Session login -> Feed -> load moments -> verify quick preset chips dưới field `Moment ID to delete` -> chọn preset để fill nhanh -> tap lại cùng row delete preset và xác nhận status `Delete target unchanged (already selected)`.
+  - iOS Session login -> Feed -> load moments -> tap `Delete this moment` trên row -> verify in-flight label đổi `Deleting this moment...` và status success của row-action delete.
 
 ## Batch handoff note
+
+- Batch vừa xong: **224**
+- Commit cuối đã chốt:
+  - `a2dc93f` — `batch224: add ios one-tap delete from feed row`
+- Test-verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **225**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - thêm confirm safety toggle cho one-tap row delete để hạn chế nhầm thao tác trên môi trường test có data thật.
+
+---
 
 - Batch vừa xong: **223**
 - Commit cuối đã chốt:
   - `9bfc007` — `batch223: add ios quick presets for delete target`
+  - `45ee0c5` — `batch223: sync workflow docs after ios delete presets`
 - Test-verify cuối:
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:

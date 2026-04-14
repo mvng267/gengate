@@ -1,15 +1,14 @@
 # GenGate Workflow Status
 
-- Batch: 223
+- Batch: 224
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 223 iOS feed UX hardening — add quick delete target presets and clearer selected/unchanged status copy
+- Scope: batch 224 iOS feed UX hardening — add one-tap row-level delete action (`Delete this moment`)
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
   - iOS: Session login -> Feed -> load private feed/authored moments.
-  - Verify section `Quick delete presets from loaded rows` xuất hiện dưới field `Moment ID to delete`.
-  - Tap 1 preset chip để fill delete target; tap lại cùng row `Use row id for delete` thì status báo `Delete target unchanged (already selected)`.
-  - Tap `Delete moment`; verify list reload như cũ.
+  - Tại row moment bất kỳ, tap `Delete this moment` để xóa ngay từ row context.
+  - Verify nút chuyển `Deleting this moment...` khi in-flight và status báo `Deleted moment <id> from row action. Reloading lists...` sau khi xong.
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
   - WORKFLOW_STATUS.md
@@ -18,14 +17,18 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `9bfc007` — `batch223: add ios quick presets for delete target`
-  - working tree: bẩn (batch223 docs in progress, chưa commit)
+  - latest feature commit: `a2dc93f` — `batch224: add ios one-tap delete from feed row`
+  - working tree: bẩn (batch224 docs in progress, chưa commit)
 - Blocker: none
-- Next: commit/push docs batch223 rồi mở batch224 cho friction slice hẹp kế tiếp
+- Next: commit/push docs batch224 rồi mở batch225 cho friction slice hẹp kế tiếp
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
-- Batch 223 handoff:
+- Batch 224 handoff:
   - pending (in progress)
-  - added `Quick delete presets from loaded rows` chips + clearer unchanged-copy when operator re-selects same delete target.
+  - added one-tap `Delete this moment` button per row with dedicated in-flight label and row-action success status copy.
+- Batch 223 handoff:
+  - `9bfc007` — `batch223: add ios quick presets for delete target`
+  - `45ee0c5` — `batch223: sync workflow docs after ios delete presets`
+  - feed delete flow now has quick preset chips under `Moment ID to delete` and clearer unchanged-copy when re-selecting same target.
 - Batch 222 handoff:
   - `acda01f` — `batch222: add ios feed row shortcut for moment delete`
   - `1f5a0aa` — `batch222: sync workflow docs after ios delete shortcut`
