@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 156
+- Batch: 157
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 156 iOS inbox seam hardening — align re-apply helper note with empty-options context to avoid misleading guidance
+- Scope: batch 157 iOS inbox seam hardening — add short-id fragment in empty-state first-option source hint for scan consistency
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch156 slice)
+  - latest commit: `HEAD` (local batch157 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch157 cho messaging friction tiếp theo (ví dụ thêm short-id vào empty-state first-option source hint để đồng nhất scan pattern) trong iOS inbox shell
+- Next: mở batch158 cho messaging friction tiếp theo (ví dụ thêm short-id cho empty-state hint khi chưa chọn và chưa có first option để đồng nhất pattern fallback) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -355,6 +355,10 @@
   - helper-note cho re-apply nay bao phủ thêm ngữ cảnh thiếu options: hiển thị rõ cần `load devices` trước khi cân nhắc re-apply
   - giữ nguyên note `bỏ qua re-apply` cho trạng thái same-as-first; không đổi flow khi selection đang lệch option
   - giảm hiểu nhầm trong empty-options phase, giúp tester đọc đúng hành động kế tiếp
+- Batch 157 outcome:
+  - empty-state source hint khi đã có first option nay hiển thị thêm short-id: `first option: <full_uuid>, short: <abcd…wxyz>`
+  - đồng bộ scan pattern với các hint same-as-first đã có short-id, giúp tester đọc nhanh hơn trên màn hẹp
+  - không đổi logic selection/re-apply; chỉ nâng readability của hint text trong trạng thái chưa chọn
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -364,7 +368,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, load direct thread A-B; trước khi load devices, verify helper-note nhắc `load devices` trong empty-options context; sau đó dùng `Quick recipient member presets` + `Reload recipient devices`, bấm dynamic first-valid action để chọn first option và verify `Recipient device source` + helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.`; thử manual/stale UUID rồi quay lại first option để verify helper-note đúng ngữ cảnh trước khi `Create message-device key`
+  - iOS Inbox path: open Inbox tab, load direct thread A-B; trước khi load devices, verify helper-note nhắc `load devices` trong empty-options context; sau khi `Reload recipient devices` và trước khi chọn device, verify empty-state source hint có cả `first option` full UUID + `short`; tiếp đó bấm dynamic first-valid action để chọn first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.`; thử manual/stale UUID rồi quay lại first option để verify hint/notes đúng ngữ cảnh trước khi `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

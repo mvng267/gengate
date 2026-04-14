@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **156 — iOS inbox re-apply guidance aligned for empty-options context slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **157 — iOS inbox empty-state first-option source hint with short-id slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **156**
-- Scope hiện tại: iOS inbox read-status UX hardening — đồng bộ helper-note re-apply với ngữ cảnh thiếu options để tránh hiểu nhầm.
+- Batch workflow chính thức hiện tại: **157**
+- Scope hiện tại: iOS inbox read-status UX hardening — thêm short-id vào empty-state `first option` source hint để đồng nhất scan pattern.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch156 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch157 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch157 cho messaging friction tiếp theo (thêm short-id vào empty-state first-option source hint) trong iOS inbox shell
+  - mở batch158 cho messaging friction tiếp theo (thêm short-id/fallback nhãn gọn cho empty-state khi chưa có first option) trong iOS inbox shell
 
 ## Batch handoff note
 
