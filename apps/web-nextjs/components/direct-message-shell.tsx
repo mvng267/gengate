@@ -438,6 +438,38 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     );
   }
 
+  function applyConversationMemberCursorContextAndFocusUser(member: ConversationMemberItem) {
+    const normalizedUserId = member.user_id.trim();
+    const normalizedMessageId = member.last_read_message_id?.trim() ?? "";
+
+    if (!normalizedUserId) {
+      setStatus("member_read_cursor_target_missing_for_context_focus_apply");
+      return;
+    }
+
+    if (!normalizedMessageId) {
+      setStatus("member_read_cursor_target_message_missing_for_context_focus_apply");
+      return;
+    }
+
+    const currentTargetUserId = readCursorTargetUserIdDraft.trim();
+    const currentTargetMessageId = readCursorTargetMessageIdDraft.trim();
+    const currentFocusUserId = readStatusFocusUserIdDraft.trim();
+    const alreadyMatched =
+      currentTargetUserId === normalizedUserId &&
+      currentTargetMessageId === normalizedMessageId &&
+      currentFocusUserId === normalizedUserId;
+
+    setReadCursorTargetUserIdDraft(normalizedUserId);
+    setReadCursorTargetMessageIdDraft(normalizedMessageId);
+    setReadStatusFocusUserIdDraft(normalizedUserId);
+    setStatus(
+      alreadyMatched
+        ? "Read-cursor target user + message + focus already match selected member cursor context (read_cursor_context_focus_source=member_row)."
+        : "Applied selected member cursor context + focus user (read_cursor_context_focus_source=member_row).",
+    );
+  }
+
   function applyCurrentSessionUserForReadCursorAndFocus() {
     const sessionUserId = currentSessionUserId.trim();
     if (!sessionUserId) {
@@ -725,6 +757,13 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
                   disabled={!member.last_read_message_id}
                 >
                   Use member cursor context (target + message)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyConversationMemberCursorContextAndFocusUser(member)}
+                  disabled={!member.last_read_message_id}
+                >
+                  Use member cursor context + focus
                 </button>
               </div>
             </li>
