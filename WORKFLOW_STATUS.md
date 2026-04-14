@@ -1,27 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 232
+- Batch: 233
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 232 friend graph seam — wire friend-request reject flow across backend + iOS Profile shell.
-- Status: complete
+- Scope: batch 233 moment posting seam — giảm friction khi create moment + image trên iOS Feed shell (ưu tiên error clarity cho image+caption path).
+- Status: verify
 - MVP status: MVP-testable
-- MVP human test path:
+- MVP human test path (latest stable trước nhịp này):
   - Backend: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - iOS: Session login -> Profile -> load pending requests -> tap `Reject request` ở inbound row -> app auto reload friend graph và request chuyển sang `rejected`.
-  - Edge-case: gọi `POST /friends/requests/{request_id}/accept` sau khi reject trả `request_not_pending` (400); iOS map hint rõ ràng để tester biết cần reload/đổi request.
 - Files:
-  - apps/backend-python/app/services/friendships.py
-  - apps/backend-python/app/modules/friendships/router.py
-  - apps/backend-python/tests/test_friendships_api.py
-  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
 - Test:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_friendships_api.py` ✅ (7 passed)
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
   - latest feature commit: `3738b54` — `batch232: wire friend-request reject flow across backend and ios`
-  - working tree: clean
+  - working tree: dirty (batch233 verify, chưa commit)
 - Blocker: none
-- Next: mở batch233 với 1 friction slice hẹp cho moment posting shell (image + caption path) để tăng testability beyond friend graph.
+- Next: chốt commit batch233 cho friction slice moment posting error clarity (không push), rồi mở scope kế tiếp cho private friend feed shell.
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 232 handoff:
   - `3738b54` — `batch232: wire friend-request reject flow across backend and ios`

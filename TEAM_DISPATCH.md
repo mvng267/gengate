@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 232
-- Trục công việc: đóng friction điểm friend graph bằng reject request end-to-end trước khi chuyển sang moment posting shell.
-- Trạng thái: batch232_complete_friend_reject_wired.
+- Batch workflow chính thức hiện tại: 233
+- Trục công việc: đóng 1 friction point của moment posting seam (image + caption) để test path iOS Feed shell dễ đoán lỗi và thao tác hơn.
+- Trạng thái: batch233_in_progress_moment_posting_error_clarity.
 
 ## Batch 232 handoff (closed)
 - Batch vừa xong: **232**
@@ -260,9 +260,9 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: batch 232 friend graph reject flow.
+- Scope hiện tại: giữ lane ổn định, không mở thay đổi mới trong nhịp này.
 - Kết quả gần nhất: reject route/service đã wired + error mapping `request_not_pending` (400) + pytest friendships pass.
-- Trạng thái: batch232_complete_friend_reject_backend.
+- Trạng thái: standby_batch233_no_new_backend_change.
 
 ### pikachu-web — frontend web
 - Scope hiện tại: tạm dừng theo chỉ đạo user.
@@ -270,9 +270,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 232 friend graph reject UX trên Profile shell.
-- Kết quả gần nhất: thêm `Reject request` action + hint mapping `request_not_pending` + reload state sau reject.
-- Trạng thái: batch232_complete_friend_reject_ios.
+- Scope hiện tại: batch 233 moment posting UX trên Feed shell.
+- Kết quả gần nhất: đã thêm error-code parsing + hint mapping cho create moment/media fail path.
+- Trạng thái: batch233_verify_moment_posting_error_clarity_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

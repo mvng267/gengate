@@ -300,6 +300,12 @@ struct FeedPlaceholderView: View {
                         Text("Fetch error: \(fetchError)")
                             .font(.footnote)
                             .foregroundStyle(.orange)
+
+                        if let feedErrorHint {
+                            Text("Hint: \(feedErrorHint)")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
                     }
 
                     if latestQuickReactionLog != nil {
@@ -807,6 +813,26 @@ struct FeedPlaceholderView: View {
 
         let trimmedReactionUserID = normalizedReactionUserIDDraft
         return trimmedReactionUserID.isEmpty ? nil : trimmedReactionUserID
+    }
+
+    private var feedErrorHint: String? {
+        guard let fetchError else {
+            return nil
+        }
+
+        if fetchError.contains("user_not_found") {
+            return "Author/viewer/reaction user was not found. Use current session user or a valid user UUID."
+        }
+
+        if fetchError.contains("moment_not_found") {
+            return "Moment no longer exists. Reload private/authored moments and retry with a fresh moment ID."
+        }
+
+        if fetchError.contains("validation_error") {
+            return "Request payload is invalid. Re-check UUID fields and image width/height values."
+        }
+
+        return nil
     }
 
     private func resolvedQuickReactionUserID(for row: PrivateFeedMomentRow) -> String? {
@@ -1354,6 +1380,12 @@ private struct PrivateFeedAPIClient {
     }
 
     private struct BackendErrorPayload: Decodable {
+        struct ErrorDetail: Decodable {
+            let code: String
+            let message: String
+        }
+
+        let error: ErrorDetail?
         let detail: String?
     }
 
@@ -1579,10 +1611,15 @@ private struct PrivateFeedAPIClient {
     }
 
     private func readErrorMessage(from data: Data, statusCode: Int, prefix: String) -> String {
-        if let payload = try? JSONDecoder().decode(BackendErrorPayload.self, from: data),
-           let detail = payload.detail,
-           !detail.isEmpty {
-            return "\(prefix): \(statusCode) (\(detail))"
+        if let payload = try? JSONDecoder().decode(BackendErrorPayload.self, from: data) {
+            if let detail = payload.detail, !detail.isEmpty {
+                return "\(prefix): \(statusCode) (\(detail))"
+            }
+
+            if let error = payload.error {
+                let message = error.message.isEmpty ? error.code : error.message
+                return "\(prefix): \(statusCode) (\(error.code): \(message))"
+            }
         }
 
         return "\(prefix): \(statusCode)"

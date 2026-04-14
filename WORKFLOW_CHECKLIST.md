@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **232 — friend-request reject flow wired end-to-end on backend + iOS Profile shell (MVP-testable)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **233 — moment posting seam friction slice đang mở (image + caption path trên iOS Feed shell)**.
 
 ## Reporting hard rule
 
@@ -89,25 +89,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **232**
-- Scope hiện tại: friend graph seam — thêm reject flow cho friend request trên backend + iOS Profile shell.
-- Trạng thái hiện tại: **complete**
+- Batch workflow chính thức hiện tại: **233**
+- Scope hiện tại: moment posting seam — giảm friction error clarity cho create moment + image (image+caption path) trên iOS Feed shell.
+- Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/backend-python/app/services/friendships.py`
-  - `apps/backend-python/app/modules/friendships/router.py`
-  - `apps/backend-python/tests/test_friendships_api.py`
-  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
+  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
 - Test-verify:
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_friendships_api.py` → ✅ `7 passed`
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
   - commit gần nhất đã chốt: `3738b54` — `batch232: wire friend-request reject flow across backend and ios`
-  - working tree hiện tại: sạch
+  - working tree hiện tại: bẩn (đang verify batch233, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch233 cho 1 slice hẹp moment posting shell (image + caption) để tăng độ end-to-end beyond friend graph.
-- MVP-testable run/test path (human):
+  - commit batch233 cho friction slice error mapping moment posting; sau đó mở 1 slice hẹp cho private friend feed shell.
+- MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.
 
