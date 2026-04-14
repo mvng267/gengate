@@ -100,8 +100,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `(current batch local commit)` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
-  - working tree hiện tại: bẩn (feature + workflow docs chờ commit)
+  - commit gần nhất đã chốt: `da1c27a` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
@@ -116,7 +116,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch vừa xong: **268**
 - Commit cuối đã chốt:
-  - `(current batch local commit)` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
+  - `da1c27a` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass

@@ -56,7 +56,7 @@
 ## Batch 268 handoff (closed)
 - Batch vừa xong: **268**
 - Commit đã chốt:
-  - `(current batch local commit)` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
+  - `da1c27a` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅

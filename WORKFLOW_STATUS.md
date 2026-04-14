@@ -18,12 +18,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(current batch local commit)` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
-  - working tree: dirty (feature + workflow docs staged for commit)
+  - latest feature commit: `da1c27a` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
+  - working tree: clean after batch268 commit
 - Blocker: none
 - Next: mở batch269 với 1 slice hẹp direct-message shell: thêm quick action web+iOS dùng current session user làm focus user cho read-state summary để giảm nhập tay khi retest.
 - Batch 268 handoff:
-  - `(current batch local commit)` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
+  - `da1c27a` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
   - web inbox shell đã wire `GET /conversations/{id}/members`, hiển thị `last_read_message_id/last_read_by`, và có quick-copy read-cursor line + clipboard action.
   - iOS inbox shell thêm quick-copy read-cursor line + clipboard action cùng format với web để report parity nhanh.
 - Batch 267 handoff:
