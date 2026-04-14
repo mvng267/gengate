@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **219 — iOS pending-request preset selected-state feedback slice is in verify (MVP-testable)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **220 — iOS profile status summary now includes selected pending pair mode (same/reverse) in verify (MVP-testable)**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **219**
-- Scope hiện tại: iOS profile friend graph UX hardening — thêm selected-state feedback cho preset same/reverse pair.
+- Batch workflow chính thức hiện tại: **220**
+- Scope hiện tại: iOS profile friend graph UX hardening — hiển thị pending pair mode (same/reverse) ngay trong status summary sau khi preset.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
@@ -100,28 +100,29 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất local: `e01f7ea` — `batch219: show selected state for ios pending pair presets`
-  - working tree hiện tại: bẩn (workflow docs đang cập nhật)
+  - commit gần nhất đã chốt: `dad9ec4` — `batch219: sync workflow docs for ios preset selection feedback`
+  - working tree hiện tại: bẩn (đang có thay đổi batch220, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - push batch219 rồi mở batch220 cho 1 friction slice hẹp kế tiếp.
+  - commit local batch220 rồi mở batch221 cho 1 friction slice hẹp kế tiếp.
 - MVP-testable run/test path (human):
-  - iOS Session login -> Profile -> load friend graph -> bấm `Use same pair` hoặc `Use reverse pair` -> verify nút đã chọn đổi thành `Using ...` + disabled, rồi tiếp tục send/accept.
+  - iOS Session login -> Profile -> load friend graph -> bấm `Use same pair`/`Use reverse pair` -> verify status summary thêm `pending pair mode: same|reverse` trước khi send/accept.
 
 ## Batch handoff note
 
-- Batch vừa xong: **218**
+- Batch vừa xong: **219**
 - Commit cuối đã chốt:
-  - `ef9152c` — `batch218: add ios pending request pair preset modes`
+  - `e01f7ea` — `batch219: show selected state for ios pending pair presets`
+  - `dad9ec4` — `batch219: sync workflow docs for ios preset selection feedback`
 - Test-verify cuối:
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
   - none
 - Batch kế tiếp:
-  - **219**
+  - **220**
 - Scope hẹp đầu tiên của batch kế tiếp:
-  - thêm selected-state feedback (`Using same pair` / `Using reverse pair`) để operator biết preset mode đang active.
+  - thêm mode marker vào status summary (`pending pair mode: same|reverse`) để tester nhìn trạng thái active mà không cần đọc label từng nút.
 
 ---
 

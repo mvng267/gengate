@@ -1,15 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 219
+- Batch: 220
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 219 iOS profile friend-graph UX hardening — add selected-state feedback for pending-request preset modes
+- Scope: batch 220 iOS profile friend-graph UX hardening — show selected pending pair mode directly in status summary
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
-  - iOS: Session login -> Profile -> load friend graph -> chọn 1 pending request.
+  - iOS: Session login -> Profile -> load friend graph -> chọn pending request row.
   - Tap `Use same pair` hoặc `Use reverse pair`.
-  - Verify nút đã chọn đổi label (`Using same pair` / `Using reverse pair`) và tự disable để tránh bấm lặp sai mode.
-  - Thực hiện send/accept để confirm flow vẫn chạy bình thường.
+  - Verify status summary now appends pair mode (`pending pair mode: same` / `pending pair mode: reverse`) next to selected requester/receiver IDs.
+  - Continue with `Send friend request`/`Accept request` to validate flow remains intact.
 - Files:
   - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
   - WORKFLOW_STATUS.md
@@ -18,13 +18,14 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `e01f7ea` — `batch219: show selected state for ios pending pair presets`
-  - working tree: bẩn (workflow docs pending update)
+  - latest commit: `dad9ec4` — `batch219: sync workflow docs for ios preset selection feedback`
+  - working tree: bẩn (batch220 changes in progress, chưa commit, chưa push)
 - Blocker: none
-- Next: sync flow docs batch219 -> push
+- Next: chốt batch220 (commit local) rồi mở batch221 cho 1 friction slice hẹp tiếp theo trong friend graph / feed seam MVP
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 219 handoff:
   - `e01f7ea` — `batch219: show selected state for ios pending pair presets`
+  - `dad9ec4` — `batch219: sync workflow docs for ios preset selection feedback`
   - pending-request preset buttons now surface selected mode via label + disabled state to reduce accidental repeat taps.
 - Batch 218 handoff:
   - `ef9152c` — `batch218: add ios pending request pair preset modes`

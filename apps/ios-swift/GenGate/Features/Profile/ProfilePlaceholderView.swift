@@ -142,10 +142,13 @@ struct ProfilePlaceholderView: View {
                     }
 
                     if let pendingRequestCount, let friendshipCount {
+                        let requestedUserLabel = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+                        let pendingPairModeSuffix = selectedPendingPairModeLabel.map { " · pending pair mode: \($0)" } ?? ""
+
                         seamRow(
                             title: "Snapshot summary",
                             state: "Pending requests: \(pendingRequestCount) · Accepted friendships: \(friendshipCount)",
-                            detail: "Requested user: \(userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines))"
+                            detail: "Requested user: \(requestedUserLabel)\(pendingPairModeSuffix)"
                         )
                     } else {
                         Text("No friend graph snapshot loaded yet.")
@@ -272,6 +275,27 @@ struct ProfilePlaceholderView: View {
         let requesterUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let receiverUserID = receiverUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         return !requesterUserID.isEmpty && requesterUserID == receiverUserID
+    }
+
+    private var selectedPendingPairModeLabel: String? {
+        let requesterDraft = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let receiverDraft = receiverUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !requesterDraft.isEmpty, !receiverDraft.isEmpty else {
+            return nil
+        }
+
+        for row in pendingRequestRows {
+            if requesterDraft == row.requesterUserID && receiverDraft == row.receiverUserID {
+                return "same"
+            }
+
+            if requesterDraft == row.receiverUserID && receiverDraft == row.requesterUserID {
+                return "reverse"
+            }
+        }
+
+        return nil
     }
 
     private func prefillFromCurrentSessionUserIfNeeded() {
