@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **254 — notification shell (web/iOS show current unread filter mode near presets) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **255 — notification shell (web/iOS replace unread_only booleans with readable mode labels) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **254**
-- Scope hiện tại: notification shell — thêm dòng `Filter mode` gần preset controls trên web/iOS.
+- Batch workflow chính thức hiện tại: **255**
+- Scope hiện tại: notification shell — đổi `unread_only=true|false` sang `Filter mode` readable labels trong list summary web/iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/notification-shell.tsx`
@@ -99,18 +99,33 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `3ac1d12` — `batch254: show current unread filter mode near presets`
+  - commit gần nhất đã chốt: `b073147` — `batch255: replace unread_only booleans with mode labels`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch255 với 1 slice hẹp notification shell: đổi summary mode hiển thị từ boolean sang nhãn dễ đọc (`All`/`Unread only`).
+  - mở batch256 với 1 slice hẹp friend-graph shell: thêm pending summary line (`Inbound pending`/`Outbound pending`) trên web+iOS Profile.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.
   - iOS Feed: tạo/lỗi moment posting flow; nếu backend trả `error.code/error.message` thì UI hiện thông điệp lỗi + hint hành động cho `user_not_found`, `moment_not_found`, `validation_error`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **255**
+- Commit cuối đã chốt:
+  - `b073147` — `batch255: replace unread_only booleans with mode labels`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **256**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - friend-graph shell: thêm pending summary line (`Inbound pending`/`Outbound pending`) trên web+iOS Profile.
+
+---
 
 - Batch vừa xong: **254**
 - Commit cuối đã chốt:

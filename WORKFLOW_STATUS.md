@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 254
+- Batch: 255
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 254 notification shell — show current unread filter mode near presets.
+- Scope: batch 255 notification shell — replace unread_only booleans with readable filter mode labels.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,10 +16,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `3ac1d12` — `batch254: show current unread filter mode near presets`
+  - latest feature commit: `b073147` — `batch255: replace unread_only booleans with mode labels`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch255 với 1 slice hẹp notification shell tiếp theo: thêm mode label vào list summary line (`unread_only=true|false`) theo ngôn ngữ dễ đọc (`All`/`Unread only`) để tránh parse boolean tay khi test nhanh.
+- Next: mở batch256 với 1 slice hẹp friend-graph shell: thêm pending summary line (`Inbound pending`/`Outbound pending`) trên web+iOS Profile để retest reject/accept nhanh hơn.
+- Batch 255 handoff:
+  - `b073147` — `batch255: replace unread_only booleans with mode labels`
+  - web/iOS list meta summary đã đổi từ `unread_only=true|false` sang `Filter mode: All notifications/Unread only` để tester đọc nhanh mà không parse boolean.
 - Batch 254 handoff:
   - `3ac1d12` — `batch254: show current unread filter mode near presets`
   - web/iOS giờ hiển thị dòng `Filter mode: ...` ngay cạnh preset area, giúp tester nhận biết mode hiện tại mà không cần suy từ disabled state.

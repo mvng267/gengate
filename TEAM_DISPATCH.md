@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 254
-- Trục công việc: notification shell — web/iOS show current unread filter mode near presets.
-- Trạng thái: batch254_complete_notification_filter_mode_label.
+- Batch workflow chính thức hiện tại: 255
+- Trục công việc: notification shell — web/iOS replace unread_only boolean display with readable mode labels.
+- Trạng thái: batch255_complete_notification_mode_label_summary.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 255 handoff (closed)
+- Batch vừa xong: **255**
+- Commit đã chốt:
+  - `b073147` — `batch255: replace unread_only booleans with mode labels`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **256**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - friend-graph shell: thêm pending summary line (`Inbound pending`/`Outbound pending`) trên web+iOS Profile.
 
 ## Batch 254 handoff (closed)
 - Batch vừa xong: **254**
