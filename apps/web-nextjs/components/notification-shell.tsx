@@ -154,6 +154,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       </p>
       <p>{status}</p>
       <p>{pendingWindowHint}</p>
+      <p>Filter mode: {pagination.unreadOnly ? "Unread only" : "All notifications"}</p>
 
       <form onSubmit={(event) => void handleCreate(event)}>
         <label>

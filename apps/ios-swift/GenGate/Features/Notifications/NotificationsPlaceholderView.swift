@@ -111,6 +111,10 @@ struct NotificationsPlaceholderView: View {
                         .disabled(pageUnreadOnly)
                     }
 
+                    Text("Filter mode: \(pageUnreadOnly ? "Unread only" : "All notifications")")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+
                     HStack(spacing: 10) {
                         Button("First page") {
                             pageOffsetDraft = "0"
