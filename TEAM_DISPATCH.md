@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 243
-- Trục công việc: notification shell — web/iOS unread-only toggle controls cho paged list filter contract.
-- Trạng thái: batch243_complete_notification_unread_filter_controls.
+- Batch workflow chính thức hiện tại: 244
+- Trục công việc: notification shell — web/iOS quick paging presets (first/prev/next).
+- Trạng thái: batch244_complete_notification_quick_paging_presets.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 244 handoff (closed)
+- Batch vừa xong: **244**
+- Commit đã chốt:
+  - `79adb18` — `batch244: add quick paging presets to web and ios notification shells`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **245**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm auto-load guard theo page window change (optional quick reload button copy/state).
 
 ## Batch 243 handoff (closed)
 - Batch vừa xong: **243**

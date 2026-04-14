@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 243
+- Batch: 244
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 243 notification shell — add web/iOS unread-only toggle controls for paged list filter contract.
+- Scope: batch 244 notification shell — add web/iOS quick paging preset controls (first/prev/next).
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -10,17 +10,19 @@
   - iOS Profile: Session login -> Profile -> load pending requests -> tap `Reject request` ở inbound row -> app auto reload friend graph và request chuyển sang `rejected`.
   - iOS Feed (batch233): khi create moment/media fail, app parse `error.code/error.message` và hiện hint rõ cho `user_not_found`, `moment_not_found`, `validation_error` để tester xử lý đúng bước tiếp theo.
 - Files:
-  - apps/web-nextjs/lib/notifications/client.ts
   - apps/web-nextjs/components/notification-shell.tsx
   - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `ac02f36` — `batch243: add unread-only filter controls to web and ios notification shells`
+  - latest feature commit: `79adb18` — `batch244: add quick paging presets to web and ios notification shells`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch244 với 1 slice hẹp notification shell tiếp theo: thêm preset quick offsets (first/next/prev) trên web/iOS để giảm nhập tay khi test paging.
+- Next: mở batch245 với 1 slice hẹp notification shell tiếp theo: thêm auto-load guard theo page window change (optional quick reload button copy/state) để giảm thao tác thủ công khi retest.
+- Batch 244 handoff:
+  - `79adb18` — `batch244: add quick paging presets to web and ios notification shells`
+  - web/iOS notification shell đã có preset `First/Prev/Next` để thay offset nhanh, không phải nhập tay mỗi lần paging.
 - Batch 243 handoff:
   - `ac02f36` — `batch243: add unread-only filter controls to web and ios notification shells`
   - web/iOS notification shell đã thêm toggle `unread_only` và truyền query filter cùng pagination window.
