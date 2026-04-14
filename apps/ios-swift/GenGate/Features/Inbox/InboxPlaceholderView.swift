@@ -62,6 +62,8 @@ struct InboxPlaceholderView: View {
     @State private var lastRecipientDeviceSourceHintDiffHintCopyText: String?
     @State private var lastRecipientDeviceSourceHintUsageNoteCopyAt: Date?
     @State private var lastRecipientDeviceSourceHintUsageNoteCopyText: String?
+    @State private var lastRecipientDeviceSourceHintTriageKitCopyAt: Date?
+    @State private var lastRecipientDeviceSourceHintTriageKitCopyText: String?
 
     private let recipientDevicesAutoReloadDebounceNanoseconds: UInt64 = 350_000_000
     private let recipientDevicesAutoReloadMinIntervalSeconds: TimeInterval = 1.0
@@ -78,7 +80,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset + empty-context-only helper-note visibility + short recipient-id mismatch hint + compact helper-note reason + readable short-caption mapping + recipient quick-member presets + dynamic first-valid-device apply/re-apply action + first-option inline subtitle (full + short id) + emphasized short-id line + source-hint short-id consistency across first-option/in-sync/manual/fallback states + same-as-first skip helper-note + empty-options reapply guidance + source-hint verify matrix + branch-key legend + matrix snapshot quick-copy + triage-line quick-copy + triage-line body quick-copy + triage preview line-vs-body block + compact diff hint + usage guidance note + usage-note quick-copy + selection-source hint + one-tap device UUID clear action; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset + empty-context-only helper-note visibility + short recipient-id mismatch hint + compact helper-note reason + readable short-caption mapping + recipient quick-member presets + dynamic first-valid-device apply/re-apply action + first-option inline subtitle (full + short id) + emphasized short-id line + source-hint short-id consistency across first-option/in-sync/manual/fallback states + same-as-first skip helper-note + empty-options reapply guidance + source-hint verify matrix + branch-key legend + matrix snapshot quick-copy + triage-line quick-copy + triage-line body quick-copy + triage preview line-vs-body block + compact diff hint + usage guidance note + usage-note quick-copy + triage-kit quick-copy + selection-source hint + one-tap device UUID clear action; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -146,6 +148,7 @@ struct InboxPlaceholderView: View {
                         "Added quick action `Copy source-hint diff hint` to reuse the exact clarification sentence in onboarding/debug notes.",
                         "Triage preview block now includes a compact usage note (`line` for tagged logs/search, `body` for concise issue text, `diff hint` for onboarding/explanation).",
                         "Added quick action `Copy source-hint usage note` so testers can paste the same line directly into bug-report templates/onboarding docs.",
+                        "Added quick action `Copy source-hint triage kit` to copy one bundled payload (line/body/diff/usage) for single-paste bug reports.",
                         "After copy, short-lived feedback lines show elapsed time + short fragment so testers can confirm exactly what was captured.",
                         "Recipient-device section now shows a compact selection-source hint so testers know whether current `Recipient device UUID` is in-sync with loaded options or still a manual out-of-options value.",
                         "One-tap action `Clear recipient device UUID` helps testers reset stale/manual device input instantly before selecting a fresh option."
@@ -518,6 +521,15 @@ struct InboxPlaceholderView: View {
                                         .frame(maxWidth: .infinity)
                                 }
                                 .buttonStyle(.bordered)
+
+                                Button {
+                                    copyRecipientDeviceSourceHintTriageKit()
+                                } label: {
+                                    Text("Copy source-hint triage kit")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(recipientDeviceSourceHintTriageKitText == nil)
                             }
 
                             if let recipientDeviceSourceHintCopiedFeedbackText {
@@ -564,6 +576,12 @@ struct InboxPlaceholderView: View {
 
                             if let recipientDeviceSourceHintUsageNoteCopiedFeedbackText {
                                 Text(recipientDeviceSourceHintUsageNoteCopiedFeedbackText)
+                                    .font(.caption2.monospaced())
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            if let recipientDeviceSourceHintTriageKitCopiedFeedbackText {
+                                Text(recipientDeviceSourceHintTriageKitCopiedFeedbackText)
                                     .font(.caption2.monospaced())
                                     .foregroundStyle(.secondary)
                             }
@@ -1463,6 +1481,21 @@ struct InboxPlaceholderView: View {
         return "[inbox-source-hint-triage] \(triageLineBodyText)"
     }
 
+    private var recipientDeviceSourceHintTriageKitText: String? {
+        guard let triageLineText = recipientDeviceSourceHintTriageLineText,
+              let triageBodyText = recipientDeviceSourceHintTriageLineBodyText else {
+            return nil
+        }
+
+        return """
+[inbox-source-hint-triage-kit]
+line=\(triageLineText)
+body=\(triageBodyText)
+diff=\(recipientDeviceSourceHintDiffHintText)
+usage=\(recipientDeviceSourceHintUsageNoteText)
+"""
+    }
+
     private var recipientDeviceSourceHintReportPayloadCopiedFeedbackText: String? {
         guard let lastRecipientDeviceSourceHintReportPayloadCopyAt,
               let lastRecipientDeviceSourceHintReportPayloadCopyText else {
@@ -1545,6 +1578,20 @@ struct InboxPlaceholderView: View {
         }
 
         return "Copied usage note (\(Int(elapsed))s ago): \(shortCaption(lastRecipientDeviceSourceHintUsageNoteCopyText, limit: 96))"
+    }
+
+    private var recipientDeviceSourceHintTriageKitCopiedFeedbackText: String? {
+        guard let lastRecipientDeviceSourceHintTriageKitCopyAt,
+              let lastRecipientDeviceSourceHintTriageKitCopyText else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(lastRecipientDeviceSourceHintTriageKitCopyAt)
+        guard elapsed <= 12 else {
+            return nil
+        }
+
+        return "Copied triage kit (\(Int(elapsed))s ago): \(shortCaption(lastRecipientDeviceSourceHintTriageKitCopyText, limit: 96))"
     }
 
     private var resolvedReadStatusMessageID: String? {
@@ -1745,6 +1792,22 @@ struct InboxPlaceholderView: View {
 
         lastRecipientDeviceSourceHintUsageNoteCopyText = normalizedUsageNoteText
         lastRecipientDeviceSourceHintUsageNoteCopyAt = Date()
+    }
+
+    private func copyRecipientDeviceSourceHintTriageKit() {
+        guard let triageKitText = recipientDeviceSourceHintTriageKitText else {
+            return
+        }
+
+        let normalizedTriageKitText = triageKitText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedTriageKitText.isEmpty else {
+            return
+        }
+
+        writeToClipboard(normalizedTriageKitText)
+
+        lastRecipientDeviceSourceHintTriageKitCopyText = normalizedTriageKitText
+        lastRecipientDeviceSourceHintTriageKitCopyAt = Date()
     }
 
     private func writeToClipboard(_ text: String) {
