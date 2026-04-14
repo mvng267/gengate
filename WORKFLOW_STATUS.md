@@ -1,12 +1,12 @@
 # GenGate Workflow Status
 
-- Batch: 212
+- Batch: 213
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 212 iOS feed seam friction reduction — add copy-latest quick-react log action
+- Scope: batch 213 iOS feed seam friction reduction — add clear quick-react log action
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
-  - iOS: Session login -> Feed -> quick react from row -> verify `qr:*` message -> tap `Copy latest quick-react log` -> confirm `qr:copied log`.
+  - iOS: Session login -> Feed -> quick react from row -> tap `Copy latest quick-react log` -> tap `Clear quick-react log` -> verify `qr:cleared log` and copy/clear controls hide.
   - Web/backend seams from prior batches remain runnable for friend graph/moments/inbox/location/notifications.
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
@@ -16,11 +16,14 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `b09f606` — `batch211: normalize ios feed quick reaction status format`
-  - working tree: bẩn (batch212 changes in progress, chưa commit, chưa push)
+  - latest commit: `7153120` — `batch212: add ios quick reaction log copy action`
+  - working tree: bẩn (batch213 changes in progress, chưa commit, chưa push)
 - Blocker: none
-- Next: chốt batch212 (commit local) rồi mở batch213 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
+- Next: chốt batch213 (commit local) rồi mở batch214 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 212 handoff:
+  - `7153120` — `batch212: add ios quick reaction log copy action`
+  - one-tap copy for latest `qr:*` log remains MVP-testable while batch 213 adds clear-log action for faster repeated manual testing.
 - Batch 211 handoff:
   - `b09f606` — `batch211: normalize ios feed quick reaction status format`
   - normalized `qr:ok`/`qr:err` logs remain MVP-testable while batch 212 adds one-tap copy action for latest quick-react log.

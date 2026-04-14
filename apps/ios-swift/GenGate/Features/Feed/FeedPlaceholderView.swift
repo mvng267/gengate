@@ -222,13 +222,23 @@ struct FeedPlaceholderView: View {
                     }
 
                     if latestQuickReactionLog != nil {
-                        Button {
-                            copyLatestQuickReactionLogToClipboard()
-                        } label: {
-                            Text("Copy latest quick-react log")
-                                .frame(maxWidth: .infinity)
+                        HStack(spacing: 8) {
+                            Button {
+                                copyLatestQuickReactionLogToClipboard()
+                            } label: {
+                                Text("Copy latest quick-react log")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.bordered)
+
+                            Button {
+                                clearLatestQuickReactionLog()
+                            } label: {
+                                Text("Clear quick-react log")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.bordered)
                         }
-                        .buttonStyle(.bordered)
                     }
 
                     Text("Loaded private-feed moments: \(momentRows.count) · authored moments: \(authoredMomentRows.count) · reactions: \(reactionRows.count)")
@@ -832,6 +842,12 @@ struct FeedPlaceholderView: View {
 #else
         statusMessage = "qr:copy_unavailable"
 #endif
+    }
+
+    private func clearLatestQuickReactionLog() {
+        latestQuickReactionLog = nil
+        fetchError = nil
+        statusMessage = "qr:cleared log"
     }
 
     private func synchronizeReactionTargetWithLoadedMoments() {

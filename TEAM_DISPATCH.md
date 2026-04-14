@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 212
-- Trục công việc: iOS feed seam friction reduction — add copy-latest quick-react log action.
+- Batch workflow chính thức hiện tại: 213
+- Trục công việc: iOS feed seam friction reduction — add clear quick-react log action.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 212 iOS feed seam friction reduction.
-- Kết quả gần nhất: có nút `Copy latest quick-react log`, copy dòng `qr:*` mới nhất và phản hồi `qr:copied log`.
-- Trạng thái: verify_batch212_ios.
+- Scope hiện tại: batch 213 iOS feed seam friction reduction.
+- Kết quả gần nhất: có thêm nút `Clear quick-react log`, reset log nhanh và phản hồi `qr:cleared log`.
+- Trạng thái: verify_batch213_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
