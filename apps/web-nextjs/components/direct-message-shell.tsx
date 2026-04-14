@@ -356,6 +356,22 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setStatus(focusStatus);
   }
 
+  function applyConversationMemberAsReadCursorTargetUser(memberUserId: string) {
+    const normalizedMemberUserId = memberUserId.trim();
+    if (!normalizedMemberUserId) {
+      setStatus("member_read_cursor_target_missing");
+      return;
+    }
+
+    const targetStatus =
+      readCursorTargetUserIdDraft.trim() === normalizedMemberUserId
+        ? "Read-cursor target user already matches selected member (read_cursor_user_source=member_row)."
+        : "Applied selected member as read-cursor target user (read_cursor_user_source=member_row).";
+
+    setReadCursorTargetUserIdDraft(normalizedMemberUserId);
+    setStatus(targetStatus);
+  }
+
   function applyCurrentSessionUserForReadCursorAndFocus() {
     const sessionUserId = currentSessionUserId.trim();
     if (!sessionUserId) {
@@ -609,9 +625,12 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
               <code>{member.last_read_message_id ?? "(none)"}</code>
               {resolvedReadCursorTargetUserId === member.user_id ? <span>{" · read_cursor_target"}</span> : null}
               {resolvedReadCursorFocusUserId === member.user_id ? <span>{" · read_focus"}</span> : null}
-              <div>
+              <div style={{ display: "flex", gap: 8 }}>
                 <button type="button" onClick={() => applyConversationMemberAsReadFocusUser(member.user_id)}>
                   Use member as read focus user
+                </button>
+                <button type="button" onClick={() => applyConversationMemberAsReadCursorTargetUser(member.user_id)}>
+                  Use member as read-cursor target user
                 </button>
               </div>
             </li>
