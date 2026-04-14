@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 251
-- Trục công việc: notification shell — web/iOS tiny read/unread legend line near list.
-- Trạng thái: batch251_complete_notification_legend_line.
+- Batch workflow chính thức hiện tại: 252
+- Trục công việc: notification shell — web/iOS quick presets for unread filter.
+- Trạng thái: batch252_complete_notification_unread_presets.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 252 handoff (closed)
+- Batch vừa xong: **252**
+- Commit đã chốt:
+  - `721661f` — `batch252: add unread filter quick presets in notification shells`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **253**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm status hint tức thì khi bấm preset (`All`/`Unread only`) trước bước Load.
 
 ## Batch 251 handoff (closed)
 - Batch vừa xong: **251**

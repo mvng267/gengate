@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 251
+- Batch: 252
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 251 notification shell — add tiny read/unread legend line near notification list.
+- Scope: batch 252 notification shell — add quick presets for unread filter (`All` / `Unread only`).
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,10 +16,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `a445633` — `batch251: add read-state legend near notification lists`
+  - latest feature commit: `721661f` — `batch252: add unread filter quick presets in notification shells`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch252 với 1 slice hẹp notification shell tiếp theo: thêm filter quick presets (`All`/`Unread only`) dạng segmented buttons để giảm toggle ambiguity khi retest.
+- Next: mở batch253 với 1 slice hẹp notification shell tiếp theo: thêm status hint tức thì khi bấm preset (`All`/`Unread only`) để tester nhận được feedback trước khi bấm Load.
+- Batch 252 handoff:
+  - `721661f` — `batch252: add unread filter quick presets in notification shells`
+  - web/iOS thêm 2 nút preset `All` và `Unread only` để đổi filter nhanh, tự reset offset về page đầu và giảm ambiguity của toggle-only flow.
 - Batch 251 handoff:
   - `a445633` — `batch251: add read-state legend near notification lists`
   - web/iOS list giờ có dòng legend tĩnh `● read · ○ unread` ngay dưới tiêu đề để tester mới hiểu ký hiệu ngay, không cần suy từ button text.
