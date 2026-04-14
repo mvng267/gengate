@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 245
+- Batch: 246
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 245 notification shell — add load-window change guard/copy on web+iOS list loaders.
+- Scope: batch 246 notification shell — quick-apply current session user + auto-reset offset when user id changes.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,10 +16,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `2334e34` — `batch245: add load-window change guard in web and ios notification shells`
+  - latest feature commit: `67a6ea0` — `batch246: quick-apply session user and reset offset on user change`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch246 với 1 slice hẹp notification shell tiếp theo: thêm quick apply current user + auto-reset page offset khi user id đổi để giảm stale-window reload mismatch.
+- Next: mở batch247 với 1 slice hẹp notification shell tiếp theo: thêm explicit pending-window hint line (không chỉ ở button title) để tester thấy mismatch ngay cả khi nút ở ngoài viewport.
+- Batch 246 handoff:
+  - `67a6ea0` — `batch246: quick-apply session user and reset offset on user change`
+  - web/iOS có action `Use current session user + load`; khi đổi user trong form, offset tự reset về 0 để tránh load nhầm page window.
 - Batch 245 handoff:
   - `2334e34` — `batch245: add load-window change guard in web and ios notification shells`
   - web/iOS load button giờ hiện rõ trạng thái `window changed`, giúp tester biết cần reload khi đổi user/paging/filter.
