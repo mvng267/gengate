@@ -1,14 +1,14 @@
 # GenGate Workflow Status
 
-- Batch: 221
+- Batch: 222
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 221 iOS feed UX hardening — quick-fill create author from selected moment row
+- Scope: batch 222 iOS feed UX hardening — quick-fill delete moment id from selected row context + inline delete action
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
   - iOS: Session login -> Feed -> load private feed/authored moments.
-  - Ở row moment bất kỳ, tap `Use author for create` để fill `Author user UUID` cho form tạo moment.
-  - Verify nút đổi thành `Author selected` khi draft trùng author đang chọn, rồi tạo/reload moment flow như cũ.
+  - Ở row moment bất kỳ, tap `Use row id for delete` để fill nhanh `Moment ID to delete`.
+  - Tap `Delete moment`; verify status báo xóa thành công và list authored/private feed được reload.
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
   - WORKFLOW_STATUS.md
@@ -17,11 +17,17 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `71a42b3` — `batch220: sync workflow docs after ios pair mode summary`
-  - working tree: bẩn (batch221 changes in progress, chưa commit, chưa push)
+  - latest feature commit: `acda01f` — `batch222: add ios feed row shortcut for moment delete`
+  - working tree: sạch
 - Blocker: none
-- Next: chốt batch221 (commit local) rồi mở batch222 cho 1 friction slice hẹp tiếp theo trong feed / inbox seam MVP
+- Next: mở batch223 cho 1 friction slice hẹp tiếp theo trong feed / inbox seam MVP
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 222 handoff:
+  - `acda01f` — `batch222: add ios feed row shortcut for moment delete`
+  - feed shell now includes `Use row id for delete` row shortcut + inline delete action wired to `DELETE /moments/{id}` and reloads private/authored lists after success.
+- Batch 221 handoff:
+  - `129619a` — `batch221: add ios feed row action to fill create author`
+  - feed moment rows now include `Use author for create` and selected-state feedback (`Author selected`) to reduce create-author copy/paste friction.
 - Batch 220 handoff:
   - `13d7a42` — `batch220: show ios pending pair mode in snapshot summary`
   - `71a42b3` — `batch220: sync workflow docs after ios pair mode summary`

@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 221
-- Trục công việc: iOS feed UX hardening — quick-fill create author from selected moment row.
-- Trạng thái: verify_batch221_ios.
+- Batch workflow chính thức hiện tại: 222
+- Trục công việc: iOS feed UX hardening — quick-fill delete moment id from selected row context + inline delete action.
+- Trạng thái: verify_batch222_ios.
+
+## Batch 221 handoff (closed)
+- Batch vừa xong: **221**
+- Commit đã push:
+  - `129619a` — `batch221: add ios feed row action to fill create author`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **222**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - thêm row-level shortcut `Use row id for delete` để fill nhanh `Moment ID` cho delete flow từ context moment row.
 
 ## Batch 220 handoff (closed)
 - Batch vừa xong: **220**
@@ -117,9 +129,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 221 iOS feed UX hardening.
-- Kết quả gần nhất: thêm action `Use author for create` + trạng thái `Author selected` trên moment row.
-- Trạng thái: verify_batch221_ios.
+- Scope hiện tại: batch 222 iOS feed UX hardening.
+- Kết quả gần nhất: batch 222 thêm shortcut `Use row id for delete` + delete action trực tiếp từ Feed shell (`DELETE /moments/{id}`).
+- Trạng thái: verify_batch222_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

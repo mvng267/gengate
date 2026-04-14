@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **221 — iOS feed quick-fill create-author from selected moment row is in verify (MVP-testable)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **222 — iOS feed quick-fill delete moment id from selected row + inline delete action is in verify (MVP-testable)**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **221**
-- Scope hiện tại: iOS feed UX hardening — thêm row-level action để fill `Author user UUID` từ moment author đang chọn.
+- Batch workflow chính thức hiện tại: **222**
+- Scope hiện tại: iOS feed UX hardening — thêm row-level shortcut `Use row id for delete` + delete action để xóa moment từ row context nhanh hơn.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
@@ -100,16 +100,44 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `71a42b3` — `batch220: sync workflow docs after ios pair mode summary`
-  - working tree hiện tại: bẩn (đang có thay đổi batch221, chưa commit)
+  - commit gần nhất đã chốt: `acda01f` — `batch222: add ios feed row shortcut for moment delete`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit local batch221 rồi mở batch222 cho 1 friction slice hẹp kế tiếp.
+  - mở batch223 cho 1 friction slice hẹp kế tiếp.
 - MVP-testable run/test path (human):
-  - iOS Session login -> Feed -> load moments -> bấm `Use author for create` ở row -> verify `Author user UUID` được fill + nút đổi `Author selected`, rồi create/reload moment flow.
+  - iOS Session login -> Feed -> load moments -> bấm `Use row id for delete` ở row -> verify `Moment ID to delete` được fill -> bấm `Delete moment` -> confirm list reload và status báo xóa thành công.
 
 ## Batch handoff note
+
+- Batch vừa xong: **222**
+- Commit cuối đã chốt:
+  - `acda01f` — `batch222: add ios feed row shortcut for moment delete`
+- Test-verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **223**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - thêm selected-state feedback cho preset delete id (`Delete id selected`) và sync status copy để giảm nhầm lẫn khi retest delete liên tiếp.
+
+---
+
+- Batch vừa xong: **221**
+- Commit cuối đã chốt:
+  - `129619a` — `batch221: add ios feed row action to fill create author`
+- Test-verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **222**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - thêm shortcut `Use row id for delete` trong iOS Feed để fill nhanh `Moment ID` cho flow delete moment từ row context.
+
+---
 
 - Batch vừa xong: **220**
 - Commit cuối đã chốt:
