@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **147 — iOS inbox one-tap recipient-device clear action slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **148 — iOS inbox one-tap re-apply first-valid recipient-device action slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **147**
-- Scope hiện tại: iOS inbox read-status UX hardening — thêm quick one-tap clear cho recipient device UUID để reset stale/manual state nhanh.
+- Batch workflow chính thức hiện tại: **148**
+- Scope hiện tại: iOS inbox read-status UX hardening — thêm quick re-apply action để đồng bộ recipient device UUID với first valid option sau clear/manual edit.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch147 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch148 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch148 cho messaging friction tiếp theo (thêm quick re-apply action để đồng bộ lại recipient device UUID với first valid option ngay sau thao tác clear/manual edit) trong iOS inbox shell
+  - mở batch149 cho messaging friction tiếp theo (gom `Use first valid` + `Re-apply first valid` thành 1 action label động theo trạng thái để giảm duplication nút trong recipient-device section) trong iOS inbox shell
 
 ## Batch handoff note
 

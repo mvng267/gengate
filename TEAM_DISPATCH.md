@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 147
-- Trục công việc: iOS inbox seam hardening — thêm one-tap clear action để reset recipient device UUID stale/manual nhanh hơn.
+- Batch workflow chính thức hiện tại: 148
+- Trục công việc: iOS inbox seam hardening — thêm one-tap re-apply action để đưa recipient device quay lại first valid option nhanh.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 147 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: thêm action `Clear recipient device UUID` giúp reset nhanh manual/stale device draft trước khi chọn option hợp lệ mới.
-- Trạng thái: verify_batch147_ios.
+- Scope hiện tại: batch 148 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: thêm action `Re-apply first valid recipient device` để restore nhanh state in-sync sau khi clear/manual edit device UUID.
+- Trạng thái: verify_batch148_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
