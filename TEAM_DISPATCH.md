@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 273
-- Trục công việc: direct-message shell — web+iOS add member-row quick action to set read-cursor target user (`read_cursor_user_source=member_row`) for faster mark-read parity retest.
-- Trạng thái: batch273_complete_dm_member_row_read_cursor_target_quick_action_web_ios.
+- Batch workflow chính thức hiện tại: 274
+- Trục công việc: direct-message shell — web+iOS add member-row one-tap action to set both read-cursor target + read focus users for faster read parity retest.
+- Trạng thái: batch274_complete_dm_member_row_target_focus_one_tap_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 274 handoff (closed)
+- Batch vừa xong: **274**
+- Commit đã chốt:
+  - `(pending in this run)` — `batch274: add member-row one-tap target-focus actions on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **275**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm one-tap action dùng selected member cursor message làm read-cursor target message trên web+iOS để rút ngắn setup mark-read case.
 
 ## Batch 273 handoff (closed)
 - Batch vừa xong: **273**

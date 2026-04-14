@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **273**
-- Scope hiện tại: direct-message shell — thêm quick action member-row để set read-cursor target user (`read_cursor_user_source=member_row`) trên web+iOS.
+- Batch workflow chính thức hiện tại: **274**
+- Scope hiện tại: direct-message shell — thêm one-tap member-row action để set đồng thời read-cursor target + read focus users trên web+iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/direct-message-shell.tsx`
@@ -99,12 +99,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `e1820a0` — `batch273: add member-row quick read-cursor target actions on web and ios`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `(pending in this run)` — `batch274: add member-row one-tap target-focus actions on web and ios`
+  - working tree hiện tại: bẩn (2 files) trước commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch274 với 1 slice hẹp direct-message shell: thêm quick action one-tap apply member row cho cả read-cursor target + read focus trên web+iOS để rút ngắn thao tác retest.
+  - mở batch275 với 1 slice hẹp direct-message shell: thêm one-tap action dùng selected member cursor message làm read-cursor target message (web+iOS) để rút ngắn setup mark-read case.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed: bấm quick action `Use current session user as viewer + load` -> verify status `viewer_source=session_user` + feed reload.
@@ -112,6 +112,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **274**
+- Commit cuối đã chốt:
+  - `(pending in this run)` — `batch274: add member-row one-tap target-focus actions on web and ios`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **275**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm one-tap action dùng selected member cursor message làm read-cursor target message (web+iOS) để rút ngắn setup mark-read case.
+
+---
 
 - Batch vừa xong: **273**
 - Commit cuối đã chốt:

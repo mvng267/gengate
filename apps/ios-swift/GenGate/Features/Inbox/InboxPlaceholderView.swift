@@ -1499,6 +1499,24 @@ struct InboxPlaceholderView: View {
                                 }
                                 .buttonStyle(.bordered)
 
+                                Button {
+                                    applyConversationMemberAsReadCursorTargetAndFocusUser(member.userID)
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Text("Use member as read-cursor target + read focus")
+                                            .font(.caption)
+
+                                        Spacer()
+
+                                        let isSelectedForBoth = resolvedReadCursorTargetUserID == member.userID && resolvedReadStatusFocusUserID == member.userID
+                                        Text(isSelectedForBoth ? "target+focus_selected" : "set_target+focus")
+                                            .font(.caption2.monospaced())
+                                            .foregroundStyle(isSelectedForBoth ? .blue : .secondary)
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .buttonStyle(.bordered)
+
                                 if let cursorMessageID {
                                     Button {
                                         readCursorTargetMessageIDDraft = cursorMessageID
@@ -3036,6 +3054,27 @@ use_when=\(useWhenText)
         }
 
         readCursorTargetUserIDDraft = normalizedMemberUserID
+    }
+
+    private func applyConversationMemberAsReadCursorTargetAndFocusUser(_ memberUserID: String) {
+        let normalizedMemberUserID = memberUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedMemberUserID.isEmpty else {
+            sendStatusHint = "member_read_cursor_user_missing_for_quick_apply"
+            return
+        }
+
+        let currentTargetUserID = readCursorTargetUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentFocusUserID = readStatusFocusUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let alreadyMatched = currentTargetUserID == normalizedMemberUserID && currentFocusUserID == normalizedMemberUserID
+
+        readCursorTargetUserIDDraft = normalizedMemberUserID
+        readStatusFocusUserIDDraft = normalizedMemberUserID
+
+        if alreadyMatched {
+            sendStatusHint = "Read-cursor target + read focus already match selected member (read_cursor_user_source=member_row)."
+        } else {
+            sendStatusHint = "Applied selected member as read-cursor target + read focus (read_cursor_user_source=member_row)."
+        }
     }
 
     private func applyCurrentSessionUserAsReadCursorTargetAndFocusUser() {

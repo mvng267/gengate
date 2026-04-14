@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 273
+- Batch: 274
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 273 direct-message shell — add member-row quick action to set read-cursor target user (read_cursor_user_source=member_row) on web+iOS.
+- Scope: batch 274 direct-message shell — add one-tap member-row action to set both read-cursor target + read focus users (read_cursor_user_source=member_row) on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -17,10 +17,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `e1820a0` — `batch273: add member-row quick read-cursor target actions on web and ios`
-  - working tree: clean after batch273 commit
+  - latest feature commit: `(pending in this run)` — `batch274: add member-row one-tap target-focus actions on web and ios`
+  - working tree: dirty (2 files) before commit
 - Blocker: none
-- Next: mở batch274 với 1 slice hẹp direct-message shell: cho phép one-tap apply member row cho cả target+focus đồng thời trên web+iOS để rút ngắn chuỗi thao tác retest read parity.
+- Next: mở batch275 với 1 slice hẹp direct-message shell: thêm one-tap action dùng selected member cursor message làm read-cursor target message trên web+iOS để rút ngắn setup mark-read case.
+- Batch 274 handoff:
+  - `(pending in this run)` — `batch274: add member-row one-tap target-focus actions on web and ios`
+  - web/iOS member summary thêm action `Use member as read-cursor target + read focus`, cho phép sync nhanh cả 2 field theo member row trước khi thao tác mark-read.
 - Batch 273 handoff:
   - `e1820a0` — `batch273: add member-row quick read-cursor target actions on web and ios`
   - web/iOS member summary thêm action `Use member as read-cursor target user`, set status source marker `read_cursor_user_source=member_row` để mark-read parity nhanh hơn.
