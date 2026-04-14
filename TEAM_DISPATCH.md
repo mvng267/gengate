@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 163
-- Trục công việc: iOS inbox seam hardening — đồng bộ wording status summary line với source-hint `short-id` consistency.
+- Batch workflow chính thức hiện tại: 164
+- Trục công việc: iOS inbox seam hardening — thêm source-hint verify matrix để giảm friction manual test.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 163 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: status summary nay gộp thành phrase consistency chung cho source-hint branches đã chuẩn hóa `short-id`.
-- Trạng thái: verify_batch163_ios.
+- Scope hiện tại: batch 164 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: thêm caption `Source-hint verify matrix` mô tả 5 branch expected text để tester đối chiếu nhanh ngay trong UI.
+- Trạng thái: verify_batch164_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

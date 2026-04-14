@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 163
+- Batch: 164
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 163 iOS inbox seam hardening — align status summary wording with source-hint `short-id` consistency
+- Scope: batch 164 iOS inbox seam hardening — add compact source-hint verify matrix for faster manual branch validation
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch163 slice)
+  - latest commit: `HEAD` (local batch164 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch164 cho messaging friction tiếp theo (ví dụ thêm testcase-like checklist line cho source-hint branch matrix để verify thủ công nhanh hơn) trong iOS inbox shell
+- Next: mở batch165 cho messaging friction tiếp theo (ví dụ thêm quick-copy cho current source-hint text để report bug nhanh hơn) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -383,6 +383,10 @@
   - status summary line được rút gọn/đồng bộ thành phrase thống nhất: `source-hint short-id consistency across first-option/in-sync/manual/fallback states`
   - bullets bổ sung note rõ việc đồng bộ wording giữa phần source-hint runtime và status capability text
   - không đổi hành vi UI/action; chỉ tăng độ nhất quán mô tả để tester đọc status nhanh hơn
+- Batch 164 outcome:
+  - thêm `Source-hint verify matrix` dạng caption ngay dưới source-hint runtime để tester đối chiếu nhanh 5 nhánh trạng thái (`empty+first`, `empty+no-options`, `in-sync+first`, `in-sync+non-first`, `manual/out-of-options`)
+  - status/bullets cập nhật phản ánh capability verify matrix mới
+  - behavior logic/API không đổi; đây là manual-test friction reduction slice
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -392,7 +396,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, load direct thread A-B; verify source-hint branch matrix dùng `short-id` nhất quán ở first-option/in-sync/manual và fallback `short-id chưa khả dụng`; đồng thời check summary text trong màn Inbox đã phản ánh phrase consistency mới; cuối cùng bấm dynamic first-valid action để quay lại first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.` trước khi `Create message-device key`
+  - iOS Inbox path: open Inbox tab, load direct thread A-B; verify `Source-hint verify matrix` caption xuất hiện ngay dưới source-hint runtime; lần lượt chạy 5 state theo matrix (`empty+first`, `empty+no-options`, `in-sync+first`, `in-sync+non-first`, `manual/out-of-options`) và đối chiếu fragment text tương ứng; cuối cùng bấm dynamic first-valid action để quay lại first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.` trước khi `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts
