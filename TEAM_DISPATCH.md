@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 160
-- Trục công việc: iOS inbox seam hardening — thêm short-id cho source hint in-sync non-first.
+- Batch workflow chính thức hiện tại: 161
+- Trục công việc: iOS inbox seam hardening — thống nhất prefix `short-id` giữa các source hint.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 160 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: case in-sync non-first nay có short-id fragment để scan nhanh và đồng bộ pattern với các source hints khác.
-- Trạng thái: verify_batch160_ios.
+- Scope hiện tại: batch 161 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: in-sync non-first + manual/out-of-options source hints nay dùng cùng prefix `short-id` để copy nhất quán.
+- Trạng thái: verify_batch161_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
