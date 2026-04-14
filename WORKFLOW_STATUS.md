@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 238
+- Batch: 239
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 238 notification shell — backend unread summary/count parity on list response.
+- Scope: batch 239 notification shell — backend list pagination + stable sorting parity.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -10,16 +10,20 @@
   - iOS Profile: Session login -> Profile -> load pending requests -> tap `Reject request` ở inbound row -> app auto reload friend graph và request chuyển sang `rejected`.
   - iOS Feed (batch233): khi create moment/media fail, app parse `error.code/error.message` và hiện hint rõ cho `user_not_found`, `moment_not_found`, `validation_error` để tester xử lý đúng bước tiếp theo.
 - Files:
-  - apps/backend-python/app/schemas/notifications.py
+  - apps/backend-python/app/repositories/notifications.py
+  - apps/backend-python/app/services/notifications.py
   - apps/backend-python/app/modules/notifications/router.py
   - apps/backend-python/tests/test_notifications_security_api.py
 - Test:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k "notifications_list_unread"` ✅ (2 passed, 10 deselected)
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k "pagination_and_sorting_parity or notifications_list_unread"` ✅ (3 passed, 10 deselected)
 - Git:
-  - latest feature commit: `f2540dc` — `batch238: add unread count to notifications list response`
-  - working tree: clean
+  - latest feature commit: `15f5c35` — `batch239: add notification list pagination and stable sorting`
+  - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch239 với 1 slice hẹp notification shell (sorting/pagination parity cho list contract).
+- Next: sync workflow docs cho batch239 rồi mở batch240 với 1 slice hẹp tiếp theo của notification shell (total unread summary parity cho paged list).
+- Batch 239 handoff:
+  - `15f5c35` — `batch239: add notification list pagination and stable sorting`
+  - `GET /notifications/{user_id}` hỗ trợ `limit`/`offset` (validated) và trả list sorted ổn định theo `created_at desc, id desc`.
 - Batch 238 handoff:
   - `f2540dc` — `batch238: add unread count to notifications list response`
   - `GET /notifications/{user_id}` trả thêm `unread_count` để client lấy unread summary trực tiếp.
