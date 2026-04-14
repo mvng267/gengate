@@ -323,6 +323,26 @@ struct FeedPlaceholderView: View {
                     }
 
                     Button {
+                        fillReactionUserFromSelectedMomentAuthor()
+                    } label: {
+                        if let selectedReactionTargetMomentAuthorID {
+                            Text("Use selected moment author (\(shortIdentifier(selectedReactionTargetMomentAuthorID)))")
+                                .frame(maxWidth: .infinity)
+                        } else {
+                            Text("Use selected moment author for reaction user")
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(selectedReactionTargetMomentAuthorID == nil)
+
+                    if let selectedReactionTargetMomentAuthorID {
+                        Text("Selected moment author: \(selectedReactionTargetMomentAuthorID)")
+                            .font(.caption.monospaced())
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Button {
                         Task {
                             await createMomentReaction()
                         }
@@ -482,6 +502,17 @@ struct FeedPlaceholderView: View {
         return uniquePreservingOrder(candidates).prefix(6).map { $0 }
     }
 
+    private var selectedReactionTargetMomentAuthorID: String? {
+        let targetMomentID = normalizedReactionTargetMomentIDDraft
+        guard !targetMomentID.isEmpty else {
+            return nil
+        }
+
+        return (momentRows + authoredMomentRows)
+            .first(where: { $0.id == targetMomentID })?
+            .authorID
+    }
+
     private func uniquePreservingOrder(_ items: [String]) -> [String] {
         var seen = Set<String>()
         var ordered: [String] = []
@@ -545,6 +576,14 @@ struct FeedPlaceholderView: View {
             return
         }
         reactionUserIDDraft = currentSessionUserID
+    }
+
+    private func fillReactionUserFromSelectedMomentAuthor() {
+        guard let selectedReactionTargetMomentAuthorID else {
+            return
+        }
+
+        reactionUserIDDraft = selectedReactionTargetMomentAuthorID
     }
 
     private func synchronizeReactionTargetWithLoadedMoments() {

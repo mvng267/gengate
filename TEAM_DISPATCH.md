@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 201
-- Trục công việc: iOS feed seam friction reduction — quick reaction target/user presets for reactions shell.
+- Batch workflow chính thức hiện tại: 202
+- Trục công việc: iOS feed seam friction reduction — selected-moment author autofill for reaction user.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 201 iOS feed seam friction reduction.
-- Kết quả gần nhất: thêm quick presets cho `reaction_target_moment_id` + `reaction_user_id` từ loaded rows/session (capsule chips, selected state, short id labels) để giảm copy-paste UUID khi test reactions.
-- Trạng thái: verify_batch201_ios.
+- Scope hiện tại: batch 202 iOS feed seam friction reduction.
+- Kết quả gần nhất: thêm action `Use selected moment author for reaction user` + selected-author hint để autofill `reaction_user_id` theo `reaction_target_moment_id` đã chọn.
+- Trạng thái: verify_batch202_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

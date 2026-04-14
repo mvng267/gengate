@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 201
+- Batch: 202
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 201 iOS feed seam friction reduction — add quick moment/user presets for reaction target fields
+- Scope: batch 202 iOS feed seam friction reduction — add selected-moment author autofill for reaction user
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
@@ -12,11 +12,14 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `19a88f4` — `batch200: add ios feed quick reaction presets`
-  - working tree: bẩn (batch201 changes in progress, chưa commit, chưa push)
+  - latest commit: `cb89145` — `batch201: add ios feed reaction target quick presets`
+  - working tree: bẩn (batch202 changes in progress, chưa commit, chưa push)
 - Blocker: none
-- Next: chốt batch201 (commit local) rồi mở batch202 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
+- Next: chốt batch202 (commit local) rồi mở batch203 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 201 handoff:
+  - `cb89145` — `batch201: add ios feed reaction target quick presets`
+  - reaction target/user preset chips remain MVP-testable while batch 202 reduces user-target mismatch via selected-moment author autofill.
 - Batch 200 handoff:
   - `19a88f4` — `batch200: add ios feed quick reaction presets`
   - reaction type chips (`heart`, `fire`, `smile`, `wow`, `clap`) remain MVP-testable while batch 201 reduces UUID copy-paste friction for reaction target/user.

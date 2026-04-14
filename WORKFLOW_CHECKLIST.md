@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **201 — iOS feed reaction target/user quick presets slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **202 — iOS feed selected-moment author autofill slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **201**
-- Scope hiện tại: iOS feed seam friction reduction — thêm quick presets cho reaction target moment + reaction user từ loaded rows/session để giảm copy-paste UUID khi verify `POST/GET /moments/{id}/reactions`.
+- Batch workflow chính thức hiện tại: **202**
+- Scope hiện tại: iOS feed seam friction reduction — thêm action autofill reaction user theo author của selected reaction-target moment để giảm mismatch khi verify `POST/GET /moments/{id}/reactions`.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `19a88f4` — `batch200: add ios feed quick reaction presets`
-  - working tree hiện tại: bẩn (đang có thay đổi batch201, chưa commit)
+  - commit gần nhất đã chốt: `cb89145` — `batch201: add ios feed reaction target quick presets`
+  - working tree hiện tại: bẩn (đang có thay đổi batch202, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit local batch201 rồi mở batch202 cho 1 friction slice hẹp tiếp theo ở feed/inbox seam MVP
+  - commit local batch202 rồi mở batch203 cho 1 friction slice hẹp tiếp theo ở feed/inbox seam MVP
 
 ## Batch handoff note
 
