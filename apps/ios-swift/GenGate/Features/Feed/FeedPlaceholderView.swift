@@ -641,7 +641,9 @@ struct FeedPlaceholderView: View {
                     Text(
                         deleteMomentIDInFlight == row.id
                             ? "Deleting this moment..."
-                            : "Delete this moment"
+                            : (requireDeleteConfirmation
+                                ? "Unlock to delete"
+                                : "Delete this moment")
                     )
                     .frame(maxWidth: .infinity)
                 }
