@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **174 — iOS inbox side-by-side triage line-vs-body preview slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **175 — iOS inbox compact diff-hint for triage line-vs-body slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **174**
-- Scope hiện tại: iOS inbox read-status UX hardening — thêm side-by-side preview block cho triage line + triage body để so sánh nhanh.
+- Batch workflow chính thức hiện tại: **175**
+- Scope hiện tại: iOS inbox read-status UX hardening — thêm compact diff-hint để nhấn rõ line = body + prefix tag.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch174 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch175 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch175 cho messaging friction tiếp theo (thêm compact diff-hint để nhấn rõ khác biệt line/body) trong iOS inbox shell
+  - mở batch176 cho messaging friction tiếp theo (thêm one-tap copy diff-hint sentence cho onboarding note) trong iOS inbox shell
 
 ## Batch handoff note
 
