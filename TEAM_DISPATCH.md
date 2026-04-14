@@ -56,7 +56,7 @@
 ## Batch 272 handoff (closed)
 - Batch vừa xong: **272**
 - Commit đã chốt:
-  - `(pending in this run)` — `batch272: add member-row quick focus-user actions on web and ios`
+  - `a34edcc` — `batch272: add member-row quick focus-user actions on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅

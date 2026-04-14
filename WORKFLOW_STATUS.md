@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(pending in this run)` — `batch272: add member-row quick focus-user actions on web and ios`
-  - working tree: dirty (2 files) before commit
+  - latest feature commit: `a34edcc` — `batch272: add member-row quick focus-user actions on web and ios`
+  - working tree: clean after batch272 commit
 - Blocker: none
 - Next: mở batch273 với 1 slice hẹp direct-message shell: thêm quick action đồng bộ selected member vào read-cursor target user parity (web+iOS) để test read-cursor updates nhanh hơn.
 - Batch 272 handoff:
-  - `(pending in this run)` — `batch272: add member-row quick focus-user actions on web and ios`
+  - `a34edcc` — `batch272: add member-row quick focus-user actions on web and ios`
   - web/iOS member summary thêm action `Use member as read focus user`, set status source marker `focus_user_source=member_row` để giảm nhập tay khi retest read-state.
 - Batch 271 handoff:
   - `0a0ff0d` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
