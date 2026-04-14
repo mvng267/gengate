@@ -56,6 +56,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [isCreatingAttachment, setIsCreatingAttachment] = useState(false);
   const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
+  const [lastSendQuickCopy, setLastSendQuickCopy] = useState("sender=(none) | message_id=(none)");
   const conversationQuickCopy = `user_a=${form.userAId.trim() || "(empty)"} | user_b=${form.userBId.trim() || "(empty)"} | message_count=${messages.length} | last_message_id=${messages[messages.length - 1]?.id ?? "(none)"}`;
 
   useEffect(() => {
@@ -69,6 +70,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setMessages([]);
     setAttachmentItems([]);
     setAttachmentForm({ ...initialAttachmentForm });
+    setLastSendQuickCopy("sender=(none) | message_id=(none)");
   }, [initialSenderUserId, initialUserAId, initialUserBId]);
 
   useEffect(() => {
@@ -79,6 +81,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   async function handleOpenThread() {
     setIsOpening(true);
     setStatus("Opening direct thread shell...");
+    setLastSendQuickCopy("sender=(none) | message_id=(none)");
 
     try {
       const nextConversation = await getOrCreateDirectConversation(form.userAId.trim(), form.userBId.trim());
@@ -179,6 +182,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       setAttachmentForm((current) => ({ ...current, targetMessageId: current.targetMessageId || created.id }));
       setForm((current) => ({ ...current, payloadText: "" }));
       const sentStatus = `Sent message ${created.id} into direct thread ${conversation.id}.`;
+      setLastSendQuickCopy(`sender=${senderUserId || "(empty)"} | message_id=${created.id}`);
       setStatus(statusPrefix ? `${statusPrefix} ${sentStatus}` : sentStatus);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "message_create_failed");
@@ -245,6 +249,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       <p>{status}</p>
       <p>
         Quick copy conversation: <code>{conversationQuickCopy}</code>
+      </p>
+      <p>
+        Quick copy send result: <code>{lastSendQuickCopy}</code>
       </p>
 
       <div>

@@ -37,6 +37,7 @@ struct InboxPlaceholderView: View {
     @State private var isLoading = false
     @State private var isSendingMessage = false
     @State private var sendStatusHint: String?
+    @State private var lastSendQuickCopy: String = "sender=(none) | message_id=(none)"
     @State private var isCreatingAttachment = false
     @State private var isCreatingDeviceKey = false
     @State private var isUpdatingReadCursor = false
@@ -1314,6 +1315,10 @@ struct InboxPlaceholderView: View {
                         .foregroundStyle(.secondary)
 
                     Text("Quick copy conversation: \(conversationQuickCopySummary)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
+                    Text("Quick copy send result: \(lastSendQuickCopy)")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
 
@@ -2887,6 +2892,7 @@ use_when=\(useWhenText)
         isLoading = true
         if !silent {
             fetchError = nil
+            lastSendQuickCopy = "sender=(none) | message_id=(none)"
         }
 
         do {
@@ -3035,6 +3041,8 @@ use_when=\(useWhenText)
             await loadInboxThread()
 
             let sentStatus = "Sent message \(created.id) into direct thread \(conversationID)."
+            let senderValue = trimmedUserA.isEmpty ? "(empty)" : trimmedUserA
+            lastSendQuickCopy = "sender=\(senderValue) | message_id=\(created.id)"
             if let statusPrefix {
                 sendStatusHint = "\(statusPrefix) \(sentStatus)"
             } else {
