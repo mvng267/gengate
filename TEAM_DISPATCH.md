@@ -56,7 +56,7 @@
 ## Batch 276 handoff (closed)
 - Batch vừa xong: **276**
 - Commit đã chốt:
-  - `(pending in this run)` — `batch276: add member-cursor context one-tap actions on web and ios`
+  - `982018b` — `batch276: add member-cursor context one-tap actions on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅

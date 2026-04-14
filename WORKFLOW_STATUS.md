@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(pending in this run)` — `batch276: add member-cursor context one-tap actions on web and ios`
-  - working tree: dirty (2 files) before commit
+  - latest feature commit: `982018b` — `batch276: add member-cursor context one-tap actions on web and ios`
+  - working tree: clean after batch276 commit
 - Blocker: none
 - Next: mở batch277 với 1 slice hẹp direct-message shell: thêm quick action one-tap apply member cursor context + focus user đồng thời trên web+iOS để rút ngắn flow verify read_state.
 - Batch 276 handoff:
-  - `(pending in this run)` — `batch276: add member-cursor context one-tap actions on web and ios`
+  - `982018b` — `batch276: add member-cursor context one-tap actions on web and ios`
   - web/iOS member summary thêm action `Use member cursor context (target + message)` để set đồng thời read-cursor target user + message từ cùng member row.
 - Batch 275 handoff:
   - `c827afa` — `batch275: add member-cursor message-target one-tap actions on web and ios`
