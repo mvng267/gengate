@@ -334,8 +334,7 @@ struct ProfilePlaceholderView: View {
                 requesterUserID: requesterUserID,
                 receiverUserID: receiverUserID
             )
-            receiverUserIDDraft = ""
-            await loadFriendGraph(statusMessage: "Friend request created. Reloading friend graph...")
+            await loadFriendGraph(statusMessage: "Friend request created. Receiver kept for quick dedupe re-test. Reloading friend graph...")
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
