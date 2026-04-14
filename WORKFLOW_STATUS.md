@@ -1,14 +1,14 @@
 # GenGate Workflow Status
 
-- Batch: 257
+- Batch: 258
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 257 friend-graph shell — include inbound/outbound pending breakdown directly in load status text.
+- Scope: batch 258 friend-graph shell — add quick-copy summary line (user + pending inbound/outbound/total + accepted count) for fast retest reporting.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
-  - iOS Profile: Session login -> Profile -> load pending requests -> tap `Reject request` ở inbound row -> app auto reload friend graph và request chuyển sang `rejected`.
-  - iOS Feed (batch233): khi create moment/media fail, app parse `error.code/error.message` và hiện hint rõ cho `user_not_found`, `moment_not_found`, `validation_error` để tester xử lý đúng bước tiếp theo.
+  - Web Profile (`/profile?user=<uuid>`): load snapshot -> thấy `Quick copy: user=... | pending_inbound=... | pending_outbound=... | pending_total=... | accepted=...`.
+  - iOS Profile: Session login -> Profile -> load pending requests -> verify dòng `Quick copy: user=... | pending_inbound=... | pending_outbound=... | pending_total=... | accepted=...`.
 - Files:
   - apps/web-nextjs/components/friend-graph-shell.tsx
   - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
@@ -16,10 +16,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `35c63e9` — `batch257: add pending direction breakdown to friend graph load status`
+  - latest feature commit: `16a8ff4` — `batch258: add quick-copy friend graph summary line`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch258 với 1 slice hẹp friend-graph shell: thêm quick-copy line chứa user + pending inbound/outbound + accepted count để gửi report test nhanh.
+- Next: mở batch259 với 1 slice hẹp moment-posting shell: thêm quick-copy payload summary (author + image_url + caption) để tester báo cáo create path nhanh.
+- Batch 258 handoff:
+  - `16a8ff4` — `batch258: add quick-copy friend graph summary line`
+  - web/iOS friend-graph shell giờ có dòng `Quick copy` chuẩn hoá key/value để copy/paste report nhanh sau mỗi lần load snapshot.
 - Batch 257 handoff:
   - `35c63e9` — `batch257: add pending direction breakdown to friend graph load status`
   - web/iOS status sau `Load friend graph` giờ có thêm `inbound/outbound` breakdown ngay trong status text, hỗ trợ copy/paste kết quả nhanh.

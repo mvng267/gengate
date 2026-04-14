@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 257
-- Trục công việc: friend-graph shell — web/iOS include inbound/outbound pending breakdown in load status text.
-- Trạng thái: batch257_complete_friend_graph_pending_breakdown_status_text.
+- Batch workflow chính thức hiện tại: 258
+- Trục công việc: friend-graph shell — web/iOS add quick-copy summary line for pending/accepted reporting.
+- Trạng thái: batch258_complete_friend_graph_quick_copy_summary_line.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 258 handoff (closed)
+- Batch vừa xong: **258**
+- Commit đã chốt:
+  - `16a8ff4` — `batch258: add quick-copy friend graph summary line`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **259**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - moment-posting shell: thêm quick-copy payload summary (author + image_url + caption).
 
 ## Batch 257 handoff (closed)
 - Batch vừa xong: **257**
