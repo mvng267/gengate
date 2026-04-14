@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **182 — iOS inbox source-hint preview-delta marker slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **183 — iOS inbox source-hint preview-delta quick-copy slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **182**
-- Scope hiện tại: iOS inbox read-status UX hardening — thêm preview delta marker giữa compact preview và full triage-kit.
+- Batch workflow chính thức hiện tại: **183**
+- Scope hiện tại: iOS inbox read-status UX hardening — thêm one-tap copy cho source-hint preview-delta hint.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch182 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch183 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch183 cho messaging friction tiếp theo (thêm quick-copy cho preview delta marker) trong iOS inbox shell
+  - mở batch184 cho messaging friction tiếp theo (thêm copy-ready short block ghép triage-kit preview + preview delta) trong iOS inbox shell
 
 ## Batch handoff note
 
