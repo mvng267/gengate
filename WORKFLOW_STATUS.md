@@ -1,21 +1,22 @@
 # GenGate Workflow Status
 
-- Batch: 198
+- Batch: 199
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 198 iOS inbox seam hardening — add quick-copy fallback `use_when + preview` (không tag/header) for ultra-short notes
+- Scope: batch 199 iOS feed seam hardening — add moment reactions create/list shell wired to backend contracts
 - Status: verify
 - Files:
-  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
+  - apps/ios-swift/GenGate/App/RootTabView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `ca207e7` — `batch198: add branch-use-when-preview-lite quick copy`
-  - working tree: sạch (sau commit local, chưa push)
+  - latest commit: `(pending local commit for batch199 slice)`
+  - working tree: dirty while editing (will be clean after local commit, chưa push)
 - Blocker: none
-- Next: mở batch199 cho messaging friction tiếp theo (ví dụ thêm quick-copy `branch + use_when + preview` fallback line without explicit `branch=` prefix label duplication) trong iOS inbox shell
+- Next: mở batch200 cho feed seam friction tiếp theo (ví dụ thêm quick reaction presets/chips để giảm typing khi verify API `/moments/{id}/reactions`) trong iOS feed shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -523,6 +524,10 @@
   - thêm computed text `recipientDeviceSourceHintBranchUseWhenPreviewLiteText` với format one-line `use_when=... | preview=...` (không kèm tag/header)
   - thêm nút `Copy source-hint branch-use-when-preview-lite` để copy nhanh fallback line cho issue title/body siêu ngắn
   - thêm feedback line `Copied branch-use-when-preview-lite ...` để xác nhận marker-lite vừa copy
+- Batch 199 outcome:
+  - iOS Feed tab thêm shell create/list reactions, wired vào backend contracts `POST /moments/{id}/reactions` + `GET /moments/{id}/reactions`
+  - thêm reaction target/user/type drafts + quick actions `Use latest loaded moment` và `Use session user for reaction` để giảm friction verify
+  - thêm auto-sync reaction target theo loaded moments, reaction row list rendering, và status counters để human test flow rõ ràng hơn
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -531,7 +536,7 @@
   - web MVP hub: `http://localhost:3000/`
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
-  - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
+  - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed; verify reaction shell by setting/auto-filling `Reaction target moment UUID` + `Reaction user UUID`, run `Create reaction` (POST `/moments/{id}/reactions`), then `Load reactions` (GET `/moments/{id}/reactions`) and confirm reaction rows (`reaction_type`, `user_id`, `reaction_id`) update accordingly
   - iOS Inbox path: open Inbox tab, load direct thread A-B; verify `Source-hint verify matrix` + `Branch-key legend` + triage preview block (`line` vs `body`) + `Diff hint` + `Usage` + `Triage-kit preview` + `Preview delta` cùng xuất hiện; lần lượt qua từng state kiểm tra line/body đều phản ánh đúng `branch + selection + guidance` và khác nhau đúng ở phần prefix tag như diff hint mô tả; verify usage note mapping đúng mục đích (`line` cho tagged log/search, `body` cho issue text gọn, `diff hint` cho onboarding/explanation), triage-kit preview hiển thị đúng `branch + shortened line/body`, preview-delta line nêu đúng phần omitted (`diff/usage`) của compact preview, và block inline `Preview-pair-lite (scan before copy)` hiển thị đúng payload lite (`[tag] + use_when + preview`) để scan nhanh trước copy; bấm `Copy source-hint branch key` để paste token nhanh, bấm `Copy source-hint report payload` để đối chiếu payload đầy đủ có cùng branch key, bấm `Copy source-hint matrix snapshot` để lấy block matrix+legend+branch cho report template, bấm `Copy source-hint triage line` để lấy line có prefix, bấm `Copy source-hint triage body` để lấy body không prefix cho issue title/body, bấm `Copy source-hint diff hint` để lấy câu giải thích line/body, bấm `Copy source-hint usage note` để lấy usage mapping line/body/diff, bấm `Copy source-hint triage kit` để lấy payload gộp line/body/diff/usage, bấm `Copy source-hint triage-kit preview` để lấy compact preview line, bấm `Copy source-hint preview delta` để lấy câu giải thích compact-vs-full, bấm `Copy source-hint preview pair` để copy một short block gồm cả preview + delta, bấm `Copy source-hint preview-pair use-when` để copy riêng marker context, bấm `Copy source-hint preview-pair-lite` để copy block siêu gọn `use_when + preview`, bấm `Copy source-hint preview-pair-lite preview` để copy riêng line `preview=...`, bấm `Copy source-hint preview-pair-lite tag` để copy riêng tag header `[inbox-source-hint-triage-preview-pair-lite]`, bấm `Copy source-hint preview-pair-lite use-when` để copy riêng line `use_when=...`, bấm `Copy source-hint preview-pair-lite condensed` để copy 1-line marker `use_when=... | preview=...`, bấm `Copy source-hint branch-preview token` để copy token `branch=<key> | preview=...`, bấm `Copy source-hint branch-use-when-preview` để copy heading `branch=<key> | use_when=... | preview=...`, bấm `Copy source-hint branch-use-when-preview tagged` để copy tagged block `[inbox-source-hint-triage-branch-summary]` + heading line, bấm `Copy source-hint branch-summary tag` để copy riêng tag header `[inbox-source-hint-triage-branch-summary]`, bấm `Copy source-hint branch-summary compact bundle` để copy compact bundle 3-line (`tag + summary + branch-preview token`), và bấm `Copy source-hint branch-use-when-preview-lite` để copy one-line fallback `use_when=... | preview=...` không kèm tag/header; check feedback lines `Copied branch key ...`, `Copied report payload ...`, `Copied matrix snapshot ...`, `Copied triage line ...`, `Copied triage body ...`, `Copied diff hint ...`, `Copied usage note ...`, `Copied triage kit ...`, `Copied triage-kit preview ...`, `Copied preview delta ...`, `Copied preview pair ...`, `Copied preview-pair use-when ...`, `Copied preview-pair-lite ...`, `Copied preview-pair-lite preview ...`, `Copied preview-pair-lite tag ...`, `Copied preview-pair-lite use-when ...`, `Copied preview-pair-lite condensed ...`, `Copied branch-preview token ...`, `Copied branch-use-when-preview ...`, `Copied branch-use-when-preview tagged ...`, `Copied branch-summary tag ...`, `Copied branch-summary compact bundle ...`, `Copied branch-use-when-preview-lite ...`; cuối cùng bấm dynamic first-valid action để quay lại first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.` trước khi `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state

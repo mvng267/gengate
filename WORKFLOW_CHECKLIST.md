@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **198 — iOS inbox branch-use-when-preview-lite fallback quick-copy slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **199 — iOS feed reactions create/list shell slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,24 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **198**
-- Scope hiện tại: iOS inbox read-status UX hardening — thêm quick-copy fallback one-line `use_when + preview` không tag/header.
+- Batch workflow chính thức hiện tại: **199**
+- Scope hiện tại: iOS feed seam hardening — thêm moment reactions create/list shell (`POST/GET /moments/{id}/reactions`) với autofill actions.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
+  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
+  - `apps/ios-swift/GenGate/App/RootTabView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `ca207e7` — `batch198: add branch-use-when-preview-lite quick copy`
-  - working tree hiện tại: sạch (sau commit local, chưa push)
+  - commit gần nhất đã chốt: `(pending local commit for batch199 slice)`
+  - working tree hiện tại: dirty while editing (will be clean after local commit, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch199 cho messaging friction tiếp theo (tinh gọn thêm 1 action copy dành cho issue-title ngắn, giảm duplication label trong payload) trong iOS inbox shell
+  - mở batch200 cho feed friction tiếp theo (quick reaction presets/chips để giảm typing khi verify reactions API)
 
 ## Batch handoff note
 

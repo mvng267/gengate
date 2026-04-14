@@ -16,7 +16,7 @@ struct RootTabView: View {
             NavigationStack {
                 protectedTabContent(
                     title: "Feed",
-                    summary: "Friends-only feed now supports minimal moment create + read shell; reactions and richer media UX remain pending."
+                    summary: "Friends-only feed now supports minimal moment create + read + reaction shell; richer media UX remains pending."
                 ) {
                     FeedPlaceholderView()
                 }

@@ -10,25 +10,31 @@ struct FeedPlaceholderView: View {
     @State private var imageMimeTypeDraft: String = "image/jpeg"
     @State private var imageWidthDraft: String = "1080"
     @State private var imageHeightDraft: String = "1350"
+    @State private var reactionTargetMomentIDDraft: String = ""
+    @State private var reactionUserIDDraft: String = ""
+    @State private var reactionTypeDraft: String = "heart"
     @State private var momentRows: [PrivateFeedMomentRow] = []
     @State private var authoredMomentRows: [PrivateFeedMomentRow] = []
+    @State private var reactionRows: [MomentReactionRow] = []
     @State private var statusMessage: String?
     @State private var fetchError: String?
     @State private var isLoading = false
     @State private var isLoadingAuthoredMoments = false
     @State private var isCreatingMoment = false
+    @State private var isLoadingReactions = false
+    @State private var isCreatingReaction = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 FeaturePlaceholderView(
                     title: "Feed",
-                    summary: "iOS native private feed shell now supports minimal moment posting (caption + image metadata) and feed reading through the same backend contracts as web.",
-                    status: "Status: native feed now supports create + read shell for moments; reactions and full media rendering remain pending.",
+                    summary: "iOS native private feed shell now supports minimal moment posting (caption + image metadata), feed reading, and moment reactions through the same backend contracts as web.",
+                    status: "Status: native feed now supports create + read + reactions shell for moments; full media rendering remains pending.",
                     bullets: [
                         "Paste a viewer UUID to load `/moments/feed?viewer_user_id=<uuid>`.",
                         "Paste an author UUID to create moments via `POST /moments` + `POST /moments/{id}/media` directly from iOS.",
-                        "Use authored list below to verify create flow even when private feed visibility does not include the same author account."
+                        "Use reaction controls below to create/list `POST /moments/{id}/reactions` + `GET /moments/{id}/reactions` for loaded moments."
                     ]
                 )
 
@@ -172,9 +178,114 @@ struct FeedPlaceholderView: View {
                             .foregroundStyle(.orange)
                     }
 
-                    Text("Loaded private-feed moments: \(momentRows.count) · authored moments: \(authoredMomentRows.count)")
+                    Text("Loaded private-feed moments: \(momentRows.count) · authored moments: \(authoredMomentRows.count) · reactions: \(reactionRows.count)")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
+                }
+
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Moment reactions")
+                        .font(.headline)
+
+                    TextField("Reaction target moment UUID", text: $reactionTargetMomentIDDraft)
+#if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+#endif
+                        .padding(12)
+                        .background(Color.secondary.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    TextField("Reaction user UUID", text: $reactionUserIDDraft)
+#if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+#endif
+                        .padding(12)
+                        .background(Color.secondary.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    TextField("Reaction type (heart, fire, smile...)", text: $reactionTypeDraft)
+#if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+#endif
+                        .padding(12)
+                        .background(Color.secondary.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    HStack(spacing: 10) {
+                        Button {
+                            fillReactionFromLatestMoment()
+                        } label: {
+                            Text("Use latest loaded moment")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(momentRows.isEmpty && authoredMomentRows.isEmpty)
+
+                        Button {
+                            fillReactionUserFromSession()
+                        } label: {
+                            Text("Use session user for reaction")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(currentSessionUserID == nil)
+                    }
+
+                    Button {
+                        Task {
+                            await createMomentReaction()
+                        }
+                    } label: {
+                        Text(isCreatingReaction ? "Creating reaction..." : "Create reaction")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(
+                        isCreatingReaction ||
+                        isLoadingReactions ||
+                        reactionTargetMomentIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                        reactionUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                        reactionTypeDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    )
+
+                    Button {
+                        Task {
+                            await loadMomentReactions()
+                        }
+                    } label: {
+                        Text(isLoadingReactions ? "Loading reactions..." : "Load reactions")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(
+                        isLoadingReactions ||
+                        isCreatingReaction ||
+                        reactionTargetMomentIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    )
+
+                    if reactionRows.isEmpty {
+                        Text("No reactions loaded for this moment yet.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(reactionRows) { row in
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("\(row.reactionType) · \(row.userID)")
+                                    .font(.footnote.monospaced())
+                                    .foregroundStyle(.secondary)
+                                Text("reaction_id: \(row.id)")
+                                    .font(.caption.monospaced())
+                                    .foregroundStyle(.secondary)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.08))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: 12) {
@@ -249,6 +360,10 @@ struct FeedPlaceholderView: View {
         return nil
     }
 
+    private var latestLoadedMomentID: String? {
+        momentRows.first?.id ?? authoredMomentRows.first?.id
+    }
+
     private func prefillFromCurrentSessionUserIfNeeded() {
         guard let currentSessionUserID else {
             return
@@ -261,6 +376,10 @@ struct FeedPlaceholderView: View {
         if authorUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             authorUserIDDraft = currentSessionUserID
         }
+
+        if reactionUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            reactionUserIDDraft = currentSessionUserID
+        }
     }
 
     private func fillFromCurrentSessionUser() {
@@ -269,6 +388,36 @@ struct FeedPlaceholderView: View {
         }
         viewerUserIDDraft = currentSessionUserID
         authorUserIDDraft = currentSessionUserID
+        reactionUserIDDraft = currentSessionUserID
+    }
+
+    private func fillReactionFromLatestMoment() {
+        guard let latestLoadedMomentID else {
+            return
+        }
+        reactionTargetMomentIDDraft = latestLoadedMomentID
+    }
+
+    private func fillReactionUserFromSession() {
+        guard let currentSessionUserID else {
+            return
+        }
+        reactionUserIDDraft = currentSessionUserID
+    }
+
+    private func synchronizeReactionTargetWithLoadedMoments() {
+        guard let latestLoadedMomentID else {
+            reactionRows = []
+            return
+        }
+
+        let trimmedReactionTargetMomentID = reactionTargetMomentIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let loadedMomentIDs = momentRows.map(\.id) + authoredMomentRows.map(\.id)
+
+        if trimmedReactionTargetMomentID.isEmpty || !loadedMomentIDs.contains(trimmedReactionTargetMomentID) {
+            reactionTargetMomentIDDraft = latestLoadedMomentID
+            reactionRows = []
+        }
     }
 
     private func loadPrivateFeed() async {
@@ -283,9 +432,11 @@ struct FeedPlaceholderView: View {
 
         do {
             momentRows = try await PrivateFeedAPIClient().fetchFeed(viewerUserID: trimmedViewerID)
+            synchronizeReactionTargetWithLoadedMoments()
             statusMessage = "Loaded \(momentRows.count) private feed moment(s)."
         } catch {
             momentRows = []
+            synchronizeReactionTargetWithLoadedMoments()
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
 
@@ -304,9 +455,11 @@ struct FeedPlaceholderView: View {
 
         do {
             authoredMomentRows = try await PrivateFeedAPIClient().fetchAuthoredMoments(authorUserID: trimmedAuthorID)
+            synchronizeReactionTargetWithLoadedMoments()
             statusMessage = "Loaded \(authoredMomentRows.count) authored moment(s)."
         } catch {
             authoredMomentRows = []
+            synchronizeReactionTargetWithLoadedMoments()
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
 
@@ -350,6 +503,7 @@ struct FeedPlaceholderView: View {
             )
 
             captionDraft = ""
+            reactionTargetMomentIDDraft = createdMomentID
             statusMessage = "Created moment \(createdMomentID). Reloading authored list..."
             await loadAuthoredMoments()
 
@@ -362,6 +516,65 @@ struct FeedPlaceholderView: View {
 
         isCreatingMoment = false
     }
+
+    private func loadMomentReactions() async {
+        let trimmedMomentID = reactionTargetMomentIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedMomentID.isEmpty else {
+            fetchError = "Reaction target moment UUID là bắt buộc để load reactions."
+            return
+        }
+
+        isLoadingReactions = true
+        fetchError = nil
+
+        do {
+            reactionRows = try await PrivateFeedAPIClient().fetchReactions(momentID: trimmedMomentID)
+            statusMessage = "Loaded \(reactionRows.count) reaction(s) for moment \(trimmedMomentID)."
+        } catch {
+            reactionRows = []
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        isLoadingReactions = false
+    }
+
+    private func createMomentReaction() async {
+        let trimmedMomentID = reactionTargetMomentIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedReactionUserID = reactionUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedReactionType = reactionTypeDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedMomentID.isEmpty else {
+            fetchError = "Reaction target moment UUID là bắt buộc để create reaction."
+            return
+        }
+
+        guard !trimmedReactionUserID.isEmpty else {
+            fetchError = "Reaction user UUID là bắt buộc để create reaction."
+            return
+        }
+
+        guard !trimmedReactionType.isEmpty else {
+            fetchError = "Reaction type là bắt buộc để create reaction."
+            return
+        }
+
+        isCreatingReaction = true
+        fetchError = nil
+
+        do {
+            _ = try await PrivateFeedAPIClient().createReaction(
+                momentID: trimmedMomentID,
+                userID: trimmedReactionUserID,
+                reactionType: trimmedReactionType
+            )
+            statusMessage = "Created reaction on moment \(trimmedMomentID). Reloading reactions..."
+            await loadMomentReactions()
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        isCreatingReaction = false
+    }
 }
 
 private struct PrivateFeedMomentRow: Identifiable {
@@ -371,6 +584,12 @@ private struct PrivateFeedMomentRow: Identifiable {
     let visibilityScope: String
     let mediaCount: Int
     let firstMediaKey: String?
+}
+
+private struct MomentReactionRow: Identifiable {
+    let id: String
+    let userID: String
+    let reactionType: String
 }
 
 private struct PrivateFeedAPIClient {
@@ -423,6 +642,28 @@ private struct PrivateFeedAPIClient {
         let id: String
     }
 
+    private struct MomentReactionCreateRequest: Encodable {
+        let user_id: String
+        let reaction_type: String
+    }
+
+    private struct MomentReactionListResponse: Decodable {
+        let count: Int
+        let items: [MomentReactionItem]
+    }
+
+    private struct MomentReactionItem: Decodable {
+        let id: String
+        let user_id: String
+        let reaction_type: String
+    }
+
+    private struct MomentReactionResponse: Decodable {
+        let id: String
+        let user_id: String
+        let reaction_type: String
+    }
+
     private struct BackendErrorPayload: Decodable {
         let detail: String?
     }
@@ -473,6 +714,48 @@ private struct PrivateFeedAPIClient {
             height: imageHeight
         )
         return createdMoment.id
+    }
+
+    func fetchReactions(momentID: String) async throws -> [MomentReactionRow] {
+        let url = try makeURL(path: "/moments/\(momentID)/reactions")
+        let (data, response) = try await URLSession.shared.data(from: url)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 200 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Moment reactions fetch failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(MomentReactionListResponse.self, from: data)
+            return payload.items.map {
+                MomentReactionRow(id: $0.id, userID: $0.user_id, reactionType: $0.reaction_type)
+            }
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func createReaction(momentID: String, userID: String, reactionType: String) async throws -> MomentReactionRow {
+        var request = URLRequest(url: try makeURL(path: "/moments/\(momentID)/reactions"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(
+            MomentReactionCreateRequest(user_id: userID, reaction_type: reactionType)
+        )
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 201 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Moment reaction create failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(MomentReactionResponse.self, from: data)
+            return MomentReactionRow(id: payload.id, userID: payload.user_id, reactionType: payload.reaction_type)
+        } catch {
+            throw APIError.invalidResponse
+        }
     }
 
     private func fetchMomentRows(from url: URL, prefix: String) async throws -> [PrivateFeedMomentRow] {
