@@ -15,6 +15,7 @@ class MomentRepository(BaseRepository[Moment]):
         statement = (
             select(Moment)
             .where(Moment.author_user_id == author_user_id)
+            .where(Moment.deleted_at.is_(None))
             .order_by(Moment.created_at.desc())
             .offset(offset)
             .limit(limit)
@@ -27,6 +28,7 @@ class MomentRepository(BaseRepository[Moment]):
         statement = (
             select(Moment)
             .where(Moment.author_user_id.in_(author_user_ids))
+            .where(Moment.deleted_at.is_(None))
             .order_by(Moment.created_at.desc())
             .limit(limit)
         )

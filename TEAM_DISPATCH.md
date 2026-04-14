@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 233
-- Trục công việc: đóng 1 friction point của moment posting seam (image + caption) để test path iOS Feed shell dễ đoán lỗi và thao tác hơn.
-- Trạng thái: batch233_complete_moment_posting_error_clarity.
+- Batch workflow chính thức hiện tại: 234
+- Trục công việc: private friend feed shell — backend filter soft-delete để feed/list không trả moment đã xóa mềm.
+- Trạng thái: batch234_complete_private_feed_soft_delete_filter.
+
+## Batch 234 handoff (closed)
+- Batch vừa xong: **234**
+- Commit đã chốt:
+  - pending_commit_batch234
+- Test/verify cuối:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` ✅ (4 passed)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **235**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct messaging shell: parity check deleted-message visibility path ở list/read backend.
 
 ## Batch 233 handoff (closed)
 - Batch vừa xong: **233**
@@ -272,9 +284,9 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: giữ lane ổn định, không mở thay đổi mới trong nhịp này.
-- Kết quả gần nhất: reject route/service đã wired + error mapping `request_not_pending` (400) + pytest friendships pass.
-- Trạng thái: standby_batch233_no_new_backend_change.
+- Scope hiện tại: đã chốt batch 234 backend slice cho private feed/list soft-delete filter.
+- Kết quả gần nhất: repository filter + tests cho moments list/feed đã pass.
+- Trạng thái: batch234_complete_private_feed_soft_delete_filter_backend.
 
 ### pikachu-web — frontend web
 - Scope hiện tại: tạm dừng theo chỉ đạo user.

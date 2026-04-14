@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 233
+- Batch: 234
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 233 moment posting seam — giảm friction khi create moment + image trên iOS Feed shell (ưu tiên error clarity cho image+caption path).
+- Scope: batch 234 private friend feed seam — backend lọc moment soft-delete (`deleted_at is null`) khỏi `/moments` và `/moments/feed`.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -10,14 +10,16 @@
   - iOS Profile: Session login -> Profile -> load pending requests -> tap `Reject request` ở inbound row -> app auto reload friend graph và request chuyển sang `rejected`.
   - iOS Feed (batch233): khi create moment/media fail, app parse `error.code/error.message` và hiện hint rõ cho `user_not_found`, `moment_not_found`, `validation_error` để tester xử lý đúng bước tiếp theo.
 - Files:
-  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
+  - apps/backend-python/app/repositories/moments.py
+  - apps/backend-python/tests/test_moments_api.py
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` ✅ (4 passed)
 - Git:
-  - latest feature commit: `17ca17b` — `batch233: improve ios moment posting error clarity`
-  - working tree: dirty (workflow docs sync in progress)
+  - latest feature commit: `44c6097` — `batch233: sync workflow docs after moment posting error clarity`
+  - working tree: dirty (batch234 complete, chưa commit)
 - Blocker: none
-- Next: mở batch234 với 1 slice hẹp private friend feed shell (ưu tiên backend lọc `deleted_at is null` cho list/feed + test).- Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Next: mở batch235 với 1 slice hẹp direct messaging shell (ưu tiên hidden deleted messages parity check ở list/read path).
+- Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 232 handoff:
   - `3738b54` — `batch232: wire friend-request reject flow across backend and ios`
   - completed reject wiring end-to-end (backend route/service/tests + iOS Profile reject action/hint) để seam friend graph bớt friction khi human retest.

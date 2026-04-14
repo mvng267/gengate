@@ -158,3 +158,53 @@ def test_private_friend_feed_lists_only_accepted_friend_moments() -> None:
     assert payload["items"][0]["media_items"][0]["storage_key"] == "moments/friend-feed.jpg"
 
     clear_overrides()
+
+
+def test_deleted_moment_is_hidden_from_author_list_and_private_feed() -> None:
+    client = create_test_client()
+
+    viewer = client.post("/auth/register", json={"email": "viewer2@example.com", "username": "viewer2_u"})
+    friend = client.post("/auth/register", json={"email": "friend2@example.com", "username": "friend2_u"})
+    viewer_id = viewer.json()["id"]
+    friend_id = friend.json()["id"]
+
+    request_response = client.post(
+        "/friends/requests",
+        json={"requester_user_id": viewer_id, "receiver_user_id": friend_id},
+    )
+    assert request_response.status_code == 201
+    request_id = request_response.json()["id"]
+    accept_response = client.post(f"/friends/requests/{request_id}/accept")
+    assert accept_response.status_code == 201
+
+    keep_moment = client.post(
+        "/moments",
+        json={"author_user_id": friend_id, "caption_text": "keep-visible"},
+    )
+    assert keep_moment.status_code == 201
+
+    delete_moment = client.post(
+        "/moments",
+        json={"author_user_id": friend_id, "caption_text": "to-delete"},
+    )
+    assert delete_moment.status_code == 201
+    delete_moment_id = delete_moment.json()["id"]
+
+    delete_response = client.delete(f"/moments/{delete_moment_id}")
+    assert delete_response.status_code == 200
+
+    authored_response = client.get(f"/moments?author_user_id={friend_id}")
+    assert authored_response.status_code == 200
+    authored_payload = authored_response.json()
+    captions = [item["caption_text"] for item in authored_payload["items"]]
+    assert "keep-visible" in captions
+    assert "to-delete" not in captions
+
+    feed_response = client.get(f"/moments/feed?viewer_user_id={viewer_id}")
+    assert feed_response.status_code == 200
+    feed_payload = feed_response.json()
+    feed_captions = [item["caption_text"] for item in feed_payload["items"]]
+    assert "keep-visible" in feed_captions
+    assert "to-delete" not in feed_captions
+
+    clear_overrides()

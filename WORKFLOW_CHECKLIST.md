@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **233 — moment posting seam friction slice đang mở (image + caption path trên iOS Feed shell)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **234 — private friend feed seam đang mở (lọc soft-deleted moments ở backend list/feed)**.
 
 ## Reporting hard rule
 
@@ -89,21 +89,22 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **233**
-- Scope hiện tại: moment posting seam — giảm friction error clarity cho create moment + image (image+caption path) trên iOS Feed shell.
+- Batch workflow chính thức hiện tại: **234**
+- Scope hiện tại: private friend feed seam — lọc moment soft-deleted khỏi backend list/feed response.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
+  - `apps/backend-python/app/repositories/moments.py`
+  - `apps/backend-python/tests/test_moments_api.py`
 - Test-verify:
-  - `cd apps/ios-swift && swift build` → ✅ pass
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` → ✅ `4 passed`
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `17ca17b` — `batch233: improve ios moment posting error clarity`
-  - working tree hiện tại: bẩn (đang sync workflow docs sau commit)
+  - commit gần nhất đã chốt: `44c6097` — `batch233: sync workflow docs after moment posting error clarity`
+  - working tree hiện tại: bẩn (batch234 complete, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch234 cho 1 slice hẹp private friend feed shell (ưu tiên lọc moment đã soft-delete khỏi list/feed ở backend + test hồi quy).
-- MVP-testable run/test path (current):
+  - commit batch234 cho private feed soft-delete filter; sau đó mở 1 slice hẹp direct messaging shell.
+- MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.
   - iOS Feed: tạo/lỗi moment posting flow; nếu backend trả `error.code/error.message` thì UI hiện thông điệp lỗi + hint hành động cho `user_not_found`, `moment_not_found`, `validation_error`.
