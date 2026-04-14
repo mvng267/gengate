@@ -1,27 +1,29 @@
 # GenGate Workflow Status
 
-- Batch: 270
+- Batch: 271
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 270 direct-message shell — add quick actions to apply current session user for both read-cursor update target and read-status focus user on web+iOS, plus web one-tap latest read-cursor update.
+- Scope: batch 271 direct-message shell — add quick-copy line chuẩn hóa read-cursor apply result (`target_user + applied_message + focus_user + read_state`) on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
-  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> bấm `Use current session user for read-cursor target + read focus` -> bấm `Mark latest message as read (target user)` -> verify status có `read_cursor_user_source=session_user` + read cursor updated -> `Copy quick read cursor` và paste format `focus_user=... | resolved_message=... | read_state=read|unread|unknown`.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> `Copy quick read cursor` và paste format `focus_user=... | resolved_message=... | read_state=read|unread|unknown`.
+  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> bấm `Use current session user for read-cursor target + read focus` -> bấm `Mark latest message as read (target user)` -> verify status có `read_cursor_user_source=session_user` + read cursor updated -> `Copy quick read-cursor apply result` và paste format `target_user=... | applied_message=... | focus_user=... | read_state=read|unread|unknown`.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> `Copy quick read-cursor apply result` và paste format `target_user=... | applied_message=... | focus_user=... | read_state=read|unread|unknown`.
 - Files:
-  - apps/web-nextjs/lib/inbox/client.ts
   - apps/web-nextjs/components/direct-message-shell.tsx
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `3313396` — `batch270: add session-user read-cursor target and focus quick actions`
-  - working tree: clean after batch270 commit
+  - latest feature commit: `(pending in this run)` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
+  - working tree: dirty (2 files) before commit
 - Blocker: none
-- Next: mở batch271 với 1 slice hẹp direct-message shell: thêm quick-copy line chuẩn hóa read-cursor apply result (`target_user + applied_message + focus_user + read_state`) trên web+iOS để report parity sau thao tác mark-read.
+- Next: mở batch272 với 1 slice hẹp direct-message shell: thêm quick action set focus user theo selected member row parity (web+iOS) để giảm nhập tay khi verify read-state transitions.
+- Batch 271 handoff:
+  - `(pending in this run)` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
+  - web/iOS inbox shell thêm line + clipboard action `Quick copy read-cursor apply result` với format chuẩn `target_user + applied_message + focus_user + read_state`.
 - Batch 270 handoff:
   - `3313396` — `batch270: add session-user read-cursor target and focus quick actions`
   - web inbox shell thêm action `Use current session user for read-cursor target + read focus`, call PATCH read-cursor trực tiếp, và one-tap `Mark latest message as read (target user)`.

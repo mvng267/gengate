@@ -67,6 +67,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [lastReadCursorQuickCopy, setLastReadCursorQuickCopy] = useState(
     "focus_user=(none) | resolved_message=(none) | read_state=unknown",
   );
+  const [lastReadCursorApplyQuickCopy, setLastReadCursorApplyQuickCopy] = useState(
+    "target_user=(none) | applied_message=(none) | focus_user=(none) | read_state=unknown",
+  );
   const conversationQuickCopy = `user_a=${form.userAId.trim() || "(empty)"} | user_b=${form.userBId.trim() || "(empty)"} | message_count=${messages.length} | last_message_id=${messages[messages.length - 1]?.id ?? "(none)"}`;
 
   const resolvedReadCursorFocusUserId =
@@ -105,6 +108,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setReadCursorTargetUserIdDraft("");
     setLastSendQuickCopy("sender=(none) | message_id=(none)");
     setLastReadCursorQuickCopy("focus_user=(none) | resolved_message=(none) | read_state=unknown");
+    setLastReadCursorApplyQuickCopy("target_user=(none) | applied_message=(none) | focus_user=(none) | read_state=unknown");
   }, [initialSenderUserId, initialUserAId, initialUserBId]);
 
   useEffect(() => {
@@ -384,8 +388,23 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
         lastReadMessageId: latestMessageId,
       });
 
-      setConversationMembers((current) =>
-        current.map((member) => (member.id === updated.id ? updated : member)),
+      const nextMembers = conversationMembers.map((member) => (member.id === updated.id ? updated : member));
+      setConversationMembers(nextMembers);
+
+      const normalizedFocusUserId = resolvedReadCursorFocusUserId.trim();
+      const normalizedAppliedMessageId = updated.last_read_message_id ?? "(none)";
+
+      let appliedReadState = "unknown";
+      if (normalizedFocusUserId && updated.last_read_message_id) {
+        const isRead = nextMembers.some(
+          (member) =>
+            member.user_id === normalizedFocusUserId && member.last_read_message_id === updated.last_read_message_id,
+        );
+        appliedReadState = isRead ? "read" : "unread";
+      }
+
+      setLastReadCursorApplyQuickCopy(
+        `target_user=${updated.user_id} | applied_message=${normalizedAppliedMessageId} | focus_user=${normalizedFocusUserId || "(none)"} | read_state=${appliedReadState}`,
       );
 
       setStatus(
@@ -404,6 +423,15 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       "Copied read-cursor quick copy to clipboard",
       "read_cursor_quick_copy_empty",
       "read_cursor_quick_copy_failed",
+    );
+  }
+
+  async function handleCopyReadCursorApplyQuickCopy() {
+    await copyToClipboard(
+      lastReadCursorApplyQuickCopy,
+      "Copied read-cursor apply quick copy to clipboard",
+      "read_cursor_apply_quick_copy_empty",
+      "read_cursor_apply_quick_copy_failed",
     );
   }
 
@@ -427,6 +455,12 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       </p>
       <button type="button" onClick={() => void handleCopyReadCursorQuickCopy()}>
         Copy quick read cursor
+      </button>
+      <p>
+        Quick copy read-cursor apply result: <code>{lastReadCursorApplyQuickCopy}</code>
+      </p>
+      <button type="button" onClick={() => void handleCopyReadCursorApplyQuickCopy()}>
+        Copy quick read-cursor apply result
       </button>
 
       <div>

@@ -89,30 +89,44 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **270**
-- Scope hiện tại: direct-message shell — thêm quick actions web+iOS đồng bộ apply current session user cho cả read-cursor target user và read-status focus user; web thêm one-tap mark latest message as read.
+- Batch workflow chính thức hiện tại: **271**
+- Scope hiện tại: direct-message shell — thêm quick-copy line chuẩn hóa read-cursor apply result (`target_user + applied_message + focus_user + read_state`) trên web+iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/lib/inbox/client.ts`
   - `apps/web-nextjs/components/direct-message-shell.tsx`
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `3313396` — `batch270: add session-user read-cursor target and focus quick actions`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `(pending in this run)` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
+  - working tree hiện tại: bẩn (2 files) trước commit
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch271 với 1 slice hẹp direct-message shell: thêm quick-copy line chuẩn hóa read-cursor apply result (`target_user + applied_message + focus_user + read_state`) trên web+iOS để report parity sau thao tác mark-read.
+  - mở batch272 với 1 slice hẹp direct-message shell: thêm quick action set read focus user từ member row chọn sẵn trên web+iOS để giảm nhập tay khi retest read-state transitions.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed: bấm quick action `Use current session user as viewer + load` -> verify status `viewer_source=session_user` + feed reload.
-  - Web Inbox: nhập user A/B -> `Open direct thread` -> bấm `Use current session user for read-cursor target + read focus` -> bấm `Mark latest message as read (target user)` -> verify status có `read_cursor_user_source=session_user` -> bấm `Copy quick read cursor` -> paste và verify `focus_user=... | resolved_message=... | read_state=...`.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> bấm `Copy quick read cursor` -> paste và verify `focus_user=... | resolved_message=... | read_state=...`.
+  - Web Inbox: nhập user A/B -> `Open direct thread` -> bấm `Use current session user for read-cursor target + read focus` -> bấm `Mark latest message as read (target user)` -> verify status có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **271**
+- Commit cuối đã chốt:
+  - `(pending in this run)` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **272**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm quick action set read focus user từ member row chọn sẵn trên web+iOS để giảm nhập tay khi retest read-state transitions.
+
+---
 
 - Batch vừa xong: **270**
 - Commit cuối đã chốt:
