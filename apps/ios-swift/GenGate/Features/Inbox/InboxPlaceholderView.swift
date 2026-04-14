@@ -1615,6 +1615,30 @@ struct InboxPlaceholderView: View {
                                 .buttonStyle(.bordered)
                                 .disabled(cursorMessageID == nil || isUpdatingReadCursor)
 
+                                Button {
+                                    applyConversationMemberLatestLoadedFocusAndMarkRead(memberUserID: member.userID)
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Text("Use member focus + latest loaded + mark read")
+                                            .font(.caption)
+
+                                        Spacer()
+
+                                        if isUpdatingReadCursor {
+                                            Text("updating")
+                                                .font(.caption2.monospaced())
+                                                .foregroundStyle(.secondary)
+                                        } else {
+                                            Text("latest+focus")
+                                                .font(.caption2.monospaced())
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled((latestLoadedMessageID?.isEmpty ?? true) || isUpdatingReadCursor)
+
                                 if cursorMessageID == nil {
                                     Text("cursor_message_target: unavailable")
                                         .font(.caption.monospaced())
@@ -3259,6 +3283,39 @@ use_when=\(useWhenText)
         sendStatusHint = alreadyMatched
             ? "Read-cursor context + focus already match selected member; marking read now (read_cursor_context_focus_auto_source=member_row)."
             : "Applied selected member cursor context + focus and marking read now (read_cursor_context_focus_auto_source=member_row)."
+
+        Task {
+            await performReadCursorUpdate(targetUserID: normalizedUserID, targetMessageID: normalizedMessageID)
+        }
+    }
+
+    private func applyConversationMemberLatestLoadedFocusAndMarkRead(memberUserID: String) {
+        let normalizedUserID = memberUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !normalizedUserID.isEmpty else {
+            sendStatusHint = "member_focus_user_missing_for_latest_auto_mark"
+            return
+        }
+
+        guard let latestMessageID = latestLoadedMessageID,
+              !latestMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            sendStatusHint = "latest_loaded_message_missing_for_member_focus_auto_mark"
+            return
+        }
+
+        let normalizedMessageID = latestMessageID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentTargetUserID = readCursorTargetUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentTargetMessageID = readCursorTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentFocusUserID = readStatusFocusUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let alreadyMatched = currentTargetUserID == normalizedUserID && currentTargetMessageID == normalizedMessageID && currentFocusUserID == normalizedUserID
+
+        readCursorTargetUserIDDraft = normalizedUserID
+        readCursorTargetMessageIDDraft = normalizedMessageID
+        readStatusFocusUserIDDraft = normalizedUserID
+
+        sendStatusHint = alreadyMatched
+            ? "Member focus + latest loaded message already match current read-cursor context; marking read now (read_cursor_latest_focus_auto_source=member_row)."
+            : "Applied member focus + latest loaded message and marking read now (read_cursor_latest_focus_auto_source=member_row)."
 
         Task {
             await performReadCursorUpdate(targetUserID: normalizedUserID, targetMessageID: normalizedMessageID)

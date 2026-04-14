@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 278
-- Trục công việc: direct-message shell — web+iOS add member-row one-tap cursor-context+focus+mark action to apply target user + target message + focus user then trigger read-cursor update immediately.
-- Trạng thái: batch278_complete_dm_member_cursor_context_focus_auto_mark_web_ios.
+- Batch workflow chính thức hiện tại: 279
+- Trục công việc: direct-message shell — web+iOS add member-row one-tap latest-loaded+focus+mark action to apply target user + latest loaded message + focus user then trigger read-cursor update immediately when member cursor message is empty.
+- Trạng thái: batch279_complete_dm_member_latest_loaded_focus_auto_mark_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 279 handoff (closed)
+- Batch vừa xong: **279**
+- Commit đã chốt:
+  - `(pending in this run)` — `batch279: add member latest-loaded focus auto-mark actions on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **280**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm one-tap action set member focus + first unread candidate rồi auto-mark read trên web+iOS để cover parity jump-first-unread.
 
 ## Batch 278 handoff (closed)
 - Batch vừa xong: **278**
