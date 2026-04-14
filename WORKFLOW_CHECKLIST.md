@@ -99,12 +99,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` → ✅ `3 passed`
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `dd7c66d` — `batch234: sync workflow docs after private feed soft-delete filter`
-  - working tree hiện tại: bẩn (batch235 complete, chưa commit)
+  - commit gần nhất đã chốt: `2c4c637` — `batch235: clear stale read cursor when message is deleted`
+  - working tree hiện tại: bẩn (đang sync workflow docs sau commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch235; sau đó mở 1 slice hẹp location sharing state shell (stop-sharing parity).
+  - mở 1 slice hẹp location sharing state shell (stop-sharing parity).
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.

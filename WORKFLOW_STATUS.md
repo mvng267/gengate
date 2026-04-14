@@ -15,12 +15,12 @@
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` ✅ (3 passed)
 - Git:
-  - latest feature commit: `dd7c66d` — `batch234: sync workflow docs after private feed soft-delete filter`
-  - working tree: dirty (batch235 complete, chưa commit)
+  - latest feature commit: `2c4c637` — `batch235: clear stale read cursor when message is deleted`
+  - working tree: dirty (workflow docs sync in progress)
 - Blocker: none
 - Next: mở batch236 với 1 slice hẹp location sharing state shell (ưu tiên stop-sharing contract parity).
 - Batch 235 handoff:
-  - pending_commit_batch235
+  - `2c4c637` — `batch235: clear stale read cursor when message is deleted`
   - direct-message read cursor now auto-clears when target message is deleted to keep member cursor summary parity with message visibility rules.
 - Batch 234 handoff:
   - `910a899` — `batch234: hide soft-deleted moments from list and feed`
