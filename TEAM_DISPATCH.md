@@ -56,7 +56,7 @@
 ## Batch 273 handoff (closed)
 - Batch vừa xong: **273**
 - Commit đã chốt:
-  - `(pending in this run)` — `batch273: add member-row quick read-cursor target actions on web and ios`
+  - `e1820a0` — `batch273: add member-row quick read-cursor target actions on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅

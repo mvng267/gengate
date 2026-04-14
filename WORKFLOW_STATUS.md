@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(pending in this run)` — `batch273: add member-row quick read-cursor target actions on web and ios`
-  - working tree: dirty (2 files) before commit
+  - latest feature commit: `e1820a0` — `batch273: add member-row quick read-cursor target actions on web and ios`
+  - working tree: clean after batch273 commit
 - Blocker: none
 - Next: mở batch274 với 1 slice hẹp direct-message shell: cho phép one-tap apply member row cho cả target+focus đồng thời trên web+iOS để rút ngắn chuỗi thao tác retest read parity.
 - Batch 273 handoff:
-  - `(pending in this run)` — `batch273: add member-row quick read-cursor target actions on web and ios`
+  - `e1820a0` — `batch273: add member-row quick read-cursor target actions on web and ios`
   - web/iOS member summary thêm action `Use member as read-cursor target user`, set status source marker `read_cursor_user_source=member_row` để mark-read parity nhanh hơn.
 - Batch 272 handoff:
   - `a34edcc` — `batch272: add member-row quick focus-user actions on web and ios`
