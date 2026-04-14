@@ -171,17 +171,28 @@ struct ProfilePlaceholderView: View {
                                     detail: "request_id: \(row.id)"
                                 )
 
-                                if row.canAccept {
+                                VStack(alignment: .leading, spacing: 8) {
                                     HStack(spacing: 8) {
                                         Button {
-                                            usePendingRequestPair(row)
+                                            applyPendingRequestPair(row, reversed: false)
                                         } label: {
-                                            Text("Use this pair")
+                                            Text("Use same pair")
                                                 .frame(maxWidth: .infinity)
                                         }
                                         .buttonStyle(.bordered)
                                         .disabled(isLoading || isCreatingRequest)
 
+                                        Button {
+                                            applyPendingRequestPair(row, reversed: true)
+                                        } label: {
+                                            Text("Use reverse pair")
+                                                .frame(maxWidth: .infinity)
+                                        }
+                                        .buttonStyle(.bordered)
+                                        .disabled(isLoading || isCreatingRequest)
+                                    }
+
+                                    if row.canAccept {
                                         Button {
                                             Task {
                                                 await acceptFriendRequest(requestID: row.id)
@@ -354,10 +365,16 @@ struct ProfilePlaceholderView: View {
         isCreatingRequest = false
     }
 
-    private func usePendingRequestPair(_ row: FriendRequestRow) {
-        userIDDraft = row.receiverUserID
-        receiverUserIDDraft = row.requesterUserID
-        statusMessage = "Filled requester/receiver from pending request."
+    private func applyPendingRequestPair(_ row: FriendRequestRow, reversed: Bool) {
+        if reversed {
+            userIDDraft = row.receiverUserID
+            receiverUserIDDraft = row.requesterUserID
+            statusMessage = "Filled reverse pair from pending request."
+        } else {
+            userIDDraft = row.requesterUserID
+            receiverUserIDDraft = row.receiverUserID
+            statusMessage = "Filled same pair from pending request."
+        }
         fetchError = nil
     }
 
