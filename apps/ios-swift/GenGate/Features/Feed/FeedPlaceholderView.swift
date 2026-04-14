@@ -213,6 +213,39 @@ struct FeedPlaceholderView: View {
                             .background(Color.secondary.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                        if !deleteMomentPresets.isEmpty {
+                            Text("Quick delete presets from loaded rows")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(deleteMomentPresets, id: \.self) { preset in
+                                        let isSelected = normalizedDeleteMomentIDDraft == preset
+                                        Button {
+                                            deleteMomentIDDraft = preset
+                                            statusMessage = "Delete target set from loaded moment."
+                                            fetchError = nil
+                                        } label: {
+                                            Text(shortIdentifier(preset))
+                                                .font(.caption.monospaced())
+                                                .padding(.horizontal, 10)
+                                                .padding(.vertical, 6)
+                                                .foregroundStyle(isSelected ? .primary : .secondary)
+                                                .background(
+                                                    isSelected
+                                                        ? Color.accentColor.opacity(0.22)
+                                                        : Color.secondary.opacity(0.12)
+                                                )
+                                                .clipShape(Capsule())
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.vertical, 2)
+                            }
+                        }
+
                         Button {
                             Task {
                                 await deleteMoment()
@@ -674,6 +707,10 @@ struct FeedPlaceholderView: View {
         uniquePreservingOrder(momentRows.map(\.id) + authoredMomentRows.map(\.id)).prefix(6).map { $0 }
     }
 
+    private var deleteMomentPresets: [String] {
+        reactionTargetMomentPresets
+    }
+
     private var reactionUserPresets: [String] {
         var candidates: [String] = []
 
@@ -809,8 +846,13 @@ struct FeedPlaceholderView: View {
             return
         }
 
+        if normalizedDeleteMomentIDDraft == trimmedMomentID {
+            statusMessage = "Delete target unchanged (already selected)."
+        } else {
+            statusMessage = "Delete moment id set from selected row."
+        }
+
         deleteMomentIDDraft = trimmedMomentID
-        statusMessage = "Delete moment id set from selected row."
         fetchError = nil
     }
 
