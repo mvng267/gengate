@@ -58,6 +58,8 @@ struct InboxPlaceholderView: View {
     @State private var lastRecipientDeviceSourceHintTriageLineCopyText: String?
     @State private var lastRecipientDeviceSourceHintTriageLineBodyCopyAt: Date?
     @State private var lastRecipientDeviceSourceHintTriageLineBodyCopyText: String?
+    @State private var lastRecipientDeviceSourceHintDiffHintCopyAt: Date?
+    @State private var lastRecipientDeviceSourceHintDiffHintCopyText: String?
 
     private let recipientDevicesAutoReloadDebounceNanoseconds: UInt64 = 350_000_000
     private let recipientDevicesAutoReloadMinIntervalSeconds: TimeInterval = 1.0
@@ -139,6 +141,7 @@ struct InboxPlaceholderView: View {
                         "Added quick action `Copy source-hint triage body` to copy the same triage content without prefix tag, ready for issue title/body paste.",
                         "Source-hint area now shows a small side-by-side triage preview block (`line` vs `body`) so testers can compare tagged/untagged forms before copying.",
                         "Added compact `Diff hint` line to make the only difference explicit: `line = body + prefix tag [inbox-source-hint-triage]`.",
+                        "Added quick action `Copy source-hint diff hint` to reuse the exact clarification sentence in onboarding/debug notes.",
                         "After copy, short-lived feedback lines show elapsed time + short fragment so testers can confirm exactly what was captured.",
                         "Recipient-device section now shows a compact selection-source hint so testers know whether current `Recipient device UUID` is in-sync with loaded options or still a manual out-of-options value.",
                         "One-tap action `Clear recipient device UUID` helps testers reset stale/manual device input instantly before selecting a fresh option."
@@ -495,6 +498,14 @@ struct InboxPlaceholderView: View {
                                 }
                                 .buttonStyle(.bordered)
                                 .disabled(recipientDeviceSourceHintTriageLineBodyText == nil)
+
+                                Button {
+                                    copyRecipientDeviceSourceHintDiffHint()
+                                } label: {
+                                    Text("Copy source-hint diff hint")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.bordered)
                             }
 
                             if let recipientDeviceSourceHintCopiedFeedbackText {
@@ -532,6 +543,12 @@ struct InboxPlaceholderView: View {
                                     .font(.caption2.monospaced())
                                     .foregroundStyle(.secondary)
                             }
+
+                            if let recipientDeviceSourceHintDiffHintCopiedFeedbackText {
+                                Text(recipientDeviceSourceHintDiffHintCopiedFeedbackText)
+                                    .font(.caption2.monospaced())
+                                    .foregroundStyle(.secondary)
+                            }
                         }
 
                         Text("Source-hint verify matrix: empty+first→`first option ... short-id`; empty+no-options→`short-id chưa khả dụng`; in-sync+first→`same as first option`; in-sync+non-first→`in-sync, short-id`; manual/out-of-options→`manual UUID/out-of-options`.")
@@ -549,7 +566,7 @@ struct InboxPlaceholderView: View {
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
 
-                                Text("Diff hint: line = body + prefix tag `[inbox-source-hint-triage]`.")
+                                Text(recipientDeviceSourceHintDiffHintText)
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
 
@@ -1396,6 +1413,10 @@ struct InboxPlaceholderView: View {
         return "[inbox-source-hint-matrix]\nbranch=\(branchKey)\n\(matrixLine)\n\(legendLine)"
     }
 
+    private var recipientDeviceSourceHintDiffHintText: String {
+        "Diff hint: line = body + prefix tag `[inbox-source-hint-triage]`."
+    }
+
     private var recipientDeviceSourceHintTriageLineBodyText: String? {
         guard let branchKey = recipientDeviceSourceHintBranchKey,
               let sourceHintText = recipientDeviceSelectionSourceHintText else {
@@ -1470,6 +1491,20 @@ struct InboxPlaceholderView: View {
         }
 
         return "Copied triage body (\(Int(elapsed))s ago): \(shortCaption(lastRecipientDeviceSourceHintTriageLineBodyCopyText, limit: 96))"
+    }
+
+    private var recipientDeviceSourceHintDiffHintCopiedFeedbackText: String? {
+        guard let lastRecipientDeviceSourceHintDiffHintCopyAt,
+              let lastRecipientDeviceSourceHintDiffHintCopyText else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(lastRecipientDeviceSourceHintDiffHintCopyAt)
+        guard elapsed <= 12 else {
+            return nil
+        }
+
+        return "Copied diff hint (\(Int(elapsed))s ago): \(shortCaption(lastRecipientDeviceSourceHintDiffHintCopyText, limit: 96))"
     }
 
     private var resolvedReadStatusMessageID: String? {
@@ -1646,6 +1681,18 @@ struct InboxPlaceholderView: View {
 
         lastRecipientDeviceSourceHintTriageLineBodyCopyText = normalizedTriageLineBodyText
         lastRecipientDeviceSourceHintTriageLineBodyCopyAt = Date()
+    }
+
+    private func copyRecipientDeviceSourceHintDiffHint() {
+        let normalizedDiffHintText = recipientDeviceSourceHintDiffHintText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedDiffHintText.isEmpty else {
+            return
+        }
+
+        writeToClipboard(normalizedDiffHintText)
+
+        lastRecipientDeviceSourceHintDiffHintCopyText = normalizedDiffHintText
+        lastRecipientDeviceSourceHintDiffHintCopyAt = Date()
     }
 
     private func writeToClipboard(_ text: String) {
