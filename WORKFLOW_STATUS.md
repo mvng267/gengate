@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 255
+- Batch: 256
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 255 notification shell — replace unread_only booleans with readable filter mode labels.
+- Scope: batch 256 friend-graph shell — add inbound/outbound pending summary line for quick accept/reject retest.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -10,16 +10,19 @@
   - iOS Profile: Session login -> Profile -> load pending requests -> tap `Reject request` ở inbound row -> app auto reload friend graph và request chuyển sang `rejected`.
   - iOS Feed (batch233): khi create moment/media fail, app parse `error.code/error.message` và hiện hint rõ cho `user_not_found`, `moment_not_found`, `validation_error` để tester xử lý đúng bước tiếp theo.
 - Files:
-  - apps/web-nextjs/components/notification-shell.tsx
-  - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
+  - apps/web-nextjs/components/friend-graph-shell.tsx
+  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `b073147` — `batch255: replace unread_only booleans with mode labels`
+  - latest feature commit: `a8ff434` — `batch256: add inbound outbound pending summaries to friend graph shells`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch256 với 1 slice hẹp friend-graph shell: thêm pending summary line (`Inbound pending`/`Outbound pending`) trên web+iOS Profile để retest reject/accept nhanh hơn.
+- Next: mở batch257 với 1 slice hẹp friend-graph shell: thêm pending breakdown theo role ngay trong status text sau load (`inbound/outbound`) để tester chụp kết quả nhanh không cần đọc section riêng.
+- Batch 256 handoff:
+  - `a8ff434` — `batch256: add inbound outbound pending summaries to friend graph shells`
+  - web/iOS friend-graph shell giờ có dòng `Pending summary: Inbound/Outbound/Total` sau khi load snapshot, giúp retest accept/reject pair nhanh hơn.
 - Batch 255 handoff:
   - `b073147` — `batch255: replace unread_only booleans with mode labels`
   - web/iOS list meta summary đã đổi từ `unread_only=true|false` sang `Filter mode: All notifications/Unread only` để tester đọc nhanh mà không parse boolean.

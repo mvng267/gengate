@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 255
-- Trục công việc: notification shell — web/iOS replace unread_only boolean display with readable mode labels.
-- Trạng thái: batch255_complete_notification_mode_label_summary.
+- Batch workflow chính thức hiện tại: 256
+- Trục công việc: friend-graph shell — web/iOS add inbound/outbound pending summary line.
+- Trạng thái: batch256_complete_friend_graph_pending_direction_summary.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 256 handoff (closed)
+- Batch vừa xong: **256**
+- Commit đã chốt:
+  - `a8ff434` — `batch256: add inbound outbound pending summaries to friend graph shells`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **257**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - friend-graph shell: thêm inbound/outbound breakdown vào status text sau load để copy/paste test result nhanh.
 
 ## Batch 255 handoff (closed)
 - Batch vừa xong: **255**

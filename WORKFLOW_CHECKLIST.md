@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **255 — notification shell (web/iOS replace unread_only booleans with readable mode labels) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **256 — friend-graph shell (web/iOS inbound/outbound pending summary line) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,28 +89,43 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **255**
-- Scope hiện tại: notification shell — đổi `unread_only=true|false` sang `Filter mode` readable labels trong list summary web/iOS.
+- Batch workflow chính thức hiện tại: **256**
+- Scope hiện tại: friend-graph shell — thêm pending summary line (`Inbound pending`/`Outbound pending`/`Total pending`) trên web+iOS Profile.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/components/notification-shell.tsx`
-  - `apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift`
+  - `apps/web-nextjs/components/friend-graph-shell.tsx`
+  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `b073147` — `batch255: replace unread_only booleans with mode labels`
+  - commit gần nhất đã chốt: `a8ff434` — `batch256: add inbound outbound pending summaries to friend graph shells`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch256 với 1 slice hẹp friend-graph shell: thêm pending summary line (`Inbound pending`/`Outbound pending`) trên web+iOS Profile.
+  - mở batch257 với 1 slice hẹp friend-graph shell: thêm inbound/outbound breakdown trực tiếp vào status message sau load để copy/paste kết quả test nhanh.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.
   - iOS Feed: tạo/lỗi moment posting flow; nếu backend trả `error.code/error.message` thì UI hiện thông điệp lỗi + hint hành động cho `user_not_found`, `moment_not_found`, `validation_error`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **256**
+- Commit cuối đã chốt:
+  - `a8ff434` — `batch256: add inbound outbound pending summaries to friend graph shells`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **257**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - friend-graph shell: thêm inbound/outbound breakdown trực tiếp vào status message sau load để copy/paste kết quả test nhanh.
+
+---
 
 - Batch vừa xong: **255**
 - Commit cuối đã chốt:
