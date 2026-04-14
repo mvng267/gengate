@@ -99,8 +99,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `(pending in this run)` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
-  - working tree hiện tại: bẩn (2 files) trước commit
+  - commit gần nhất đã chốt: `0a0ff0d` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
@@ -115,7 +115,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch vừa xong: **271**
 - Commit cuối đã chốt:
-  - `(pending in this run)` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
+  - `0a0ff0d` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass

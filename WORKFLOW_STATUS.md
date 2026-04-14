@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(pending in this run)` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
-  - working tree: dirty (2 files) before commit
+  - latest feature commit: `0a0ff0d` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
+  - working tree: clean after batch271 commit
 - Blocker: none
 - Next: mở batch272 với 1 slice hẹp direct-message shell: thêm quick action set focus user theo selected member row parity (web+iOS) để giảm nhập tay khi verify read-state transitions.
 - Batch 271 handoff:
-  - `(pending in this run)` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
+  - `0a0ff0d` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
   - web/iOS inbox shell thêm line + clipboard action `Quick copy read-cursor apply result` với format chuẩn `target_user + applied_message + focus_user + read_state`.
 - Batch 270 handoff:
   - `3313396` — `batch270: add session-user read-cursor target and focus quick actions`

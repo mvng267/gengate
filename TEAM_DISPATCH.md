@@ -56,7 +56,7 @@
 ## Batch 271 handoff (closed)
 - Batch vừa xong: **271**
 - Commit đã chốt:
-  - `(pending in this run)` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
+  - `0a0ff0d` — `batch271: add read-cursor apply-result quick-copy summaries on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
