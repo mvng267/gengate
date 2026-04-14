@@ -260,11 +260,13 @@ struct FeedPlaceholderView: View {
                             fetchError = nil
                         }
 
-                        if requireDeleteConfirmation {
-                            Text("One-tap row delete đang khóa. Tắt toggle để mở `Delete this moment` ở từng row.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
+                        Text(
+                            requireDeleteConfirmation
+                                ? "One-tap row delete đang khóa. Tắt toggle để mở `Delete this moment` ở từng row."
+                                : "One-tap row delete đã mở khoá. Có thể dùng `Delete this moment` trực tiếp từ row."
+                        )
+                        .font(.caption)
+                        .foregroundStyle(requireDeleteConfirmation ? .orange : .green)
 
                         Button {
                             Task {
