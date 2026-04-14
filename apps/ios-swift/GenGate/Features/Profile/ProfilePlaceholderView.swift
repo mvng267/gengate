@@ -164,6 +164,9 @@ struct ProfilePlaceholderView: View {
                             .foregroundStyle(.secondary)
                     } else {
                         ForEach(pendingRequestRows) { row in
+                            let isSamePairSelected = isPendingRequestPairSelected(row, reversed: false)
+                            let isReversePairSelected = isPendingRequestPairSelected(row, reversed: true)
+
                             VStack(alignment: .leading, spacing: 8) {
                                 seamRow(
                                     title: "\(row.requesterLabel) → \(row.receiverLabel)",
@@ -176,20 +179,20 @@ struct ProfilePlaceholderView: View {
                                         Button {
                                             applyPendingRequestPair(row, reversed: false)
                                         } label: {
-                                            Text("Use same pair")
+                                            Text(isSamePairSelected ? "Using same pair" : "Use same pair")
                                                 .frame(maxWidth: .infinity)
                                         }
                                         .buttonStyle(.bordered)
-                                        .disabled(isLoading || isCreatingRequest)
+                                        .disabled(isLoading || isCreatingRequest || isSamePairSelected)
 
                                         Button {
                                             applyPendingRequestPair(row, reversed: true)
                                         } label: {
-                                            Text("Use reverse pair")
+                                            Text(isReversePairSelected ? "Using reverse pair" : "Use reverse pair")
                                                 .frame(maxWidth: .infinity)
                                         }
                                         .buttonStyle(.bordered)
-                                        .disabled(isLoading || isCreatingRequest)
+                                        .disabled(isLoading || isCreatingRequest || isReversePairSelected)
                                     }
 
                                     if row.canAccept {
@@ -376,6 +379,17 @@ struct ProfilePlaceholderView: View {
             statusMessage = "Filled same pair from pending request."
         }
         fetchError = nil
+    }
+
+    private func isPendingRequestPairSelected(_ row: FriendRequestRow, reversed: Bool) -> Bool {
+        let requesterDraft = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let receiverDraft = receiverUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if reversed {
+            return requesterDraft == row.receiverUserID && receiverDraft == row.requesterUserID
+        }
+
+        return requesterDraft == row.requesterUserID && receiverDraft == row.receiverUserID
     }
 
     private func acceptFriendRequest(requestID: String) async {
