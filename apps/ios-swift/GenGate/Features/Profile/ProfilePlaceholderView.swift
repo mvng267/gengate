@@ -157,6 +157,13 @@ struct ProfilePlaceholderView: View {
                                 .font(.footnote.monospaced())
                                 .foregroundStyle(.secondary)
                         }
+
+                        if let quickCopyFriendGraphSummary {
+                            Text("Quick copy: \(quickCopyFriendGraphSummary)")
+                                .font(.footnote.monospaced())
+                                .foregroundStyle(.secondary)
+                                .textSelection(.enabled)
+                        }
                     } else {
                         Text("No friend graph snapshot loaded yet.")
                             .font(.footnote)
@@ -357,6 +364,17 @@ struct ProfilePlaceholderView: View {
         }
 
         return (inbound: inbound, outbound: outbound, total: total)
+    }
+
+    private var quickCopyFriendGraphSummary: String? {
+        let requestedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !requestedUserID.isEmpty,
+              let pendingDirectionSummary,
+              let friendshipCount else {
+            return nil
+        }
+
+        return "user=\(requestedUserID) | pending_inbound=\(pendingDirectionSummary.inbound) | pending_outbound=\(pendingDirectionSummary.outbound) | pending_total=\(pendingDirectionSummary.total) | accepted=\(friendshipCount)"
     }
 
     private func prefillFromCurrentSessionUserIfNeeded() {

@@ -42,6 +42,9 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
         { inbound: 0, outbound: 0, total: 0 },
       )
     : null;
+  const quickCopySummary = pendingDirectionSummary
+    ? `user=${userId} | pending_inbound=${pendingDirectionSummary.inbound} | pending_outbound=${pendingDirectionSummary.outbound} | pending_total=${pendingDirectionSummary.total} | accepted=${snapshot?.friendshipCount ?? 0}`
+    : null;
 
   async function loadSnapshot(message?: string) {
     setIsLoadingSnapshot(true);
@@ -126,10 +129,15 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
         <strong>User:</strong> {userId}
       </p>
       {pendingDirectionSummary ? (
-        <p>
-          Pending summary: Inbound pending <strong>{pendingDirectionSummary.inbound}</strong> · Outbound pending{" "}
-          <strong>{pendingDirectionSummary.outbound}</strong> · Total pending <strong>{pendingDirectionSummary.total}</strong>
-        </p>
+        <>
+          <p>
+            Pending summary: Inbound pending <strong>{pendingDirectionSummary.inbound}</strong> · Outbound pending{" "}
+            <strong>{pendingDirectionSummary.outbound}</strong> · Total pending <strong>{pendingDirectionSummary.total}</strong>
+          </p>
+          <p>
+            Quick copy: <code>{quickCopySummary}</code>
+          </p>
+        </>
       ) : (
         <p>Pending summary: load snapshot to view inbound/outbound pending counts.</p>
       )}
