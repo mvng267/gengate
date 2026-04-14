@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(pending in this run)` — `batch274: add member-row one-tap target-focus actions on web and ios`
-  - working tree: dirty (2 files) before commit
+  - latest feature commit: `514f34e` — `batch274: add member-row one-tap target-focus actions on web and ios`
+  - working tree: clean after batch274 commit
 - Blocker: none
 - Next: mở batch275 với 1 slice hẹp direct-message shell: thêm one-tap action dùng selected member cursor message làm read-cursor target message trên web+iOS để rút ngắn setup mark-read case.
 - Batch 274 handoff:
-  - `(pending in this run)` — `batch274: add member-row one-tap target-focus actions on web and ios`
+  - `514f34e` — `batch274: add member-row one-tap target-focus actions on web and ios`
   - web/iOS member summary thêm action `Use member as read-cursor target + read focus`, cho phép sync nhanh cả 2 field theo member row trước khi thao tác mark-read.
 - Batch 273 handoff:
   - `e1820a0` — `batch273: add member-row quick read-cursor target actions on web and ios`

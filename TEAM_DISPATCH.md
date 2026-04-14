@@ -56,7 +56,7 @@
 ## Batch 274 handoff (closed)
 - Batch vừa xong: **274**
 - Commit đã chốt:
-  - `(pending in this run)` — `batch274: add member-row one-tap target-focus actions on web and ios`
+  - `514f34e` — `batch274: add member-row one-tap target-focus actions on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
