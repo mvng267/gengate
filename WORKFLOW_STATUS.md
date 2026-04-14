@@ -1,14 +1,14 @@
 # GenGate Workflow Status
 
-- Batch: 259
+- Batch: 260
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 259 moment-posting shell — add quick-copy payload summary (author + image_url + caption) for fast create-flow reporting.
+- Scope: batch 260 moment-posting shell — add quick preset action to apply current session user as create author with explicit author-source status.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
-  - Web Feed (`/feed`): nhập author/caption/image key -> verify dòng `Quick copy payload: author=... | image_url=... | caption=...` trước khi bấm `Create moment + image shell`.
-  - iOS Feed: mở tab Feed -> nhập author/caption/image key -> verify dòng `Quick copy payload: author=... | image_url=... | caption=...` trước khi bấm `Create moment + image`.
+  - Web Feed (`/feed`): bấm `Use current session user as create author` -> verify status có `author_source=session_user` + quick-copy payload đổi `author=...`, sau đó bấm `Create moment + image shell`.
+  - iOS Feed: bấm `Use current session user as create author` -> verify status có `author_source=session_user` + quick-copy payload đổi `author=...`, sau đó bấm `Create moment + image`.
 - Files:
   - apps/web-nextjs/components/moment-compose-shell.tsx
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
@@ -16,10 +16,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `f42dc59` — `batch259: add quick-copy moment payload summaries`
+  - latest feature commit: `9614a3b` — `batch260: add session-user author quick preset in moment shells`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch260 với 1 slice hẹp moment-posting shell: thêm quick preset button dùng session user làm author + emit status rõ `author source` khi apply.
+- Next: mở batch261 với 1 slice hẹp private-feed shell: thêm quick-copy list summary (viewer + feed_count + first_moment_id) trên web+iOS để report parity load nhanh.
+- Batch 260 handoff:
+  - `9614a3b` — `batch260: add session-user author quick preset in moment shells`
+  - web/iOS moment shell có thêm action apply session user làm author và status rõ nguồn author (`author_source=session_user`) để giảm thao tác nhập tay khi retest.
 - Batch 259 handoff:
   - `f42dc59` — `batch259: add quick-copy moment payload summaries`
   - web/iOS moment-posting shell giờ có dòng quick-copy payload `author/image_url/caption` để report create path nhanh trước khi submit.
