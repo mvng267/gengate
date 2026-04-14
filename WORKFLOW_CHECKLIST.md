@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **218 — iOS pending-request preset modes (same/reverse pair) slice is in verify (MVP-testable)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **219 — iOS pending-request preset selected-state feedback slice is in verify (MVP-testable)**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **218**
-- Scope hiện tại: iOS profile friend graph UX hardening — tách preset pending request thành same/reverse pair.
+- Batch workflow chính thức hiện tại: **219**
+- Scope hiện tại: iOS profile friend graph UX hardening — thêm selected-state feedback cho preset same/reverse pair.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
@@ -100,16 +100,30 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất local: `ef9152c` — `batch218: add ios pending request pair preset modes`
+  - commit gần nhất local: `e01f7ea` — `batch219: show selected state for ios pending pair presets`
   - working tree hiện tại: bẩn (workflow docs đang cập nhật)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - push batch218 rồi mở batch219 cho 1 friction slice hẹp kế tiếp.
+  - push batch219 rồi mở batch220 cho 1 friction slice hẹp kế tiếp.
 - MVP-testable run/test path (human):
-  - iOS Session login -> Profile -> load friend graph -> ở pending request row bấm `Use same pair` hoặc `Use reverse pair` -> form requester/receiver được điền theo đúng mode trước khi send/accept.
+  - iOS Session login -> Profile -> load friend graph -> bấm `Use same pair` hoặc `Use reverse pair` -> verify nút đã chọn đổi thành `Using ...` + disabled, rồi tiếp tục send/accept.
 
 ## Batch handoff note
+
+- Batch vừa xong: **218**
+- Commit cuối đã chốt:
+  - `ef9152c` — `batch218: add ios pending request pair preset modes`
+- Test-verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **219**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - thêm selected-state feedback (`Using same pair` / `Using reverse pair`) để operator biết preset mode đang active.
+
+---
 
 - Batch vừa xong: **217**
 - Commit cuối đã chốt:

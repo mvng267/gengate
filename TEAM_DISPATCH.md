@@ -12,8 +12,20 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 218
-- Trục công việc: iOS profile friend graph UX hardening — split pending-request preset into same/reverse pair modes.
+- Batch workflow chính thức hiện tại: 219
+- Trục công việc: iOS profile friend graph UX hardening — selected-state feedback for pending-request preset modes.
+
+## Batch 218 handoff (closed)
+- Batch vừa xong: **218**
+- Commit đã push:
+  - `ef9152c` — `batch218: add ios pending request pair preset modes`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **219**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - thêm selected-state feedback (`Using same pair` / `Using reverse pair`) để operator nhìn phát biết mode đang active.
 
 ## Batch 217 handoff (closed)
 - Batch vừa xong: **217**
@@ -77,9 +89,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 218 iOS profile friend graph UX hardening.
-- Kết quả gần nhất: batch 218 thêm 2 preset mode (`Use same pair` / `Use reverse pair`) trên pending request row.
-- Trạng thái: verify_batch218_ios.
+- Scope hiện tại: batch 219 iOS profile friend graph UX hardening.
+- Kết quả gần nhất: batch 219 thêm selected-state feedback cho preset mode (`Using same pair` / `Using reverse pair`).
+- Trạng thái: verify_batch219_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

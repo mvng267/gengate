@@ -1,15 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 218
+- Batch: 219
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 218 iOS profile friend-graph UX hardening — split pending request presets into same/reverse pair modes
+- Scope: batch 219 iOS profile friend-graph UX hardening — add selected-state feedback for pending-request preset modes
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
   - iOS: Session login -> Profile -> load friend graph -> chọn 1 pending request.
-  - Tap `Use same pair` để điền requester/receiver đúng chiều request gốc.
-  - Tap `Use reverse pair` để điền chiều ngược nhanh cho retest dedupe/2-way flow.
-  - Sau đó dùng `Send friend request` hoặc `Accept request` như cũ.
+  - Tap `Use same pair` hoặc `Use reverse pair`.
+  - Verify nút đã chọn đổi label (`Using same pair` / `Using reverse pair`) và tự disable để tránh bấm lặp sai mode.
+  - Thực hiện send/accept để confirm flow vẫn chạy bình thường.
 - Files:
   - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
   - WORKFLOW_STATUS.md
@@ -18,11 +18,17 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `ef9152c` — `batch218: add ios pending request pair preset modes`
+  - latest commit: `e01f7ea` — `batch219: show selected state for ios pending pair presets`
   - working tree: bẩn (workflow docs pending update)
 - Blocker: none
-- Next: sync flow docs batch218 -> push
+- Next: sync flow docs batch219 -> push
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 219 handoff:
+  - `e01f7ea` — `batch219: show selected state for ios pending pair presets`
+  - pending-request preset buttons now surface selected mode via label + disabled state to reduce accidental repeat taps.
+- Batch 218 handoff:
+  - `ef9152c` — `batch218: add ios pending request pair preset modes`
+  - pending-request rows now expose `Use same pair` / `Use reverse pair` for faster direction control in friend-request retests.
 - Batch 217 handoff:
   - `7bbd5cd` — `batch217: preset ios friend request pair from pending row`
   - pending-request rows now provide preset to fill requester/receiver quickly before send/swap/accept actions.
