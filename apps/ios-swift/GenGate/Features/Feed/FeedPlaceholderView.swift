@@ -254,6 +254,12 @@ struct FeedPlaceholderView: View {
                         }
                         .toggleStyle(.switch)
 
+                        if requireDeleteConfirmation {
+                            Text("One-tap row delete đang khóa. Tắt toggle để mở `Delete this moment` ở từng row.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
                         Button {
                             Task {
                                 await deleteMoment()
@@ -642,7 +648,7 @@ struct FeedPlaceholderView: View {
                         deleteMomentIDInFlight == row.id
                             ? "Deleting this moment..."
                             : (requireDeleteConfirmation
-                                ? "Unlock to delete"
+                                ? "🔒 Unlock to delete"
                                 : "Delete this moment")
                     )
                     .frame(maxWidth: .infinity)
