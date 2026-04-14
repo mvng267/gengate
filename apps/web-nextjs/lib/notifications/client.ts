@@ -18,6 +18,7 @@ export type NotificationListPayload = {
 export type NotificationListQuery = {
   limit?: number;
   offset?: number;
+  unreadOnly?: boolean;
 };
 
 function toNotificationListQueryString(query?: NotificationListQuery): string {
@@ -31,6 +32,9 @@ function toNotificationListQueryString(query?: NotificationListQuery): string {
   }
   if (query.offset !== undefined) {
     params.set("offset", String(query.offset));
+  }
+  if (query.unreadOnly !== undefined) {
+    params.set("unread_only", query.unreadOnly ? "true" : "false");
   }
 
   const queryString = params.toString();

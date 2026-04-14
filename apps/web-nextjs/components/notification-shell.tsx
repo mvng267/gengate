@@ -28,7 +28,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   });
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [listMeta, setListMeta] = useState<Pick<NotificationListPayload, "count" | "unread_count" | "total_unread_count"> | null>(null);
-  const [pagination, setPagination] = useState({ limit: 20, offset: 0 });
+  const [pagination, setPagination] = useState({ limit: 20, offset: 0, unreadOnly: false });
   const [status, setStatus] = useState("Provide a real user UUID to load notifications or create a minimal notification shell item.");
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -41,7 +41,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     }));
     setItems([]);
     setListMeta(null);
-    setPagination({ limit: 20, offset: 0 });
+    setPagination({ limit: 20, offset: 0, unreadOnly: false });
   }, [initialUserId]);
 
   async function handleLoad() {
@@ -52,6 +52,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       const payload = await listNotifications(form.userId.trim(), {
         limit: pagination.limit,
         offset: pagination.offset,
+        unreadOnly: pagination.unreadOnly,
       });
       setItems(payload.items);
       setListMeta({
@@ -62,7 +63,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       setStatus(
         `Loaded ${payload.count} notification(s) for ${form.userId.trim() || "unknown-user"}. ` +
           `Page unread: ${payload.unread_count}. Total unread: ${payload.total_unread_count}. ` +
-          `Page window limit=${pagination.limit}, offset=${pagination.offset}.`,
+          `Page window limit=${pagination.limit}, offset=${pagination.offset}, unread_only=${pagination.unreadOnly}.`,
       );
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "notifications_list_failed");
@@ -152,6 +153,20 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
           />
         </label>
         <label>
+          <input
+            type="checkbox"
+            checked={pagination.unreadOnly}
+            onChange={(event) => {
+              setPagination((current) => ({
+                ...current,
+                unreadOnly: event.target.checked,
+                offset: 0,
+              }));
+            }}
+          />
+          Load unread only
+        </label>
+        <label>
           User UUID
           <input
             value={form.userId}
@@ -185,7 +200,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       <h2>Notifications</h2>
       {listMeta ? (
         <p>
-          Page count: <strong>{listMeta.count}</strong> · Page unread: <strong>{listMeta.unread_count}</strong> · Total unread: <strong>{listMeta.total_unread_count}</strong> · Limit: <strong>{pagination.limit}</strong> · Offset: <strong>{pagination.offset}</strong>
+          Page count: <strong>{listMeta.count}</strong> · Page unread: <strong>{listMeta.unread_count}</strong> · Total unread: <strong>{listMeta.total_unread_count}</strong> · Limit: <strong>{pagination.limit}</strong> · Offset: <strong>{pagination.offset}</strong> · unread_only: <strong>{String(pagination.unreadOnly)}</strong>
         </p>
       ) : null}
       {items.length === 0 ? (

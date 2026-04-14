@@ -10,6 +10,7 @@ struct NotificationsPlaceholderView: View {
     @State private var listMeta: NotificationListMeta?
     @State private var pageLimitDraft: String = "20"
     @State private var pageOffsetDraft: String = "0"
+    @State private var pageUnreadOnly: Bool = false
     @State private var mutatingNotificationIDs: Set<String> = []
     @State private var fetchError: String?
     @State private var statusMessage: String?
@@ -70,6 +71,9 @@ struct NotificationsPlaceholderView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
                         }
                     }
+
+                    Toggle("Load unread only", isOn: $pageUnreadOnly)
+                        .toggleStyle(.switch)
 
                     Button("Use current session user") {
                         fillFromCurrentSessionUser()
@@ -151,7 +155,7 @@ struct NotificationsPlaceholderView: View {
                         .foregroundStyle(.secondary)
 
                     if let listMeta {
-                        Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount) · Limit: \(listMeta.limit) · Offset: \(listMeta.offset)")
+                        Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount) · Limit: \(listMeta.limit) · Offset: \(listMeta.offset) · unread_only: \(listMeta.unreadOnly ? "true" : "false")")
                             .font(.footnote.monospaced())
                             .foregroundStyle(.secondary)
                     }
@@ -260,7 +264,8 @@ struct NotificationsPlaceholderView: View {
             let payload = try await NotificationsAPIClient().fetchNotifications(
                 userID: trimmedUserID,
                 limit: safeLimit,
-                offset: safeOffset
+                offset: safeOffset,
+                unreadOnly: pageUnreadOnly
             )
             notificationRows = payload.items
             listMeta = NotificationListMeta(
@@ -268,10 +273,11 @@ struct NotificationsPlaceholderView: View {
                 unreadCount: payload.unreadCount,
                 totalUnreadCount: payload.totalUnreadCount,
                 limit: safeLimit,
-                offset: safeOffset
+                offset: safeOffset,
+                unreadOnly: pageUnreadOnly
             )
             mutatingNotificationIDs = []
-            statusMessage = "Loaded \(payload.count) notification(s). Page unread: \(payload.unreadCount). Total unread: \(payload.totalUnreadCount). Page window limit=\(safeLimit), offset=\(safeOffset)."
+            statusMessage = "Loaded \(payload.count) notification(s). Page unread: \(payload.unreadCount). Total unread: \(payload.totalUnreadCount). Page window limit=\(safeLimit), offset=\(safeOffset), unread_only=\(pageUnreadOnly ? "true" : "false")."
         } catch {
             notificationRows = []
             listMeta = nil
@@ -359,6 +365,7 @@ private struct NotificationListMeta {
     let totalUnreadCount: Int
     let limit: Int
     let offset: Int
+    let unreadOnly: Bool
 }
 
 private struct NotificationListPayload {
@@ -447,10 +454,11 @@ private struct NotificationsAPIClient {
 
     private let baseURL = BackendEnvironment.apiBaseURL
 
-    func fetchNotifications(userID: String, limit: Int, offset: Int) async throws -> NotificationListPayload {
+    func fetchNotifications(userID: String, limit: Int, offset: Int, unreadOnly: Bool) async throws -> NotificationListPayload {
         let url = try makeURL(path: "/notifications/\(userID)", queryItems: [
             URLQueryItem(name: "limit", value: String(limit)),
             URLQueryItem(name: "offset", value: String(offset)),
+            URLQueryItem(name: "unread_only", value: unreadOnly ? "true" : "false"),
         ])
         let (data, response) = try await URLSession.shared.data(from: url)
         let httpResponse = try requireHTTPResponse(response)
