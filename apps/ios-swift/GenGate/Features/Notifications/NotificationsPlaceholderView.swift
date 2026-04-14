@@ -459,8 +459,8 @@ struct NotificationsPlaceholderView: View {
                 notificationRows[index] = updated
             }
             statusMessage = updated.isRead
-                ? "Marked notification \(updated.id) as read."
-                : "Marked notification \(updated.id) as unread."
+                ? "Marked notification \(updated.id) as read (●)."
+                : "Marked notification \(updated.id) as unread (○)."
             lastLoadedWindow = nil
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription

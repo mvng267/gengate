@@ -136,7 +136,10 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       const updated = item.read_at ? await markNotificationUnread(item.id) : await markNotificationRead(item.id);
       setItems((current) => current.map((entry) => (entry.id === updated.id ? updated : entry)));
       setLastLoadedWindow(null);
-      setStatus(`Updated notification ${updated.id} to ${updated.read_at ? "read" : "unread"}. Reload to refresh unread summary.`);
+      setStatus(
+        `Updated notification ${updated.id} to ${updated.read_at ? "read (●)" : "unread (○)"}. ` +
+          "Reload to refresh unread summary.",
+      );
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "notification_toggle_failed");
     }
