@@ -1,16 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 228
+- Batch: 229
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 228 iOS feed UX hardening — emit immediate status copy when row-delete lock toggle changes so tester gets instant readiness feedback
+- Scope: batch 229 iOS feed UX hardening — tint row delete readiness hint by lock/unlock state for faster visual scan
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
   - iOS: Session login -> Feed -> load private feed/authored moments.
-  - Bật/tắt `Require confirmation for row delete` và quan sát status message đổi ngay:
-    - unlock: `Row delete unlocked. You can tap \`Delete this moment\` on a row now.`
-    - lock lại: `Row delete lock is on again.`
-  - Khi unlock, row CTA đổi sang `Delete this moment`; khi lock, CTA quay về `🔒 Unlock to delete`.
+  - Khi lock bật: readiness hint hiện màu cam + copy lock.
+  - Khi lock tắt: readiness hint hiện màu xanh + copy unlock, row CTA là `Delete this moment`.
+  - Verify vẫn có status copy tức thời khi toggle đổi trạng thái.
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
   - WORKFLOW_STATUS.md
@@ -19,13 +18,17 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `af92ad2` — `batch228: show status when row delete lock toggles`
-  - working tree: bẩn (docs batch228 in progress, chưa commit)
+  - latest feature commit: `df805ad` — `batch229: tint row delete readiness hint by lock state`
+  - working tree: sạch
 - Blocker: none
-- Next: commit docs batch228 rồi mở batch229 cho friction slice hẹp kế tiếp
+- Next: mở batch230 cho friction slice hẹp kế tiếp
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 229 handoff:
+  - pending (verify)
+  - readiness hint now always visible and color-coded (orange locked, green unlocked) for quicker operator recognition.
 - Batch 228 handoff:
-  - pending (in progress)
+  - `af92ad2` — `batch228: show status when row delete lock toggles`
+  - `35ab051` — `batch228: sync workflow docs after row delete lock status hint`
   - added immediate status feedback on lock toggle change so tester instantly knows whether row delete is armed or re-locked.
 - Batch 227 handoff:
   - `19198e9` — `batch227: add inline hint for row delete unlock path`
