@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 152
+- Batch: 153
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 152 iOS inbox seam hardening — add visual emphasis line for short-id fragment in dynamic first-valid subtitle
+- Scope: batch 153 iOS inbox seam hardening — add `same as first option` in-sync state-label in recipient-device selection source hint
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch152 slice)
+  - latest commit: `HEAD` (local batch153 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch153 cho messaging friction tiếp theo (ví dụ thêm nhẹ state-label `same as first option` khi recipient device đã in-sync để giảm thao tác thừa) trong iOS inbox shell
+- Next: mở batch154 cho messaging friction tiếp theo (ví dụ bổ sung short-id cho `same as first option` label để scan nhanh hơn khi first UUID dài) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -339,6 +339,10 @@
   - dynamic first-valid subtitle tách short-id sang dòng riêng `Short target ID: <abcd…wxyz>` với visual emphasis nhẹ (`semibold`)
   - giúp tester scan nhanh state target trên màn hẹp khi full UUID dài, không cần đọc lại toàn bộ chuỗi trước khi bấm apply
   - giữ nguyên behavior action + guard enable, chỉ nâng độ rõ ràng của phần caption mục tiêu
+- Batch 153 outcome:
+  - `Recipient device source` hint nay có nhánh rõ ràng cho trạng thái in-sync đồng thời trùng first option: `current options (in-sync, same as first option)`
+  - giúp tester biết ngay không cần bấm lại dynamic first-valid action khi selection đã tối ưu sẵn
+  - các nhánh hint khác (`in-sync`, `manual UUID`, `chưa chọn`) giữ nguyên để tránh thay đổi hành vi ngoài scope
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -348,7 +352,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, load direct thread A-B, dùng `Quick recipient member presets` để pick nhanh 1 member vào `Recipient user UUID`, sau đó `Reload recipient devices` để load options và bấm dynamic first-valid action; verify subtitle có 2 dòng: full UUID target + `Short target ID: <abcd…wxyz>` (emphasized); verify `Recipient device source` hint báo `current options (in-sync)`; thử manual/stale UUID rồi dùng `Clear recipient device UUID` + dynamic action để quay lại in-sync trước khi `Create message-device key`
+  - iOS Inbox path: open Inbox tab, load direct thread A-B, dùng `Quick recipient member presets` rồi `Reload recipient devices`; bấm dynamic first-valid action để chọn first option và verify `Recipient device source` chuyển sang `current options (in-sync, same as first option)`; sau đó thử manual/stale UUID rồi quay lại first option để verify label `same as first option` xuất hiện lại trước khi `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts
