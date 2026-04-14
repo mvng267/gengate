@@ -56,7 +56,7 @@
 ## Batch 278 handoff (closed)
 - Batch vừa xong: **278**
 - Commit đã chốt:
-  - `(pending in this run)` — `batch278: add member-cursor context-focus auto-mark actions on web and ios`
+  - `69ed4b4` — `batch278: add member-cursor context-focus auto-mark actions on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅

@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(pending in this run)` — `batch278: add member-cursor context-focus auto-mark actions on web and ios`
-  - working tree: dirty (2 files) before commit
+  - latest feature commit: `69ed4b4` — `batch278: add member-cursor context-focus auto-mark actions on web and ios`
+  - working tree: clean after batch278 commit
 - Blocker: none
 - Next: mở batch279 với 1 slice hẹp direct-message shell: thêm one-tap auto-mark action dùng latest loaded message cho focus user trên web+iOS để cover case member cursor message trống.
 - Batch 278 handoff:
-  - `(pending in this run)` — `batch278: add member-cursor context-focus auto-mark actions on web and ios`
+  - `69ed4b4` — `batch278: add member-cursor context-focus auto-mark actions on web and ios`
   - web/iOS member summary thêm action `Use member cursor context + focus + mark read`, cho phép apply context rồi update read-cursor ngay trong một thao tác.
 - Batch 277 handoff:
   - `58eedff` — `batch277: add member-cursor context-focus one-tap actions on web and ios`
