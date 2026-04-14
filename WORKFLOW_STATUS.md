@@ -1,30 +1,33 @@
 # GenGate Workflow Status
 
-- Batch: 231
+- Batch: 232
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 231 iOS feed UX hardening — align row lock-state copy with toggle status text (`Delete lock: Locked/Unlocked`)
-- Status: verify
+- Scope: batch 232 friend graph seam — wire friend-request reject flow across backend + iOS Profile shell.
+- Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
-  - iOS: Session login -> Feed -> load private feed/authored moments.
-  - Lock ON: row hint hiển thị `Delete lock: Locked` + copy hướng dẫn unlock.
-  - Lock OFF: row hint hiển thị `Delete lock: Unlocked` + copy `Row delete ready...`.
-  - CTA vẫn đúng: lock ON -> `🔒 Unlock to delete`, lock OFF -> `Delete this moment`.
+  - Backend: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
+  - iOS: Session login -> Profile -> load pending requests -> tap `Reject request` ở inbound row -> app auto reload friend graph và request chuyển sang `rejected`.
+  - Edge-case: gọi `POST /friends/requests/{request_id}/accept` sau khi reject trả `request_not_pending` (400); iOS map hint rõ ràng để tester biết cần reload/đổi request.
 - Files:
-  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
-  - WORKFLOW_STATUS.md
-  - WORKFLOW_CHECKLIST.md
-  - TEAM_DISPATCH.md
+  - apps/backend-python/app/services/friendships.py
+  - apps/backend-python/app/modules/friendships/router.py
+  - apps/backend-python/tests/test_friendships_api.py
+  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
 - Test:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_friendships_api.py` ✅ (7 passed)
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `d3a491f` — `batch231: align row lock-state copy with toggle status text`
-  - working tree: bẩn (docs batch231 in progress, chưa commit)
+  - latest feature commit: `3738b54` — `batch232: wire friend-request reject flow across backend and ios`
+  - working tree: clean
 - Blocker: none
-- Next: commit docs batch231 rồi mở batch232 cho friction slice hẹp kế tiếp
+- Next: mở batch233 với 1 friction slice hẹp cho moment posting shell (image + caption path) để tăng testability beyond friend graph.
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 232 handoff:
+  - `3738b54` — `batch232: wire friend-request reject flow across backend and ios`
+  - completed reject wiring end-to-end (backend route/service/tests + iOS Profile reject action/hint) để seam friend graph bớt friction khi human retest.
 - Batch 231 handoff:
-  - pending (in progress)
+  - `d3a491f` — `batch231: align row lock-state copy with toggle status text`
   - aligned row lock-state wording with toggle status semantics to reduce retest mismatch.
 - Batch 230 handoff:
   - `a53dc6d` — `batch230: add row lock-state badge near delete action`

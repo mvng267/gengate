@@ -13,8 +13,21 @@
 
 ## Active batch
 - Batch workflow chính thức hiện tại: 232
-- Trục công việc: chuyển trọng tâm lại seam social ưu tiên cao (friend/moment/feed/DM) bằng 1 slice wiring nhỏ, tránh drift vào iOS copy-only.
-- Trạng thái: planned_batch232_social_seam.
+- Trục công việc: đóng friction điểm friend graph bằng reject request end-to-end trước khi chuyển sang moment posting shell.
+- Trạng thái: batch232_complete_friend_reject_wired.
+
+## Batch 232 handoff (closed)
+- Batch vừa xong: **232**
+- Commit đã chốt:
+  - `3738b54` — `batch232: wire friend-request reject flow across backend and ios`
+- Test/verify cuối:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_friendships_api.py` ✅ (7 passed)
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **233**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - lấy 1 friction point của moment posting shell (image + caption) để tăng độ human-testable beyond friend graph.
 
 ## Batch 231 handoff (closed)
 - Batch vừa xong: **231**
@@ -247,9 +260,9 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: ổn định sau batch 214 dedupe guard.
-- Kết quả gần nhất: duplicate friend-request đã bị chặn nhất quán với mã lỗi domain rõ ràng.
-- Trạng thái: stable_after_batch214_backend.
+- Scope hiện tại: batch 232 friend graph reject flow.
+- Kết quả gần nhất: reject route/service đã wired + error mapping `request_not_pending` (400) + pytest friendships pass.
+- Trạng thái: batch232_complete_friend_reject_backend.
 
 ### pikachu-web — frontend web
 - Scope hiện tại: tạm dừng theo chỉ đạo user.
@@ -257,9 +270,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 232 social seam pivot planning.
-- Kết quả gần nhất: batch 231 đồng bộ row lock-state copy với semantics toggle status.
-- Trạng thái: planned_batch232_social_seam.
+- Scope hiện tại: batch 232 friend graph reject UX trên Profile shell.
+- Kết quả gần nhất: thêm `Reject request` action + hint mapping `request_not_pending` + reload state sau reject.
+- Trạng thái: batch232_complete_friend_reject_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
