@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **193 — iOS inbox branch-preview-token quick-copy slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **194 — iOS inbox branch-use-when-preview quick-copy slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **193**
-- Scope hiện tại: iOS inbox read-status UX hardening — thêm quick-copy short token `branch=<key> | preview=...`.
+- Batch workflow chính thức hiện tại: **194**
+- Scope hiện tại: iOS inbox read-status UX hardening — thêm quick-copy 1-line summary `branch=<key> | use_when=... | preview=...`.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `5186d25` — `batch193: add branch-preview token quick copy`
-  - working tree hiện tại: sạch (sau commit local, chưa push)
+  - commit gần nhất đã chốt: `(pending local commit for batch194 slice)`
+  - working tree hiện tại: dirty trong lúc edit batch194; sẽ sạch sau commit local, chưa push
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch194 cho messaging friction tiếp theo (thêm quick-copy block `branch + use_when + preview` gọn 1 dòng cho summary heading trong ticket) trong iOS inbox shell
+  - mở batch195 cho messaging friction tiếp theo (thêm quick-copy block summary có tag header + `branch/use_when/preview` để dán nguyên cụm vào ticket note) trong iOS inbox shell
 
 ## Batch handoff note
 
