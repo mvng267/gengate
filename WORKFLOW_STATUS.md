@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 239
+- Batch: 240
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 239 notification shell — backend list pagination + stable sorting parity.
+- Scope: batch 240 notification shell — backend total unread summary parity for paged list.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -13,14 +13,18 @@
   - apps/backend-python/app/repositories/notifications.py
   - apps/backend-python/app/services/notifications.py
   - apps/backend-python/app/modules/notifications/router.py
+  - apps/backend-python/app/schemas/notifications.py
   - apps/backend-python/tests/test_notifications_security_api.py
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k "pagination_and_sorting_parity or notifications_list_unread"` ✅ (3 passed, 10 deselected)
 - Git:
-  - latest feature commit: `15f5c35` — `batch239: add notification list pagination and stable sorting`
+  - latest feature commit: `b6fc2e5` — `batch240: add total unread summary for paged notifications`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: sync workflow docs cho batch239 rồi mở batch240 với 1 slice hẹp tiếp theo của notification shell (total unread summary parity cho paged list).
+- Next: sync workflow docs cho batch240 rồi mở batch241 với 1 slice hẹp notification shell tiếp theo (web/iOS contract adoption cho `total_unread_count`).
+- Batch 240 handoff:
+  - `b6fc2e5` — `batch240: add total unread summary for paged notifications`
+  - list response thêm `total_unread_count` để client có tổng unread toàn cục độc lập với page hiện tại.
 - Batch 239 handoff:
   - `15f5c35` — `batch239: add notification list pagination and stable sorting`
   - `GET /notifications/{user_id}` hỗ trợ `limit`/`offset` (validated) và trả list sorted ổn định theo `created_at desc, id desc`.

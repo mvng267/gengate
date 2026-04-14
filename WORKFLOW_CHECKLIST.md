@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **239 — notification shell đang mở (list pagination + stable sorting parity ở backend)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **240 — notification shell đang mở (total unread summary parity cho paged list ở backend)**.
 
 ## Reporting hard rule
 
@@ -89,29 +89,44 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **239**
-- Scope hiện tại: notification shell — backend list pagination + stable sorting parity.
+- Batch workflow chính thức hiện tại: **240**
+- Scope hiện tại: notification shell — backend total unread summary parity cho paged list.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/backend-python/app/repositories/notifications.py`
   - `apps/backend-python/app/services/notifications.py`
   - `apps/backend-python/app/modules/notifications/router.py`
+  - `apps/backend-python/app/schemas/notifications.py`
   - `apps/backend-python/tests/test_notifications_security_api.py`
 - Test-verify:
   - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k "pagination_and_sorting_parity or notifications_list_unread"` → ✅ `3 passed, 10 deselected`
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `15f5c35` — `batch239: add notification list pagination and stable sorting`
+  - commit gần nhất đã chốt: `b6fc2e5` — `batch240: add total unread summary for paged notifications`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - sync workflow docs cho batch239 rồi mở 1 slice hẹp tiếp theo notification shell (total unread summary parity cho paged list).
+  - sync workflow docs cho batch240 rồi mở 1 slice hẹp notification shell tiếp theo (web/iOS contract adoption cho `total_unread_count`).
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.
   - iOS Feed: tạo/lỗi moment posting flow; nếu backend trả `error.code/error.message` thì UI hiện thông điệp lỗi + hint hành động cho `user_not_found`, `moment_not_found`, `validation_error`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **240**
+- Commit cuối đã chốt:
+  - `b6fc2e5` — `batch240: add total unread summary for paged notifications`
+- Test-verify cuối:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k "pagination_and_sorting_parity or notifications_list_unread"` → 3 passed, 10 deselected
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **241**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: web/iOS contract adoption cho `total_unread_count`.
+
+---
 
 - Batch vừa xong: **239**
 - Commit cuối đã chốt:
