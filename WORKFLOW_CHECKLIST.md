@@ -89,25 +89,25 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **216**
-- Scope hiện tại: iOS profile friend graph UX hardening — thêm quick action swap requester/receiver để test request 2 chiều nhanh hơn.
-- Trạng thái hiện tại: **verify**
+- Batch workflow chính thức hiện tại: **217**
+- Scope hiện tại: iOS profile friend graph UX hardening — preset requester/receiver từ pending request row.
+- Trạng thái hiện tại: **in_progress**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/ios-swift && swift build` → ✅ pass
+  - `cd apps/ios-swift && swift build` → ✅ pass (baseline batch216)
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `cb631c6` — `batch215: map ios friend request dedupe error hints`
-  - working tree hiện tại: bẩn (đang có thay đổi batch216, chưa commit)
+  - commit gần nhất đã push: `b46705d` — `batch216: keep receiver id for dedupe retest`
+  - working tree hiện tại: bẩn (đang có thay đổi batch217, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit local batch216 rồi mở batch217 cho 1 friction slice hẹp tiếp theo ở friend graph / feed seam MVP
+  - hoàn tất UI preset pair từ pending request, chạy `swift build`, commit batch217 rồi push.
 - MVP-testable run/test path (human):
-  - iOS Session login -> Profile -> nhập requester/receiver -> bấm `Swap requester/receiver` -> gửi request chiều ngược mà không phải paste lại UUID.
+  - iOS Session login -> Profile -> load friend graph -> bấm `Use this pair` tại 1 pending request -> form requester/receiver được điền sẵn để thao tác nhanh.
 
 ## Batch handoff note
 

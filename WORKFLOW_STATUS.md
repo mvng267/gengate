@@ -1,29 +1,34 @@
 # GenGate Workflow Status
 
-- Batch: 216
+- Batch: 217
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 216 iOS profile friend-graph UX hardening — add swap requester/receiver quick action
-- Status: verify
+- Scope: batch 217 iOS profile friend-graph UX hardening — preset requester/receiver from pending request row
+- Status: in_progress
 - MVP status: MVP-testable
 - MVP human test path:
-  - iOS: Session login -> Profile -> set requester + receiver -> tap `Swap requester/receiver` -> send request opposite direction without retyping UUIDs.
-  - Use with batch 214 dedupe guards and batch 215 readable error hints for two-way friend-request testing.
+  - iOS: Session login -> Profile -> load friend graph -> chọn 1 pending request -> tap `Use this pair` để đổ requester/receiver vào form -> thao tác send/swap/accept nhanh hơn.
+  - Batch 216 flow (swap + self-request guard + keep receiver) vẫn giữ nguyên.
 - Files:
   - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅ (last batch216 baseline)
 - Git:
-  - latest commit: `cb631c6` — `batch215: map ios friend request dedupe error hints`
-  - working tree: bẩn (batch216 changes in progress, chưa commit, chưa push)
+  - latest commit: `b46705d` — `batch216: keep receiver id for dedupe retest`
+  - working tree: bẩn (batch217 changes in progress)
 - Blocker: none
-- Next: chốt batch216 (commit local) rồi mở batch217 cho 1 friction slice hẹp tiếp theo trong friend graph / feed seam MVP
+- Next: chốt batch217 (commit local) rồi verify/push
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 216 handoff:
+  - `90d0dc0` — `batch216: add ios friend request swap quick action`
+  - `42e42d5` — `batch216: guard ios self friend request draft`
+  - `b46705d` — `batch216: keep receiver id for dedupe retest`
+  - iOS Profile friend-request flow now supports fast two-way testing with safer invalid self-request guard while preserving receiver input for immediate dedupe re-check.
 - Batch 215 handoff:
   - `cb631c6` — `batch215: map ios friend request dedupe error hints`
-  - readable dedupe-error hints remain MVP-testable while batch 216 adds quick requester/receiver swap for faster two-way testing.
+  - readable dedupe-error hints remain MVP-testable while batch 216 adds faster two-way request testing flow.
 - Batch 214 handoff:
   - `eafe97e` — `batch214: harden friend request dedupe guards`
   - backend dedupe errors remain MVP-testable while batch 215 adds iOS-friendly hint mapping for those error codes.

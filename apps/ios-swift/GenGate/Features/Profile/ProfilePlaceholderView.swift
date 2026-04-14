@@ -172,15 +172,27 @@ struct ProfilePlaceholderView: View {
                                 )
 
                                 if row.canAccept {
-                                    Button {
-                                        Task {
-                                            await acceptFriendRequest(requestID: row.id)
+                                    HStack(spacing: 8) {
+                                        Button {
+                                            usePendingRequestPair(row)
+                                        } label: {
+                                            Text("Use this pair")
+                                                .frame(maxWidth: .infinity)
                                         }
-                                    } label: {
-                                        Text(busyAcceptRequestID == row.id ? "Accepting..." : "Accept request")
+                                        .buttonStyle(.bordered)
+                                        .disabled(isLoading || isCreatingRequest)
+
+                                        Button {
+                                            Task {
+                                                await acceptFriendRequest(requestID: row.id)
+                                            }
+                                        } label: {
+                                            Text(busyAcceptRequestID == row.id ? "Accepting..." : "Accept request")
+                                                .frame(maxWidth: .infinity)
+                                        }
+                                        .buttonStyle(.bordered)
+                                        .disabled(isLoading || busyAcceptRequestID == row.id)
                                     }
-                                    .buttonStyle(.bordered)
-                                    .disabled(isLoading || busyAcceptRequestID == row.id)
                                 }
                             }
                         }
@@ -342,6 +354,13 @@ struct ProfilePlaceholderView: View {
         isCreatingRequest = false
     }
 
+    private func usePendingRequestPair(_ row: FriendRequestRow) {
+        userIDDraft = row.receiverUserID
+        receiverUserIDDraft = row.requesterUserID
+        statusMessage = "Filled requester/receiver from pending request."
+        fetchError = nil
+    }
+
     private func acceptFriendRequest(requestID: String) async {
         guard !requestID.isEmpty else {
             fetchError = "Friend request id không hợp lệ."
@@ -390,6 +409,8 @@ private struct FriendGraphSnapshot {
 private struct FriendRequestRow: Identifiable {
     let id: String
     let status: String
+    let requesterUserID: String
+    let receiverUserID: String
     let requesterLabel: String
     let receiverLabel: String
     let canAccept: Bool
@@ -486,6 +507,8 @@ private struct FriendGraphAPIClient {
                 FriendRequestRow(
                     id: $0.id,
                     status: $0.status,
+                    requesterUserID: $0.requester.id,
+                    receiverUserID: $0.receiver.id,
                     requesterLabel: $0.requester.username ?? $0.requester.email,
                     receiverLabel: $0.receiver.username ?? $0.receiver.email,
                     canAccept: $0.status == "pending" && $0.receiver.id == userID
