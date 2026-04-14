@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 240
+- Batch: 241
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 240 notification shell — backend total unread summary parity for paged list.
+- Scope: batch 241 notification shell — web/iOS contract adoption for paged `total_unread_count` summary.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -10,18 +10,20 @@
   - iOS Profile: Session login -> Profile -> load pending requests -> tap `Reject request` ở inbound row -> app auto reload friend graph và request chuyển sang `rejected`.
   - iOS Feed (batch233): khi create moment/media fail, app parse `error.code/error.message` và hiện hint rõ cho `user_not_found`, `moment_not_found`, `validation_error` để tester xử lý đúng bước tiếp theo.
 - Files:
-  - apps/backend-python/app/repositories/notifications.py
-  - apps/backend-python/app/services/notifications.py
-  - apps/backend-python/app/modules/notifications/router.py
-  - apps/backend-python/app/schemas/notifications.py
-  - apps/backend-python/tests/test_notifications_security_api.py
+  - apps/web-nextjs/lib/notifications/client.ts
+  - apps/web-nextjs/components/notification-shell.tsx
+  - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
 - Test:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k "pagination_and_sorting_parity or notifications_list_unread"` ✅ (3 passed, 10 deselected)
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `b6fc2e5` — `batch240: add total unread summary for paged notifications`
+  - latest feature commit: `b033484` — `batch241: adopt total unread summary in web and ios notification shells`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: sync workflow docs cho batch240 rồi mở batch241 với 1 slice hẹp notification shell tiếp theo (web/iOS contract adoption cho `total_unread_count`).
+- Next: mở batch242 với 1 slice hẹp notification shell tiếp theo: thêm pagination controls (`limit`/`offset`) trên web/iOS để khai thác ổn định contract list paged.
+- Batch 241 handoff:
+  - `b033484` — `batch241: adopt total unread summary in web and ios notification shells`
+  - web/iOS đã parse + hiển thị `unread_count` và `total_unread_count` từ backend list payload, có fallback local count nếu field chưa có.
 - Batch 240 handoff:
   - `b6fc2e5` — `batch240: add total unread summary for paged notifications`
   - list response thêm `total_unread_count` để client có tổng unread toàn cục độc lập với page hiện tại.

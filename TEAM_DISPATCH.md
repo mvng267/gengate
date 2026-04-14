@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 240
-- Trục công việc: notification shell — backend total unread summary parity cho paged list.
-- Trạng thái: batch240_complete_notification_total_unread_summary_parity.
+- Batch workflow chính thức hiện tại: 241
+- Trục công việc: notification shell — web/iOS contract adoption cho paged `total_unread_count` summary.
+- Trạng thái: batch241_complete_notification_contract_adoption.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 241 handoff (closed)
+- Batch vừa xong: **241**
+- Commit đã chốt:
+  - `b033484` — `batch241: adopt total unread summary in web and ios notification shells`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **242**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm pagination controls (`limit`/`offset`) trên web/iOS.
 
 ## Batch 240 handoff (closed)
 - Batch vừa xong: **240**

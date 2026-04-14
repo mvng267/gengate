@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **240 — notification shell đang mở (total unread summary parity cho paged list ở backend)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **241 — notification shell (web/iOS contract adoption cho total unread summary) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,30 +89,44 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **240**
-- Scope hiện tại: notification shell — backend total unread summary parity cho paged list.
+- Batch workflow chính thức hiện tại: **241**
+- Scope hiện tại: notification shell — web/iOS contract adoption cho `total_unread_count`.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/backend-python/app/repositories/notifications.py`
-  - `apps/backend-python/app/services/notifications.py`
-  - `apps/backend-python/app/modules/notifications/router.py`
-  - `apps/backend-python/app/schemas/notifications.py`
-  - `apps/backend-python/tests/test_notifications_security_api.py`
+  - `apps/web-nextjs/lib/notifications/client.ts`
+  - `apps/web-nextjs/components/notification-shell.tsx`
+  - `apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift`
 - Test-verify:
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_notifications_security_api.py -k "pagination_and_sorting_parity or notifications_list_unread"` → ✅ `3 passed, 10 deselected`
+  - `cd apps/web-nextjs && npm run -s typecheck` → ✅
+  - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `b6fc2e5` — `batch240: add total unread summary for paged notifications`
+  - commit gần nhất đã chốt: `b033484` — `batch241: adopt total unread summary in web and ios notification shells`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - sync workflow docs cho batch240 rồi mở 1 slice hẹp notification shell tiếp theo (web/iOS contract adoption cho `total_unread_count`).
+  - mở batch242 với 1 slice hẹp notification shell: thêm pagination controls (`limit`/`offset`) trên web/iOS để bám sát contract paged list.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.
   - iOS Feed: tạo/lỗi moment posting flow; nếu backend trả `error.code/error.message` thì UI hiện thông điệp lỗi + hint hành động cho `user_not_found`, `moment_not_found`, `validation_error`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **241**
+- Commit cuối đã chốt:
+  - `b033484` — `batch241: adopt total unread summary in web and ios notification shells`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **242**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm pagination controls (`limit`/`offset`) trên web/iOS.
+
+---
 
 - Batch vừa xong: **240**
 - Commit cuối đã chốt:
