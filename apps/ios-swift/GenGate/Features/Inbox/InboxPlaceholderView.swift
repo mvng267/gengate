@@ -118,6 +118,7 @@ struct InboxPlaceholderView: View {
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
                         "You can now call `PATCH /conversations/{id}/members/{user_id}/read-cursor` directly from iOS to move read cursor and observe `last_read_by` + focused `read_status(user)` + member cursor summary in-shell.",
                         "Quick action `Mark latest message as read (focus user)` helps testers advance read cursor to newest loaded row with one tap.",
+                        "Quick action `Use current session user as read-cursor target + read focus` đồng bộ cả `Member user UUID` và `Read-status focus user UUID` để retest read parity không cần nhập tay.",
                         "Quick preset buttons now let testers pick member/message targets without copy-pasting UUIDs manually.",
                         "Member summary now shows cursor ordering hint + unread count behind cursor to spot lagging read state quickly.",
                         "Quick action `Jump focus user to first unread candidate` advances cursor to the earliest unread loaded message for the focus user.",
@@ -1283,6 +1284,15 @@ struct InboxPlaceholderView: View {
                             applyCurrentSessionUserAsReadStatusFocusUser()
                         } label: {
                             Text("Use current session user as read focus user")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(isLoading || conversationSummary == nil)
+
+                        Button {
+                            applyCurrentSessionUserAsReadCursorTargetAndFocusUser()
+                        } label: {
+                            Text("Use current session user as read-cursor target + read focus")
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.bordered)
@@ -2934,6 +2944,27 @@ use_when=\(useWhenText)
 
         readStatusFocusUserIDDraft = currentSessionUserID
         sendStatusHint = focusStatus
+    }
+
+    private func applyCurrentSessionUserAsReadCursorTargetAndFocusUser() {
+        guard let currentSessionUserID else {
+            sendStatusHint = "session_read_cursor_user_missing_for_quick_apply"
+            return
+        }
+
+        let currentTargetUserID = readCursorTargetUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentFocusUserID = readStatusFocusUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let bothAlreadyMatch = currentTargetUserID == currentSessionUserID && currentFocusUserID == currentSessionUserID
+
+        readCursorTargetUserIDDraft = currentSessionUserID
+        readStatusFocusUserIDDraft = currentSessionUserID
+
+        if bothAlreadyMatch {
+            sendStatusHint = "Read-cursor target + read focus already match current session user (read_cursor_user_source=session_user)."
+        } else {
+            sendStatusHint = "Applied current session user as read-cursor target + read focus (read_cursor_user_source=session_user)."
+        }
     }
 
     private func clearCursorFormSyncHintIfIdentityChanged() {

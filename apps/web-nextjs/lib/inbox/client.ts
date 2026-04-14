@@ -75,6 +75,31 @@ export async function listConversationMembers(conversationId: string): Promise<C
   return payload.items;
 }
 
+export async function updateConversationMemberReadCursor(input: {
+  conversationId: string;
+  userId: string;
+  lastReadMessageId: string;
+}): Promise<ConversationMemberItem> {
+  const response = await apiRequest(
+    `/conversations/${encodeURIComponent(input.conversationId)}/members/${encodeURIComponent(input.userId)}/read-cursor`,
+    {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        last_read_message_id: input.lastReadMessageId,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`conversation_member_read_cursor_update_failed:${response.status}`);
+  }
+
+  return (await response.json()) as ConversationMemberItem;
+}
+
 export async function sendMessage(input: {
   conversationId: string;
   senderUserId: string;

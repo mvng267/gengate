@@ -10,6 +10,7 @@ import {
   listMessageAttachments,
   listMessages,
   sendMessage,
+  updateConversationMemberReadCursor,
   type ConversationMemberItem,
   type DirectConversation,
   type MessageAttachmentItem,
@@ -58,8 +59,10 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [isSending, setIsSending] = useState(false);
   const [isCreatingAttachment, setIsCreatingAttachment] = useState(false);
   const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
+  const [isUpdatingReadCursor, setIsUpdatingReadCursor] = useState(false);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
   const [readStatusFocusUserIdDraft, setReadStatusFocusUserIdDraft] = useState("");
+  const [readCursorTargetUserIdDraft, setReadCursorTargetUserIdDraft] = useState("");
   const [lastSendQuickCopy, setLastSendQuickCopy] = useState("sender=(none) | message_id=(none)");
   const [lastReadCursorQuickCopy, setLastReadCursorQuickCopy] = useState(
     "focus_user=(none) | resolved_message=(none) | read_state=unknown",
@@ -68,6 +71,8 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
 
   const resolvedReadCursorFocusUserId =
     readStatusFocusUserIdDraft.trim() || form.userAId.trim() || currentSessionUserId.trim() || "";
+  const resolvedReadCursorTargetUserId =
+    readCursorTargetUserIdDraft.trim() || form.userAId.trim() || currentSessionUserId.trim() || "";
   const resolvedReadCursorMessageId = messages[messages.length - 1]?.id ?? "";
 
   const focusReadState = (() => {
@@ -97,6 +102,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setConversationMembers([]);
     setAttachmentForm({ ...initialAttachmentForm });
     setReadStatusFocusUserIdDraft("");
+    setReadCursorTargetUserIdDraft("");
     setLastSendQuickCopy("sender=(none) | message_id=(none)");
     setLastReadCursorQuickCopy("focus_user=(none) | resolved_message=(none) | read_state=unknown");
   }, [initialSenderUserId, initialUserAId, initialUserBId]);
@@ -330,6 +336,68 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setStatus(focusStatus);
   }
 
+  function applyCurrentSessionUserForReadCursorAndFocus() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_read_cursor_user_missing_for_quick_apply");
+      return;
+    }
+
+    setReadCursorTargetUserIdDraft(sessionUserId);
+    setReadStatusFocusUserIdDraft(sessionUserId);
+
+    const bothAlreadyMatch =
+      readCursorTargetUserIdDraft.trim() === sessionUserId && readStatusFocusUserIdDraft.trim() === sessionUserId;
+
+    setStatus(
+      bothAlreadyMatch
+        ? "Read-cursor target + read focus already match current session user (read_cursor_user_source=session_user)."
+        : "Applied current session user as read-cursor target + read focus (read_cursor_user_source=session_user).",
+    );
+  }
+
+  async function handleMarkLatestMessageAsReadForResolvedTargetUser() {
+    if (!conversation) {
+      setStatus("open_thread_first");
+      return;
+    }
+
+    const targetUserId = resolvedReadCursorTargetUserId.trim();
+    if (!targetUserId) {
+      setStatus("read_cursor_target_user_required");
+      return;
+    }
+
+    const latestMessageId = messages[messages.length - 1]?.id ?? "";
+    if (!latestMessageId) {
+      setStatus("read_cursor_target_message_required");
+      return;
+    }
+
+    setIsUpdatingReadCursor(true);
+    setStatus(`Updating read cursor for ${targetUserId} to latest message ${latestMessageId}...`);
+
+    try {
+      const updated = await updateConversationMemberReadCursor({
+        conversationId: conversation.id,
+        userId: targetUserId,
+        lastReadMessageId: latestMessageId,
+      });
+
+      setConversationMembers((current) =>
+        current.map((member) => (member.id === updated.id ? updated : member)),
+      );
+
+      setStatus(
+        `Updated read cursor for ${updated.user_id} to ${updated.last_read_message_id ?? "(none)"} in thread ${conversation.id}.`,
+      );
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "conversation_member_read_cursor_update_failed");
+    }
+
+    setIsUpdatingReadCursor(false);
+  }
+
   async function handleCopyReadCursorQuickCopy() {
     await copyToClipboard(
       lastReadCursorQuickCopy,
@@ -376,6 +444,31 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
           disabled={currentSessionUserId.trim().length === 0}
         >
           Use current session user as read focus user
+        </button>
+      </div>
+
+      <div>
+        <label>
+          Read-cursor target user UUID (optional, defaults to User A/session user)
+          <input
+            value={readCursorTargetUserIdDraft}
+            onChange={(event) => setReadCursorTargetUserIdDraft(event.target.value)}
+            placeholder="target user for read-cursor update"
+          />
+        </label>
+        <button
+          type="button"
+          onClick={() => applyCurrentSessionUserForReadCursorAndFocus()}
+          disabled={currentSessionUserId.trim().length === 0}
+        >
+          Use current session user for read-cursor target + read focus
+        </button>
+        <button
+          type="button"
+          onClick={() => void handleMarkLatestMessageAsReadForResolvedTargetUser()}
+          disabled={isUpdatingReadCursor || !conversation || messages.length === 0}
+        >
+          {isUpdatingReadCursor ? "Marking latest as read..." : "Mark latest message as read (target user)"}
         </button>
       </div>
 
@@ -464,6 +557,8 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
               <strong>{member.user_id}</strong>
               {" · last_read_message_id: "}
               <code>{member.last_read_message_id ?? "(none)"}</code>
+              {resolvedReadCursorTargetUserId === member.user_id ? <span>{" · read_cursor_target"}</span> : null}
+              {resolvedReadCursorFocusUserId === member.user_id ? <span>{" · read_focus"}</span> : null}
             </li>
           ))}
         </ul>
