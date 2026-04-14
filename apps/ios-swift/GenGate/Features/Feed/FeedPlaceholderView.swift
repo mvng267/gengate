@@ -32,6 +32,7 @@ struct FeedPlaceholderView: View {
     @State private var isCreatingReaction = false
     @State private var quickReactionMomentIDInFlight: String?
     @State private var deleteMomentIDInFlight: String?
+    @State private var requireDeleteConfirmation = true
     @State private var quickReactionPreferMomentAuthor = false
     @State private var quickReactionRefreshMode: QuickReactionRefreshMode = .both
 
@@ -246,6 +247,12 @@ struct FeedPlaceholderView: View {
                                 .padding(.vertical, 2)
                             }
                         }
+
+                        Toggle(isOn: $requireDeleteConfirmation) {
+                            Text("Require confirmation for row delete")
+                                .font(.footnote)
+                        }
+                        .toggleStyle(.switch)
 
                         Button {
                             Task {
@@ -645,7 +652,8 @@ struct FeedPlaceholderView: View {
                     deleteMomentIDInFlight != nil ||
                     isCreatingMoment ||
                     isCreatingReaction ||
-                    isLoadingReactions
+                    isLoadingReactions ||
+                    requireDeleteConfirmation
                 )
 
                 Button {
@@ -1171,6 +1179,11 @@ struct FeedPlaceholderView: View {
     }
 
     private func deleteMomentFromRow(_ row: PrivateFeedMomentRow) async {
+        guard !requireDeleteConfirmation else {
+            fetchError = "One-tap delete is locked. Tắt 'Require confirmation for row delete' để tiếp tục."
+            return
+        }
+
         let trimmedMomentID = row.id.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedMomentID.isEmpty else {
             return
