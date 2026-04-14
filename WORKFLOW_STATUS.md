@@ -1,13 +1,13 @@
 # GenGate Workflow Status
 
-- Batch: 215
+- Batch: 216
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 215 iOS profile friend-graph UX hardening — show clear hints for friend-request dedupe error codes
+- Scope: batch 216 iOS profile friend-graph UX hardening — add swap requester/receiver quick action
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
-  - iOS: Session login -> Profile -> load friend graph -> create duplicate request -> verify backend error plus readable hint (`pending request already exists` / `users are already friends`).
-  - Backend dedupe guards from batch 214 remain active.
+  - iOS: Session login -> Profile -> set requester + receiver -> tap `Swap requester/receiver` -> send request opposite direction without retyping UUIDs.
+  - Use with batch 214 dedupe guards and batch 215 readable error hints for two-way friend-request testing.
 - Files:
   - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
   - WORKFLOW_STATUS.md
@@ -16,11 +16,14 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `eafe97e` — `batch214: harden friend request dedupe guards`
-  - working tree: bẩn (batch215 changes in progress, chưa commit, chưa push)
+  - latest commit: `cb631c6` — `batch215: map ios friend request dedupe error hints`
+  - working tree: bẩn (batch216 changes in progress, chưa commit, chưa push)
 - Blocker: none
-- Next: chốt batch215 (commit local) rồi mở batch216 cho 1 friction slice hẹp tiếp theo trong friend graph / feed seam MVP
+- Next: chốt batch216 (commit local) rồi mở batch217 cho 1 friction slice hẹp tiếp theo trong friend graph / feed seam MVP
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 215 handoff:
+  - `cb631c6` — `batch215: map ios friend request dedupe error hints`
+  - readable dedupe-error hints remain MVP-testable while batch 216 adds quick requester/receiver swap for faster two-way testing.
 - Batch 214 handoff:
   - `eafe97e` — `batch214: harden friend request dedupe guards`
   - backend dedupe errors remain MVP-testable while batch 215 adds iOS-friendly hint mapping for those error codes.

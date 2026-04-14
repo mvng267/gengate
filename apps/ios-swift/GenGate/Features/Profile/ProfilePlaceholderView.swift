@@ -73,21 +73,37 @@ struct ProfilePlaceholderView: View {
                             .background(Color.secondary.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                        Button {
-                            Task {
-                                await createFriendRequest()
+                        HStack(spacing: 8) {
+                            Button {
+                                swapRequesterAndReceiver()
+                            } label: {
+                                Text("Swap requester/receiver")
+                                    .frame(maxWidth: .infinity)
                             }
-                        } label: {
-                            Text(isCreatingRequest ? "Sending friend request..." : "Send friend request")
-                                .frame(maxWidth: .infinity)
+                            .buttonStyle(.bordered)
+                            .disabled(
+                                isCreatingRequest ||
+                                isLoading ||
+                                userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                                receiverUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                            )
+
+                            Button {
+                                Task {
+                                    await createFriendRequest()
+                                }
+                            } label: {
+                                Text(isCreatingRequest ? "Sending friend request..." : "Send friend request")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.bordered)
+                            .disabled(
+                                isCreatingRequest ||
+                                isLoading ||
+                                userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                                receiverUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                            )
                         }
-                        .buttonStyle(.bordered)
-                        .disabled(
-                            isCreatingRequest ||
-                            isLoading ||
-                            userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-                            receiverUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                        )
                     }
 
                     Text("Session indicator: \(sessionStore.sessionIndicatorLabel)")
@@ -265,6 +281,20 @@ struct ProfilePlaceholderView: View {
         }
 
         isLoading = false
+    }
+
+    private func swapRequesterAndReceiver() {
+        let trimmedRequester = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedReceiver = receiverUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedRequester.isEmpty, !trimmedReceiver.isEmpty else {
+            return
+        }
+
+        userIDDraft = trimmedReceiver
+        receiverUserIDDraft = trimmedRequester
+        statusMessage = "Swapped requester/receiver."
+        fetchError = nil
     }
 
     private func createFriendRequest() async {

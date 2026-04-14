@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 215
-- Trục công việc: iOS profile friend graph UX hardening — readable hints for dedupe error codes.
+- Batch workflow chính thức hiện tại: 216
+- Trục công việc: iOS profile friend graph UX hardening — swap requester/receiver quick action.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 215 iOS profile friend graph UX hardening.
-- Kết quả gần nhất: map lỗi dedupe (`friend_request_already_pending`, `friendship_already_exists`) thành hint dễ đọc trong Profile tab.
-- Trạng thái: verify_batch215_ios.
+- Scope hiện tại: batch 216 iOS profile friend graph UX hardening.
+- Kết quả gần nhất: thêm quick action `Swap requester/receiver` để test gửi request hai chiều nhanh hơn.
+- Trạng thái: verify_batch216_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

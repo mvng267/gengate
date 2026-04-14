@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **215 — iOS profile friend-request dedupe hint mapping slice is in verify (MVP-testable)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **216 — iOS profile requester/receiver swap quick action slice is in verify (MVP-testable)**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **215**
-- Scope hiện tại: iOS profile friend graph UX hardening — map lỗi dedupe friend-request thành hint dễ đọc cho tester.
+- Batch workflow chính thức hiện tại: **216**
+- Scope hiện tại: iOS profile friend graph UX hardening — thêm quick action swap requester/receiver để test request 2 chiều nhanh hơn.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
@@ -100,14 +100,14 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `eafe97e` — `batch214: harden friend request dedupe guards`
-  - working tree hiện tại: bẩn (đang có thay đổi batch215, chưa commit)
+  - commit gần nhất đã chốt: `cb631c6` — `batch215: map ios friend request dedupe error hints`
+  - working tree hiện tại: bẩn (đang có thay đổi batch216, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit local batch215 rồi mở batch216 cho 1 friction slice hẹp tiếp theo ở friend graph / feed seam MVP
+  - commit local batch216 rồi mở batch217 cho 1 friction slice hẹp tiếp theo ở friend graph / feed seam MVP
 - MVP-testable run/test path (human):
-  - iOS Session login -> Profile -> load friend graph -> tạo request trùng -> verify hiển thị hint rõ nghĩa cho `friend_request_already_pending` / `friendship_already_exists`.
+  - iOS Session login -> Profile -> nhập requester/receiver -> bấm `Swap requester/receiver` -> gửi request chiều ngược mà không phải paste lại UUID.
 
 ## Batch handoff note
 
