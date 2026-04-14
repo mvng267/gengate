@@ -21,6 +21,27 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
   const inboxHref = `/inbox?userA=${encodeURIComponent(userId)}&sender=${encodeURIComponent(userId)}`;
   const notificationsHref = `/notifications?user=${encodeURIComponent(userId)}`;
   const locationHref = `/location?owner=${encodeURIComponent(userId)}`;
+  const pendingDirectionSummary = snapshot
+    ? snapshot.pendingRequests.reduce(
+        (acc, request) => {
+          if (request.status !== "pending") {
+            return acc;
+          }
+
+          if (request.receiver.id === userId) {
+            acc.inbound += 1;
+          }
+
+          if (request.requester.id === userId) {
+            acc.outbound += 1;
+          }
+
+          acc.total += 1;
+          return acc;
+        },
+        { inbound: 0, outbound: 0, total: 0 },
+      )
+    : null;
 
   async function loadSnapshot(message?: string) {
     setIsLoadingSnapshot(true);
@@ -84,6 +105,14 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
       <p>
         <strong>User:</strong> {userId}
       </p>
+      {pendingDirectionSummary ? (
+        <p>
+          Pending summary: Inbound pending <strong>{pendingDirectionSummary.inbound}</strong> · Outbound pending{" "}
+          <strong>{pendingDirectionSummary.outbound}</strong> · Total pending <strong>{pendingDirectionSummary.total}</strong>
+        </p>
+      ) : (
+        <p>Pending summary: load snapshot to view inbound/outbound pending counts.</p>
+      )}
       <p>
         Next seam pivots for this profile context: <Link href={feedHref}>Feed</Link> · <Link href={inboxHref}>Inbox</Link> ·{" "}
         <Link href={notificationsHref}>Notifications</Link> · <Link href={locationHref}>Location</Link>

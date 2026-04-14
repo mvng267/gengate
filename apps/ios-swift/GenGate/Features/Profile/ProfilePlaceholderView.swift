@@ -151,6 +151,12 @@ struct ProfilePlaceholderView: View {
                             state: "Pending requests: \(pendingRequestCount) · Accepted friendships: \(friendshipCount)",
                             detail: "Requested user: \(requestedUserLabel)\(pendingPairModeSuffix)"
                         )
+
+                        if let pendingDirectionSummary {
+                            Text("Pending summary: Inbound pending \(pendingDirectionSummary.inbound) · Outbound pending \(pendingDirectionSummary.outbound) · Total pending \(pendingDirectionSummary.total)")
+                                .font(.footnote.monospaced())
+                                .foregroundStyle(.secondary)
+                        }
                     } else {
                         Text("No friend graph snapshot loaded yet.")
                             .font(.footnote)
@@ -322,6 +328,35 @@ struct ProfilePlaceholderView: View {
         }
 
         return nil
+    }
+
+    private var pendingDirectionSummary: (inbound: Int, outbound: Int, total: Int)? {
+        guard pendingRequestCount != nil else {
+            return nil
+        }
+
+        let requestedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !requestedUserID.isEmpty else {
+            return nil
+        }
+
+        var inbound = 0
+        var outbound = 0
+        var total = 0
+
+        for row in pendingRequestRows where row.status == "pending" {
+            if row.receiverUserID == requestedUserID {
+                inbound += 1
+            }
+
+            if row.requesterUserID == requestedUserID {
+                outbound += 1
+            }
+
+            total += 1
+        }
+
+        return (inbound: inbound, outbound: outbound, total: total)
     }
 
     private func prefillFromCurrentSessionUserIfNeeded() {
