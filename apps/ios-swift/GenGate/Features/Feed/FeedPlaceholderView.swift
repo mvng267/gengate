@@ -253,6 +253,12 @@ struct FeedPlaceholderView: View {
                                 .font(.footnote)
                         }
                         .toggleStyle(.switch)
+                        .onChange(of: requireDeleteConfirmation) { _, isLocked in
+                            statusMessage = isLocked
+                                ? "Row delete lock is on again."
+                                : "Row delete unlocked. You can tap `Delete this moment` on a row now."
+                            fetchError = nil
+                        }
 
                         if requireDeleteConfirmation {
                             Text("One-tap row delete đang khóa. Tắt toggle để mở `Delete this moment` ở từng row.")
