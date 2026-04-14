@@ -13,8 +13,8 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `(pending local commit for batch199 slice)`
-  - working tree: dirty while editing (will be clean after local commit, chưa push)
+  - latest commit: `cde18e1` — `batch199: add ios feed reactions create/list shell`
+  - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
 - Next: mở batch200 cho feed seam friction tiếp theo (ví dụ thêm quick reaction presets/chips để giảm typing khi verify API `/moments/{id}/reactions`) trong iOS feed shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ

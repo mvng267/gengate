@@ -101,8 +101,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `(pending local commit for batch199 slice)`
-  - working tree hiện tại: dirty while editing (will be clean after local commit, chưa push)
+  - commit gần nhất đã chốt: `cde18e1` — `batch199: add ios feed reactions create/list shell`
+  - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
