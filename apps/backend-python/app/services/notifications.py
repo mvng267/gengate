@@ -26,13 +26,28 @@ class NotificationService:
             notification_type=notification_type,
             payload_json=payload_json,
             read_at=None,
+            created_at=datetime.now(timezone.utc),
         )
 
-    def list_notifications(self, db: Session, user_id: uuid.UUID, unread_only: bool = False) -> list[Notification]:
+    def list_notifications(
+        self,
+        db: Session,
+        user_id: uuid.UUID,
+        *,
+        unread_only: bool = False,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[Notification]:
         user = user_repository.get(db, user_id)
         if user is None:
             raise ValueError("user_not_found")
-        return notification_repository.list_by_user_id(db, user_id, unread_only=unread_only)
+        return notification_repository.list_by_user_id(
+            db,
+            user_id,
+            unread_only=unread_only,
+            limit=limit,
+            offset=offset,
+        )
 
     def get_notification(self, db: Session, notification_id: uuid.UUID) -> Notification | None:
         return notification_repository.get_active(db, notification_id)

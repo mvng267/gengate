@@ -41,10 +41,18 @@ def create_notification(
 def list_notifications(
     user_id: uuid.UUID,
     unread_only: bool = Query(default=False),
+    limit: int = Query(default=100, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db_session),
 ) -> NotificationListResponse:
     try:
-        notifications = notification_service.list_notifications(db, user_id, unread_only=unread_only)
+        notifications = notification_service.list_notifications(
+            db,
+            user_id,
+            unread_only=unread_only,
+            limit=limit,
+            offset=offset,
+        )
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     items = [to_notification_response(notification) for notification in notifications]

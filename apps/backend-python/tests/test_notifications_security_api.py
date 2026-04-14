@@ -993,3 +993,87 @@ def test_notifications_list_unread_count_stays_zero_when_all_are_read() -> None:
     assert unread_only_response.json()["unread_count"] == 0
 
     app.dependency_overrides.clear()
+
+
+def test_notifications_list_pagination_and_sorting_parity() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    user_response = client.post(
+        "/auth/register",
+        json={"email": "batch239-notify@example.com", "username": "batch239_notify"},
+    )
+    assert user_response.status_code == 201
+    user_id = user_response.json()["id"]
+
+    first_notification_response = client.post(
+        "/notifications",
+        json={"user_id": user_id, "notification_type": "friend_request", "payload_json": {"order": 1}},
+    )
+    second_notification_response = client.post(
+        "/notifications",
+        json={"user_id": user_id, "notification_type": "moment_like", "payload_json": {"order": 2}},
+    )
+    third_notification_response = client.post(
+        "/notifications",
+        json={"user_id": user_id, "notification_type": "system", "payload_json": {"order": 3}},
+    )
+    assert first_notification_response.status_code == 201
+    assert second_notification_response.status_code == 201
+    assert third_notification_response.status_code == 201
+
+    first_notification_id = first_notification_response.json()["id"]
+    second_notification_id = second_notification_response.json()["id"]
+    third_notification_id = third_notification_response.json()["id"]
+
+    mark_read_response = client.patch(f"/notifications/{second_notification_id}/read")
+    assert mark_read_response.status_code == 200
+
+    page_one_response = client.get(f"/notifications/{user_id}?limit=2&offset=0")
+    assert page_one_response.status_code == 200
+    assert page_one_response.json()["count"] == 2
+    assert page_one_response.json()["unread_count"] == 1
+    page_one_ids = [item["id"] for item in page_one_response.json()["items"]]
+    assert page_one_ids == [third_notification_id, second_notification_id]
+
+    page_two_response = client.get(f"/notifications/{user_id}?limit=2&offset=2")
+    assert page_two_response.status_code == 200
+    assert page_two_response.json()["count"] == 1
+    assert page_two_response.json()["unread_count"] == 1
+    page_two_ids = [item["id"] for item in page_two_response.json()["items"]]
+    assert page_two_ids == [first_notification_id]
+
+    unread_page_one_response = client.get(f"/notifications/{user_id}?unread_only=true&limit=1&offset=0")
+    assert unread_page_one_response.status_code == 200
+    assert unread_page_one_response.json()["count"] == 1
+    assert unread_page_one_response.json()["unread_count"] == 1
+    unread_page_one_ids = [item["id"] for item in unread_page_one_response.json()["items"]]
+    assert unread_page_one_ids == [third_notification_id]
+
+    unread_page_two_response = client.get(f"/notifications/{user_id}?unread_only=true&limit=1&offset=1")
+    assert unread_page_two_response.status_code == 200
+    assert unread_page_two_response.json()["count"] == 1
+    assert unread_page_two_response.json()["unread_count"] == 1
+    unread_page_two_ids = [item["id"] for item in unread_page_two_response.json()["items"]]
+    assert unread_page_two_ids == [first_notification_id]
+
+    app.dependency_overrides.clear()
