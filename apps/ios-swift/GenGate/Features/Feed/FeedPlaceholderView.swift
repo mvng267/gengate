@@ -197,6 +197,37 @@ struct FeedPlaceholderView: View {
                         .background(Color.secondary.opacity(0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                    if !reactionTargetMomentPresets.isEmpty {
+                        Text("Quick moment presets from loaded rows")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(reactionTargetMomentPresets, id: \.self) { preset in
+                                    let isSelected = normalizedReactionTargetMomentIDDraft == preset
+                                    Button {
+                                        reactionTargetMomentIDDraft = preset
+                                    } label: {
+                                        Text(shortIdentifier(preset))
+                                            .font(.caption.monospaced())
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .foregroundStyle(isSelected ? .primary : .secondary)
+                                            .background(
+                                                isSelected
+                                                    ? Color.accentColor.opacity(0.22)
+                                                    : Color.secondary.opacity(0.12)
+                                            )
+                                            .clipShape(Capsule())
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.vertical, 2)
+                        }
+                    }
+
                     TextField("Reaction user UUID", text: $reactionUserIDDraft)
 #if os(iOS)
                         .textInputAutocapitalization(.never)
@@ -205,6 +236,37 @@ struct FeedPlaceholderView: View {
                         .padding(12)
                         .background(Color.secondary.opacity(0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    if !reactionUserPresets.isEmpty {
+                        Text("Quick user presets from session + loaded rows")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(reactionUserPresets, id: \.self) { preset in
+                                    let isSelected = normalizedReactionUserIDDraft == preset
+                                    Button {
+                                        reactionUserIDDraft = preset
+                                    } label: {
+                                        Text(shortIdentifier(preset))
+                                            .font(.caption.monospaced())
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .foregroundStyle(isSelected ? .primary : .secondary)
+                                            .background(
+                                                isSelected
+                                                    ? Color.accentColor.opacity(0.22)
+                                                    : Color.secondary.opacity(0.12)
+                                            )
+                                            .clipShape(Capsule())
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.vertical, 2)
+                        }
+                    }
 
                     TextField("Reaction type (heart, fire, smile...)", text: $reactionTypeDraft)
 #if os(iOS)
@@ -394,6 +456,54 @@ struct FeedPlaceholderView: View {
         reactionTypeDraft
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .lowercased()
+    }
+
+    private var normalizedReactionTargetMomentIDDraft: String {
+        reactionTargetMomentIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var normalizedReactionUserIDDraft: String {
+        reactionUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var reactionTargetMomentPresets: [String] {
+        uniquePreservingOrder(momentRows.map(\.id) + authoredMomentRows.map(\.id)).prefix(6).map { $0 }
+    }
+
+    private var reactionUserPresets: [String] {
+        var candidates: [String] = []
+
+        if let currentSessionUserID {
+            candidates.append(currentSessionUserID)
+        }
+
+        candidates.append(contentsOf: uniquePreservingOrder(momentRows.map(\.authorID) + authoredMomentRows.map(\.authorID)))
+
+        return uniquePreservingOrder(candidates).prefix(6).map { $0 }
+    }
+
+    private func uniquePreservingOrder(_ items: [String]) -> [String] {
+        var seen = Set<String>()
+        var ordered: [String] = []
+
+        for item in items {
+            if seen.insert(item).inserted {
+                ordered.append(item)
+            }
+        }
+
+        return ordered
+    }
+
+    private func shortIdentifier(_ raw: String) -> String {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.count <= 12 {
+            return trimmed
+        }
+
+        let prefixPart = trimmed.prefix(6)
+        let suffixPart = trimmed.suffix(4)
+        return "\(prefixPart)…\(suffixPart)"
     }
 
     private func prefillFromCurrentSessionUserIfNeeded() {
@@ -611,6 +721,7 @@ struct FeedPlaceholderView: View {
 
 private struct PrivateFeedMomentRow: Identifiable {
     let id: String
+    let authorID: String
     let authorLabel: String
     let caption: String
     let visibilityScope: String
@@ -803,6 +914,7 @@ private struct PrivateFeedAPIClient {
             return payload.items.map {
                 PrivateFeedMomentRow(
                     id: $0.id,
+                    authorID: $0.author.id,
                     authorLabel: $0.author.username ?? $0.author.email,
                     caption: $0.caption_text ?? "(no caption)",
                     visibilityScope: $0.visibility_scope,
