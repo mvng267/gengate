@@ -1,23 +1,29 @@
 # GenGate Workflow Status
 
-- Batch: 262
+- Batch: 263
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 262 private-feed shell — add web quick action `Use current session user as viewer + load` for parity with iOS viewer shortcut.
+- Scope: batch 263 direct-message shell — add quick-copy conversation summary (`user_a + user_b + message_count + last_message_id`) on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
-  - iOS Feed: bấm `Use current session user for viewer + author` hoặc nhập viewer rồi bấm `Load private feed`, đối chiếu nhanh với web.
+  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> verify dòng `Quick copy conversation: user_a=... | user_b=... | message_count=... | last_message_id=...`.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> verify dòng `Quick copy conversation: user_a=... | user_b=... | message_count=... | last_message_id=...`.
 - Files:
-  - apps/web-nextjs/components/moment-compose-shell.tsx
+  - apps/web-nextjs/components/direct-message-shell.tsx
+  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `47cb6df` — `batch262: add session-viewer quick load action in web feed shell`
+  - latest feature commit: `2e3ab8b` — `batch263: add direct-message quick-copy conversation summaries`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch263 với 1 slice hẹp direct-message shell: thêm quick-copy conversation summary (user_a + user_b + message_count + last_message_id) trên web+iOS.
+- Next: mở batch264 với 1 slice hẹp direct-message shell: thêm quick action web `Use current session user as sender + send` để parity thao tác nhanh với iOS sender mặc định User A.
+- Batch 263 handoff:
+  - `2e3ab8b` — `batch263: add direct-message quick-copy conversation summaries`
+  - web/iOS inbox shell giờ có line quick-copy chuẩn hóa `user_a/user_b/message_count/last_message_id` để report nhanh trạng thái thread.
 - Batch 262 handoff:
   - `47cb6df` — `batch262: add session-viewer quick load action in web feed shell`
   - web feed shell giờ có quick action apply session user làm viewer + reload feed ngay, đồng bộ thao tác nhanh với iOS.
