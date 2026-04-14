@@ -18,7 +18,7 @@
 
 ## Batch 222 handoff (closed)
 - Batch vừa xong: **222**
-- Commit đã push:
+- Commit local đã chốt (chưa push):
   - `acda01f` — `batch222: add ios feed row shortcut for moment delete`
 - Test/verify cuối:
   - iOS: `cd apps/ios-swift && swift build` ✅
