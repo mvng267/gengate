@@ -16,6 +16,7 @@ struct NotificationsPlaceholderView: View {
     @State private var statusMessage: String?
     @State private var isLoading = false
     @State private var isCreatingNotification = false
+    @State private var lastLoadedWindow: NotificationLoadWindow?
 
     var body: some View {
         ScrollView {
@@ -109,7 +110,7 @@ struct NotificationsPlaceholderView: View {
                             await loadNotifications()
                         }
                     } label: {
-                        Text(isLoading ? "Loading notifications..." : "Load notifications")
+                        Text(loadButtonTitle)
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
@@ -251,6 +252,34 @@ struct NotificationsPlaceholderView: View {
         return nil
     }
 
+    private var normalizedLimit: Int {
+        min(max(Int(pageLimitDraft.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 20, 1), 200)
+    }
+
+    private var normalizedOffset: Int {
+        max(Int(pageOffsetDraft.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0, 0)
+    }
+
+    private var hasPendingWindowChange: Bool {
+        guard let lastLoadedWindow else {
+            return true
+        }
+
+        let trimmedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        return lastLoadedWindow.userID != trimmedUserID ||
+            lastLoadedWindow.limit != normalizedLimit ||
+            lastLoadedWindow.offset != normalizedOffset ||
+            lastLoadedWindow.unreadOnly != pageUnreadOnly
+    }
+
+    private var loadButtonTitle: String {
+        if isLoading {
+            return "Loading notifications..."
+        }
+
+        return hasPendingWindowChange ? "Load notifications (window changed)" : "Load notifications"
+    }
+
     private func prefillFromCurrentSessionUserIfNeeded() {
         guard userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let currentSessionUserID else {
@@ -300,12 +329,19 @@ struct NotificationsPlaceholderView: View {
                 unreadOnly: pageUnreadOnly
             )
             mutatingNotificationIDs = []
+            lastLoadedWindow = NotificationLoadWindow(
+                userID: trimmedUserID,
+                limit: safeLimit,
+                offset: safeOffset,
+                unreadOnly: pageUnreadOnly
+            )
             statusMessage = "Loaded \(payload.count) notification(s). Page unread: \(payload.unreadCount). Total unread: \(payload.totalUnreadCount). Page window limit=\(safeLimit), offset=\(safeOffset), unread_only=\(pageUnreadOnly ? "true" : "false"). Use First/Prev/Next to move paging window quickly."
         } catch {
             notificationRows = []
             listMeta = nil
             mutatingNotificationIDs = []
             statusMessage = nil
+            lastLoadedWindow = nil
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
 
@@ -337,6 +373,7 @@ struct NotificationsPlaceholderView: View {
                 payloadMessage: trimmedPayload.isEmpty ? "sent from ios notifications shell" : trimmedPayload
             )
             statusMessage = "Created notification \(createdRow.id). Reloading list..."
+            lastLoadedWindow = nil
             await loadNotifications()
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
@@ -365,6 +402,7 @@ struct NotificationsPlaceholderView: View {
             statusMessage = updated.isRead
                 ? "Marked notification \(updated.id) as read."
                 : "Marked notification \(updated.id) as unread."
+            lastLoadedWindow = nil
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
@@ -386,6 +424,13 @@ private struct NotificationListMeta {
     let count: Int
     let unreadCount: Int
     let totalUnreadCount: Int
+    let limit: Int
+    let offset: Int
+    let unreadOnly: Bool
+}
+
+private struct NotificationLoadWindow {
+    let userID: String
     let limit: Int
     let offset: Int
     let unreadOnly: Bool

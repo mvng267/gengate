@@ -21,6 +21,13 @@ const initialForm = {
   payloadJson: '{"message":"Demo notification"}',
 };
 
+type NotificationLoadWindow = {
+  userId: string;
+  limit: number;
+  offset: number;
+  unreadOnly: boolean;
+};
+
 export function NotificationShell({ initialUserId = "" }: NotificationShellProps) {
   const [form, setForm] = useState({
     ...initialForm,
@@ -33,6 +40,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [lastLoadedWindow, setLastLoadedWindow] = useState<NotificationLoadWindow | null>(null);
 
   useEffect(() => {
     setForm((current) => ({
@@ -42,17 +50,29 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     setItems([]);
     setListMeta(null);
     setPagination({ limit: 20, offset: 0, unreadOnly: false });
+    setLastLoadedWindow(null);
   }, [initialUserId]);
 
+  function currentLoadWindow(): NotificationLoadWindow {
+    return {
+      userId: form.userId.trim(),
+      limit: pagination.limit,
+      offset: pagination.offset,
+      unreadOnly: pagination.unreadOnly,
+    };
+  }
+
   async function handleLoad() {
+    const window = currentLoadWindow();
+
     setIsLoading(true);
     setStatus("Loading notifications...");
 
     try {
-      const payload = await listNotifications(form.userId.trim(), {
-        limit: pagination.limit,
-        offset: pagination.offset,
-        unreadOnly: pagination.unreadOnly,
+      const payload = await listNotifications(window.userId, {
+        limit: window.limit,
+        offset: window.offset,
+        unreadOnly: window.unreadOnly,
       });
       setItems(payload.items);
       setListMeta({
@@ -60,10 +80,11 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
         unread_count: payload.unread_count,
         total_unread_count: payload.total_unread_count,
       });
+      setLastLoadedWindow(window);
       setStatus(
-        `Loaded ${payload.count} notification(s) for ${form.userId.trim() || "unknown-user"}. ` +
+        `Loaded ${payload.count} notification(s) for ${window.userId || "unknown-user"}. ` +
           `Page unread: ${payload.unread_count}. Total unread: ${payload.total_unread_count}. ` +
-          `Page window limit=${pagination.limit}, offset=${pagination.offset}, unread_only=${pagination.unreadOnly}.`,
+          `Page window limit=${window.limit}, offset=${window.offset}, unread_only=${window.unreadOnly}.`,
       );
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "notifications_list_failed");
@@ -71,6 +92,13 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
 
     setIsLoading(false);
   }
+
+  const pendingWindowChange =
+    lastLoadedWindow === null ||
+    lastLoadedWindow.userId !== form.userId.trim() ||
+    lastLoadedWindow.limit !== pagination.limit ||
+    lastLoadedWindow.offset !== pagination.offset ||
+    lastLoadedWindow.unreadOnly !== pagination.unreadOnly;
 
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -84,6 +112,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
         payloadJson: JSON.parse(form.payloadJson) as Record<string, unknown>,
       });
       setItems((current) => [created, ...current.filter((item) => item.id !== created.id)]);
+      setLastLoadedWindow(null);
       setStatus(`Created notification ${created.id}. Reload to refresh unread summary.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "notification_create_failed");
@@ -99,6 +128,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     try {
       const updated = item.read_at ? await markNotificationUnread(item.id) : await markNotificationRead(item.id);
       setItems((current) => current.map((entry) => (entry.id === updated.id ? updated : entry)));
+      setLastLoadedWindow(null);
       setStatus(`Updated notification ${updated.id} to ${updated.read_at ? "read" : "unread"}. Reload to refresh unread summary.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "notification_toggle_failed");
@@ -230,7 +260,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
           {isCreating ? "Creating..." : "Create notification"}
         </button>
         <button type="button" onClick={() => void handleLoad()} disabled={isLoading}>
-          {isLoading ? "Loading..." : "Load notifications"}
+          {isLoading ? "Loading..." : pendingWindowChange ? "Load notifications (window changed)" : "Load notifications"}
         </button>
       </form>
 
