@@ -104,6 +104,12 @@ struct FeedPlaceholderView: View {
                     .buttonStyle(.bordered)
                     .disabled(currentSessionUserID == nil)
 
+                    Button("Use current session user as create author") {
+                        applyCurrentSessionUserAsCreateAuthor()
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(currentSessionUserID == nil || isCreatingMoment)
+
                     Button {
                         Task {
                             await loadPrivateFeed()
@@ -916,6 +922,26 @@ struct FeedPlaceholderView: View {
         viewerUserIDDraft = currentSessionUserID
         authorUserIDDraft = currentSessionUserID
         reactionUserIDDraft = currentSessionUserID
+    }
+
+    private func applyCurrentSessionUserAsCreateAuthor() {
+        guard let currentSessionUserID else {
+            return
+        }
+
+        let trimmedSessionUserID = currentSessionUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedSessionUserID.isEmpty else {
+            return
+        }
+
+        let trimmedAuthorDraft = normalizedAuthorUserIDDraft
+        if trimmedAuthorDraft == trimmedSessionUserID {
+            statusMessage = "Create author already matches current session user (author_source=session_user)."
+        } else {
+            authorUserIDDraft = trimmedSessionUserID
+            statusMessage = "Applied current session user as create author (author_source=session_user)."
+        }
+        fetchError = nil
     }
 
     private func fillReactionFromLatestMoment() {

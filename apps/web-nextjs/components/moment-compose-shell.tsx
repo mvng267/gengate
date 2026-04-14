@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { readPersistedAuthSession } from "@/lib/auth/client";
 import { createMomentWithImage, listMomentsForAuthor, listPrivateFeed, type MomentListItem } from "@/lib/moments/client";
 
 type MomentComposeShellProps = {
@@ -31,6 +32,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [isLoadingFeed, setIsLoadingFeed] = useState(false);
   const [items, setItems] = useState<MomentListItem[]>([]);
   const [feedItems, setFeedItems] = useState<MomentListItem[]>([]);
+  const [currentSessionUserId, setCurrentSessionUserId] = useState("");
   const momentPayloadQuickCopy = `author=${form.authorUserId.trim() || "(empty)"} | image_url=${form.imageStorageKey.trim() || "(empty)"} | caption=${form.captionText.trim() || "(empty)"}`;
 
   useEffect(() => {
@@ -42,6 +44,31 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     setItems([]);
     setFeedItems([]);
   }, [initialAuthorUserId, initialViewerUserId]);
+
+  useEffect(() => {
+    const persistedSession = readPersistedAuthSession();
+    setCurrentSessionUserId(persistedSession?.session.user_id?.trim() ?? "");
+  }, []);
+
+  function applyCurrentSessionUserAsAuthor() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_author_missing_for_quick_apply");
+      return;
+    }
+
+    const draftAuthorUserId = form.authorUserId.trim();
+    if (draftAuthorUserId === sessionUserId) {
+      setStatus("Create author already matches current session user (author_source=session_user).");
+      return;
+    }
+
+    setForm((current) => ({
+      ...current,
+      authorUserId: sessionUserId,
+    }));
+    setStatus("Applied current session user as create author (author_source=session_user).");
+  }
 
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -115,6 +142,9 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
             placeholder="paste registered user uuid"
           />
         </label>
+        <button type="button" onClick={applyCurrentSessionUserAsAuthor} disabled={currentSessionUserId.trim().length === 0 || isSubmitting}>
+          Use current session user as create author
+        </button>
         <label>
           Feed viewer UUID
           <input
