@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **247 — notification shell (web/iOS explicit pending-window hint line) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **248 — notification shell (web/iOS quick-apply unchanged-user copy clarity) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **247**
-- Scope hiện tại: notification shell — thêm explicit pending-window hint line trên web/iOS.
+- Batch workflow chính thức hiện tại: **248**
+- Scope hiện tại: notification shell — clarify copy cho quick apply khi session-user trùng draft hiện tại trên web/iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/notification-shell.tsx`
@@ -99,18 +99,33 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `997d2c2` — `batch247: show explicit pending-window hints in notification shells`
+  - commit gần nhất đã chốt: `dde8939` — `batch248: clarify quick-apply copy when session user unchanged`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch248 với 1 slice hẹp notification shell: normalize copy cho quick apply khi session-user trùng draft hiện tại.
+  - mở batch249 với 1 slice hẹp notification shell: thêm lightweight row-level read-state symbol gần nút để scan read/unread nhanh hơn khi paging.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.
   - iOS Feed: tạo/lỗi moment posting flow; nếu backend trả `error.code/error.message` thì UI hiện thông điệp lỗi + hint hành động cho `user_not_found`, `moment_not_found`, `validation_error`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **248**
+- Commit cuối đã chốt:
+  - `dde8939` — `batch248: clarify quick-apply copy when session user unchanged`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **249**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm lightweight row-level read-state symbol gần nút để scan read/unread nhanh hơn khi paging.
+
+---
 
 - Batch vừa xong: **247**
 - Commit cuối đã chốt:

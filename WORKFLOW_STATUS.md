@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 247
+- Batch: 248
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 247 notification shell — add explicit pending-window hint line on web+iOS.
+- Scope: batch 248 notification shell — clarify quick-apply copy when session user is unchanged.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,10 +16,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `997d2c2` — `batch247: show explicit pending-window hints in notification shells`
+  - latest feature commit: `dde8939` — `batch248: clarify quick-apply copy when session user unchanged`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch248 với 1 slice hẹp notification shell tiếp theo: thêm normalize copy cho session-user quick apply khi session user trùng draft hiện tại (đỡ reload nhầm do tưởng đã đổi user).
+- Next: mở batch249 với 1 slice hẹp notification shell tiếp theo: thêm lightweight row-level read-state symbol near button label để scan unread/read nhanh hơn khi retest paging.
+- Batch 248 handoff:
+  - `dde8939` — `batch248: clarify quick-apply copy when session user unchanged`
+  - web/iOS quick-apply giờ báo rõ `already selected` vs `applied current session user` trước khi reload first page.
 - Batch 247 handoff:
   - `997d2c2` — `batch247: show explicit pending-window hints in notification shells`
   - web/iOS hiển thị dòng `Window hint` riêng (ngoài button label) để tester thấy ngay trạng thái sync/mismatch của load window.

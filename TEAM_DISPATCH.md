@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 247
-- Trục công việc: notification shell — web/iOS explicit pending-window hint line.
-- Trạng thái: batch247_complete_notification_pending_window_hint.
+- Batch workflow chính thức hiện tại: 248
+- Trục công việc: notification shell — web/iOS quick-apply unchanged-user copy clarity.
+- Trạng thái: batch248_complete_notification_quick_apply_copy_clarity.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 248 handoff (closed)
+- Batch vừa xong: **248**
+- Commit đã chốt:
+  - `dde8939` — `batch248: clarify quick-apply copy when session user unchanged`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **249**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm lightweight row-level read-state symbol gần nút để scan read/unread nhanh hơn khi paging.
 
 ## Batch 247 handoff (closed)
 - Batch vừa xong: **247**
