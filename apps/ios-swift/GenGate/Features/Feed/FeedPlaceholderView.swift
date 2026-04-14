@@ -620,14 +620,6 @@ struct FeedPlaceholderView: View {
                 .font(.caption.monospaced())
                 .foregroundStyle(.secondary)
 
-            Text(requireDeleteConfirmation ? "Delete lock: Locked" : "Delete lock: Unlocked")
-                .font(.caption2.weight(.semibold))
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .foregroundStyle(requireDeleteConfirmation ? .orange : .green)
-                .background((requireDeleteConfirmation ? Color.orange : Color.green).opacity(0.12))
-                .clipShape(Capsule())
-
             HStack(spacing: 8) {
                 Button {
                     useMomentAsReactionTarget(row)
@@ -693,7 +685,7 @@ struct FeedPlaceholderView: View {
             }
 
             HStack(spacing: 8) {
-                Text(requireDeleteConfirmation ? "Locked" : "Unlocked")
+                Text(requireDeleteConfirmation ? "Lock ON" : "Lock OFF")
                     .font(.caption2.monospaced())
                     .fontWeight(.semibold)
                     .padding(.horizontal, 8)
@@ -704,8 +696,8 @@ struct FeedPlaceholderView: View {
 
                 Text(
                     requireDeleteConfirmation
-                        ? "Row delete đang khóa. Tắt `Require confirmation for row delete` ở form phía trên để mở khoá."
-                        : "Row delete đã mở khoá. Có thể dùng `Delete this moment` ngay tại row này."
+                        ? "Row delete lock is on. Turn off `Require confirmation for row delete` to unlock."
+                        : "Row delete unlocked. You can tap `Delete this moment` on this row now."
                 )
                 .font(.caption)
                 .foregroundStyle(requireDeleteConfirmation ? .orange : .green)
