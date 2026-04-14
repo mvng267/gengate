@@ -1,12 +1,12 @@
 # GenGate Workflow Status
 
-- Batch: 211
+- Batch: 212
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 211 iOS feed seam friction reduction — normalize quick-react status/error message format
+- Scope: batch 212 iOS feed seam friction reduction — add copy-latest quick-react log action
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
-  - iOS: Session login -> Feed -> load private/authored moments -> quick react from row -> verify compact status (`qr:ok ...`) and error (`qr:err ...`) messages for rapid multi-run testing.
+  - iOS: Session login -> Feed -> quick react from row -> verify `qr:*` message -> tap `Copy latest quick-react log` -> confirm `qr:copied log`.
   - Web/backend seams from prior batches remain runnable for friend graph/moments/inbox/location/notifications.
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
@@ -16,11 +16,14 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `ce16b12` — `batch210: add ios feed quick reaction refresh outcome status`
-  - working tree: bẩn (batch211 changes in progress, chưa commit, chưa push)
+  - latest commit: `b09f606` — `batch211: normalize ios feed quick reaction status format`
+  - working tree: bẩn (batch212 changes in progress, chưa commit, chưa push)
 - Blocker: none
-- Next: chốt batch211 (commit local) rồi mở batch212 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
+- Next: chốt batch212 (commit local) rồi mở batch213 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 211 handoff:
+  - `b09f606` — `batch211: normalize ios feed quick reaction status format`
+  - normalized `qr:ok`/`qr:err` logs remain MVP-testable while batch 212 adds one-tap copy action for latest quick-react log.
 - Batch 210 handoff:
   - `ce16b12` — `batch210: add ios feed quick reaction refresh outcome status`
   - refresh outcome summary remains MVP-testable while batch 211 normalizes quick-react status/error message format.

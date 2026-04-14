@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 struct FeedPlaceholderView: View {
     @Environment(AppSessionStore.self) private var sessionStore
@@ -19,6 +22,7 @@ struct FeedPlaceholderView: View {
     @State private var reactionRows: [MomentReactionRow] = []
     @State private var statusMessage: String?
     @State private var fetchError: String?
+    @State private var latestQuickReactionLog: String?
     @State private var isLoading = false
     @State private var isLoadingAuthoredMoments = false
     @State private var isCreatingMoment = false
@@ -215,6 +219,16 @@ struct FeedPlaceholderView: View {
                         Text("Fetch error: \(fetchError)")
                             .font(.footnote)
                             .foregroundStyle(.orange)
+                    }
+
+                    if latestQuickReactionLog != nil {
+                        Button {
+                            copyLatestQuickReactionLogToClipboard()
+                        } label: {
+                            Text("Copy latest quick-react log")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
                     }
 
                     Text("Loaded private-feed moments: \(momentRows.count) · authored moments: \(authoredMomentRows.count) · reactions: \(reactionRows.count)")
@@ -752,6 +766,7 @@ struct FeedPlaceholderView: View {
             )
 
             statusMessage = "qr:ok moment=\(shortIdentifier(row.id)) mode=\(quickReactionRefreshMode.shortLabel) refreshing=reactions"
+            latestQuickReactionLog = statusMessage
             await loadMomentReactions()
 
             var refreshedTargets: [String] = []
@@ -784,6 +799,7 @@ struct FeedPlaceholderView: View {
             if fetchError == nil {
                 let refreshedSummary = refreshedTargets.isEmpty ? "none" : refreshedTargets.joined(separator: "+")
                 statusMessage = "qr:ok moment=\(shortIdentifier(row.id)) mode=\(quickReactionRefreshMode.shortLabel) refreshed=\(refreshedTargets.count) targets=\(refreshedSummary)"
+                latestQuickReactionLog = statusMessage
             }
         } catch {
             setQuickReactionError(
@@ -801,6 +817,21 @@ struct FeedPlaceholderView: View {
         } else {
             fetchError = "qr:err code=\(code)"
         }
+
+        latestQuickReactionLog = fetchError
+    }
+
+    private func copyLatestQuickReactionLogToClipboard() {
+        guard let latestQuickReactionLog else {
+            return
+        }
+
+#if canImport(UIKit)
+        UIPasteboard.general.string = latestQuickReactionLog
+        statusMessage = "qr:copied log"
+#else
+        statusMessage = "qr:copy_unavailable"
+#endif
     }
 
     private func synchronizeReactionTargetWithLoadedMoments() {

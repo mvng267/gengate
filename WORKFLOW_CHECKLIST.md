@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **211 — iOS feed quick-react status/error format normalization slice is in verify (MVP-testable)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **212 — iOS feed quick-react log copy action slice is in verify (MVP-testable)**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **211**
-- Scope hiện tại: iOS feed seam friction reduction — chuẩn hóa quick-react status/error message sang format ngắn nhất quán (`qr:ok ...` / `qr:err ...`) để giảm nhiễu khi test lặp nhiều vòng.
+- Batch workflow chính thức hiện tại: **212**
+- Scope hiện tại: iOS feed seam friction reduction — thêm action copy nhanh latest quick-react log để hỗ trợ test lặp và ghi bug note.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
@@ -100,14 +100,14 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `ce16b12` — `batch210: add ios feed quick reaction refresh outcome status`
-  - working tree hiện tại: bẩn (đang có thay đổi batch211, chưa commit)
+  - commit gần nhất đã chốt: `b09f606` — `batch211: normalize ios feed quick reaction status format`
+  - working tree hiện tại: bẩn (đang có thay đổi batch212, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit local batch211 rồi mở batch212 cho 1 friction slice hẹp tiếp theo ở feed/inbox seam MVP
+  - commit local batch212 rồi mở batch213 cho 1 friction slice hẹp tiếp theo ở feed/inbox seam MVP
 - MVP-testable run/test path (human):
-  - iOS Session login -> Feed -> load private/authored moments -> quick react from row -> verify `qr:ok`/`qr:err` messages hiển thị đúng mode + refresh outcome.
+  - iOS Session login -> Feed -> quick react from row -> verify `qr:*` message -> tap `Copy latest quick-react log` -> confirm `qr:copied log`.
 
 ## Batch handoff note
 
