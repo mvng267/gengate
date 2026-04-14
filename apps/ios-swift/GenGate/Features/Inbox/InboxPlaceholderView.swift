@@ -48,9 +48,17 @@ struct InboxPlaceholderView: View {
     @State private var lastRecipientDeviceContextResetUserID: String?
     @State private var lastRecipientDeviceSourceHintCopyAt: Date?
     @State private var lastRecipientDeviceSourceHintCopyText: String?
+    @State private var lastRecipientDeviceSourceHintReportPayloadCopyAt: Date?
+    @State private var lastRecipientDeviceSourceHintReportPayloadCopyText: String?
 
     private let recipientDevicesAutoReloadDebounceNanoseconds: UInt64 = 350_000_000
     private let recipientDevicesAutoReloadMinIntervalSeconds: TimeInterval = 1.0
+
+    private static let recipientSourceHintReportTimestampFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
 
     var body: some View {
         ScrollView {
@@ -114,7 +122,8 @@ struct InboxPlaceholderView: View {
                         "Status summary wording is now compacted into a single source-hint consistency phrase to match current `short-id`-normalized behavior across all branches.",
                         "Recipient-device section now shows a compact source-hint verify matrix so testers can quickly map current state against expected hint fragment before executing device-key actions.",
                         "Added quick action `Copy source hint` to copy the current runtime source-hint string for bug reports and triage notes.",
-                        "After copy, a short-lived feedback line shows elapsed time + short hint fragment so testers can confirm exactly what was captured.",
+                        "Added quick action `Copy source-hint report payload` to capture a compact triage line (recipient user/device short-id + branch hint + timestamp).",
+                        "After copy, short-lived feedback lines show elapsed time + short fragment so testers can confirm exactly what was captured.",
                         "Recipient-device section now shows a compact selection-source hint so testers know whether current `Recipient device UUID` is in-sync with loaded options or still a manual out-of-options value.",
                         "One-tap action `Clear recipient device UUID` helps testers reset stale/manual device input instantly before selecting a fresh option."
                     ]
@@ -411,16 +420,33 @@ struct InboxPlaceholderView: View {
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
 
-                            Button {
-                                copyRecipientDeviceSourceHint(recipientDeviceSelectionSourceHintText)
-                            } label: {
-                                Text("Copy source hint")
-                                    .frame(maxWidth: .infinity)
+                            VStack(alignment: .leading, spacing: 8) {
+                                Button {
+                                    copyRecipientDeviceSourceHint(recipientDeviceSelectionSourceHintText)
+                                } label: {
+                                    Text("Copy source hint")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.bordered)
+
+                                Button {
+                                    copyRecipientDeviceSourceHintReportPayload()
+                                } label: {
+                                    Text("Copy source-hint report payload")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(recipientDeviceSourceHintReportPayloadText == nil)
                             }
-                            .buttonStyle(.bordered)
 
                             if let recipientDeviceSourceHintCopiedFeedbackText {
                                 Text(recipientDeviceSourceHintCopiedFeedbackText)
+                                    .font(.caption2.monospaced())
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            if let recipientDeviceSourceHintReportPayloadCopiedFeedbackText {
+                                Text(recipientDeviceSourceHintReportPayloadCopiedFeedbackText)
                                     .font(.caption2.monospaced())
                                     .foregroundStyle(.secondary)
                             }
@@ -1200,6 +1226,35 @@ struct InboxPlaceholderView: View {
         return "Copied source hint (\(Int(elapsed))s ago): \(shortCaption(lastRecipientDeviceSourceHintCopyText, limit: 88))"
     }
 
+    private var recipientDeviceSourceHintReportPayloadText: String? {
+        guard let sourceHintText = recipientDeviceSelectionSourceHintText else {
+            return nil
+        }
+
+        let trimmedRecipientUserID = recipientUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedRecipientDeviceID = recipientDeviceIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let recipientUserShort = shortUserID(trimmedRecipientUserID)
+        let recipientDeviceShort = shortUserID(trimmedRecipientDeviceID)
+        let trimmedSourceHintText = sourceHintText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let timestamp = Self.recipientSourceHintReportTimestampFormatter.string(from: Date())
+
+        return "[inbox-source-hint] ts=\(timestamp) recipient_user=\(recipientUserShort) recipient_device=\(recipientDeviceShort) hint=\(trimmedSourceHintText)"
+    }
+
+    private var recipientDeviceSourceHintReportPayloadCopiedFeedbackText: String? {
+        guard let lastRecipientDeviceSourceHintReportPayloadCopyAt,
+              let lastRecipientDeviceSourceHintReportPayloadCopyText else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(lastRecipientDeviceSourceHintReportPayloadCopyAt)
+        guard elapsed <= 12 else {
+            return nil
+        }
+
+        return "Copied report payload (\(Int(elapsed))s ago): \(shortCaption(lastRecipientDeviceSourceHintReportPayloadCopyText, limit: 96))"
+    }
+
     private var resolvedReadStatusMessageID: String? {
         if let targetMessageID = resolvedReadCursorTargetMessageID,
            !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -1290,15 +1345,35 @@ struct InboxPlaceholderView: View {
             return
         }
 
-#if os(iOS)
-        UIPasteboard.general.string = normalizedText
-#elseif os(macOS)
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(normalizedText, forType: .string)
-#endif
+        writeToClipboard(normalizedText)
 
         lastRecipientDeviceSourceHintCopyText = normalizedText
         lastRecipientDeviceSourceHintCopyAt = Date()
+    }
+
+    private func copyRecipientDeviceSourceHintReportPayload() {
+        guard let reportPayload = recipientDeviceSourceHintReportPayloadText else {
+            return
+        }
+
+        let normalizedPayload = reportPayload.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedPayload.isEmpty else {
+            return
+        }
+
+        writeToClipboard(normalizedPayload)
+
+        lastRecipientDeviceSourceHintReportPayloadCopyText = normalizedPayload
+        lastRecipientDeviceSourceHintReportPayloadCopyAt = Date()
+    }
+
+    private func writeToClipboard(_ text: String) {
+#if os(iOS)
+        UIPasteboard.general.string = text
+#elseif os(macOS)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+#endif
     }
 
     private func recipientResetReasonCaption(_ reason: String) -> String {
