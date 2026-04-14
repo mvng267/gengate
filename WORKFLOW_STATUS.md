@@ -18,11 +18,14 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `dad9ec4` — `batch219: sync workflow docs for ios preset selection feedback`
-  - working tree: bẩn (batch220 changes in progress, chưa commit, chưa push)
+  - latest commit: `13d7a42` — `batch220: show ios pending pair mode in snapshot summary`
+  - working tree: sạch
 - Blocker: none
-- Next: chốt batch220 (commit local) rồi mở batch221 cho 1 friction slice hẹp tiếp theo trong friend graph / feed seam MVP
+- Next: mở batch221 cho 1 friction slice hẹp tiếp theo trong friend graph / feed seam MVP
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 220 handoff:
+  - `13d7a42` — `batch220: show ios pending pair mode in snapshot summary`
+  - snapshot summary now exposes current pending pair mode (`same` / `reverse`) after preset selection for faster operator confirmation.
 - Batch 219 handoff:
   - `e01f7ea` — `batch219: show selected state for ios pending pair presets`
   - `dad9ec4` — `batch219: sync workflow docs for ios preset selection feedback`

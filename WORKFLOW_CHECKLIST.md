@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `dad9ec4` — `batch219: sync workflow docs for ios preset selection feedback`
-  - working tree hiện tại: bẩn (đang có thay đổi batch220, chưa commit)
+  - commit gần nhất đã chốt: `13d7a42` — `batch220: show ios pending pair mode in snapshot summary`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit local batch220 rồi mở batch221 cho 1 friction slice hẹp kế tiếp.
+  - mở batch221 cho 1 friction slice hẹp kế tiếp.
 - MVP-testable run/test path (human):
   - iOS Session login -> Profile -> load friend graph -> bấm `Use same pair`/`Use reverse pair` -> verify status summary thêm `pending pair mode: same|reverse` trước khi send/accept.
 

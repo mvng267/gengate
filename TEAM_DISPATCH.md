@@ -14,6 +14,7 @@
 ## Active batch
 - Batch workflow chính thức hiện tại: 220
 - Trục công việc: iOS profile friend graph UX hardening — show selected pending pair mode in status summary.
+- Trạng thái: verify_batch220_ios (đã commit local, chưa push).
 
 ## Batch 219 handoff (closed)
 - Batch vừa xong: **219**
