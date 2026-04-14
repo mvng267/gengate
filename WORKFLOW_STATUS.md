@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 181
+- Batch: 182
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 181 iOS inbox seam hardening — add one-tap copy for compact triage-kit preview line
+- Scope: batch 182 iOS inbox seam hardening — add preview delta marker between compact preview and full triage-kit
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch181 slice)
+  - latest commit: `HEAD` (local batch182 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch182 cho messaging friction tiếp theo (ví dụ thêm preview delta marker để chỉ phần khác nhau giữa compact preview và full triage-kit) trong iOS inbox shell
+- Next: mở batch183 cho messaging friction tiếp theo (ví dụ thêm quick-copy cho preview delta marker) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -455,6 +455,10 @@
   - thêm nút `Copy source-hint triage-kit preview` để copy nhanh compact preview line cho short bug note
   - thêm feedback line `Copied triage-kit preview ...` để xác nhận dòng preview vừa copy
   - không đổi payload chính triage-kit; chỉ thêm quick-copy cho phiên bản compact
+- Batch 182 outcome:
+  - thêm line `Preview delta` ngay dưới `Triage-kit preview` để chỉ rõ phần compact preview lược bỏ so với full triage-kit
+  - thêm computed text `recipientDeviceSourceHintTriageKitPreviewDeltaHintText` để giữ wording nhất quán trong preview block
+  - cập nhật status/bullets phản ánh capability `preview delta marker`
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -464,7 +468,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, load direct thread A-B; verify `Source-hint verify matrix` + `Branch-key legend` + triage preview block (`line` vs `body`) + `Diff hint` + `Usage` + `Triage-kit preview` cùng xuất hiện; lần lượt qua từng state kiểm tra line/body đều phản ánh đúng `branch + selection + guidance` và khác nhau đúng ở phần prefix tag như diff hint mô tả; verify usage note mapping đúng mục đích (`line` cho tagged log/search, `body` cho issue text gọn, `diff hint` cho onboarding/explanation) và triage-kit preview hiển thị đúng `branch + shortened line/body`; bấm `Copy source-hint branch key` để paste token nhanh, bấm `Copy source-hint report payload` để đối chiếu payload đầy đủ có cùng branch key, bấm `Copy source-hint matrix snapshot` để lấy block matrix+legend+branch cho report template, bấm `Copy source-hint triage line` để lấy line có prefix, bấm `Copy source-hint triage body` để lấy body không prefix cho issue title/body, bấm `Copy source-hint diff hint` để lấy câu giải thích line/body, bấm `Copy source-hint usage note` để lấy usage mapping line/body/diff, bấm `Copy source-hint triage kit` để lấy payload gộp line/body/diff/usage, và bấm `Copy source-hint triage-kit preview` để lấy compact preview line; check feedback lines `Copied branch key ...`, `Copied report payload ...`, `Copied matrix snapshot ...`, `Copied triage line ...`, `Copied triage body ...`, `Copied diff hint ...`, `Copied usage note ...`, `Copied triage kit ...`, `Copied triage-kit preview ...`; cuối cùng bấm dynamic first-valid action để quay lại first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.` trước khi `Create message-device key`
+  - iOS Inbox path: open Inbox tab, load direct thread A-B; verify `Source-hint verify matrix` + `Branch-key legend` + triage preview block (`line` vs `body`) + `Diff hint` + `Usage` + `Triage-kit preview` + `Preview delta` cùng xuất hiện; lần lượt qua từng state kiểm tra line/body đều phản ánh đúng `branch + selection + guidance` và khác nhau đúng ở phần prefix tag như diff hint mô tả; verify usage note mapping đúng mục đích (`line` cho tagged log/search, `body` cho issue text gọn, `diff hint` cho onboarding/explanation), triage-kit preview hiển thị đúng `branch + shortened line/body`, và preview-delta line nêu đúng phần omitted (`diff/usage`) của compact preview; bấm `Copy source-hint branch key` để paste token nhanh, bấm `Copy source-hint report payload` để đối chiếu payload đầy đủ có cùng branch key, bấm `Copy source-hint matrix snapshot` để lấy block matrix+legend+branch cho report template, bấm `Copy source-hint triage line` để lấy line có prefix, bấm `Copy source-hint triage body` để lấy body không prefix cho issue title/body, bấm `Copy source-hint diff hint` để lấy câu giải thích line/body, bấm `Copy source-hint usage note` để lấy usage mapping line/body/diff, bấm `Copy source-hint triage kit` để lấy payload gộp line/body/diff/usage, và bấm `Copy source-hint triage-kit preview` để lấy compact preview line; check feedback lines `Copied branch key ...`, `Copied report payload ...`, `Copied matrix snapshot ...`, `Copied triage line ...`, `Copied triage body ...`, `Copied diff hint ...`, `Copied usage note ...`, `Copied triage kit ...`, `Copied triage-kit preview ...`; cuối cùng bấm dynamic first-valid action để quay lại first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.` trước khi `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts
