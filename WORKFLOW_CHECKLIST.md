@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **229 — iOS row delete readiness hint now uses lock/unlock tint for faster scan (MVP-testable)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **230 — iOS row-level lock-state badge added near delete actions (MVP-testable)**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **229**
-- Scope hiện tại: iOS feed UX hardening — tô màu readiness hint theo lock/unlock state để operator bắt trạng thái nhanh hơn khi test liên tiếp.
+- Batch workflow chính thức hiện tại: **230**
+- Scope hiện tại: iOS feed UX hardening — thêm badge lock-state ngay gần row delete action để operator biết trạng thái lock/unlock tại chỗ.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
@@ -100,20 +100,35 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `df805ad` — `batch229: tint row delete readiness hint by lock state`
-  - working tree hiện tại: sạch
+  - commit gần nhất đã chốt: `a53dc6d` — `batch230: add row lock-state badge near delete action`
+  - working tree hiện tại: bẩn (docs batch230 đang cập nhật, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch230 cho 1 friction slice hẹp kế tiếp.
+  - commit docs batch230 rồi mở batch231 cho 1 friction slice hẹp kế tiếp.
 - MVP-testable run/test path (human):
-  - iOS Session login -> Feed -> load moments -> verify readiness hint màu cam khi lock + màu xanh khi unlock -> unlock rồi tap `Delete this moment`.
+  - iOS Session login -> Feed -> load moments -> verify badge `Delete lock: Locked/Unlocked` đổi theo toggle -> unlock rồi tap `Delete this moment`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **230**
+- Commit cuối đã chốt:
+  - `a53dc6d` — `batch230: add row lock-state badge near delete action`
+- Test-verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **231**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - đồng bộ style badge lock-state cho consistency với status copy (tone/copy gọn hơn khi scroll dày).
+
+---
 
 - Batch vừa xong: **229**
 - Commit cuối đã chốt:
   - `df805ad` — `batch229: tint row delete readiness hint by lock state`
+  - `0cc3a22` — `batch229: sync workflow docs after lock tint hint`
 - Test-verify cuối:
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:

@@ -1,15 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 229
+- Batch: 230
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 229 iOS feed UX hardening — tint row delete readiness hint by lock/unlock state for faster visual scan
+- Scope: batch 230 iOS feed UX hardening — add row-level lock-state badge near delete action (`Delete lock: Locked/Unlocked`)
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
   - iOS: Session login -> Feed -> load private feed/authored moments.
-  - Khi lock bật: readiness hint hiện màu cam + copy lock.
-  - Khi lock tắt: readiness hint hiện màu xanh + copy unlock, row CTA là `Delete this moment`.
-  - Verify vẫn có status copy tức thời khi toggle đổi trạng thái.
+  - Verify mỗi row hiển thị badge lock-state (`Delete lock: Locked` hoặc `Delete lock: Unlocked`).
+  - Bật/tắt toggle `Require confirmation for row delete` và xác nhận badge đổi trạng thái tức thời.
+  - Khi unlock, vẫn tap được `Delete this moment`; khi lock, CTA chuyển `🔒 Unlock to delete`.
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
   - WORKFLOW_STATUS.md
@@ -18,13 +18,17 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `df805ad` — `batch229: tint row delete readiness hint by lock state`
-  - working tree: sạch
+  - latest feature commit: `a53dc6d` — `batch230: add row lock-state badge near delete action`
+  - working tree: bẩn (docs batch230 in progress, chưa commit)
 - Blocker: none
-- Next: mở batch230 cho friction slice hẹp kế tiếp
+- Next: commit docs batch230 rồi mở batch231 cho friction slice hẹp kế tiếp
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 230 handoff:
+  - pending (in progress)
+  - added always-visible lock-state badge right at row-level action area to reduce missed state during fast scrolling.
 - Batch 229 handoff:
-  - pending (verify)
+  - `df805ad` — `batch229: tint row delete readiness hint by lock state`
+  - `0cc3a22` — `batch229: sync workflow docs after lock tint hint`
   - readiness hint now always visible and color-coded (orange locked, green unlocked) for quicker operator recognition.
 - Batch 228 handoff:
   - `af92ad2` — `batch228: show status when row delete lock toggles`

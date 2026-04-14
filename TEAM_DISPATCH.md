@@ -12,14 +12,27 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 230
-- Trục công việc: iOS feed UX hardening — thêm lock-state badge ngắn tại row action để operator không cần nhìn lên form vẫn biết delete đang lock/unlock.
-- Trạng thái: in_progress_batch230_ios.
+- Batch workflow chính thức hiện tại: 231
+- Trục công việc: iOS feed UX hardening — đồng bộ style/copy lock-state badge để nhất quán với status copy khi thao tác liên tiếp.
+- Trạng thái: in_progress_batch231_ios.
+
+## Batch 230 handoff (closed)
+- Batch vừa xong: **230**
+- Commit đã push:
+  - `a53dc6d` — `batch230: add row lock-state badge near delete action`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **231**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - tune lại copy/style badge (`Locked`/`Unlocked`) để đồng bộ ngắn gọn hơn với status copy unlock/re-lock.
 
 ## Batch 229 handoff (closed)
 - Batch vừa xong: **229**
 - Commit đã push:
   - `df805ad` — `batch229: tint row delete readiness hint by lock state`
+  - `0cc3a22` — `batch229: sync workflow docs after lock tint hint`
 - Test/verify cuối:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Blocker/rủi ro còn lại:
@@ -231,9 +244,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 230 iOS feed UX hardening.
-- Kết quả gần nhất: batch 229 thêm readiness hint màu theo lock/unlock state để scan nhanh hơn.
-- Trạng thái: in_progress_batch230_ios.
+- Scope hiện tại: batch 231 iOS feed UX hardening.
+- Kết quả gần nhất: batch 230 thêm lock-state badge ngay gần row delete action.
+- Trạng thái: in_progress_batch231_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
