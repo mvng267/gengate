@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 153
-- Trục công việc: iOS inbox seam hardening — state-label `same as first option` cho recipient-device source hint.
+- Batch workflow chính thức hiện tại: 154
+- Trục công việc: iOS inbox seam hardening — bổ sung short-id vào state-label `same as first option`.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 153 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: hint source nay phân biệt rõ case in-sync đồng thời trùng first option (`same as first option`).
-- Trạng thái: verify_batch153_ios.
+- Scope hiện tại: batch 154 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: label `same as first option` nay kèm short-id fragment để scan nhanh hơn khi UUID dài.
+- Trạng thái: verify_batch154_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

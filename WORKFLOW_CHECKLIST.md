@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **153 — iOS inbox in-sync first-option state-label slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **154 — iOS inbox in-sync first-option short-id state-label slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **153**
-- Scope hiện tại: iOS inbox read-status UX hardening — state-label `same as first option` cho recipient-device source hint khi selection đang in-sync với first option.
+- Batch workflow chính thức hiện tại: **154**
+- Scope hiện tại: iOS inbox read-status UX hardening — thêm short-id fragment trong `same as first option` source label.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch153 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch154 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch154 cho messaging friction tiếp theo (thêm short-id trong `same as first option` label) trong iOS inbox shell
+  - mở batch155 cho messaging friction tiếp theo (helper-note nhẹ khi selection đã same-as-first để giảm thao tác thừa) trong iOS inbox shell
 
 ## Batch handoff note
 
