@@ -71,6 +71,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [lastReadCursorApplyQuickCopy, setLastReadCursorApplyQuickCopy] = useState(
     "target_user=(none) | applied_message=(none) | focus_user=(none) | read_state=unknown",
   );
+  const [lastFirstUnreadJumpQuickCopy, setLastFirstUnreadJumpQuickCopy] = useState(
+    "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown",
+  );
   const conversationQuickCopy = `user_a=${form.userAId.trim() || "(empty)"} | user_b=${form.userBId.trim() || "(empty)"} | message_count=${messages.length} | last_message_id=${messages[messages.length - 1]?.id ?? "(none)"}`;
 
   const resolvedReadCursorFocusUserId =
@@ -141,6 +144,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setLastSendQuickCopy("sender=(none) | message_id=(none)");
     setLastReadCursorQuickCopy("focus_user=(none) | resolved_message=(none) | read_state=unknown");
     setLastReadCursorApplyQuickCopy("target_user=(none) | applied_message=(none) | focus_user=(none) | read_state=unknown");
+    setLastFirstUnreadJumpQuickCopy(
+      "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown",
+    );
   }, [initialSenderUserId, initialUserAId, initialUserBId]);
 
   useEffect(() => {
@@ -686,7 +692,14 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       );
 
       const successStatus = `Updated read cursor for ${updated.user_id} to ${updated.last_read_message_id ?? "(none)"} in thread ${conversation.id}.`;
-      setStatus(statusPrefix ? `${statusPrefix} ${successStatus}` : successStatus);
+      const composedStatus = statusPrefix ? `${statusPrefix} ${successStatus}` : successStatus;
+      setStatus(composedStatus);
+
+      if (statusPrefix?.includes("read_cursor_first_unread_focus_source=focus_user")) {
+        setLastFirstUnreadJumpQuickCopy(
+          `focus_user=${normalizedFocusUserId || "(none)"} | first_unread_candidate=${targetMessageId} | applied_message=${normalizedAppliedMessageId} | read_state=${appliedReadState}`,
+        );
+      }
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "conversation_member_read_cursor_update_failed");
     }
@@ -719,6 +732,15 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     );
   }
 
+  async function handleCopyFirstUnreadJumpQuickCopy() {
+    await copyToClipboard(
+      lastFirstUnreadJumpQuickCopy,
+      "Copied first-unread jump quick copy to clipboard",
+      "first_unread_jump_quick_copy_empty",
+      "first_unread_jump_quick_copy_failed",
+    );
+  }
+
   return (
     <section>
       <p>
@@ -745,6 +767,12 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       </p>
       <button type="button" onClick={() => void handleCopyReadCursorApplyQuickCopy()}>
         Copy quick read-cursor apply result
+      </button>
+      <p>
+        Quick copy first-unread jump result: <code>{lastFirstUnreadJumpQuickCopy}</code>
+      </p>
+      <button type="button" onClick={() => void handleCopyFirstUnreadJumpQuickCopy()}>
+        Copy quick first-unread jump result
       </button>
 
       <div>

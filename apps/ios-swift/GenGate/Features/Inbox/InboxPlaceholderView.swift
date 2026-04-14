@@ -39,6 +39,7 @@ struct InboxPlaceholderView: View {
     @State private var sendStatusHint: String?
     @State private var lastSendQuickCopy: String = "sender=(none) | message_id=(none)"
     @State private var lastReadCursorApplyQuickCopy: String = "target_user=(none) | applied_message=(none) | focus_user=(none) | read_state=unknown"
+    @State private var lastFirstUnreadJumpQuickCopy: String = "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown"
     @State private var isCreatingAttachment = false
     @State private var isCreatingDeviceKey = false
     @State private var isUpdatingReadCursor = false
@@ -1374,6 +1375,18 @@ struct InboxPlaceholderView: View {
                         .buttonStyle(.bordered)
                     }
 
+                    HStack(alignment: .center, spacing: 8) {
+                        Text("Quick copy first-unread jump result: \(lastFirstUnreadJumpQuickCopy)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Button("Copy quick first-unread jump result") {
+                            copyFirstUnreadJumpQuickCopySummary()
+                        }
+                        .buttonStyle(.bordered)
+                    }
+
                     Text("Attachment target message_id: \(resolvedAttachmentTargetMessageID ?? "(not resolved)")")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
@@ -2661,6 +2674,17 @@ use_when=\(useWhenText)
         sendStatusHint = "Copied read-cursor apply quick copy to clipboard (\(normalizedText))."
     }
 
+    private func copyFirstUnreadJumpQuickCopySummary() {
+        let normalizedText = lastFirstUnreadJumpQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            sendStatusHint = "first_unread_jump_quick_copy_empty"
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        sendStatusHint = "Copied first-unread jump quick copy to clipboard (\(normalizedText))."
+    }
+
     private func copyRecipientDeviceSourceHint(_ hintText: String) {
         let normalizedText = hintText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
@@ -3801,6 +3825,11 @@ use_when=\(useWhenText)
             }
 
             lastReadCursorApplyQuickCopy = "target_user=\(targetUserID) | applied_message=\(targetMessageID) | focus_user=\(normalizedFocusUserID) | read_state=\(appliedReadState)"
+
+            if sendStatusHint?.contains("read_cursor_first_unread_focus_auto_source=member_row") == true ||
+                sendStatusHint?.contains("read_cursor_first_unread_focus_source=focus_user") == true {
+                lastFirstUnreadJumpQuickCopy = "focus_user=\(normalizedFocusUserID) | first_unread_candidate=\(targetMessageID) | applied_message=\(targetMessageID) | read_state=\(appliedReadState)"
+            }
 
             await loadInboxThread()
         } catch {
