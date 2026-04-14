@@ -26,6 +26,7 @@ struct FeedPlaceholderView: View {
     @State private var isCreatingReaction = false
     @State private var quickReactionMomentIDInFlight: String?
     @State private var quickReactionPreferMomentAuthor = false
+    @State private var quickReactionAutoRefreshLists = true
 
     var body: some View {
         ScrollView {
@@ -306,6 +307,12 @@ struct FeedPlaceholderView: View {
 
                     Toggle(isOn: $quickReactionPreferMomentAuthor) {
                         Text("Quick react uses selected moment author as user")
+                            .font(.footnote)
+                    }
+                    .toggleStyle(.switch)
+
+                    Toggle(isOn: $quickReactionAutoRefreshLists) {
+                        Text("Quick react auto refreshes feed/authored lists")
                             .font(.footnote)
                     }
                     .toggleStyle(.switch)
@@ -698,6 +705,16 @@ struct FeedPlaceholderView: View {
 
             statusMessage = "Quick reacted moment \(row.id). Reloading reactions..."
             await loadMomentReactions()
+
+            if quickReactionAutoRefreshLists {
+                if !viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    await loadPrivateFeed()
+                }
+
+                if !authorUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    await loadAuthoredMoments()
+                }
+            }
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }

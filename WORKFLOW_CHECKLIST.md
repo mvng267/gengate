@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **206 — iOS feed quick-react user resolution hardening slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **207 — iOS feed quick-react auto-refresh lists slice is in verify (MVP-testable)**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **206**
-- Scope hiện tại: iOS feed seam friction reduction — harden quick reaction per-row user resolution theo mode (author-mode vs current-user-mode), đồng thời hiển thị rõ mode label trên CTA để giảm nhầm context khi verify `POST/GET /moments/{id}/reactions`.
+- Batch workflow chính thức hiện tại: **207**
+- Scope hiện tại: iOS feed seam friction reduction — thêm tùy chọn auto-refresh feed/authored lists sau quick react để giảm thao tác load tay khi verify `POST/GET /moments/{id}/reactions` trong context moments list.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
@@ -100,12 +100,14 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `4e82ada` — `batch205: add ios feed quick react prefer author toggle`
-  - working tree hiện tại: bẩn (đang có thay đổi batch206, chưa commit)
+  - commit gần nhất đã chốt: `e113bb8` — `batch206: harden ios feed row quick reaction user mode`
+  - working tree hiện tại: bẩn (đang có thay đổi batch207, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit local batch206 rồi mở batch207 cho 1 friction slice hẹp tiếp theo ở feed/inbox seam MVP
+  - commit local batch207 rồi mở batch208 cho 1 friction slice hẹp tiếp theo ở feed/inbox seam MVP
+- MVP-testable run/test path (human):
+  - iOS Session login -> Feed -> load private/authored moments -> quick react from row -> verify reactions + auto-refreshed feed/authored lists.
 
 ## Batch handoff note
 
