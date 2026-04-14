@@ -68,6 +68,8 @@ struct InboxPlaceholderView: View {
     @State private var lastRecipientDeviceSourceHintTriageKitPreviewCopyText: String?
     @State private var lastRecipientDeviceSourceHintPreviewDeltaCopyAt: Date?
     @State private var lastRecipientDeviceSourceHintPreviewDeltaCopyText: String?
+    @State private var lastRecipientDeviceSourceHintTriagePreviewPairCopyAt: Date?
+    @State private var lastRecipientDeviceSourceHintTriagePreviewPairCopyText: String?
 
     private let recipientDevicesAutoReloadDebounceNanoseconds: UInt64 = 350_000_000
     private let recipientDevicesAutoReloadMinIntervalSeconds: TimeInterval = 1.0
@@ -84,7 +86,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset + empty-context-only helper-note visibility + short recipient-id mismatch hint + compact helper-note reason + readable short-caption mapping + recipient quick-member presets + dynamic first-valid-device apply/re-apply action + first-option inline subtitle (full + short id) + emphasized short-id line + source-hint short-id consistency across first-option/in-sync/manual/fallback states + same-as-first skip helper-note + empty-options reapply guidance + source-hint verify matrix + branch-key legend + matrix snapshot quick-copy + triage-line quick-copy + triage-line body quick-copy + triage preview line-vs-body block + compact diff hint + usage guidance note + usage-note quick-copy + triage-kit quick-copy + triage-kit compact preview + triage-kit preview quick-copy + preview delta marker + preview-delta quick-copy + selection-source hint + one-tap device UUID clear action; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset + empty-context-only helper-note visibility + short recipient-id mismatch hint + compact helper-note reason + readable short-caption mapping + recipient quick-member presets + dynamic first-valid-device apply/re-apply action + first-option inline subtitle (full + short id) + emphasized short-id line + source-hint short-id consistency across first-option/in-sync/manual/fallback states + same-as-first skip helper-note + empty-options reapply guidance + source-hint verify matrix + branch-key legend + matrix snapshot quick-copy + triage-line quick-copy + triage-line body quick-copy + triage preview line-vs-body block + compact diff hint + usage guidance note + usage-note quick-copy + triage-kit quick-copy + triage-kit compact preview + triage-kit preview quick-copy + preview delta marker + preview-delta quick-copy + preview-pair quick-copy + selection-source hint + one-tap device UUID clear action; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -157,6 +159,7 @@ struct InboxPlaceholderView: View {
                         "Added quick action `Copy source-hint triage-kit preview` to copy the compact preview line directly into short bug notes.",
                         "Triage preview now includes a compact `Preview delta` marker so testers can see exactly what compact preview omits vs full triage-kit (`diff/usage`).",
                         "Added quick action `Copy source-hint preview delta` to copy that compact-vs-full explanation line directly into bug notes/onboarding docs.",
+                        "Added quick action `Copy source-hint preview pair` to copy one short block combining compact preview + preview-delta hint for single-paste triage notes.",
                         "After copy, short-lived feedback lines show elapsed time + short fragment so testers can confirm exactly what was captured.",
                         "Recipient-device section now shows a compact selection-source hint so testers know whether current `Recipient device UUID` is in-sync with loaded options or still a manual out-of-options value.",
                         "One-tap action `Clear recipient device UUID` helps testers reset stale/manual device input instantly before selecting a fresh option."
@@ -556,6 +559,15 @@ struct InboxPlaceholderView: View {
                                 }
                                 .buttonStyle(.bordered)
                                 .disabled(recipientDeviceSourceHintTriageKitPreviewDeltaHintText == nil)
+
+                                Button {
+                                    copyRecipientDeviceSourceHintTriagePreviewPair()
+                                } label: {
+                                    Text("Copy source-hint preview pair")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(recipientDeviceSourceHintTriagePreviewPairText == nil)
                             }
 
                             if let recipientDeviceSourceHintCopiedFeedbackText {
@@ -620,6 +632,12 @@ struct InboxPlaceholderView: View {
 
                             if let recipientDeviceSourceHintPreviewDeltaCopiedFeedbackText {
                                 Text(recipientDeviceSourceHintPreviewDeltaCopiedFeedbackText)
+                                    .font(.caption2.monospaced())
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            if let recipientDeviceSourceHintTriagePreviewPairCopiedFeedbackText {
+                                Text(recipientDeviceSourceHintTriagePreviewPairCopiedFeedbackText)
                                     .font(.caption2.monospaced())
                                     .foregroundStyle(.secondary)
                             }
@@ -1565,6 +1583,21 @@ usage=\(recipientDeviceSourceHintUsageNoteText)
         return "Preview delta: compact preview chỉ giữ `branch + line/body rút gọn`; full triage-kit vẫn chứa đủ 4 fields `line/body/diff/usage`."
     }
 
+    private var recipientDeviceSourceHintTriagePreviewPairText: String? {
+        guard let compactPreviewText = recipientDeviceSourceHintTriageKitCompactPreviewText,
+              let previewDeltaHintText = recipientDeviceSourceHintTriageKitPreviewDeltaHintText else {
+            return nil
+        }
+
+        return """
+[inbox-source-hint-triage-preview-pair]
+preview=
+\(compactPreviewText)
+delta=
+\(previewDeltaHintText)
+"""
+    }
+
     private var recipientDeviceSourceHintReportPayloadCopiedFeedbackText: String? {
         guard let lastRecipientDeviceSourceHintReportPayloadCopyAt,
               let lastRecipientDeviceSourceHintReportPayloadCopyText else {
@@ -1689,6 +1722,20 @@ usage=\(recipientDeviceSourceHintUsageNoteText)
         }
 
         return "Copied preview delta (\(Int(elapsed))s ago): \(shortCaption(lastRecipientDeviceSourceHintPreviewDeltaCopyText, limit: 96))"
+    }
+
+    private var recipientDeviceSourceHintTriagePreviewPairCopiedFeedbackText: String? {
+        guard let lastRecipientDeviceSourceHintTriagePreviewPairCopyAt,
+              let lastRecipientDeviceSourceHintTriagePreviewPairCopyText else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(lastRecipientDeviceSourceHintTriagePreviewPairCopyAt)
+        guard elapsed <= 12 else {
+            return nil
+        }
+
+        return "Copied preview pair (\(Int(elapsed))s ago): \(shortCaption(lastRecipientDeviceSourceHintTriagePreviewPairCopyText, limit: 96))"
     }
 
     private var resolvedReadStatusMessageID: String? {
@@ -1937,6 +1984,22 @@ usage=\(recipientDeviceSourceHintUsageNoteText)
 
         lastRecipientDeviceSourceHintPreviewDeltaCopyText = normalizedPreviewDeltaHintText
         lastRecipientDeviceSourceHintPreviewDeltaCopyAt = Date()
+    }
+
+    private func copyRecipientDeviceSourceHintTriagePreviewPair() {
+        guard let triagePreviewPairText = recipientDeviceSourceHintTriagePreviewPairText else {
+            return
+        }
+
+        let normalizedTriagePreviewPairText = triagePreviewPairText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedTriagePreviewPairText.isEmpty else {
+            return
+        }
+
+        writeToClipboard(normalizedTriagePreviewPairText)
+
+        lastRecipientDeviceSourceHintTriagePreviewPairCopyText = normalizedTriagePreviewPairText
+        lastRecipientDeviceSourceHintTriagePreviewPairCopyAt = Date()
     }
 
     private func writeToClipboard(_ text: String) {
