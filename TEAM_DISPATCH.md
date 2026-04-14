@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 246
-- Trục công việc: notification shell — web/iOS quick-apply session user + offset reset on user change.
-- Trạng thái: batch246_complete_notification_quick_apply_and_offset_reset.
+- Batch workflow chính thức hiện tại: 247
+- Trục công việc: notification shell — web/iOS explicit pending-window hint line.
+- Trạng thái: batch247_complete_notification_pending_window_hint.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 247 handoff (closed)
+- Batch vừa xong: **247**
+- Commit đã chốt:
+  - `997d2c2` — `batch247: show explicit pending-window hints in notification shells`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **248**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: normalize copy cho quick apply khi session-user trùng draft hiện tại.
 
 ## Batch 246 handoff (closed)
 - Batch vừa xong: **246**

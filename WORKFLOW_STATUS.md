@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 246
+- Batch: 247
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 246 notification shell — quick-apply current session user + auto-reset offset when user id changes.
+- Scope: batch 247 notification shell — add explicit pending-window hint line on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,10 +16,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `67a6ea0` — `batch246: quick-apply session user and reset offset on user change`
+  - latest feature commit: `997d2c2` — `batch247: show explicit pending-window hints in notification shells`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch247 với 1 slice hẹp notification shell tiếp theo: thêm explicit pending-window hint line (không chỉ ở button title) để tester thấy mismatch ngay cả khi nút ở ngoài viewport.
+- Next: mở batch248 với 1 slice hẹp notification shell tiếp theo: thêm normalize copy cho session-user quick apply khi session user trùng draft hiện tại (đỡ reload nhầm do tưởng đã đổi user).
+- Batch 247 handoff:
+  - `997d2c2` — `batch247: show explicit pending-window hints in notification shells`
+  - web/iOS hiển thị dòng `Window hint` riêng (ngoài button label) để tester thấy ngay trạng thái sync/mismatch của load window.
 - Batch 246 handoff:
   - `67a6ea0` — `batch246: quick-apply session user and reset offset on user change`
   - web/iOS có action `Use current session user + load`; khi đổi user trong form, offset tự reset về 0 để tránh load nhầm page window.
