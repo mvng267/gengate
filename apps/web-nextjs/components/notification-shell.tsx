@@ -53,17 +53,17 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     setLastLoadedWindow(null);
   }, [initialUserId]);
 
-  function currentLoadWindow(): NotificationLoadWindow {
+  function currentLoadWindow(overrides?: Partial<NotificationLoadWindow>): NotificationLoadWindow {
     return {
-      userId: form.userId.trim(),
-      limit: pagination.limit,
-      offset: pagination.offset,
-      unreadOnly: pagination.unreadOnly,
+      userId: overrides?.userId ?? form.userId.trim(),
+      limit: overrides?.limit ?? pagination.limit,
+      offset: overrides?.offset ?? pagination.offset,
+      unreadOnly: overrides?.unreadOnly ?? pagination.unreadOnly,
     };
   }
 
-  async function handleLoad() {
-    const window = currentLoadWindow();
+  async function handleLoad(windowOverride?: Partial<NotificationLoadWindow>) {
+    const window = currentLoadWindow(windowOverride);
 
     setIsLoading(true);
     setStatus("Loading notifications...");
@@ -237,7 +237,21 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
           User UUID
           <input
             value={form.userId}
-            onChange={(event) => setForm((current) => ({ ...current, userId: event.target.value }))}
+            onChange={(event) => {
+              const nextUserId = event.target.value;
+              const nextTrimmedUserId = nextUserId.trim();
+
+              setForm((current) => ({ ...current, userId: nextUserId }));
+              setPagination((current) => {
+                const shouldResetOffset = current.offset !== 0 && nextTrimmedUserId !== currentLoadWindow().userId;
+                return shouldResetOffset
+                  ? {
+                      ...current,
+                      offset: 0,
+                    }
+                  : current;
+              });
+            }}
             placeholder="paste registered user uuid"
           />
         </label>
@@ -258,6 +272,32 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
         </label>
         <button type="submit" disabled={isCreating}>
           {isCreating ? "Creating..." : "Create notification"}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            const sessionUserId = initialUserId.trim();
+            if (!sessionUserId) {
+              setStatus("session_user_missing_for_quick_apply");
+              return;
+            }
+
+            setForm((current) => ({
+              ...current,
+              userId: sessionUserId,
+            }));
+            setPagination((current) => ({
+              ...current,
+              offset: 0,
+            }));
+            void handleLoad({
+              userId: sessionUserId,
+              offset: 0,
+            });
+          }}
+          disabled={isLoading || initialUserId.trim().length === 0}
+        >
+          Use current session user + load
         </button>
         <button type="button" onClick={() => void handleLoad()} disabled={isLoading}>
           {isLoading ? "Loading..." : pendingWindowChange ? "Load notifications (window changed)" : "Load notifications"}

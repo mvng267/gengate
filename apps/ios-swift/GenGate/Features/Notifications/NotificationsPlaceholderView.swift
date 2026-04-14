@@ -44,6 +44,21 @@ struct NotificationsPlaceholderView: View {
                         .padding(12)
                         .background(Color.secondary.opacity(0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .onChange(of: userIDDraft, initial: false) { oldValue, newValue in
+                            guard normalizedOffset > 0 else {
+                                return
+                            }
+
+                            let oldTrimmed = oldValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                            let newTrimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                            guard oldTrimmed != newTrimmed else {
+                                return
+                            }
+
+                            pageOffsetDraft = "0"
+                            statusMessage = "User changed. Offset reset to first page."
+                            fetchError = nil
+                        }
 
                     HStack(spacing: 12) {
                         VStack(alignment: .leading, spacing: 6) {
@@ -104,6 +119,17 @@ struct NotificationsPlaceholderView: View {
                     }
                     .buttonStyle(.bordered)
                     .disabled(currentSessionUserID == nil)
+
+                    Button {
+                        Task {
+                            await useCurrentSessionUserAndLoad()
+                        }
+                    } label: {
+                        Text("Use current session user + load")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(isLoading || isCreatingNotification || currentSessionUserID == nil)
 
                     Button {
                         Task {
@@ -295,8 +321,19 @@ struct NotificationsPlaceholderView: View {
         userIDDraft = currentSessionUserID
     }
 
-    private func loadNotifications() async {
-        let trimmedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+    private func useCurrentSessionUserAndLoad() async {
+        guard let currentSessionUserID else {
+            fetchError = "Current session user không khả dụng."
+            return
+        }
+
+        userIDDraft = currentSessionUserID
+        pageOffsetDraft = "0"
+        await loadNotifications(forcedUserID: currentSessionUserID, forcedOffset: 0)
+    }
+
+    private func loadNotifications(forcedUserID: String? = nil, forcedOffset: Int? = nil) async {
+        let trimmedUserID = (forcedUserID ?? userIDDraft).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedUserID.isEmpty else {
             fetchError = "User UUID là bắt buộc để load notifications."
             return
@@ -305,7 +342,7 @@ struct NotificationsPlaceholderView: View {
         let parsedLimit = Int(pageLimitDraft.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 20
         let parsedOffset = Int(pageOffsetDraft.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
         let safeLimit = min(max(parsedLimit, 1), 200)
-        let safeOffset = max(parsedOffset, 0)
+        let safeOffset = max(forcedOffset ?? parsedOffset, 0)
         pageLimitDraft = String(safeLimit)
         pageOffsetDraft = String(safeOffset)
 
