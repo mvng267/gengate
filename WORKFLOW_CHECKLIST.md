@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **267 — direct-message shell (web+iOS clipboard quick-copy send-result) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **268 — direct-message shell (web+iOS quick-copy read-cursor focus summary) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,29 +89,45 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **267**
-- Scope hiện tại: direct-message shell — thêm quick action copy `Quick copy send result` vào clipboard trên web+iOS.
+- Batch workflow chính thức hiện tại: **268**
+- Scope hiện tại: direct-message shell — thêm quick-copy read-cursor focus summary (`focus_user + resolved_message + read_state`) trên web+iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
+  - `apps/web-nextjs/lib/inbox/client.ts`
   - `apps/web-nextjs/components/direct-message-shell.tsx`
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `2efcf86` — `batch267: add quick copy send-result clipboard actions on web and ios`
-  - working tree hiện tại: bẩn (workflow docs update in progress)
+  - commit gần nhất đã chốt: `(current batch local commit)` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
+  - working tree hiện tại: bẩn (feature + workflow docs chờ commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch268 với 1 slice hẹp direct-message shell: thêm quick-copy read-cursor focus summary (`focus_user + resolved_message + read_state`) trên web+iOS.
+  - mở batch269 với 1 slice hẹp direct-message shell: thêm quick action web+iOS dùng current session user làm focus user cho read-state summary để giảm nhập tay khi retest.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed: bấm quick action `Use current session user as viewer + load` -> verify status `viewer_source=session_user` + feed reload.
-  - Web Inbox: nhập user A/B -> gửi message -> bấm `Copy quick send result` -> paste và verify `sender=... | message_id=...`.
-  - iOS Inbox: nhập User A/B -> gửi message -> bấm `Copy quick send result` -> paste và verify `sender=... | message_id=...`.
+  - Web Inbox: nhập user A/B -> `Open direct thread` -> `Reload thread messages` -> bấm `Copy quick read cursor` -> paste và verify `focus_user=... | resolved_message=... | read_state=...`.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Copy quick read cursor` -> paste và verify `focus_user=... | resolved_message=... | read_state=...`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **268**
+- Commit cuối đã chốt:
+  - `(current batch local commit)` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **269**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm quick action web+iOS dùng current session user làm focus user cho read-state summary để giảm nhập tay khi retest.
+
+---
 
 - Batch vừa xong: **267**
 - Commit cuối đã chốt:

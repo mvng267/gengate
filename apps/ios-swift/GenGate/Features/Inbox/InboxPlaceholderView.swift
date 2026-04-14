@@ -1330,6 +1330,18 @@ struct InboxPlaceholderView: View {
                         .buttonStyle(.bordered)
                     }
 
+                    HStack(alignment: .center, spacing: 8) {
+                        Text("Quick copy read cursor: \(readCursorQuickCopySummary)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Button("Copy quick read cursor") {
+                            copyReadCursorQuickCopySummary()
+                        }
+                        .buttonStyle(.bordered)
+                    }
+
                     Text("Attachment target message_id: \(resolvedAttachmentTargetMessageID ?? "(not resolved)")")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
@@ -2308,6 +2320,26 @@ use_when=\(useWhenText)
         return messageRows.last?.id
     }
 
+    private var readCursorQuickCopySummary: String {
+        let focusUserID = resolvedReadStatusFocusUserID ?? "(none)"
+        let resolvedMessageID = resolvedReadStatusMessageID ?? "(none)"
+
+        let readState: String
+        if let focusUserID = resolvedReadStatusFocusUserID,
+           let resolvedMessageID = resolvedReadStatusMessageID,
+           !focusUserID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           !resolvedMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let isRead = conversationMembers.contains { member in
+                member.userID == focusUserID && member.lastReadMessageID == resolvedMessageID
+            }
+            readState = isRead ? "read" : "unread"
+        } else {
+            readState = "unknown"
+        }
+
+        return "focus_user=\(focusUserID) | resolved_message=\(resolvedMessageID) | read_state=\(readState)"
+    }
+
     private var latestLoadedMessageID: String? {
         messageRows.last?.id
     }
@@ -2392,6 +2424,17 @@ use_when=\(useWhenText)
 
         writeToClipboard(normalizedText)
         sendStatusHint = "Copied send-result quick copy to clipboard (\(normalizedText))."
+    }
+
+    private func copyReadCursorQuickCopySummary() {
+        let normalizedText = readCursorQuickCopySummary.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            sendStatusHint = "read_cursor_quick_copy_empty"
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        sendStatusHint = "Copied read-cursor quick copy to clipboard (\(normalizedText))."
     }
 
     private func copyRecipientDeviceSourceHint(_ hintText: String) {

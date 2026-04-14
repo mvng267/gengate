@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 267
-- Trục công việc: direct-message shell — web+iOS add clipboard quick action for quick-copy send-result line.
-- Trạng thái: batch267_complete_dm_send_result_clipboard_actions_web_ios.
+- Batch workflow chính thức hiện tại: 268
+- Trục công việc: direct-message shell — web+iOS add quick-copy read-cursor focus summary (`focus_user + resolved_message + read_state`).
+- Trạng thái: batch268_complete_dm_read_cursor_quick_copy_summary_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 268 handoff (closed)
+- Batch vừa xong: **268**
+- Commit đã chốt:
+  - `(current batch local commit)` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **269**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm quick action web+iOS dùng current session user làm focus user cho read-state summary để giảm nhập tay khi retest.
 
 ## Batch 267 handoff (closed)
 - Batch vừa xong: **267**

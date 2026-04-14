@@ -1,26 +1,31 @@
 # GenGate Workflow Status
 
-- Batch: 267
+- Batch: 268
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 267 direct-message shell — add clipboard quick action for `Quick copy send result` on web+iOS.
+- Scope: batch 268 direct-message shell — add quick-copy read-cursor focus summary (`focus_user + resolved_message + read_state`) on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
-  - Web Inbox (`/inbox`): nhập user A/B -> gửi message -> bấm `Copy quick send result` -> paste và verify format `sender=... | message_id=...`.
-  - iOS Inbox: nhập User A/B -> gửi message -> bấm `Copy quick send result` -> paste và verify format `sender=... | message_id=...`.
+  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> `Reload thread messages` -> verify line `Quick copy read cursor`; bấm `Copy quick read cursor` và paste format `focus_user=... | resolved_message=... | read_state=read|unread|unknown`.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> verify line `Quick copy read cursor`; bấm `Copy quick read cursor` và paste format `focus_user=... | resolved_message=... | read_state=read|unread|unknown`.
 - Files:
+  - apps/web-nextjs/lib/inbox/client.ts
   - apps/web-nextjs/components/direct-message-shell.tsx
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `2efcf86` — `batch267: add quick copy send-result clipboard actions on web and ios`
-  - working tree: dirty (workflow docs update in progress)
+  - latest feature commit: `(current batch local commit)` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
+  - working tree: dirty (feature + workflow docs staged for commit)
 - Blocker: none
-- Next: mở batch268 với 1 slice hẹp direct-message shell: thêm quick-copy read-cursor focus summary (`focus_user + resolved_message + read_state`) trên web+iOS để report read-state parity nhanh.
+- Next: mở batch269 với 1 slice hẹp direct-message shell: thêm quick action web+iOS dùng current session user làm focus user cho read-state summary để giảm nhập tay khi retest.
+- Batch 268 handoff:
+  - `(current batch local commit)` — `batch268: add dm read-cursor quick-copy summaries on web and ios`
+  - web inbox shell đã wire `GET /conversations/{id}/members`, hiển thị `last_read_message_id/last_read_by`, và có quick-copy read-cursor line + clipboard action.
+  - iOS inbox shell thêm quick-copy read-cursor line + clipboard action cùng format với web để report parity nhanh.
 - Batch 267 handoff:
   - `2efcf86` — `batch267: add quick copy send-result clipboard actions on web and ios`
   - web/iOS inbox shell giờ có nút copy clipboard cho `Quick copy send result`, giảm thao tác thủ công khi report DM send parity.

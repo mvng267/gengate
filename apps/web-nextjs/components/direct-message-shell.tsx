@@ -6,9 +6,11 @@ import { readPersistedAuthSession } from "@/lib/auth/client";
 import {
   createMessageAttachment,
   getOrCreateDirectConversation,
+  listConversationMembers,
   listMessageAttachments,
   listMessages,
   sendMessage,
+  type ConversationMemberItem,
   type DirectConversation,
   type MessageAttachmentItem,
   type MessageItem,
@@ -50,6 +52,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [conversation, setConversation] = useState<DirectConversation | null>(null);
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [attachmentItems, setAttachmentItems] = useState<MessageAttachmentItem[]>([]);
+  const [conversationMembers, setConversationMembers] = useState<ConversationMemberItem[]>([]);
   const [isOpening, setIsOpening] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -57,7 +60,27 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
   const [lastSendQuickCopy, setLastSendQuickCopy] = useState("sender=(none) | message_id=(none)");
+  const [lastReadCursorQuickCopy, setLastReadCursorQuickCopy] = useState(
+    "focus_user=(none) | resolved_message=(none) | read_state=unknown",
+  );
   const conversationQuickCopy = `user_a=${form.userAId.trim() || "(empty)"} | user_b=${form.userBId.trim() || "(empty)"} | message_count=${messages.length} | last_message_id=${messages[messages.length - 1]?.id ?? "(none)"}`;
+
+  const resolvedReadCursorFocusUserId = form.userAId.trim() || currentSessionUserId.trim() || "";
+  const resolvedReadCursorMessageId = messages[messages.length - 1]?.id ?? "";
+
+  const focusReadState = (() => {
+    if (!resolvedReadCursorFocusUserId || !resolvedReadCursorMessageId) {
+      return "unknown";
+    }
+
+    const isRead = conversationMembers.some(
+      (member) =>
+        member.user_id === resolvedReadCursorFocusUserId &&
+        member.last_read_message_id === resolvedReadCursorMessageId,
+    );
+
+    return isRead ? "read" : "unread";
+  })();
 
   useEffect(() => {
     setForm((current) => ({
@@ -69,8 +92,10 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setConversation(null);
     setMessages([]);
     setAttachmentItems([]);
+    setConversationMembers([]);
     setAttachmentForm({ ...initialAttachmentForm });
     setLastSendQuickCopy("sender=(none) | message_id=(none)");
+    setLastReadCursorQuickCopy("focus_user=(none) | resolved_message=(none) | read_state=unknown");
   }, [initialSenderUserId, initialUserAId, initialUserBId]);
 
   useEffect(() => {
@@ -86,8 +111,12 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     try {
       const nextConversation = await getOrCreateDirectConversation(form.userAId.trim(), form.userBId.trim());
       setConversation(nextConversation);
-      const nextMessages = await listMessages(nextConversation.id);
+      const [nextMessages, nextMembers] = await Promise.all([
+        listMessages(nextConversation.id),
+        listConversationMembers(nextConversation.id),
+      ]);
       setMessages(nextMessages);
+      setConversationMembers(nextMembers);
 
       const firstMessageId = nextMessages[0]?.id ?? "";
       if (firstMessageId) {
@@ -117,8 +146,12 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setStatus("Reloading direct thread messages...");
 
     try {
-      const nextMessages = await listMessages(conversation.id);
+      const [nextMessages, nextMembers] = await Promise.all([
+        listMessages(conversation.id),
+        listConversationMembers(conversation.id),
+      ]);
       setMessages(nextMessages);
+      setConversationMembers(nextMembers);
       const firstMessageId = nextMessages[0]?.id ?? "";
       setAttachmentForm((current) => ({ ...current, targetMessageId: current.targetMessageId || firstMessageId }));
       setStatus(`Reloaded ${nextMessages.length} message(s) for thread ${conversation.id}.`);
@@ -241,24 +274,50 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setIsLoadingAttachments(false);
   }
 
-  async function handleCopySendResultQuickCopy() {
-    const normalizedText = lastSendQuickCopy.trim();
+  useEffect(() => {
+    const normalizedFocusUser = resolvedReadCursorFocusUserId || "(none)";
+    const normalizedMessageId = resolvedReadCursorMessageId || "(none)";
+    setLastReadCursorQuickCopy(
+      `focus_user=${normalizedFocusUser} | resolved_message=${normalizedMessageId} | read_state=${focusReadState}`,
+    );
+  }, [focusReadState, resolvedReadCursorFocusUserId, resolvedReadCursorMessageId]);
+
+  async function copyToClipboard(text: string, statusPrefix: string, emptyCode: string, failedCode: string) {
+    const normalizedText = text.trim();
     if (!normalizedText) {
-      setStatus("send_result_quick_copy_empty");
+      setStatus(emptyCode);
       return;
     }
 
     if (typeof navigator === "undefined" || typeof navigator.clipboard?.writeText !== "function") {
-      setStatus("send_result_quick_copy_clipboard_unavailable");
+      setStatus("quick_copy_clipboard_unavailable");
       return;
     }
 
     try {
       await navigator.clipboard.writeText(normalizedText);
-      setStatus(`Copied send-result quick copy to clipboard (${normalizedText}).`);
+      setStatus(`${statusPrefix} (${normalizedText}).`);
     } catch {
-      setStatus("send_result_quick_copy_failed");
+      setStatus(failedCode);
     }
+  }
+
+  async function handleCopySendResultQuickCopy() {
+    await copyToClipboard(
+      lastSendQuickCopy,
+      "Copied send-result quick copy to clipboard",
+      "send_result_quick_copy_empty",
+      "send_result_quick_copy_failed",
+    );
+  }
+
+  async function handleCopyReadCursorQuickCopy() {
+    await copyToClipboard(
+      lastReadCursorQuickCopy,
+      "Copied read-cursor quick copy to clipboard",
+      "read_cursor_quick_copy_empty",
+      "read_cursor_quick_copy_failed",
+    );
   }
 
   return (
@@ -275,6 +334,12 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       </p>
       <button type="button" onClick={() => void handleCopySendResultQuickCopy()}>
         Copy quick send result
+      </button>
+      <p>
+        Quick copy read cursor: <code>{lastReadCursorQuickCopy}</code>
+      </p>
+      <button type="button" onClick={() => void handleCopyReadCursorQuickCopy()}>
+        Copy quick read cursor
       </button>
 
       <div>
@@ -352,20 +417,45 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
         </ul>
       )}
 
+      <h2>Conversation members</h2>
+      {conversationMembers.length === 0 ? (
+        <p>No conversation members loaded yet.</p>
+      ) : (
+        <ul>
+          {conversationMembers.map((member) => (
+            <li key={member.id}>
+              <strong>{member.user_id}</strong>
+              {" · last_read_message_id: "}
+              <code>{member.last_read_message_id ?? "(none)"}</code>
+            </li>
+          ))}
+        </ul>
+      )}
+
       <h2>Messages</h2>
       {messages.length === 0 ? (
         <p>No thread messages loaded yet.</p>
       ) : (
         <ul>
-          {messages.map((message) => (
-            <li key={message.id}>
-              <strong>{message.payload_text}</strong>
-              {" · sender: "}
-              {message.sender_user_id}
-              {" · id: "}
-              <code>{message.id}</code>
-            </li>
-          ))}
+          {messages.map((message) => {
+            const readCursorOwners = conversationMembers
+              .filter((member) => member.last_read_message_id === message.id)
+              .map((member) => member.user_id);
+
+            return (
+              <li key={message.id}>
+                <strong>{message.payload_text}</strong>
+                {" · sender: "}
+                {message.sender_user_id}
+                {" · id: "}
+                <code>{message.id}</code>
+                {readCursorOwners.length > 0 ? <span>{` · last_read_by: ${readCursorOwners.join(", ")}`}</span> : null}
+                {resolvedReadCursorMessageId === message.id && resolvedReadCursorFocusUserId ? (
+                  <span>{` · read_status(${resolvedReadCursorFocusUserId}): ${focusReadState}`}</span>
+                ) : null}
+              </li>
+            );
+          })}
         </ul>
       )}
 

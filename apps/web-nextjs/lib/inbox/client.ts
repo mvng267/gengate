@@ -21,6 +21,13 @@ export type MessageAttachmentItem = {
   storage_key: string | null;
 };
 
+export type ConversationMemberItem = {
+  id: string;
+  conversation_id: string;
+  user_id: string;
+  last_read_message_id: string | null;
+};
+
 export async function getOrCreateDirectConversation(userAId: string, userBId: string): Promise<DirectConversation> {
   const response = await apiRequest("/conversations/direct", {
     method: "POST",
@@ -49,6 +56,20 @@ export async function listMessages(conversationId: string): Promise<MessageItem[
   const payload = (await response.json()) as {
     count: number;
     items: MessageItem[];
+  };
+
+  return payload.items;
+}
+
+export async function listConversationMembers(conversationId: string): Promise<ConversationMemberItem[]> {
+  const response = await apiRequest(`/conversations/${encodeURIComponent(conversationId)}/members`);
+  if (!response.ok) {
+    throw new Error(`conversation_member_list_failed:${response.status}`);
+  }
+
+  const payload = (await response.json()) as {
+    count: number;
+    items: ConversationMemberItem[];
   };
 
   return payload.items;
