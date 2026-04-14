@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 177
+- Batch: 178
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 177 iOS inbox seam hardening — add inline usage guidance for triage line/body/diff-hint
+- Scope: batch 178 iOS inbox seam hardening — add one-tap copy for source-hint usage note
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch177 slice)
+  - latest commit: `HEAD` (local batch178 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch178 cho messaging friction tiếp theo (ví dụ thêm copy-ready usage-note line để paste vào bug report template) trong iOS inbox shell
+- Next: mở batch179 cho messaging friction tiếp theo (ví dụ thêm triage-kit copy all để gộp line/body/diff/usage trong một payload) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -439,6 +439,10 @@
   - thêm `Usage` guidance ngay trong triage preview block để chỉ rõ khi nào dùng `triage line`, `triage body`, `diff hint`
   - cập nhật status/bullets phản ánh capability `usage guidance note`
   - không đổi logic API/copy payload; chỉ giảm nhầm lẫn thao tác report
+- Batch 178 outcome:
+  - thêm nút `Copy source-hint usage note` để copy nhanh câu usage mapping vào bug report template/onboarding note
+  - thêm feedback line `Copied usage note ...` để xác nhận text vừa copy
+  - tách usage note thành computed text dùng chung cho preview + copy action
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -448,7 +452,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, load direct thread A-B; verify `Source-hint verify matrix` + `Branch-key legend` + triage preview block (`line` vs `body`) + `Diff hint` + `Usage` cùng xuất hiện; lần lượt qua từng state kiểm tra line/body đều phản ánh đúng `branch + selection + guidance` và khác nhau đúng ở phần prefix tag như diff hint mô tả; verify usage note mapping đúng mục đích (`line` cho tagged log/search, `body` cho issue text gọn, `diff hint` cho onboarding/explanation); bấm `Copy source-hint branch key` để paste token nhanh, bấm `Copy source-hint report payload` để đối chiếu payload đầy đủ có cùng branch key, bấm `Copy source-hint matrix snapshot` để lấy block matrix+legend+branch cho report template, bấm `Copy source-hint triage line` để lấy line có prefix, bấm `Copy source-hint triage body` để lấy body không prefix cho issue title/body, và bấm `Copy source-hint diff hint` để lấy câu giải thích line/body; check feedback lines `Copied branch key ...`, `Copied report payload ...`, `Copied matrix snapshot ...`, `Copied triage line ...`, `Copied triage body ...`, `Copied diff hint ...`; cuối cùng bấm dynamic first-valid action để quay lại first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.` trước khi `Create message-device key`
+  - iOS Inbox path: open Inbox tab, load direct thread A-B; verify `Source-hint verify matrix` + `Branch-key legend` + triage preview block (`line` vs `body`) + `Diff hint` + `Usage` cùng xuất hiện; lần lượt qua từng state kiểm tra line/body đều phản ánh đúng `branch + selection + guidance` và khác nhau đúng ở phần prefix tag như diff hint mô tả; verify usage note mapping đúng mục đích (`line` cho tagged log/search, `body` cho issue text gọn, `diff hint` cho onboarding/explanation); bấm `Copy source-hint branch key` để paste token nhanh, bấm `Copy source-hint report payload` để đối chiếu payload đầy đủ có cùng branch key, bấm `Copy source-hint matrix snapshot` để lấy block matrix+legend+branch cho report template, bấm `Copy source-hint triage line` để lấy line có prefix, bấm `Copy source-hint triage body` để lấy body không prefix cho issue title/body, bấm `Copy source-hint diff hint` để lấy câu giải thích line/body, và bấm `Copy source-hint usage note` để lấy usage mapping line/body/diff; check feedback lines `Copied branch key ...`, `Copied report payload ...`, `Copied matrix snapshot ...`, `Copied triage line ...`, `Copied triage body ...`, `Copied diff hint ...`, `Copied usage note ...`; cuối cùng bấm dynamic first-valid action để quay lại first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.` trước khi `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts
