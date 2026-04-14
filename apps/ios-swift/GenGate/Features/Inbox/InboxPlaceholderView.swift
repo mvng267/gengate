@@ -48,6 +48,8 @@ struct InboxPlaceholderView: View {
     @State private var lastRecipientDeviceContextResetUserID: String?
     @State private var lastRecipientDeviceSourceHintCopyAt: Date?
     @State private var lastRecipientDeviceSourceHintCopyText: String?
+    @State private var lastRecipientDeviceSourceHintBranchKeyCopyAt: Date?
+    @State private var lastRecipientDeviceSourceHintBranchKeyCopyText: String?
     @State private var lastRecipientDeviceSourceHintReportPayloadCopyAt: Date?
     @State private var lastRecipientDeviceSourceHintReportPayloadCopyText: String?
 
@@ -124,6 +126,7 @@ struct InboxPlaceholderView: View {
                         "Added quick action `Copy source hint` to copy the current runtime source-hint string for bug reports and triage notes.",
                         "Added quick action `Copy source-hint report payload` to capture a compact triage line (branch key + recipient user/device short-id + hint + timestamp).",
                         "Recipient-device section now shows `Source-hint branch key` (e.g. `empty-first`, `sync-first`, `sync-nonfirst`, `manual-oob`) to map UI state quickly with payload logs.",
+                        "Added quick action `Copy source-hint branch key` so testers can paste only the compact state token when full payload is unnecessary.",
                         "After copy, short-lived feedback lines show elapsed time + short fragment so testers can confirm exactly what was captured.",
                         "Recipient-device section now shows a compact selection-source hint so testers know whether current `Recipient device UUID` is in-sync with loaded options or still a manual out-of-options value.",
                         "One-tap action `Clear recipient device UUID` helps testers reset stale/manual device input instantly before selecting a fresh option."
@@ -437,6 +440,15 @@ struct InboxPlaceholderView: View {
                                 .buttonStyle(.bordered)
 
                                 Button {
+                                    copyRecipientDeviceSourceHintBranchKey()
+                                } label: {
+                                    Text("Copy source-hint branch key")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(recipientDeviceSourceHintBranchKey == nil)
+
+                                Button {
                                     copyRecipientDeviceSourceHintReportPayload()
                                 } label: {
                                     Text("Copy source-hint report payload")
@@ -448,6 +460,12 @@ struct InboxPlaceholderView: View {
 
                             if let recipientDeviceSourceHintCopiedFeedbackText {
                                 Text(recipientDeviceSourceHintCopiedFeedbackText)
+                                    .font(.caption2.monospaced())
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            if let recipientDeviceSourceHintBranchKeyCopiedFeedbackText {
+                                Text(recipientDeviceSourceHintBranchKeyCopiedFeedbackText)
                                     .font(.caption2.monospaced())
                                     .foregroundStyle(.secondary)
                             }
@@ -1271,6 +1289,20 @@ struct InboxPlaceholderView: View {
         return "[inbox-source-hint] ts=\(timestamp) branch=\(branchKey) recipient_user=\(recipientUserShort) recipient_device=\(recipientDeviceShort) hint=\(trimmedSourceHintText)"
     }
 
+    private var recipientDeviceSourceHintBranchKeyCopiedFeedbackText: String? {
+        guard let lastRecipientDeviceSourceHintBranchKeyCopyAt,
+              let lastRecipientDeviceSourceHintBranchKeyCopyText else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(lastRecipientDeviceSourceHintBranchKeyCopyAt)
+        guard elapsed <= 12 else {
+            return nil
+        }
+
+        return "Copied branch key (\(Int(elapsed))s ago): \(lastRecipientDeviceSourceHintBranchKeyCopyText)"
+    }
+
     private var recipientDeviceSourceHintReportPayloadCopiedFeedbackText: String? {
         guard let lastRecipientDeviceSourceHintReportPayloadCopyAt,
               let lastRecipientDeviceSourceHintReportPayloadCopyText else {
@@ -1379,6 +1411,22 @@ struct InboxPlaceholderView: View {
 
         lastRecipientDeviceSourceHintCopyText = normalizedText
         lastRecipientDeviceSourceHintCopyAt = Date()
+    }
+
+    private func copyRecipientDeviceSourceHintBranchKey() {
+        guard let branchKey = recipientDeviceSourceHintBranchKey else {
+            return
+        }
+
+        let normalizedBranchKey = branchKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedBranchKey.isEmpty else {
+            return
+        }
+
+        writeToClipboard(normalizedBranchKey)
+
+        lastRecipientDeviceSourceHintBranchKeyCopyText = normalizedBranchKey
+        lastRecipientDeviceSourceHintBranchKeyCopyAt = Date()
     }
 
     private func copyRecipientDeviceSourceHintReportPayload() {

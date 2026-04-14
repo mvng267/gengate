@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 167
+- Batch: 168
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 167 iOS inbox seam hardening — add explicit source-hint branch key for UI↔payload mapping
+- Scope: batch 168 iOS inbox seam hardening — add one-tap copy for source-hint branch key token
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch167 slice)
+  - latest commit: `HEAD` (local batch168 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch168 cho messaging friction tiếp theo (ví dụ thêm one-tap copy branch key riêng để dán log nhanh mà không cần full payload) trong iOS inbox shell
+- Next: mở batch169 cho messaging friction tiếp theo (ví dụ thêm branch-key legend mini ngay cạnh matrix để test nhanh hơn) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -399,6 +399,10 @@
   - thêm `Source-hint branch key` line ngay dưới runtime hint (keys: `empty-first`, `empty-none`, `sync-first`, `sync-nonfirst`, `manual-oob`) để map trạng thái UI nhanh
   - payload `Copy source-hint report payload` nay chứa thêm field `branch=<key>` giúp đối chiếu log/report với UI state rõ hơn
   - cập nhật bullets/status để phản ánh triage flow mới; không đổi behavior API/logic gửi message
+- Batch 168 outcome:
+  - thêm nút `Copy source-hint branch key` để copy nhanh token branch-state mà không cần full payload
+  - thêm feedback line `Copied branch key ...` để xác nhận token vừa copy
+  - giữ nguyên copy hint + copy payload flows; chỉ mở rộng thao tác copy hẹp cho triage tốc độ cao
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -408,7 +412,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, load direct thread A-B; verify line `Source-hint branch key` đổi đúng theo từng state trong matrix; ở mỗi state bấm `Copy source-hint report payload` rồi paste ra note ngoài để xác nhận payload có đủ `ts`, `branch`, `recipient_user`, `recipient_device`, `hint`; đồng thời check feedback line `Copied report payload ...` tự hiển thị ngắn hạn; cuối cùng bấm dynamic first-valid action để quay lại first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.` trước khi `Create message-device key`
+  - iOS Inbox path: open Inbox tab, load direct thread A-B; verify line `Source-hint branch key` đổi đúng theo từng state trong matrix; ở mỗi state bấm `Copy source-hint branch key` để paste token nhanh ra note ngoài, rồi bấm `Copy source-hint report payload` để đối chiếu payload đầy đủ có cùng branch key; đồng thời check feedback lines `Copied branch key ...` và `Copied report payload ...`; cuối cùng bấm dynamic first-valid action để quay lại first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.` trước khi `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

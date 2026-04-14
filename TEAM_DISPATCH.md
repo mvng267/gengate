@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 167
-- Trục công việc: iOS inbox seam hardening — thêm source-hint branch key để map nhanh UI với payload triage.
+- Batch workflow chính thức hiện tại: 168
+- Trục công việc: iOS inbox seam hardening — thêm quick-copy branch-key token cho triage nhanh.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 167 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: thêm line `Source-hint branch key` và đưa `branch=<key>` vào payload copy để đối chiếu UI/log nhanh hơn.
-- Trạng thái: verify_batch167_ios.
+- Scope hiện tại: batch 168 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: thêm nút `Copy source-hint branch key` + feedback line để copy token trạng thái nhanh mà không cần full payload.
+- Trạng thái: verify_batch168_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
