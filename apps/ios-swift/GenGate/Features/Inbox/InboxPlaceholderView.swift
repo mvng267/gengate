@@ -51,7 +51,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset + empty-context-only helper-note visibility + short recipient-id mismatch hint + compact helper-note reason + readable short-caption mapping + recipient quick-member presets + dynamic first-valid-device apply/re-apply action + first-option inline subtitle (full + short id) + emphasized short-id line + in-sync first-option short-id state-label + same-as-first skip helper-note + empty-options reapply guidance + empty-state first-option short-id source label + empty-state short-id-unavailable fallback label + manual out-of-options short label + selection-source hint + one-tap device UUID clear action; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset + empty-context-only helper-note visibility + short recipient-id mismatch hint + compact helper-note reason + readable short-caption mapping + recipient quick-member presets + dynamic first-valid-device apply/re-apply action + first-option inline subtitle (full + short id) + emphasized short-id line + in-sync first-option short-id state-label + in-sync non-first short label + same-as-first skip helper-note + empty-options reapply guidance + empty-state first-option short-id source label + empty-state short-id-unavailable fallback label + manual out-of-options short label + selection-source hint + one-tap device UUID clear action; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -101,6 +101,7 @@ struct InboxPlaceholderView: View {
                         "Empty-state `first option` source hint now includes short-id fragment to keep scan pattern consistent with in-sync same-as-first hints.",
                         "When empty-state has no first option yet, source hint now explicitly marks `short-id chưa khả dụng` to keep fallback semantics clear.",
                         "Manual out-of-options source hint now uses compact label + short-id (`manual UUID/out-of-options`) for quicker mismatch scanning.",
+                        "In-sync (non-first) source hint now also includes short-id fragment for consistent scan speed across all valid-selection states.",
                         "Recipient-device section now shows a compact selection-source hint so testers know whether current `Recipient device UUID` is in-sync with loaded options or still a manual out-of-options value.",
                         "One-tap action `Clear recipient device UUID` helps testers reset stale/manual device input instantly before selecting a fresh option."
                     ]
@@ -1124,7 +1125,7 @@ struct InboxPlaceholderView: View {
         }
 
         if recipientDeviceOptions.contains(where: { $0.id == trimmedRecipientDeviceID }) {
-            return "Recipient device source: current options (in-sync)."
+            return "Recipient device source: current options (in-sync, short: \(shortUserID(trimmedRecipientDeviceID)))."
         }
 
         return "Recipient device source: manual UUID/out-of-options (short: \(shortUserID(trimmedRecipientDeviceID)))."

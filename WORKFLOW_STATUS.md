@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 159
+- Batch: 160
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 159 iOS inbox seam hardening — add compact manual out-of-options source label with short-id
+- Scope: batch 160 iOS inbox seam hardening — add short-id fragment in in-sync non-first source hint for consistency
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch159 slice)
+  - latest commit: `HEAD` (local batch160 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch160 cho messaging friction tiếp theo (ví dụ thêm short-id cho nhánh in-sync non-first để cân bằng toàn bộ source states) trong iOS inbox shell
+- Next: mở batch161 cho messaging friction tiếp theo (ví dụ thống nhất short-id prefix label giữa in-sync non-first và manual out-of-options states) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -367,6 +367,10 @@
   - source hint cho case manual UUID nằm ngoài options nay dùng nhãn gọn + short-id: `manual UUID/out-of-options (short: <abcd…wxyz>)`
   - giúp tester scan mismatch nhanh hơn mà không cần đọc full manual UUID ở mỗi lần kiểm tra
   - không đổi behavior validation/fallback; chỉ chuẩn hoá readability giữa các source states
+- Batch 160 outcome:
+  - source hint cho case in-sync nhưng không trùng first option nay thêm short-id: `current options (in-sync, short: <abcd…wxyz>)`
+  - đồng bộ khả năng scan nhanh với các nhánh same-as-first/manual/out-of-options đã có short-id
+  - logic state detection giữ nguyên; thay đổi chỉ ở phần caption readability
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -376,7 +380,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, load direct thread A-B; verify empty-state fallback `short-id chưa khả dụng`, rồi `Reload recipient devices` để thấy hint có `first option + short`; nhập manual/stale UUID ngoài options và verify hint chuyển thành `manual UUID/out-of-options (short: <id>)`; sau đó bấm dynamic first-valid action để quay lại first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.` trước khi `Create message-device key`
+  - iOS Inbox path: open Inbox tab, load direct thread A-B; verify empty-state fallback `short-id chưa khả dụng`, rồi `Reload recipient devices` để thấy hint có `first option + short`; chọn một device option hợp lệ nhưng không phải first để verify hint `current options (in-sync, short: <id>)`; nhập manual/stale UUID ngoài options để verify hint `manual UUID/out-of-options`; cuối cùng bấm dynamic first-valid action để quay lại first option và verify helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.` trước khi `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts
