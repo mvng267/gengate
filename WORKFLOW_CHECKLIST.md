@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **266 — direct-message shell (web+iOS quick-copy send-result summary) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **267 — direct-message shell (web+iOS clipboard quick-copy send-result) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **266**
-- Scope hiện tại: direct-message shell — thêm quick-copy send-result line chuẩn hóa `sender + message_id` trên web+iOS.
+- Batch workflow chính thức hiện tại: **267**
+- Scope hiện tại: direct-message shell — thêm quick action copy `Quick copy send result` vào clipboard trên web+iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/direct-message-shell.tsx`
@@ -99,19 +99,34 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `e35e51e` — `batch266: add dm send-result quick-copy summaries on web and ios`
+  - commit gần nhất đã chốt: `2efcf86` — `batch267: add quick copy send-result clipboard actions on web and ios`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch267 với 1 slice hẹp direct-message shell: thêm quick action copy `Quick copy send result` vào clipboard cho web+iOS.
+  - mở batch268 với 1 slice hẹp direct-message shell: thêm quick-copy read-cursor focus summary (`focus_user + resolved_message + read_state`) trên web+iOS.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed: bấm quick action `Use current session user as viewer + load` -> verify status `viewer_source=session_user` + feed reload.
-  - Web Inbox: nhập user A/B -> `Open direct thread` -> gửi message (manual hoặc quick session sender) -> verify dòng quick-copy send result `sender=... | message_id=...`.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> gửi message (manual hoặc quick session User A send) -> verify dòng quick-copy send result `sender=... | message_id=...`.
+  - Web Inbox: nhập user A/B -> gửi message -> bấm `Copy quick send result` -> paste và verify `sender=... | message_id=...`.
+  - iOS Inbox: nhập User A/B -> gửi message -> bấm `Copy quick send result` -> paste và verify `sender=... | message_id=...`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **267**
+- Commit cuối đã chốt:
+  - `2efcf86` — `batch267: add quick copy send-result clipboard actions on web and ios`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **268**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm quick-copy read-cursor focus summary (`focus_user + resolved_message + read_state`) trên web+iOS.
+
+---
 
 - Batch vừa xong: **266**
 - Commit cuối đã chốt:
