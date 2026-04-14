@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 183
+- Batch: 184
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 183 iOS inbox seam hardening — add one-tap copy for source-hint preview-delta hint
+- Scope: batch 184 iOS inbox seam hardening — add one-tap copy for source-hint preview pair (compact preview + delta)
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch183 slice)
+  - latest commit: `d395884` — `batch184: add source-hint preview pair quick copy`
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch184 cho messaging friction tiếp theo (ví dụ thêm preview-delta pair line để map compact preview + delta thành một copy-ready short block) trong iOS inbox shell
+- Next: mở batch185 cho messaging friction tiếp theo (ví dụ thêm copy-ready short block có thêm marker `when to use preview pair` để dễ dán bug note đúng ngữ cảnh) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -463,6 +463,10 @@
   - thêm nút `Copy source-hint preview delta` để copy nhanh câu giải thích compact-vs-full triage-kit
   - thêm feedback line `Copied preview delta ...` để xác nhận line vừa copy
   - giữ nguyên behavior payload khác; chỉ bổ sung quick-copy trên delta marker
+- Batch 184 outcome:
+  - thêm computed block `recipientDeviceSourceHintTriagePreviewPairText` ghép `Triage-kit preview` + `Preview delta` thành payload copy-ready ngắn
+  - thêm nút `Copy source-hint preview pair` để copy block này một lần, tiện dán bug note không cần ghép tay
+  - thêm feedback line `Copied preview pair ...` để xác nhận payload preview-pair vừa copy
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
