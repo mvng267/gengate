@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 253
+- Batch: 254
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 253 notification shell — show immediate status hint when unread preset is selected.
+- Scope: batch 254 notification shell — show current unread filter mode near presets.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,10 +16,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `f9081ef` — `batch253: show status hint when unread preset is selected`
+  - latest feature commit: `3ac1d12` — `batch254: show current unread filter mode near presets`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch254 với 1 slice hẹp notification shell tiếp theo: thêm tiny selected-state marker gần preset controls để tester nhận biết mode hiện tại mà không nhìn disabled state.
+- Next: mở batch255 với 1 slice hẹp notification shell tiếp theo: thêm mode label vào list summary line (`unread_only=true|false`) theo ngôn ngữ dễ đọc (`All`/`Unread only`) để tránh parse boolean tay khi test nhanh.
+- Batch 254 handoff:
+  - `3ac1d12` — `batch254: show current unread filter mode near presets`
+  - web/iOS giờ hiển thị dòng `Filter mode: ...` ngay cạnh preset area, giúp tester nhận biết mode hiện tại mà không cần suy từ disabled state.
 - Batch 253 handoff:
   - `f9081ef` — `batch253: show status hint when unread preset is selected`
   - web/iOS preset `All`/`Unread only` giờ ghi status hint ngay khi bấm, nhắc cần `Load notifications` để refresh window theo filter vừa chọn.
