@@ -1,12 +1,12 @@
 # GenGate Workflow Status
 
-- Batch: 207
+- Batch: 208
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 207 iOS feed seam friction reduction — quick-react auto-refresh feed/authored lists
+- Scope: batch 208 iOS feed seam friction reduction — add selective quick-react list refresh mode
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
-  - iOS: Session login -> Feed -> load private/authored moments -> quick react from row -> verify reactions + feed/authored lists auto-refresh without manual reload churn.
+  - iOS: Session login -> Feed -> load private/authored moments -> set quick-react refresh mode (none/private/authored/both) -> quick react from row -> verify reactions + expected list refresh behavior.
   - Web/backend seams from prior batches remain runnable for friend graph/moments/inbox/location/notifications.
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
@@ -16,11 +16,14 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `e113bb8` — `batch206: harden ios feed row quick reaction user mode`
-  - working tree: bẩn (batch207 changes in progress, chưa commit, chưa push)
+  - latest commit: `e7c0ab0` — `batch207: add ios feed quick reaction auto refresh lists`
+  - working tree: bẩn (batch208 changes in progress, chưa commit, chưa push)
 - Blocker: none
-- Next: chốt batch207 (commit local) rồi mở batch208 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
+- Next: chốt batch208 (commit local) rồi mở batch209 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 207 handoff:
+  - `e7c0ab0` — `batch207: add ios feed quick reaction auto refresh lists`
+  - quick reaction auto-refresh remains MVP-testable while batch 208 adds selective refresh modes to reduce unnecessary reload calls.
 - Batch 206 handoff:
   - `e113bb8` — `batch206: harden ios feed row quick reaction user mode`
   - per-row quick reaction mode labeling + user resolution remains MVP-testable while batch 207 adds optional auto-refresh for feed/authored lists after quick react.

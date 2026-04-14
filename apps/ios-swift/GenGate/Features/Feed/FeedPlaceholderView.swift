@@ -26,7 +26,29 @@ struct FeedPlaceholderView: View {
     @State private var isCreatingReaction = false
     @State private var quickReactionMomentIDInFlight: String?
     @State private var quickReactionPreferMomentAuthor = false
-    @State private var quickReactionAutoRefreshLists = true
+    @State private var quickReactionRefreshMode: QuickReactionRefreshMode = .both
+
+    private enum QuickReactionRefreshMode: String, CaseIterable, Identifiable {
+        case none
+        case privateFeed
+        case authored
+        case both
+
+        var id: String { rawValue }
+
+        var label: String {
+            switch self {
+            case .none:
+                return "No list refresh"
+            case .privateFeed:
+                return "Refresh private feed"
+            case .authored:
+                return "Refresh authored"
+            case .both:
+                return "Refresh both lists"
+            }
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -311,11 +333,18 @@ struct FeedPlaceholderView: View {
                     }
                     .toggleStyle(.switch)
 
-                    Toggle(isOn: $quickReactionAutoRefreshLists) {
-                        Text("Quick react auto refreshes feed/authored lists")
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Quick react list refresh mode")
                             .font(.footnote)
+                            .foregroundStyle(.secondary)
+
+                        Picker("Quick react list refresh mode", selection: $quickReactionRefreshMode) {
+                            ForEach(QuickReactionRefreshMode.allCases) { mode in
+                                Text(mode.label).tag(mode)
+                            }
+                        }
+                        .pickerStyle(.segmented)
                     }
-                    .toggleStyle(.switch)
 
                     HStack(spacing: 10) {
                         Button {
@@ -706,7 +735,18 @@ struct FeedPlaceholderView: View {
             statusMessage = "Quick reacted moment \(row.id). Reloading reactions..."
             await loadMomentReactions()
 
-            if quickReactionAutoRefreshLists {
+            switch quickReactionRefreshMode {
+            case .none:
+                break
+            case .privateFeed:
+                if !viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    await loadPrivateFeed()
+                }
+            case .authored:
+                if !authorUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    await loadAuthoredMoments()
+                }
+            case .both:
                 if !viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     await loadPrivateFeed()
                 }
