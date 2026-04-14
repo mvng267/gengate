@@ -1,14 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 224
+- Batch: 225
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 224 iOS feed UX hardening — add one-tap row-level delete action (`Delete this moment`)
+- Scope: batch 225 iOS feed UX hardening — gate one-tap row delete behind confirmation toggle
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
   - iOS: Session login -> Feed -> load private feed/authored moments.
-  - Tại row moment bất kỳ, tap `Delete this moment` để xóa ngay từ row context.
-  - Verify nút chuyển `Deleting this moment...` khi in-flight và status báo `Deleted moment <id> from row action. Reloading lists...` sau khi xong.
+  - Mặc định toggle `Require confirmation for row delete` bật: nút `Delete this moment` bị disable.
+  - Tắt toggle, rồi tap `Delete this moment` trên row để thực thi one-tap delete.
+  - Bật lại toggle để lock an toàn cho nhịp test kế tiếp.
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
   - WORKFLOW_STATUS.md
@@ -17,14 +18,19 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `a2dc93f` — `batch224: add ios one-tap delete from feed row`
-  - working tree: bẩn (batch224 docs in progress, chưa commit)
+  - latest feature commit: `cdb8cb6` — `batch225: gate row delete behind confirmation toggle`
+  - working tree: sạch
 - Blocker: none
-- Next: commit/push docs batch224 rồi mở batch225 cho friction slice hẹp kế tiếp
+- Next: mở batch226 cho friction slice hẹp kế tiếp
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 225 handoff:
+  - `cdb8cb6` — `batch225: gate row delete behind confirmation toggle`
+  - `900734d` — `batch225: sync workflow docs after delete safety toggle`
+  - one-tap row delete is now locked by default via `Require confirmation for row delete` toggle; operator must disable lock before row delete.
 - Batch 224 handoff:
-  - pending (in progress)
-  - added one-tap `Delete this moment` button per row with dedicated in-flight label and row-action success status copy.
+  - `a2dc93f` — `batch224: add ios one-tap delete from feed row`
+  - `387e3f5` — `batch224: sync workflow docs after ios one-tap delete`
+  - feed row now supports one-tap delete with dedicated in-flight label/status message.
 - Batch 223 handoff:
   - `9bfc007` — `batch223: add ios quick presets for delete target`
   - `45ee0c5` — `batch223: sync workflow docs after ios delete presets`
