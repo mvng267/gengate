@@ -91,23 +91,38 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch workflow chính thức hiện tại: **233**
 - Scope hiện tại: moment posting seam — giảm friction error clarity cho create moment + image (image+caption path) trên iOS Feed shell.
-- Trạng thái hiện tại: **verify**
+- Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `3738b54` — `batch232: wire friend-request reject flow across backend and ios`
-  - working tree hiện tại: bẩn (đang verify batch233, chưa commit)
+  - commit gần nhất đã chốt: `17ca17b` — `batch233: improve ios moment posting error clarity`
+  - working tree hiện tại: bẩn (đang sync workflow docs sau commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch233 cho friction slice error mapping moment posting; sau đó mở 1 slice hẹp cho private friend feed shell.
-- MVP-testable run/test path (latest stable):
+  - mở batch234 cho 1 slice hẹp private friend feed shell (ưu tiên lọc moment đã soft-delete khỏi list/feed ở backend + test hồi quy).
+- MVP-testable run/test path (current):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
-  - iOS: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.
+  - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.
+  - iOS Feed: tạo/lỗi moment posting flow; nếu backend trả `error.code/error.message` thì UI hiện thông điệp lỗi + hint hành động cho `user_not_found`, `moment_not_found`, `validation_error`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **233**
+- Commit cuối đã chốt:
+  - `17ca17b` — `batch233: improve ios moment posting error clarity`
+- Test-verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **234**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - private friend feed shell: backend loại bỏ moment `deleted_at != null` khỏi list/feed response + test hồi quy.
+
+---
 
 - Batch vừa xong: **232**
 - Commit cuối đã chốt:

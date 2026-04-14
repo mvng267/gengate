@@ -14,7 +14,19 @@
 ## Active batch
 - Batch workflow chính thức hiện tại: 233
 - Trục công việc: đóng 1 friction point của moment posting seam (image + caption) để test path iOS Feed shell dễ đoán lỗi và thao tác hơn.
-- Trạng thái: batch233_in_progress_moment_posting_error_clarity.
+- Trạng thái: batch233_complete_moment_posting_error_clarity.
+
+## Batch 233 handoff (closed)
+- Batch vừa xong: **233**
+- Commit đã chốt:
+  - `17ca17b` — `batch233: improve ios moment posting error clarity`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **234**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - private friend feed shell: backend lọc bỏ moment đã soft-delete khỏi `/moments` và `/moments/feed` + test hồi quy.
 
 ## Batch 232 handoff (closed)
 - Batch vừa xong: **232**
@@ -270,9 +282,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 233 moment posting UX trên Feed shell.
+- Scope hiện tại: đã chốt batch 233 moment posting UX trên Feed shell.
 - Kết quả gần nhất: đã thêm error-code parsing + hint mapping cho create moment/media fail path.
-- Trạng thái: batch233_verify_moment_posting_error_clarity_ios.
+- Trạng thái: batch233_complete_moment_posting_error_clarity_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
