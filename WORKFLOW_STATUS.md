@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 244
+- Batch: 245
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 244 notification shell — add web/iOS quick paging preset controls (first/prev/next).
+- Scope: batch 245 notification shell — add load-window change guard/copy on web+iOS list loaders.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,10 +16,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `79adb18` — `batch244: add quick paging presets to web and ios notification shells`
+  - latest feature commit: `2334e34` — `batch245: add load-window change guard in web and ios notification shells`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch245 với 1 slice hẹp notification shell tiếp theo: thêm auto-load guard theo page window change (optional quick reload button copy/state) để giảm thao tác thủ công khi retest.
+- Next: mở batch246 với 1 slice hẹp notification shell tiếp theo: thêm quick apply current user + auto-reset page offset khi user id đổi để giảm stale-window reload mismatch.
+- Batch 245 handoff:
+  - `2334e34` — `batch245: add load-window change guard in web and ios notification shells`
+  - web/iOS load button giờ hiện rõ trạng thái `window changed`, giúp tester biết cần reload khi đổi user/paging/filter.
 - Batch 244 handoff:
   - `79adb18` — `batch244: add quick paging presets to web and ios notification shells`
   - web/iOS notification shell đã có preset `First/Prev/Next` để thay offset nhanh, không phải nhập tay mỗi lần paging.

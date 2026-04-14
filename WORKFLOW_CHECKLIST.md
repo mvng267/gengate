@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **244 — notification shell (web/iOS quick paging presets first/prev/next) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **245 — notification shell (web/iOS load-window change guard copy/state) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **244**
-- Scope hiện tại: notification shell — thêm quick paging presets (`first/prev/next`) trên web/iOS.
+- Batch workflow chính thức hiện tại: **245**
+- Scope hiện tại: notification shell — thêm load-window change guard copy/state trên web/iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/notification-shell.tsx`
@@ -99,18 +99,33 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `79adb18` — `batch244: add quick paging presets to web and ios notification shells`
+  - commit gần nhất đã chốt: `2334e34` — `batch245: add load-window change guard in web and ios notification shells`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch245 với 1 slice hẹp notification shell: thêm auto-load guard theo page window change (optional quick reload button copy/state).
+  - mở batch246 với 1 slice hẹp notification shell: thêm quick apply current user + auto-reset page offset khi user id đổi.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.
   - iOS Feed: tạo/lỗi moment posting flow; nếu backend trả `error.code/error.message` thì UI hiện thông điệp lỗi + hint hành động cho `user_not_found`, `moment_not_found`, `validation_error`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **245**
+- Commit cuối đã chốt:
+  - `2334e34` — `batch245: add load-window change guard in web and ios notification shells`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **246**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm quick apply current user + auto-reset page offset khi user id đổi.
+
+---
 
 - Batch vừa xong: **244**
 - Commit cuối đã chốt:

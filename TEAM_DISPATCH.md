@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 244
-- Trục công việc: notification shell — web/iOS quick paging presets (first/prev/next).
-- Trạng thái: batch244_complete_notification_quick_paging_presets.
+- Batch workflow chính thức hiện tại: 245
+- Trục công việc: notification shell — web/iOS load-window change guard copy/state.
+- Trạng thái: batch245_complete_notification_load_window_guard.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 245 handoff (closed)
+- Batch vừa xong: **245**
+- Commit đã chốt:
+  - `2334e34` — `batch245: add load-window change guard in web and ios notification shells`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **246**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm quick apply current user + auto-reset page offset khi user id đổi.
 
 ## Batch 244 handoff (closed)
 - Batch vừa xong: **244**
