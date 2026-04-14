@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 204
-- Trục công việc: iOS feed seam friction reduction — per-row quick reaction create action.
+- Batch workflow chính thức hiện tại: 205
+- Trục công việc: iOS feed seam friction reduction — quick-react prefer-moment-author toggle.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 204 iOS feed seam friction reduction.
-- Kết quả gần nhất: mỗi moment row có thêm action `Quick react from row` để tạo reaction ngay tại row context (reuse reaction type + session/manual user) và reload reactions.
-- Trạng thái: verify_batch204_ios.
+- Scope hiện tại: batch 205 iOS feed seam friction reduction.
+- Kết quả gần nhất: thêm toggle `Quick react uses selected moment author as user`; khi bật, quick react theo row sẽ dùng `author_id` của row làm `reaction_user_id`.
+- Trạng thái: verify_batch205_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

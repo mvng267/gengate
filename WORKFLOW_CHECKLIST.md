@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **204 — iOS feed row-level quick reaction create slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **205 — iOS feed quick-react prefer-author toggle slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **204**
-- Scope hiện tại: iOS feed seam friction reduction — thêm quick reaction create trực tiếp tại moment row (reuse selected reaction type + session/manual reaction user) để rút ngắn create+load verify loop cho `POST/GET /moments/{id}/reactions`.
+- Batch workflow chính thức hiện tại: **205**
+- Scope hiện tại: iOS feed seam friction reduction — thêm toggle `Quick react uses selected moment author as user` để quick reaction theo row có thể dùng author của moment làm reaction user, giảm mismatch user-target khi verify `POST/GET /moments/{id}/reactions`.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `58ee4d2` — `batch203: add ios feed row-level reaction actions`
-  - working tree hiện tại: bẩn (đang có thay đổi batch204, chưa commit)
+  - commit gần nhất đã chốt: `20c9879` — `batch204: add ios feed row quick reaction create`
+  - working tree hiện tại: bẩn (đang có thay đổi batch205, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit local batch204 rồi mở batch205 cho 1 friction slice hẹp tiếp theo ở feed/inbox seam MVP
+  - commit local batch205 rồi mở batch206 cho 1 friction slice hẹp tiếp theo ở feed/inbox seam MVP
 
 ## Batch handoff note
 

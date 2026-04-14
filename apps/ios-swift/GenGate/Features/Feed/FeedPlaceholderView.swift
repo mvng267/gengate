@@ -25,6 +25,7 @@ struct FeedPlaceholderView: View {
     @State private var isLoadingReactions = false
     @State private var isCreatingReaction = false
     @State private var quickReactionMomentIDInFlight: String?
+    @State private var quickReactionPreferMomentAuthor = false
 
     var body: some View {
         ScrollView {
@@ -302,6 +303,12 @@ struct FeedPlaceholderView: View {
                         }
                         .padding(.vertical, 2)
                     }
+
+                    Toggle(isOn: $quickReactionPreferMomentAuthor) {
+                        Text("Quick react uses selected moment author as user")
+                            .font(.footnote)
+                    }
+                    .toggleStyle(.switch)
 
                     HStack(spacing: 10) {
                         Button {
@@ -656,20 +663,29 @@ struct FeedPlaceholderView: View {
             return
         }
 
-        guard let resolvedQuickReactionUserID else {
-            fetchError = "Reaction user UUID hoặc session user là bắt buộc để quick react từ moment row."
+        let quickReactionUserID: String?
+        if quickReactionPreferMomentAuthor {
+            quickReactionUserID = row.authorID
+        } else {
+            quickReactionUserID = resolvedQuickReactionUserID
+        }
+
+        guard let quickReactionUserID, !quickReactionUserID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            fetchError = quickReactionPreferMomentAuthor
+                ? "Author user UUID của moment là bắt buộc khi bật quick react prefer author."
+                : "Reaction user UUID hoặc session user là bắt buộc để quick react từ moment row."
             return
         }
 
         quickReactionMomentIDInFlight = row.id
         reactionTargetMomentIDDraft = row.id
-        reactionUserIDDraft = resolvedQuickReactionUserID
+        reactionUserIDDraft = quickReactionUserID
         fetchError = nil
 
         do {
             _ = try await PrivateFeedAPIClient().createReaction(
                 momentID: row.id,
-                userID: resolvedQuickReactionUserID,
+                userID: quickReactionUserID,
                 reactionType: trimmedReactionType
             )
 
