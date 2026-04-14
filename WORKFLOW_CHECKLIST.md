@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **261 — private-feed shell (web/iOS quick-copy feed summary line) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **262 — private-feed shell (web session-viewer quick load action) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,28 +89,40 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **261**
-- Scope hiện tại: private-feed shell — thêm quick-copy list summary (`viewer + feed_count + first_moment_id`) trên web+iOS.
+- Batch workflow chính thức hiện tại: **262**
+- Scope hiện tại: private-feed shell — thêm quick action web `Use current session user as viewer + load` để parity với iOS viewer shortcut.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/moment-compose-shell.tsx`
-  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
-  - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `4c02683` — `batch261: add private-feed quick-copy summaries in moment shells`
+  - commit gần nhất đã chốt: `47cb6df` — `batch262: add session-viewer quick load action in web feed shell`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch262 với 1 slice hẹp private-feed shell: thêm quick action `Use current session user as viewer + load` trên web.
+  - mở batch263 với 1 slice hẹp direct-message shell: thêm quick-copy conversation summary (`user_a + user_b + message_count + last_message_id`) trên web+iOS.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
-  - Web Feed: nhập viewer -> reload private feed -> verify quick-copy feed line `viewer/feed_count/first_moment_id`.
-  - iOS Feed: nhập viewer -> load private feed -> verify quick-copy feed line `viewer/feed_count/first_moment_id`.
+  - Web Feed: bấm quick action `Use current session user as viewer + load` -> verify status `viewer_source=session_user` + feed reload.
+  - iOS Feed: dùng viewer shortcut hiện có (`Use current session user for viewer + author`) rồi load feed để parity với web.
 
 ## Batch handoff note
+
+- Batch vừa xong: **262**
+- Commit cuối đã chốt:
+  - `47cb6df` — `batch262: add session-viewer quick load action in web feed shell`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **263**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm quick-copy conversation summary (`user_a + user_b + message_count + last_message_id`) trên web+iOS.
+
+---
 
 - Batch vừa xong: **261**
 - Commit cuối đã chốt:

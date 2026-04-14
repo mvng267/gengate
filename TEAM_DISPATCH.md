@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 261
-- Trục công việc: private-feed shell — web/iOS add quick-copy feed summary line for load parity reporting.
-- Trạng thái: batch261_complete_private_feed_quick_copy_summary.
+- Batch workflow chính thức hiện tại: 262
+- Trục công việc: private-feed shell — web add quick action to apply session user as viewer and reload feed.
+- Trạng thái: batch262_complete_web_session_viewer_quick_load.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 262 handoff (closed)
+- Batch vừa xong: **262**
+- Commit đã chốt:
+  - `47cb6df` — `batch262: add session-viewer quick load action in web feed shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **263**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm quick-copy conversation summary (user_a + user_b + message_count + last_message_id) trên web+iOS.
 
 ## Batch 261 handoff (closed)
 - Batch vừa xong: **261**
