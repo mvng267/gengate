@@ -545,6 +545,10 @@ struct FeedPlaceholderView: View {
                 resolvedRowQuickReactionUserID == nil ||
                 normalizedReactionTypeDraft.isEmpty
             )
+
+            Text("Refresh after quick react: \(quickReactionRefreshMode.label)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)

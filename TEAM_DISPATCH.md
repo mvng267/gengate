@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 208
-- Trục công việc: iOS feed seam friction reduction — selective quick-react list refresh mode.
+- Batch workflow chính thức hiện tại: 209
+- Trục công việc: iOS feed seam friction reduction — row-level quick-react refresh-mode context hint.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 208 iOS feed seam friction reduction.
-- Kết quả gần nhất: quick react theo row hỗ trợ refresh mode chọn lọc (`none`/`private`/`authored`/`both`) để giảm call dư khi human-test.
-- Trạng thái: verify_batch208_ios.
+- Scope hiện tại: batch 209 iOS feed seam friction reduction.
+- Kết quả gần nhất: row action context hiển thị mode refresh hiện hành sau quick react để tránh nhầm mode khi human-test.
+- Trạng thái: verify_batch209_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
