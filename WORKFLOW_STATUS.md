@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 250
+- Batch: 251
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 250 notification shell — include read-state symbols in toggle status copy.
+- Scope: batch 251 notification shell — add tiny read/unread legend line near notification list.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,10 +16,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `e35cde6` — `batch250: include read-state symbols in toggle status copy`
+  - latest feature commit: `a445633` — `batch251: add read-state legend near notification lists`
   - working tree: dirty (workflow docs update in progress)
 - Blocker: none
-- Next: mở batch251 với 1 slice hẹp notification shell tiếp theo: thêm tiny legend line ngay trên list (`● read`, `○ unread`) để người mới không phải suy nghĩa ký hiệu.
+- Next: mở batch252 với 1 slice hẹp notification shell tiếp theo: thêm filter quick presets (`All`/`Unread only`) dạng segmented buttons để giảm toggle ambiguity khi retest.
+- Batch 251 handoff:
+  - `a445633` — `batch251: add read-state legend near notification lists`
+  - web/iOS list giờ có dòng legend tĩnh `● read · ○ unread` ngay dưới tiêu đề để tester mới hiểu ký hiệu ngay, không cần suy từ button text.
 - Batch 250 handoff:
   - `e35cde6` — `batch250: include read-state symbols in toggle status copy`
   - web/iOS status sau toggle đã nhắc trực tiếp `read (●)` / `unread (○)` để đồng bộ với ký hiệu trên nút row.

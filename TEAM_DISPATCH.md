@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 250
-- Trục công việc: notification shell — web/iOS toggle status copy includes read-state symbols.
-- Trạng thái: batch250_complete_notification_toggle_status_symbols.
+- Batch workflow chính thức hiện tại: 251
+- Trục công việc: notification shell — web/iOS tiny read/unread legend line near list.
+- Trạng thái: batch251_complete_notification_legend_line.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 251 handoff (closed)
+- Batch vừa xong: **251**
+- Commit đã chốt:
+  - `a445633` — `batch251: add read-state legend near notification lists`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **252**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: thêm filter quick presets (`All`/`Unread only`) dạng segmented buttons để giảm toggle ambiguity.
 
 ## Batch 250 handoff (closed)
 - Batch vừa xong: **250**
