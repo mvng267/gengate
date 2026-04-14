@@ -95,6 +95,8 @@ struct NotificationsPlaceholderView: View {
                         Button("All") {
                             pageUnreadOnly = false
                             pageOffsetDraft = "0"
+                            statusMessage = "Preset selected: All notifications. Press Load notifications to refresh this window."
+                            fetchError = nil
                         }
                         .buttonStyle(.bordered)
                         .disabled(!pageUnreadOnly)
@@ -102,6 +104,8 @@ struct NotificationsPlaceholderView: View {
                         Button("Unread only") {
                             pageUnreadOnly = true
                             pageOffsetDraft = "0"
+                            statusMessage = "Preset selected: Unread only. Press Load notifications to refresh this window."
+                            fetchError = nil
                         }
                         .buttonStyle(.bordered)
                         .disabled(pageUnreadOnly)

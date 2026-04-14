@@ -247,26 +247,28 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
         <div>
           <button
             type="button"
-            onClick={() =>
+            onClick={() => {
               setPagination((current) => ({
                 ...current,
                 unreadOnly: false,
                 offset: 0,
-              }))
-            }
+              }));
+              setStatus("Preset selected: All notifications. Press Load notifications to refresh this window.");
+            }}
             disabled={!pagination.unreadOnly}
           >
             All
           </button>
           <button
             type="button"
-            onClick={() =>
+            onClick={() => {
               setPagination((current) => ({
                 ...current,
                 unreadOnly: true,
                 offset: 0,
-              }))
-            }
+              }));
+              setStatus("Preset selected: Unread only. Press Load notifications to refresh this window.");
+            }}
             disabled={pagination.unreadOnly}
           >
             Unread only
