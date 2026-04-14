@@ -247,7 +247,7 @@ struct NotificationsPlaceholderView: View {
                                         await toggleReadState(for: row)
                                     }
                                 } label: {
-                                    Text(isMutating ? "Updating..." : (row.isRead ? "Mark unread" : "Mark read"))
+                                    Text(isMutating ? "Updating..." : "\(row.isRead ? "●" : "○") \(row.isRead ? "Mark unread" : "Mark read")")
                                 }
                                 .buttonStyle(.bordered)
                                 .disabled(isMutating || isLoading)

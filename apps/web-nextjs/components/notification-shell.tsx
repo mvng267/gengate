@@ -337,7 +337,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
               {" · payload: "}
               {JSON.stringify(item.payload_json)} {" "}
               <button type="button" onClick={() => void toggleRead(item)} disabled={busyId === item.id}>
-                {busyId === item.id ? "Saving..." : item.read_at ? "Mark unread" : "Mark read"}
+                {busyId === item.id ? "Saving..." : `${item.read_at ? "●" : "○"} ${item.read_at ? "Mark unread" : "Mark read"}`}
               </button>
             </li>
           ))}
