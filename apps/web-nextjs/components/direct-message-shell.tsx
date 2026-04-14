@@ -54,6 +54,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [isSending, setIsSending] = useState(false);
   const [isCreatingAttachment, setIsCreatingAttachment] = useState(false);
   const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
+  const conversationQuickCopy = `user_a=${form.userAId.trim() || "(empty)"} | user_b=${form.userBId.trim() || "(empty)"} | message_count=${messages.length} | last_message_id=${messages[messages.length - 1]?.id ?? "(none)"}`;
 
   useEffect(() => {
     setForm((current) => ({
@@ -201,6 +202,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
         <strong>Status:</strong> direct messaging shell wires direct thread open/create, text send/list, and image attachment create/list.
       </p>
       <p>{status}</p>
+      <p>
+        Quick copy conversation: <code>{conversationQuickCopy}</code>
+      </p>
 
       <div>
         <label>

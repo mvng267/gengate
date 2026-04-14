@@ -1289,6 +1289,10 @@ struct InboxPlaceholderView: View {
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
 
+                    Text("Quick copy conversation: \(conversationQuickCopySummary)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
                     Text("Attachment target message_id: \(resolvedAttachmentTargetMessageID ?? "(not resolved)")")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
@@ -1539,6 +1543,17 @@ struct InboxPlaceholderView: View {
             return userSession.userID
         }
         return nil
+    }
+
+    private var conversationQuickCopySummary: String {
+        let userA = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let userB = userBIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let summaryUserA = userA.isEmpty ? "(empty)" : userA
+        let summaryUserB = userB.isEmpty ? "(empty)" : userB
+        let summaryMessageCount = messageRows.count
+        let summaryLastMessageID = messageRows.last?.id ?? "(none)"
+
+        return "user_a=\(summaryUserA) | user_b=\(summaryUserB) | message_count=\(summaryMessageCount) | last_message_id=\(summaryLastMessageID)"
     }
 
     private var resolvedAttachmentTargetMessageID: String? {
