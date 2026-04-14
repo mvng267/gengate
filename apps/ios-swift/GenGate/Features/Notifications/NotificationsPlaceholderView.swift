@@ -233,7 +233,7 @@ struct NotificationsPlaceholderView: View {
                         .foregroundStyle(.secondary)
 
                     if let listMeta {
-                        Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount) · Limit: \(listMeta.limit) · Offset: \(listMeta.offset) · unread_only: \(listMeta.unreadOnly ? "true" : "false")")
+                        Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount) · Limit: \(listMeta.limit) · Offset: \(listMeta.offset) · Filter mode: \(listMeta.unreadOnly ? "Unread only" : "All notifications")")
                             .font(.footnote.monospaced())
                             .foregroundStyle(.secondary)
                     }

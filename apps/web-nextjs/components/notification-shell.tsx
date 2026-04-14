@@ -359,7 +359,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       </p>
       {listMeta ? (
         <p>
-          Page count: <strong>{listMeta.count}</strong> · Page unread: <strong>{listMeta.unread_count}</strong> · Total unread: <strong>{listMeta.total_unread_count}</strong> · Limit: <strong>{pagination.limit}</strong> · Offset: <strong>{pagination.offset}</strong> · unread_only: <strong>{String(pagination.unreadOnly)}</strong>
+          Page count: <strong>{listMeta.count}</strong> · Page unread: <strong>{listMeta.unread_count}</strong> · Total unread: <strong>{listMeta.total_unread_count}</strong> · Limit: <strong>{pagination.limit}</strong> · Offset: <strong>{pagination.offset}</strong> · Filter mode: <strong>{pagination.unreadOnly ? "Unread only" : "All notifications"}</strong>
         </p>
       ) : null}
       {items.length === 0 ? (
