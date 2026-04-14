@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **149 — iOS inbox dynamic first-valid recipient-device action consolidation slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **150 — iOS inbox first-valid action inline target subtitle slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **149**
-- Scope hiện tại: iOS inbox read-status UX hardening — gộp apply/re-apply first valid recipient-device thành 1 action label động theo trạng thái.
+- Batch workflow chính thức hiện tại: **150**
+- Scope hiện tại: iOS inbox read-status UX hardening — thêm inline subtitle dưới dynamic first-valid action để show target first-option UUID trước khi apply.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `HEAD` (local batch149 slice)
+  - commit gần nhất đã chốt: `HEAD` (local batch150 slice)
   - working tree hiện tại: sạch (sau commit local, chưa push)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch150 cho messaging friction tiếp theo (thêm inline subtitle dưới dynamic action để show cụ thể target first-option UUID sẽ được áp dụng khi button enable) trong iOS inbox shell
+  - mở batch151 cho messaging friction tiếp theo (show short-id version trong subtitle cạnh full UUID để tester scan nhanh hơn trên màn hình hẹp) trong iOS inbox shell
 
 ## Batch handoff note
 

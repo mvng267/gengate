@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 149
+- Batch: 150
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 149 iOS inbox seam hardening — gộp apply/re-apply first valid recipient-device thành 1 action label động theo trạng thái
+- Scope: batch 150 iOS inbox seam hardening — thêm inline subtitle dưới dynamic first-valid action để show target first-option UUID trước khi apply
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch149 slice)
+  - latest commit: `HEAD` (local batch150 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch150 cho messaging friction tiếp theo (thêm inline subtitle dưới dynamic action để show cụ thể target first-option UUID sẽ được áp dụng khi button enable) trong iOS inbox shell
+- Next: mở batch151 cho messaging friction tiếp theo (show short-id version trong subtitle cạnh full UUID để tester scan nhanh hơn trên màn hình hẹp) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -327,6 +327,10 @@
   - gộp `Use first valid recipient device` + `Re-apply first valid recipient device` thành một nút duy nhất với label động theo state (`Use...` khi empty, `Re-apply...` khi đã có draft nhưng lệch option)
   - giảm duplication control trong recipient-device section, giữ cùng behavior apply first option nhưng UI ít nút hơn và rõ intent theo ngữ cảnh
   - giữ nguyên guard enable theo `canApplyFirstRecipientDeviceOption` để chỉ bật khi thao tác thực sự có hiệu lực
+- Batch 150 outcome:
+  - thêm inline subtitle ngay dưới dynamic first-valid action: `Action target: first valid option <device_uuid>` khi action đang enable
+  - subtitle hiển thị rõ target UUID sẽ được áp dụng trước khi bấm, giúp human tester tránh apply nhầm option trong flow manual/stale
+  - giữ style `caption2.monospaced` để đọc UUID ổn định và không làm nặng layout recipient-device section
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -336,7 +340,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, load direct thread A-B, dùng `Quick recipient member presets` để pick nhanh 1 member vào `Recipient user UUID`, sau đó `Reload recipient devices` để load options và bấm dynamic first-valid action (label `Use first valid recipient device`); verify `Recipient device source` hint báo `current options (in-sync)`; thử nhập manual/stale device UUID rồi bấm `Clear recipient device UUID`, sau đó set lại stale value và bấm dynamic action (label `Re-apply first valid recipient device`) để quay lại trạng thái in-sync; tiếp theo load direct thread C-D thành công (khác member set) và verify recipient user/device/options bị auto-clear khi recipient user cũ không thuộc member set mới + xuất hiện inline reset helper note với caption ngắn `non-member after switch` kèm recipient short id; cuối cùng dùng preset chọn member mới + dynamic first-valid action + `Create message-device key`
+  - iOS Inbox path: open Inbox tab, load direct thread A-B, dùng `Quick recipient member presets` để pick nhanh 1 member vào `Recipient user UUID`, sau đó `Reload recipient devices` để load options và bấm dynamic first-valid action (label `Use first valid recipient device`) + verify subtitle `Action target: first valid option <device_uuid>`; verify `Recipient device source` hint báo `current options (in-sync)`; thử nhập manual/stale device UUID rồi bấm `Clear recipient device UUID`, sau đó set lại stale value và bấm dynamic action (label `Re-apply first valid recipient device`) + verify subtitle target UUID trước khi apply để quay lại trạng thái in-sync; tiếp theo load direct thread C-D thành công (khác member set) và verify recipient user/device/options bị auto-clear khi recipient user cũ không thuộc member set mới + xuất hiện inline reset helper note với caption ngắn `non-member after switch` kèm recipient short id; cuối cùng dùng preset chọn member mới + dynamic first-valid action + `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts
