@@ -36,6 +36,7 @@ struct InboxPlaceholderView: View {
     @State private var fetchError: String?
     @State private var isLoading = false
     @State private var isSendingMessage = false
+    @State private var sendStatusHint: String?
     @State private var isCreatingAttachment = false
     @State private var isCreatingDeviceKey = false
     @State private var isUpdatingReadCursor = false
@@ -262,6 +263,23 @@ struct InboxPlaceholderView: View {
                             .padding(12)
                             .background(Color.secondary.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        Button {
+                            Task {
+                                await applyCurrentSessionUserAsUserAAndSend()
+                            }
+                        } label: {
+                            Text(isSendingMessage ? "Sending message..." : "Use current session user as User A + send")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(
+                            isLoading ||
+                            isSendingMessage ||
+                            conversationSummary == nil ||
+                            currentSessionUserID == nil ||
+                            messageDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        )
 
                         Button {
                             Task {
@@ -1258,6 +1276,12 @@ struct InboxPlaceholderView: View {
                     if let currentSessionUserID {
                         Text("Current session user_id: \(currentSessionUserID)")
                             .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if let sendStatusHint {
+                        Text("Status hint: \(sendStatusHint)")
+                            .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
 
@@ -2796,6 +2820,29 @@ use_when=\(useWhenText)
         userAIDDraft = currentSessionUserID
     }
 
+    private func applyCurrentSessionUserAsUserAAndSend() async {
+        guard let currentSessionUserID else {
+            sendStatusHint = "session_sender_missing_for_quick_apply"
+            return
+        }
+
+        guard conversationSummary != nil else {
+            fetchError = "Load direct thread trước khi gửi message."
+            return
+        }
+
+        let senderStatus: String
+        if userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == currentSessionUserID {
+            senderStatus = "User A already matches current session user (sender_source=session_user)."
+        } else {
+            senderStatus = "Applied current session user as User A (sender_source=session_user)."
+        }
+
+        userAIDDraft = currentSessionUserID
+        sendStatusHint = "\(senderStatus) Sending direct message shell..."
+        await sendMessage(senderUserIDOverride: currentSessionUserID, statusPrefix: senderStatus)
+    }
+
     private func clearCursorFormSyncHintIfIdentityChanged() {
         lastCursorFormSyncSummary = nil
         lastCursorFormSyncAt = nil
@@ -2947,7 +2994,11 @@ use_when=\(useWhenText)
     }
 
     private func sendMessage() async {
-        let trimmedUserA = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        await sendMessage(senderUserIDOverride: nil, statusPrefix: nil)
+    }
+
+    private func sendMessage(senderUserIDOverride: String?, statusPrefix: String?) async {
+        let trimmedUserA = senderUserIDOverride?.trimmingCharacters(in: .whitespacesAndNewlines) ?? userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedPayload = messageDraft.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard let conversationID = conversationSummary?.id else {
@@ -2967,9 +3018,14 @@ use_when=\(useWhenText)
 
         isSendingMessage = true
         fetchError = nil
+        if let statusPrefix {
+            sendStatusHint = "\(statusPrefix) Sending direct message shell..."
+        } else {
+            sendStatusHint = nil
+        }
 
         do {
-            _ = try await InboxAPIClient().createMessage(
+            let created = try await InboxAPIClient().createMessage(
                 conversationID: conversationID,
                 senderUserID: trimmedUserA,
                 payloadText: trimmedPayload
@@ -2977,6 +3033,13 @@ use_when=\(useWhenText)
             messageDraft = ""
             messageToDeleteIDDraft = ""
             await loadInboxThread()
+
+            let sentStatus = "Sent message \(created.id) into direct thread \(conversationID)."
+            if let statusPrefix {
+                sendStatusHint = "\(statusPrefix) \(sentStatus)"
+            } else {
+                sendStatusHint = sentStatus
+            }
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
