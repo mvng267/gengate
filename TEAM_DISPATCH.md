@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 148
-- Trục công việc: iOS inbox seam hardening — thêm one-tap re-apply action để đưa recipient device quay lại first valid option nhanh.
+- Batch workflow chính thức hiện tại: 149
+- Trục công việc: iOS inbox seam hardening — gộp apply/re-apply first-valid recipient-device thành 1 action label động theo trạng thái.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 148 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: thêm action `Re-apply first valid recipient device` để restore nhanh state in-sync sau khi clear/manual edit device UUID.
-- Trạng thái: verify_batch148_ios.
+- Scope hiện tại: batch 149 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: gộp `Use first valid`/`Re-apply first valid` thành 1 dynamic action để giảm duplication control mà vẫn giữ behavior apply option đầu tiên.
+- Trạng thái: verify_batch149_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
