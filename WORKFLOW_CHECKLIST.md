@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **276**
-- Scope hiện tại: direct-message shell — thêm one-tap member-row cursor-context action để set đồng thời read-cursor target user + message trên web+iOS.
+- Batch workflow chính thức hiện tại: **277**
+- Scope hiện tại: direct-message shell — thêm one-tap member-row cursor-context+focus action để set đồng thời read-cursor target user + message + focus user trên web+iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/direct-message-shell.tsx`
@@ -99,12 +99,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `982018b` — `batch276: add member-cursor context one-tap actions on web and ios`
+  - commit gần nhất đã chốt: `58eedff` — `batch277: add member-cursor context-focus one-tap actions on web and ios`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch277 với 1 slice hẹp direct-message shell: thêm quick action one-tap apply member cursor context + focus user đồng thời trên web+iOS để rút ngắn verify read_state.
+  - mở batch278 với 1 slice hẹp direct-message shell: thêm quick action one-tap apply member cursor context+focus rồi trigger read-cursor update ngay trên web+iOS để giảm thêm 1 bước thao tác.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed: bấm quick action `Use current session user as viewer + load` -> verify status `viewer_source=session_user` + feed reload.
@@ -112,6 +112,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **277**
+- Commit cuối đã chốt:
+  - `58eedff` — `batch277: add member-cursor context-focus one-tap actions on web and ios`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **278**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm quick action one-tap apply member cursor context+focus rồi trigger read-cursor update ngay trên web+iOS để giảm thêm 1 bước thao tác.
+
+---
 
 - Batch vừa xong: **276**
 - Commit cuối đã chốt:

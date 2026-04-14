@@ -1,15 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 276
+- Batch: 277
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 276 direct-message shell — add one-tap member-row cursor-context action to apply both target user + target message into read-cursor form (read_cursor_context_source=member_row) on web+iOS.
+- Scope: batch 277 direct-message shell — add one-tap member-row cursor-context+focus action to apply target user + target message + focus user together (read_cursor_context_focus_source=member_row) on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
-  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> trong `Conversation members` bấm `Use member cursor context (target + message)` trên row có `last_read_message_id` -> bấm `Mark target message as read (target user)` -> verify status có `read_cursor_context_source=member_row` và read cursor updated -> `Copy quick read-cursor apply result` và paste format `target_user=... | applied_message=... | focus_user=... | read_state=read|unread|unknown`.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> trong `Member read-cursor summary` bấm `Use member cursor context (target + message)` trên row có `last_read_message_id` -> bấm `Update read cursor` -> verify status hint có `read_cursor_context_source=member_row` -> `Copy quick read-cursor apply result` và paste format `target_user=... | applied_message=... | focus_user=... | read_state=read|unread|unknown`.
+  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> trong `Conversation members` bấm `Use member cursor context + focus` trên row có `last_read_message_id` -> bấm `Mark target message as read (target user)` -> verify status có `read_cursor_context_focus_source=member_row` và read cursor updated -> `Copy quick read-cursor apply result` và paste format `target_user=... | applied_message=... | focus_user=... | read_state=read|unread|unknown`.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> trong `Member read-cursor summary` bấm `Use member cursor context + focus` trên row có `last_read_message_id` -> bấm `Update read cursor` -> verify status hint có `read_cursor_context_focus_source=member_row` -> `Copy quick read-cursor apply result` và paste format `target_user=... | applied_message=... | focus_user=... | read_state=read|unread|unknown`.
 - Files:
   - apps/web-nextjs/components/direct-message-shell.tsx
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -17,10 +17,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `982018b` — `batch276: add member-cursor context one-tap actions on web and ios`
-  - working tree: clean after batch276 commit
+  - latest feature commit: `58eedff` — `batch277: add member-cursor context-focus one-tap actions on web and ios`
+  - working tree: clean after batch277 commit
 - Blocker: none
-- Next: mở batch277 với 1 slice hẹp direct-message shell: thêm quick action one-tap apply member cursor context + focus user đồng thời trên web+iOS để rút ngắn flow verify read_state.
+- Next: mở batch278 với 1 slice hẹp direct-message shell: thêm quick action one-tap apply member cursor context+focus rồi trigger read-cursor update ngay trên web+iOS để giảm thêm 1 bước thao tác.
+- Batch 277 handoff:
+  - `58eedff` — `batch277: add member-cursor context-focus one-tap actions on web and ios`
+  - web/iOS member summary thêm action `Use member cursor context + focus`, cho phép set đồng thời target user + target message + focus user từ cùng member row.
 - Batch 276 handoff:
   - `982018b` — `batch276: add member-cursor context one-tap actions on web and ios`
   - web/iOS member summary thêm action `Use member cursor context (target + message)` để set đồng thời read-cursor target user + message từ cùng member row.
