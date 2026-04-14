@@ -1,15 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 225
+- Batch: 226
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 225 iOS feed UX hardening — gate one-tap row delete behind confirmation toggle
+- Scope: batch 226 iOS feed UX hardening — show explicit lock hint copy (`Unlock to delete`) on row delete CTA when confirmation lock is enabled
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
   - iOS: Session login -> Feed -> load private feed/authored moments.
-  - Mặc định toggle `Require confirmation for row delete` bật: nút `Delete this moment` bị disable.
-  - Tắt toggle, rồi tap `Delete this moment` trên row để thực thi one-tap delete.
-  - Bật lại toggle để lock an toàn cho nhịp test kế tiếp.
+  - Mặc định toggle `Require confirmation for row delete` bật: mỗi row hiển thị CTA `Unlock to delete` và không cho tap delete.
+  - Tắt toggle để CTA đổi về `Delete this moment`, rồi tap để thực thi one-tap delete.
+  - Verify in-flight label `Deleting this moment...` + status success row-delete.
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
   - WORKFLOW_STATUS.md
@@ -18,14 +18,17 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `cdb8cb6` — `batch225: gate row delete behind confirmation toggle`
-  - working tree: sạch
+  - latest feature commit: `a96ada2` — `batch226: add unlock hint copy for row delete lock`
+  - working tree: bẩn (batch226 docs in progress, chưa commit)
 - Blocker: none
-- Next: mở batch226 cho friction slice hẹp kế tiếp
+- Next: commit docs batch226 rồi mở batch227 cho friction slice hẹp kế tiếp
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 226 handoff:
+  - pending (in progress)
+  - row delete CTA now shows explicit lock hint `Unlock to delete` while confirmation toggle is enabled; reduces ambiguity of disabled destructive action.
 - Batch 225 handoff:
   - `cdb8cb6` — `batch225: gate row delete behind confirmation toggle`
-  - `900734d` — `batch225: sync workflow docs after delete safety toggle`
+  - `de012f8` — `batch225: sync workflow docs after delete safety toggle`
   - one-tap row delete is now locked by default via `Require confirmation for row delete` toggle; operator must disable lock before row delete.
 - Batch 224 handoff:
   - `a2dc93f` — `batch224: add ios one-tap delete from feed row`

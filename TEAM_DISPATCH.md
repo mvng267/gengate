@@ -12,15 +12,27 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 226
-- Trục công việc: iOS feed UX hardening — thêm safety copy ở row delete button khi lock đang bật (`Unlock to delete`).
-- Trạng thái: in_progress_batch226_ios.
+- Batch workflow chính thức hiện tại: 227
+- Trục công việc: iOS feed UX hardening — thêm inline hint gần row actions để nhắc cách mở khoá row delete (tắt toggle confirmation) mà không phải kéo lên form.
+- Trạng thái: in_progress_batch227_ios.
+
+## Batch 226 handoff (closed)
+- Batch vừa xong: **226**
+- Commit đã push:
+  - `a96ada2` — `batch226: add unlock hint copy for row delete lock`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **227**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - thêm inline hint ngay vùng row actions để operator thấy rõ cần tắt toggle `Require confirmation for row delete` trước khi row delete.
 
 ## Batch 225 handoff (closed)
 - Batch vừa xong: **225**
 - Commit đã push:
   - `cdb8cb6` — `batch225: gate row delete behind confirmation toggle`
-  - `900734d` — `batch225: sync workflow docs after delete safety toggle`
+  - `de012f8` — `batch225: sync workflow docs after delete safety toggle`
 - Test/verify cuối:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Blocker/rủi ro còn lại:
@@ -181,9 +193,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 226 iOS feed UX hardening.
-- Kết quả gần nhất: batch 225 thêm safety toggle để lock one-tap row delete theo mặc định.
-- Trạng thái: in_progress_batch226_ios.
+- Scope hiện tại: batch 227 iOS feed UX hardening.
+- Kết quả gần nhất: batch 226 thêm lock-hint copy `Unlock to delete` ngay trên row delete CTA khi toggle confirmation đang bật.
+- Trạng thái: in_progress_batch227_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
