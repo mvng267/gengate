@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **187 — iOS inbox source-hint preview-pair-lite quick-copy slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **188 — iOS inbox preview-pair-lite preview-line quick-copy slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **187**
-- Scope hiện tại: iOS inbox read-status UX hardening — thêm quick-copy cho payload `preview-pair-lite` (`use_when + preview`).
+- Batch workflow chính thức hiện tại: **188**
+- Scope hiện tại: iOS inbox read-status UX hardening — thêm quick-copy riêng cho line `preview=...` trong `preview-pair-lite`.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `97b4b1a` — `batch187: add preview-pair-lite quick copy`
-  - working tree hiện tại: sạch (sau commit local, chưa push)
+  - commit gần nhất đã chốt: `(pending local commit for batch188 slice)`
+  - working tree hiện tại: dirty trong lúc edit batch188; sẽ sạch sau commit local, chưa push
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch188 cho messaging friction tiếp theo (thêm quick-copy riêng cho `preview` line trong preview-pair-lite để note title rất ngắn) trong iOS inbox shell
+  - mở batch189 cho messaging friction tiếp theo (thêm preview block hiển thị riêng `preview-pair-lite` ngay trong UI để scan trước khi copy) trong iOS inbox shell
 
 ## Batch handoff note
 
