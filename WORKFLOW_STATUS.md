@@ -1,15 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 274
+- Batch: 275
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 274 direct-message shell — add one-tap member-row action to set both read-cursor target + read focus users (read_cursor_user_source=member_row) on web+iOS.
+- Scope: batch 275 direct-message shell — add one-tap member-row action to apply selected member cursor message as read-cursor target message (read_cursor_message_source=member_cursor) on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
-  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> bấm `Use current session user for read-cursor target + read focus` -> bấm `Mark latest message as read (target user)` -> verify status có `read_cursor_user_source=session_user` + read cursor updated -> `Copy quick read-cursor apply result` và paste format `target_user=... | applied_message=... | focus_user=... | read_state=read|unread|unknown`.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> `Copy quick read-cursor apply result` và paste format `target_user=... | applied_message=... | focus_user=... | read_state=read|unread|unknown`.
+  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> trong `Conversation members` bấm `Use member cursor as message target` trên row có `last_read_message_id` -> bấm `Mark target message as read (target user)` -> verify status có `read_cursor_message_source=member_cursor` và read cursor updated -> `Copy quick read-cursor apply result` và paste format `target_user=... | applied_message=... | focus_user=... | read_state=read|unread|unknown`.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> trong `Member read-cursor summary` bấm `Use member cursor as message target` trên row có `last_read_message_id` -> bấm `Update read cursor` (hoặc action mark-read hiện có) -> verify status hint có `read_cursor_message_source=member_cursor` -> `Copy quick read-cursor apply result` và paste format `target_user=... | applied_message=... | focus_user=... | read_state=read|unread|unknown`.
 - Files:
   - apps/web-nextjs/components/direct-message-shell.tsx
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -17,10 +17,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `514f34e` — `batch274: add member-row one-tap target-focus actions on web and ios`
-  - working tree: clean after batch274 commit
+  - latest feature commit: `(pending in this run)` — `batch275: add member-cursor message-target one-tap actions on web and ios`
+  - working tree: dirty (2 files) before commit
 - Blocker: none
-- Next: mở batch275 với 1 slice hẹp direct-message shell: thêm one-tap action dùng selected member cursor message làm read-cursor target message trên web+iOS để rút ngắn setup mark-read case.
+- Next: mở batch276 với 1 slice hẹp direct-message shell: thêm one-tap action apply member cursor message + member user đồng thời vào read-cursor target form để giảm thêm thao tác setup mark-read case.
+- Batch 275 handoff:
+  - `(pending in this run)` — `batch275: add member-cursor message-target one-tap actions on web and ios`
+  - web/iOS member summary thêm action `Use member cursor as message target`, cho phép set nhanh read-cursor target message từ `last_read_message_id` của member row.
 - Batch 274 handoff:
   - `514f34e` — `batch274: add member-row one-tap target-focus actions on web and ios`
   - web/iOS member summary thêm action `Use member as read-cursor target + read focus`, cho phép sync nhanh cả 2 field theo member row trước khi thao tác mark-read.

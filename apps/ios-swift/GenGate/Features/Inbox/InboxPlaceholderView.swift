@@ -1517,24 +1517,31 @@ struct InboxPlaceholderView: View {
                                 }
                                 .buttonStyle(.bordered)
 
-                                if let cursorMessageID {
-                                    Button {
-                                        readCursorTargetMessageIDDraft = cursorMessageID
-                                    } label: {
-                                        HStack(spacing: 8) {
-                                            Text("Use cursor as message target")
-                                                .font(.caption)
+                                Button {
+                                    applyConversationMemberCursorMessageAsReadCursorTargetMessage(cursorMessageID)
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Text("Use member cursor as message target")
+                                            .font(.caption)
 
-                                            Spacer()
+                                        Spacer()
 
+                                        if let cursorMessageID {
                                             Text(resolvedReadCursorTargetMessageID == cursorMessageID ? "message_target_selected" : "set_message_target")
                                                 .font(.caption2.monospaced())
                                                 .foregroundStyle(resolvedReadCursorTargetMessageID == cursorMessageID ? .green : .secondary)
+                                        } else {
+                                            Text("cursor_missing")
+                                                .font(.caption2.monospaced())
+                                                .foregroundStyle(.secondary)
                                         }
-                                        .frame(maxWidth: .infinity, alignment: .leading)
                                     }
-                                    .buttonStyle(.bordered)
-                                } else {
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(cursorMessageID == nil)
+
+                                if cursorMessageID == nil {
                                     Text("cursor_message_target: unavailable")
                                         .font(.caption.monospaced())
                                         .foregroundStyle(.secondary)
@@ -3074,6 +3081,23 @@ use_when=\(useWhenText)
             sendStatusHint = "Read-cursor target + read focus already match selected member (read_cursor_user_source=member_row)."
         } else {
             sendStatusHint = "Applied selected member as read-cursor target + read focus (read_cursor_user_source=member_row)."
+        }
+    }
+
+    private func applyConversationMemberCursorMessageAsReadCursorTargetMessage(_ lastReadMessageID: String?) {
+        let normalizedMessageID = lastReadMessageID?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !normalizedMessageID.isEmpty else {
+            sendStatusHint = "member_read_cursor_target_message_missing"
+            return
+        }
+
+        let alreadyMatched = readCursorTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == normalizedMessageID
+        readCursorTargetMessageIDDraft = normalizedMessageID
+
+        if alreadyMatched {
+            sendStatusHint = "Read-cursor target message already matches selected member cursor message (read_cursor_message_source=member_cursor)."
+        } else {
+            sendStatusHint = "Applied selected member cursor message as read-cursor target message (read_cursor_message_source=member_cursor)."
         }
     }
 
