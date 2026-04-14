@@ -341,6 +341,14 @@ struct NotificationsPlaceholderView: View {
             return
         }
 
+        let currentDraftUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if currentDraftUserID == currentSessionUserID {
+            statusMessage = "Session user already selected. Reloading first page for current user."
+        } else {
+            statusMessage = "Applied current session user. Reloading first page."
+        }
+        fetchError = nil
+
         userIDDraft = currentSessionUserID
         pageOffsetDraft = "0"
         await loadNotifications(forcedUserID: currentSessionUserID, forcedOffset: 0)

@@ -290,6 +290,13 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
               return;
             }
 
+            const draftUserId = form.userId.trim();
+            if (draftUserId === sessionUserId) {
+              setStatus("Session user already selected. Reloading first page for current user.");
+            } else {
+              setStatus("Applied current session user. Reloading first page.");
+            }
+
             setForm((current) => ({
               ...current,
               userId: sessionUserId,
