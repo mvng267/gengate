@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 155
+- Batch: 156
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 155 iOS inbox seam hardening — add helper note when recipient-device selection is already `same as first option`
+- Scope: batch 156 iOS inbox seam hardening — align re-apply helper note with empty-options context to avoid misleading guidance
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -12,10 +12,10 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `HEAD` (local batch155 slice)
+  - latest commit: `HEAD` (local batch156 slice)
   - working tree: sạch (sau commit local, chưa push)
 - Blocker: none
-- Next: mở batch156 cho messaging friction tiếp theo (ví dụ đồng bộ helper-note với ngữ cảnh thiếu options để tránh hiểu nhầm phải re-apply) trong iOS inbox shell
+- Next: mở batch157 cho messaging friction tiếp theo (ví dụ thêm short-id vào empty-state first-option source hint để đồng nhất scan pattern) trong iOS inbox shell
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
 - Batch 55 handoff:
   - `9786726` — `batch55: wire friend graph shell`
@@ -351,6 +351,10 @@
   - khi recipient-device selection đang in-sync và trùng first option, UI hiển thị helper-note ngắn: `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.`
   - helper-note chỉ hiện đúng ngữ cảnh same-as-first để giảm nhiễu; các trạng thái selection khác không đổi
   - giúp tester tránh thao tác re-apply dư thừa trước bước create message-device key
+- Batch 156 outcome:
+  - helper-note cho re-apply nay bao phủ thêm ngữ cảnh thiếu options: hiển thị rõ cần `load devices` trước khi cân nhắc re-apply
+  - giữ nguyên note `bỏ qua re-apply` cho trạng thái same-as-first; không đổi flow khi selection đang lệch option
+  - giảm hiểu nhầm trong empty-options phase, giúp tester đọc đúng hành động kế tiếp
 - Run/test path:
   - backend run: `cd apps/backend-python && ./.venv/bin/uvicorn app.main:app --reload`
   - web run: `cd apps/web-nextjs && npm run dev`
@@ -360,7 +364,7 @@
   - web profile launcher: `http://localhost:3000/profile?user=<uuid>`
   - iOS Profile path: open Session tab, then Profile tab, paste a real user UUID, load friend graph snapshot, and run friend-request create/accept actions
   - iOS Feed path: open Feed tab, paste viewer + author UUID, create moment + image, then load authored moments and private feed
-  - iOS Inbox path: open Inbox tab, load direct thread A-B, dùng `Quick recipient member presets` rồi `Reload recipient devices`; bấm dynamic first-valid action để chọn first option và verify `Recipient device source` chuyển sang `current options (in-sync, same as first option: <short_id>)` đồng thời thấy helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.`; thử manual/stale UUID rồi quay lại first option để verify helper-note xuất hiện lại trước khi `Create message-device key`
+  - iOS Inbox path: open Inbox tab, load direct thread A-B; trước khi load devices, verify helper-note nhắc `load devices` trong empty-options context; sau đó dùng `Quick recipient member presets` + `Reload recipient devices`, bấm dynamic first-valid action để chọn first option và verify `Recipient device source` + helper-note `Selection đã trùng first option — có thể bỏ qua thao tác re-apply.`; thử manual/stale UUID rồi quay lại first option để verify helper-note đúng ngữ cảnh trước khi `Create message-device key`
   - read-cursor API path: call `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` with `{ "last_read_message_id": "<message_uuid>" }` and verify member list reflects updated `last_read_message_id`
   - iOS Notifications path: open Notifications tab, paste a user UUID, create notification, load list, then toggle read/unread state
   - iOS Location path: open Location tab, paste owner UUID, create share, optionally add audience user, then reload location status counts

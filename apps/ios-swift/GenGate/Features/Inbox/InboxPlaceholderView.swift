@@ -51,7 +51,7 @@ struct InboxPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Inbox",
                     summary: "iOS native inbox shell. Use two real user UUIDs to resolve a direct conversation, send text, create attachment/device-key metadata, auto-load recipient devices, and inspect read-cursor/member summary state via the same backend contracts as web.",
-                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset + empty-context-only helper-note visibility + short recipient-id mismatch hint + compact helper-note reason + readable short-caption mapping + recipient quick-member presets + dynamic first-valid-device apply/re-apply action + first-option inline subtitle (full + short id) + emphasized short-id line + in-sync first-option short-id state-label + same-as-first skip helper-note + selection-source hint + one-tap device UUID clear action; realtime delivery remains pending.",
+                    status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset + empty-context-only helper-note visibility + short recipient-id mismatch hint + compact helper-note reason + readable short-caption mapping + recipient quick-member presets + dynamic first-valid-device apply/re-apply action + first-option inline subtitle (full + short id) + emphasized short-id line + in-sync first-option short-id state-label + same-as-first skip helper-note + empty-options reapply guidance + selection-source hint + one-tap device UUID clear action; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
                         "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
@@ -97,6 +97,7 @@ struct InboxPlaceholderView: View {
                         "Selection-source hint now explicitly labels in-sync cases that already match first option (`same as first option`) so testers can skip redundant re-apply taps.",
                         "`same as first option` hint now also includes short-id fragment for faster scan when first UUID is long.",
                         "When selection is already same-as-first, a tiny helper note now says re-apply can be skipped to reduce redundant taps.",
+                        "Helper-note now also clarifies empty-options context (`load devices first`) so testers don't misread re-apply availability before options exist.",
                         "Recipient-device section now shows a compact selection-source hint so testers know whether current `Recipient device UUID` is in-sync with loaded options or still a manual out-of-options value.",
                         "One-tap action `Clear recipient device UUID` helps testers reset stale/manual device input instantly before selecting a fresh option."
                     ]
@@ -394,8 +395,8 @@ struct InboxPlaceholderView: View {
                                 .foregroundStyle(.secondary)
                         }
 
-                        if let recipientDeviceInSyncFirstOptionHintText {
-                            Text(recipientDeviceInSyncFirstOptionHintText)
+                        if let recipientDeviceReapplyGuidanceHintText {
+                            Text(recipientDeviceReapplyGuidanceHintText)
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }
@@ -1126,16 +1127,28 @@ struct InboxPlaceholderView: View {
         return "Recipient device source: manual UUID (không nằm trong options hiện tại)."
     }
 
-    private var recipientDeviceInSyncFirstOptionHintText: String? {
+    private var recipientDeviceReapplyGuidanceHintText: String? {
         let trimmedRecipientDeviceID = recipientDeviceIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        guard let firstRecipientDeviceOptionID,
-              !trimmedRecipientDeviceID.isEmpty,
-              trimmedRecipientDeviceID == firstRecipientDeviceOptionID else {
+        guard !trimmedRecipientDeviceID.isEmpty else {
+            if recipientDeviceOptions.isEmpty {
+                return "Chưa có recipient-device options — load devices trước khi cân nhắc thao tác re-apply."
+            }
             return nil
         }
 
-        return "Selection đã trùng first option — có thể bỏ qua thao tác re-apply."
+        guard let firstRecipientDeviceOptionID else {
+            if recipientDeviceOptions.isEmpty {
+                return "Danh sách recipient-device options hiện trống — không có target để re-apply."
+            }
+            return nil
+        }
+
+        if trimmedRecipientDeviceID == firstRecipientDeviceOptionID {
+            return "Selection đã trùng first option — có thể bỏ qua thao tác re-apply."
+        }
+
+        return nil
     }
 
     private var resolvedReadStatusMessageID: String? {
