@@ -8,7 +8,14 @@ export type NotificationItem = {
   read_at: string | null;
 };
 
-export async function listNotifications(userId: string): Promise<NotificationItem[]> {
+export type NotificationListPayload = {
+  count: number;
+  unread_count: number;
+  total_unread_count: number;
+  items: NotificationItem[];
+};
+
+export async function listNotifications(userId: string): Promise<NotificationListPayload> {
   const response = await apiRequest(`/notifications/${encodeURIComponent(userId)}`);
   if (!response.ok) {
     throw new Error(`notifications_list_failed:${response.status}`);
@@ -16,10 +23,20 @@ export async function listNotifications(userId: string): Promise<NotificationIte
 
   const payload = (await response.json()) as {
     count: number;
+    unread_count?: number;
+    total_unread_count?: number;
     items: NotificationItem[];
   };
 
-  return payload.items;
+  const fallbackUnreadCount = payload.items.filter((item) => item.read_at === null).length;
+  const unreadCount = payload.unread_count ?? fallbackUnreadCount;
+
+  return {
+    count: payload.count,
+    unread_count: unreadCount,
+    total_unread_count: payload.total_unread_count ?? unreadCount,
+    items: payload.items,
+  };
 }
 
 export async function createNotification(input: {

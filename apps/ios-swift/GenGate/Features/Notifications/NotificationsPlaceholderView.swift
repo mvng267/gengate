@@ -7,6 +7,7 @@ struct NotificationsPlaceholderView: View {
     @State private var createTypeDraft: String = "ios_shell_notice"
     @State private var createPayloadDraft: String = "hello from ios notifications shell"
     @State private var notificationRows: [NotificationRow] = []
+    @State private var listMeta: NotificationListMeta?
     @State private var mutatingNotificationIDs: Set<String> = []
     @State private var fetchError: String?
     @State private var statusMessage: String?
@@ -118,6 +119,12 @@ struct NotificationsPlaceholderView: View {
                     Text("Loaded notifications: \(notificationRows.count)")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
+
+                    if let listMeta {
+                        Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: 12) {
@@ -213,11 +220,18 @@ struct NotificationsPlaceholderView: View {
         fetchError = nil
 
         do {
-            notificationRows = try await NotificationsAPIClient().fetchNotifications(userID: trimmedUserID)
+            let payload = try await NotificationsAPIClient().fetchNotifications(userID: trimmedUserID)
+            notificationRows = payload.items
+            listMeta = NotificationListMeta(
+                count: payload.count,
+                unreadCount: payload.unreadCount,
+                totalUnreadCount: payload.totalUnreadCount
+            )
             mutatingNotificationIDs = []
-            statusMessage = "Loaded \(notificationRows.count) notification(s)."
+            statusMessage = "Loaded \(payload.count) notification(s). Page unread: \(payload.unreadCount). Total unread: \(payload.totalUnreadCount)."
         } catch {
             notificationRows = []
+            listMeta = nil
             mutatingNotificationIDs = []
             statusMessage = nil
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
@@ -296,9 +310,24 @@ private struct NotificationRow: Identifiable {
     }
 }
 
+private struct NotificationListMeta {
+    let count: Int
+    let unreadCount: Int
+    let totalUnreadCount: Int
+}
+
+private struct NotificationListPayload {
+    let count: Int
+    let unreadCount: Int
+    let totalUnreadCount: Int
+    let items: [NotificationRow]
+}
+
 private struct NotificationsAPIClient {
     private struct NotificationListResponse: Decodable {
         let count: Int
+        let unread_count: Int?
+        let total_unread_count: Int?
         let items: [NotificationResponse]
     }
 
@@ -373,7 +402,7 @@ private struct NotificationsAPIClient {
 
     private let baseURL = BackendEnvironment.apiBaseURL
 
-    func fetchNotifications(userID: String) async throws -> [NotificationRow] {
+    func fetchNotifications(userID: String) async throws -> NotificationListPayload {
         let url = try makeURL(path: "/notifications/\(userID)")
         let (data, response) = try await URLSession.shared.data(from: url)
         let httpResponse = try requireHTTPResponse(response)
@@ -384,7 +413,16 @@ private struct NotificationsAPIClient {
 
         do {
             let payload = try JSONDecoder().decode(NotificationListResponse.self, from: data)
-            return payload.items.map(mapNotification)
+            let mappedRows = payload.items.map(mapNotification)
+            let fallbackUnreadCount = mappedRows.filter { !$0.isRead }.count
+            let unreadCount = payload.unread_count ?? fallbackUnreadCount
+
+            return NotificationListPayload(
+                count: payload.count,
+                unreadCount: unreadCount,
+                totalUnreadCount: payload.total_unread_count ?? unreadCount,
+                items: mappedRows
+            )
         } catch {
             throw APIError.invalidResponse
         }

@@ -8,6 +8,7 @@ import {
   markNotificationRead,
   markNotificationUnread,
   type NotificationItem,
+  type NotificationListPayload,
 } from "@/lib/notifications/client";
 
 type NotificationShellProps = {
@@ -26,6 +27,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     userId: initialUserId,
   });
   const [items, setItems] = useState<NotificationItem[]>([]);
+  const [listMeta, setListMeta] = useState<Pick<NotificationListPayload, "count" | "unread_count" | "total_unread_count"> | null>(null);
   const [status, setStatus] = useState("Provide a real user UUID to load notifications or create a minimal notification shell item.");
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -37,6 +39,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       userId: initialUserId,
     }));
     setItems([]);
+    setListMeta(null);
   }, [initialUserId]);
 
   async function handleLoad() {
@@ -44,9 +47,17 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     setStatus("Loading notifications...");
 
     try {
-      const nextItems = await listNotifications(form.userId.trim());
-      setItems(nextItems);
-      setStatus(`Loaded ${nextItems.length} notification(s) for ${form.userId.trim() || "unknown-user"}.`);
+      const payload = await listNotifications(form.userId.trim());
+      setItems(payload.items);
+      setListMeta({
+        count: payload.count,
+        unread_count: payload.unread_count,
+        total_unread_count: payload.total_unread_count,
+      });
+      setStatus(
+        `Loaded ${payload.count} notification(s) for ${form.userId.trim() || "unknown-user"}. ` +
+          `Page unread: ${payload.unread_count}. Total unread: ${payload.total_unread_count}.`,
+      );
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "notifications_list_failed");
     }
@@ -66,7 +77,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
         payloadJson: JSON.parse(form.payloadJson) as Record<string, unknown>,
       });
       setItems((current) => [created, ...current.filter((item) => item.id !== created.id)]);
-      setStatus(`Created notification ${created.id}.`);
+      setStatus(`Created notification ${created.id}. Reload to refresh unread summary.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "notification_create_failed");
     }
@@ -81,7 +92,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     try {
       const updated = item.read_at ? await markNotificationUnread(item.id) : await markNotificationRead(item.id);
       setItems((current) => current.map((entry) => (entry.id === updated.id ? updated : entry)));
-      setStatus(`Updated notification ${updated.id} to ${updated.read_at ? "read" : "unread"}.`);
+      setStatus(`Updated notification ${updated.id} to ${updated.read_at ? "read" : "unread"}. Reload to refresh unread summary.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "notification_toggle_failed");
     }
@@ -129,6 +140,11 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       </form>
 
       <h2>Notifications</h2>
+      {listMeta ? (
+        <p>
+          Page count: <strong>{listMeta.count}</strong> · Page unread: <strong>{listMeta.unread_count}</strong> · Total unread: <strong>{listMeta.total_unread_count}</strong>
+        </p>
+      ) : null}
       {items.length === 0 ? (
         <p>No notifications loaded yet.</p>
       ) : (
