@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `PENDING_COMMIT` — `batch269: add session-user read-focus quick action on web and ios`
-  - working tree: dirty (feature + workflow docs staged for commit)
+  - latest feature commit: `e2c2765` — `batch269: add session-user read-focus quick action on web and ios`
+  - working tree: clean after batch269 commit
 - Blocker: none
 - Next: mở batch270 với 1 slice hẹp direct-message shell: thêm quick action web+iOS đồng bộ apply session user cho cả `Member user UUID` (read-cursor update target) cùng `Read-status focus user` để retest read-cursor parity không cần nhập tay.
 - Batch 269 handoff:
-  - `PENDING_COMMIT` — `batch269: add session-user read-focus quick action on web and ios`
+  - `e2c2765` — `batch269: add session-user read-focus quick action on web and ios`
   - web/iOS inbox shell đều có action `Use current session user as read focus user` và status hint/source marker `focus_user_source=session_user` để verify nhanh trước khi copy quick read-cursor summary.
 - Batch 268 handoff:
   - `da1c27a` — `batch268: add dm read-cursor quick-copy summaries on web and ios`

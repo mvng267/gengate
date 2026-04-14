@@ -56,7 +56,7 @@
 ## Batch 269 handoff (closed)
 - Batch vừa xong: **269**
 - Commit đã chốt:
-  - `PENDING_COMMIT` — `batch269: add session-user read-focus quick action on web and ios`
+  - `e2c2765` — `batch269: add session-user read-focus quick action on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
