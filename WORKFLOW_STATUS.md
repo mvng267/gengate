@@ -1,26 +1,31 @@
 # GenGate Workflow Status
 
-- Batch: 213
+- Batch: 214
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 213 iOS feed seam friction reduction — add clear quick-react log action
+- Scope: batch 214 backend friend-graph seam hardening — block duplicate pending friend requests and duplicate post-friendship requests
 - Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
-  - iOS: Session login -> Feed -> quick react from row -> tap `Copy latest quick-react log` -> tap `Clear quick-react log` -> verify `qr:cleared log` and copy/clear controls hide.
-  - Web/backend seams from prior batches remain runnable for friend graph/moments/inbox/location/notifications.
+  - Backend: register two users -> create friend request once -> retry same pair (both directions) should return `friend_request_already_pending` -> accept request -> retry create should return `friendship_already_exists`.
+  - iOS/Web shells can consume clearer backend errors for friend-request flows.
 - Files:
-  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
+  - apps/backend-python/app/services/friendships.py
+  - apps/backend-python/app/repositories/friendships.py
+  - apps/backend-python/tests/test_friendships_api.py
   - WORKFLOW_STATUS.md
   - WORKFLOW_CHECKLIST.md
   - TEAM_DISPATCH.md
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_friendships_api.py` ✅
 - Git:
-  - latest commit: `7153120` — `batch212: add ios quick reaction log copy action`
-  - working tree: bẩn (batch213 changes in progress, chưa commit, chưa push)
+  - latest commit: `6c7f0bb` — `batch213: add ios quick reaction log clear action`
+  - working tree: bẩn (batch214 changes in progress, chưa commit, chưa push)
 - Blocker: none
-- Next: chốt batch213 (commit local) rồi mở batch214 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
+- Next: chốt batch214 (commit local) rồi mở batch215 cho 1 friction slice hẹp tiếp theo trong friend graph / feed seam MVP
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 213 handoff:
+  - `6c7f0bb` — `batch213: add ios quick reaction log clear action`
+  - quick-react log reset remains MVP-testable while batch 214 hardens backend friend-request dedupe behavior.
 - Batch 212 handoff:
   - `7153120` — `batch212: add ios quick reaction log copy action`
   - one-tap copy for latest `qr:*` log remains MVP-testable while batch 213 adds clear-log action for faster repeated manual testing.

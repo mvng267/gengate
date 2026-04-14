@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **213 — iOS feed quick-react log clear action slice is in verify (MVP-testable)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **214 — backend friend-request dedupe hardening slice is in verify (MVP-testable)**.
 
 ## Reporting hard rule
 
@@ -89,25 +89,27 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **213**
-- Scope hiện tại: iOS feed seam friction reduction — thêm action clear latest quick-react log để reset nhanh trạng thái test giữa các lượt chạy.
+- Batch workflow chính thức hiện tại: **214**
+- Scope hiện tại: backend friend graph seam hardening — chặn duplicate friend-request khi đang pending và sau khi friendship đã accepted.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
+  - `apps/backend-python/app/services/friendships.py`
+  - `apps/backend-python/app/repositories/friendships.py`
+  - `apps/backend-python/tests/test_friendships_api.py`
   - `WORKFLOW_STATUS.md`
   - `WORKFLOW_CHECKLIST.md`
   - `TEAM_DISPATCH.md`
 - Test-verify:
-  - `cd apps/ios-swift && swift build` → ✅ pass
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_friendships_api.py` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `7153120` — `batch212: add ios quick reaction log copy action`
-  - working tree hiện tại: bẩn (đang có thay đổi batch213, chưa commit)
+  - commit gần nhất đã chốt: `6c7f0bb` — `batch213: add ios quick reaction log clear action`
+  - working tree hiện tại: bẩn (đang có thay đổi batch214, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit local batch213 rồi mở batch214 cho 1 friction slice hẹp tiếp theo ở feed/inbox seam MVP
+  - commit local batch214 rồi mở batch215 cho 1 friction slice hẹp tiếp theo ở friend graph / feed seam MVP
 - MVP-testable run/test path (human):
-  - iOS Session login -> Feed -> quick react from row -> copy latest quick-react log -> clear quick-react log -> verify `qr:cleared log` và controls copy/clear ẩn lại.
+  - Backend: register 2 users -> create request -> retry duplicate (same/reverse direction) nhận `friend_request_already_pending` -> accept -> retry create nhận `friendship_already_exists`.
 
 ## Batch handoff note
 

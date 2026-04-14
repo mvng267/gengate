@@ -22,6 +22,21 @@ class FriendRequestRepository(BaseRepository[FriendRequest]):
         )
         return list(db.scalars(statement).all())
 
+    def get_pending_between_users(
+        self,
+        db: Session,
+        user_a_id: uuid.UUID,
+        user_b_id: uuid.UUID,
+    ) -> FriendRequest | None:
+        statement = select(FriendRequest).where(
+            FriendRequest.status == "pending",
+            or_(
+                and_(FriendRequest.requester_user_id == user_a_id, FriendRequest.receiver_user_id == user_b_id),
+                and_(FriendRequest.requester_user_id == user_b_id, FriendRequest.receiver_user_id == user_a_id),
+            ),
+        )
+        return db.scalar(statement)
+
 
 class FriendshipRepository(BaseRepository[Friendship]):
     def __init__(self) -> None:

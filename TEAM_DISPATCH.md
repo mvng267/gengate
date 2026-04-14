@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 213
-- Trục công việc: iOS feed seam friction reduction — add clear quick-react log action.
+- Batch workflow chính thức hiện tại: 214
+- Trục công việc: backend friend graph seam hardening — dedupe duplicate friend-request attempts.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -41,9 +41,9 @@
 ## Worker slices
 
 ### pikamen — backend
-- Scope hiện tại: giữ ổn định backend read-cursor contract vừa chốt ở batch 101.
-- Kết quả gần nhất: `PATCH /conversations/{conversation_id}/members/{user_id}/read-cursor` + contract tests pass.
-- Trạng thái: stable_after_batch101.
+- Scope hiện tại: batch 214 backend friend graph seam hardening.
+- Kết quả gần nhất: chặn duplicate pending/repeated friend request với mã lỗi rõ ràng (`friend_request_already_pending`, `friendship_already_exists`) + test pass.
+- Trạng thái: verify_batch214_backend.
 
 ### pikachu-web — frontend web
 - Scope hiện tại: tạm dừng theo chỉ đạo user.
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 213 iOS feed seam friction reduction.
-- Kết quả gần nhất: có thêm nút `Clear quick-react log`, reset log nhanh và phản hồi `qr:cleared log`.
-- Trạng thái: verify_batch213_ios.
+- Scope hiện tại: ổn định sau batch 213 iOS feed quick-react log clear action.
+- Kết quả gần nhất: quick-react copy/clear log flow hoạt động để hỗ trợ manual test lặp.
+- Trạng thái: stable_after_batch213_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.

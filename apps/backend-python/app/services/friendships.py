@@ -19,6 +19,18 @@ class FriendshipService:
         if requester is None or receiver is None:
             raise ValueError("user_not_found")
 
+        existing_friendship = friendship_repository.get_by_pair(db, requester_user_id, receiver_user_id)
+        if existing_friendship is not None:
+            raise ValueError("friendship_already_exists")
+
+        existing_pending_request = friend_request_repository.get_pending_between_users(
+            db,
+            requester_user_id,
+            receiver_user_id,
+        )
+        if existing_pending_request is not None:
+            raise ValueError("friend_request_already_pending")
+
         return friend_request_repository.create(
             db,
             requester_user_id=requester_user_id,

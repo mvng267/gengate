@@ -80,6 +80,79 @@ def test_friendship_request_and_accept_flow() -> None:
     clear_overrides()
 
 
+def test_create_friend_request_returns_conflict_when_pending_request_already_exists() -> None:
+    client = create_test_client()
+
+    requester = client.post("/auth/register", json={"email": "pending-a@example.com", "username": "pending_a"})
+    receiver = client.post("/auth/register", json={"email": "pending-b@example.com", "username": "pending_b"})
+    requester_id = requester.json()["id"]
+    receiver_id = receiver.json()["id"]
+
+    first_request = client.post(
+        "/friends/requests",
+        json={"requester_user_id": requester_id, "receiver_user_id": receiver_id},
+    )
+    assert first_request.status_code == 201
+
+    duplicate_same_direction = client.post(
+        "/friends/requests",
+        json={"requester_user_id": requester_id, "receiver_user_id": receiver_id},
+    )
+    assert duplicate_same_direction.status_code == 400
+    assert duplicate_same_direction.json() == {
+        "error": {
+            "code": "friend_request_already_pending",
+            "message": "friend_request_already_pending",
+        }
+    }
+
+    duplicate_reverse_direction = client.post(
+        "/friends/requests",
+        json={"requester_user_id": receiver_id, "receiver_user_id": requester_id},
+    )
+    assert duplicate_reverse_direction.status_code == 400
+    assert duplicate_reverse_direction.json() == {
+        "error": {
+            "code": "friend_request_already_pending",
+            "message": "friend_request_already_pending",
+        }
+    }
+
+    clear_overrides()
+
+
+def test_create_friend_request_returns_conflict_when_friendship_already_exists() -> None:
+    client = create_test_client()
+
+    requester = client.post("/auth/register", json={"email": "accepted-a@example.com", "username": "accepted_a"})
+    receiver = client.post("/auth/register", json={"email": "accepted-b@example.com", "username": "accepted_b"})
+    requester_id = requester.json()["id"]
+    receiver_id = receiver.json()["id"]
+
+    request_response = client.post(
+        "/friends/requests",
+        json={"requester_user_id": requester_id, "receiver_user_id": receiver_id},
+    )
+    assert request_response.status_code == 201
+
+    accept_response = client.post(f"/friends/requests/{request_response.json()['id']}/accept")
+    assert accept_response.status_code == 201
+
+    duplicate_after_accept = client.post(
+        "/friends/requests",
+        json={"requester_user_id": requester_id, "receiver_user_id": receiver_id},
+    )
+    assert duplicate_after_accept.status_code == 400
+    assert duplicate_after_accept.json() == {
+        "error": {
+            "code": "friendship_already_exists",
+            "message": "friendship_already_exists",
+        }
+    }
+
+    clear_overrides()
+
+
 def test_list_friend_requests_missing_user_returns_not_found() -> None:
     client = create_test_client()
 
