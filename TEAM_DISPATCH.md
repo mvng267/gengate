@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 186
-- Trục công việc: iOS inbox seam hardening — thêm quick-copy riêng cho marker `use_when` của source-hint preview-pair.
+- Batch workflow chính thức hiện tại: 187
+- Trục công việc: iOS inbox seam hardening — thêm quick-copy cho payload `preview-pair-lite` (`use_when + preview`).
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 186 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: thêm quick action `Copy source-hint preview-pair use-when` + feedback line để tái dùng marker context trong onboarding/debug notes.
-- Trạng thái: verify_batch186_ios.
+- Scope hiện tại: batch 187 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: thêm quick action `Copy source-hint preview-pair-lite` + feedback line để copy block siêu gọn `use_when + preview`.
+- Trạng thái: verify_batch187_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
