@@ -24,6 +24,7 @@ struct FeedPlaceholderView: View {
     @State private var isCreatingMoment = false
     @State private var isLoadingReactions = false
     @State private var isCreatingReaction = false
+    @State private var quickReactionMomentIDInFlight: String?
 
     var body: some View {
         ScrollView {
@@ -477,6 +478,27 @@ struct FeedPlaceholderView: View {
                 .buttonStyle(.bordered)
                 .disabled(isLoadingReactions || isCreatingReaction)
             }
+
+            Button {
+                Task {
+                    await createQuickReactionForMoment(row)
+                }
+            } label: {
+                Text(
+                    quickReactionMomentIDInFlight == row.id
+                        ? "Creating quick reaction..."
+                        : "Quick react from row (use current reaction type)"
+                )
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(
+                isCreatingReaction ||
+                isLoadingReactions ||
+                quickReactionMomentIDInFlight != nil ||
+                resolvedQuickReactionUserID == nil ||
+                normalizedReactionTypeDraft.isEmpty
+            )
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
@@ -534,6 +556,15 @@ struct FeedPlaceholderView: View {
         return (momentRows + authoredMomentRows)
             .first(where: { $0.id == targetMomentID })?
             .authorID
+    }
+
+    private var resolvedQuickReactionUserID: String? {
+        if let currentSessionUserID {
+            return currentSessionUserID
+        }
+
+        let trimmedReactionUserID = normalizedReactionUserIDDraft
+        return trimmedReactionUserID.isEmpty ? nil : trimmedReactionUserID
     }
 
     private func uniquePreservingOrder(_ items: [String]) -> [String] {
@@ -616,6 +647,39 @@ struct FeedPlaceholderView: View {
     private func loadReactionsForMoment(_ row: PrivateFeedMomentRow) async {
         reactionTargetMomentIDDraft = row.id
         await loadMomentReactions()
+    }
+
+    private func createQuickReactionForMoment(_ row: PrivateFeedMomentRow) async {
+        let trimmedReactionType = normalizedReactionTypeDraft
+        guard !trimmedReactionType.isEmpty else {
+            fetchError = "Reaction type là bắt buộc để quick react từ moment row."
+            return
+        }
+
+        guard let resolvedQuickReactionUserID else {
+            fetchError = "Reaction user UUID hoặc session user là bắt buộc để quick react từ moment row."
+            return
+        }
+
+        quickReactionMomentIDInFlight = row.id
+        reactionTargetMomentIDDraft = row.id
+        reactionUserIDDraft = resolvedQuickReactionUserID
+        fetchError = nil
+
+        do {
+            _ = try await PrivateFeedAPIClient().createReaction(
+                momentID: row.id,
+                userID: resolvedQuickReactionUserID,
+                reactionType: trimmedReactionType
+            )
+
+            statusMessage = "Quick reacted moment \(row.id). Reloading reactions..."
+            await loadMomentReactions()
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        quickReactionMomentIDInFlight = nil
     }
 
     private func synchronizeReactionTargetWithLoadedMoments() {
