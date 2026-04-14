@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **265 — direct-message shell (iOS quick session-user send action) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **266 — direct-message shell (web+iOS quick-copy send-result summary) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,27 +89,44 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **265**
-- Scope hiện tại: direct-message shell — thêm quick action iOS `Use current session user as User A + send`.
+- Batch workflow chính thức hiện tại: **266**
+- Scope hiện tại: direct-message shell — thêm quick-copy send-result line chuẩn hóa `sender + message_id` trên web+iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
+  - `apps/web-nextjs/components/direct-message-shell.tsx`
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
 - Test-verify:
+  - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `36333ac` — `batch265: add session-user quick send action in ios dm shell`
+  - commit gần nhất đã chốt: `e35e51e` — `batch266: add dm send-result quick-copy summaries on web and ios`
   - working tree hiện tại: bẩn (workflow docs update in progress)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch266 với 1 slice hẹp direct-message shell: thêm quick-copy send status line chuẩn hóa sender + message_id trên web+iOS.
+  - mở batch267 với 1 slice hẹp direct-message shell: thêm quick action copy `Quick copy send result` vào clipboard cho web+iOS.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed: bấm quick action `Use current session user as viewer + load` -> verify status `viewer_source=session_user` + feed reload.
-  - Web Inbox: nhập user A/B -> `Open direct thread` -> nhập message text -> bấm `Use current session user as sender + send` -> verify status chứa `sender_source=session_user` + message được gửi.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> nhập message text -> bấm `Use current session user as User A + send` -> verify status hint chứa `sender_source=session_user` + message được gửi.
+  - Web Inbox: nhập user A/B -> `Open direct thread` -> gửi message (manual hoặc quick session sender) -> verify dòng quick-copy send result `sender=... | message_id=...`.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> gửi message (manual hoặc quick session User A send) -> verify dòng quick-copy send result `sender=... | message_id=...`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **266**
+- Commit cuối đã chốt:
+  - `e35e51e` — `batch266: add dm send-result quick-copy summaries on web and ios`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **267**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm quick action copy `Quick copy send result` vào clipboard cho web+iOS.
+
+---
 
 - Batch vừa xong: **265**
 - Commit cuối đã chốt:

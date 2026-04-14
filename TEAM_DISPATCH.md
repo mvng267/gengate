@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 265
-- Trục công việc: direct-message shell — iOS add quick action to apply session user as User A and send message.
-- Trạng thái: batch265_complete_ios_session_usera_quick_send.
+- Batch workflow chính thức hiện tại: 266
+- Trục công việc: direct-message shell — web+iOS add quick-copy send-result summary line (`sender + message_id`).
+- Trạng thái: batch266_complete_dm_send_result_quick_copy_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 266 handoff (closed)
+- Batch vừa xong: **266**
+- Commit đã chốt:
+  - `e35e51e` — `batch266: add dm send-result quick-copy summaries on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **267**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm quick action copy `Quick copy send result` vào clipboard cho web+iOS.
 
 ## Batch 265 handoff (closed)
 - Batch vừa xong: **265**
