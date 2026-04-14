@@ -219,6 +219,10 @@ struct NotificationsPlaceholderView: View {
                     Text("Notifications")
                         .font(.headline)
 
+                    Text("Legend: ● read · ○ unread")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+
                     if notificationRows.isEmpty {
                         Text("No notifications loaded for this user yet.")
                             .font(.footnote)

@@ -323,6 +323,9 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       </form>
 
       <h2>Notifications</h2>
+      <p>
+        Legend: <strong>●</strong> read · <strong>○</strong> unread
+      </p>
       {listMeta ? (
         <p>
           Page count: <strong>{listMeta.count}</strong> · Page unread: <strong>{listMeta.unread_count}</strong> · Total unread: <strong>{listMeta.total_unread_count}</strong> · Limit: <strong>{pagination.limit}</strong> · Offset: <strong>{pagination.offset}</strong> · unread_only: <strong>{String(pagination.unreadOnly)}</strong>
