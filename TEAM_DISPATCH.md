@@ -56,7 +56,7 @@
 ## Batch 279 handoff (closed)
 - Batch vừa xong: **279**
 - Commit đã chốt:
-  - `(pending in this run)` — `batch279: add member latest-loaded focus auto-mark actions on web and ios`
+  - `bcaf55f` — `batch279: add member latest-loaded focus auto-mark actions on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅

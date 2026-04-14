@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(pending in this run)` — `batch279: add member latest-loaded focus auto-mark actions on web and ios`
+  - latest feature commit: `bcaf55f` — `batch279: add member latest-loaded focus auto-mark actions on web and ios`
   - working tree: clean after batch279 commit
 - Blocker: none
 - Next: mở batch280 với 1 slice hẹp direct-message shell: thêm one-tap action set member focus + first unread candidate rồi auto-mark read trên web+iOS để cover parity jump-first-unread.
 - Batch 279 handoff:
-  - `(pending in this run)` — `batch279: add member latest-loaded focus auto-mark actions on web and ios`
+  - `bcaf55f` — `batch279: add member latest-loaded focus auto-mark actions on web and ios`
   - web/iOS member summary thêm action `Use member focus + latest loaded + mark read`, cho phép fallback khi `last_read_message_id` trống mà vẫn apply focus + mark-read ngay theo latest loaded message.
 - Batch 278 handoff:
   - `69ed4b4` — `batch278: add member-cursor context-focus auto-mark actions on web and ios`
