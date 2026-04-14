@@ -194,6 +194,10 @@ struct NotificationsPlaceholderView: View {
                             .foregroundStyle(.secondary)
                     }
 
+                    Text(pendingWindowHint)
+                        .font(.footnote)
+                        .foregroundStyle(hasPendingWindowChange ? .orange : .secondary)
+
                     if let fetchError {
                         Text("Fetch error: \(fetchError)")
                             .font(.footnote)
@@ -304,6 +308,16 @@ struct NotificationsPlaceholderView: View {
         }
 
         return hasPendingWindowChange ? "Load notifications (window changed)" : "Load notifications"
+    }
+
+    private var pendingWindowHint: String {
+        if lastLoadedWindow == nil {
+            return "Window hint: no list window loaded yet. Load once to sync list and summary."
+        }
+
+        return hasPendingWindowChange
+            ? "Window hint: current user/page/filter differs from last loaded window. Reload to sync."
+            : "Window hint: current user/page/filter is in sync with last loaded window."
     }
 
     private func prefillFromCurrentSessionUserIfNeeded() {

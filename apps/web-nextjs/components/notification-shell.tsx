@@ -100,6 +100,13 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     lastLoadedWindow.offset !== pagination.offset ||
     lastLoadedWindow.unreadOnly !== pagination.unreadOnly;
 
+  const pendingWindowHint =
+    lastLoadedWindow === null
+      ? "Window hint: no list window has been loaded yet. Use Load notifications to sync the first result set."
+      : pendingWindowChange
+        ? "Window hint: current user/page/filter differs from the last loaded window. Reload to sync the list and summary."
+        : "Window hint: current user/page/filter is in sync with the last loaded window.";
+
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsCreating(true);
@@ -143,6 +150,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
         <strong>Status:</strong> notification shell now wires per-user list plus read/unread state to backend contracts.
       </p>
       <p>{status}</p>
+      <p>{pendingWindowHint}</p>
 
       <form onSubmit={(event) => void handleCreate(event)}>
         <label>
