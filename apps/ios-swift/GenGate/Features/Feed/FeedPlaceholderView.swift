@@ -446,6 +446,7 @@ struct FeedPlaceholderView: View {
     @ViewBuilder
     private func momentRow(_ row: PrivateFeedMomentRow) -> some View {
         let isReactionTargetSelected = normalizedReactionTargetMomentIDDraft == row.id
+        let resolvedRowQuickReactionUserID = resolvedQuickReactionUserID(for: row)
 
         VStack(alignment: .leading, spacing: 8) {
             Text(row.authorLabel)
@@ -494,7 +495,9 @@ struct FeedPlaceholderView: View {
                 Text(
                     quickReactionMomentIDInFlight == row.id
                         ? "Creating quick reaction..."
-                        : "Quick react from row (use current reaction type)"
+                        : (quickReactionPreferMomentAuthor
+                            ? "Quick react from row (author mode)"
+                            : "Quick react from row (current user mode)")
                 )
                 .frame(maxWidth: .infinity)
             }
@@ -503,7 +506,7 @@ struct FeedPlaceholderView: View {
                 isCreatingReaction ||
                 isLoadingReactions ||
                 quickReactionMomentIDInFlight != nil ||
-                resolvedQuickReactionUserID == nil ||
+                resolvedRowQuickReactionUserID == nil ||
                 normalizedReactionTypeDraft.isEmpty
             )
         }
@@ -572,6 +575,15 @@ struct FeedPlaceholderView: View {
 
         let trimmedReactionUserID = normalizedReactionUserIDDraft
         return trimmedReactionUserID.isEmpty ? nil : trimmedReactionUserID
+    }
+
+    private func resolvedQuickReactionUserID(for row: PrivateFeedMomentRow) -> String? {
+        if quickReactionPreferMomentAuthor {
+            let trimmedAuthorID = row.authorID.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmedAuthorID.isEmpty ? nil : trimmedAuthorID
+        }
+
+        return resolvedQuickReactionUserID
     }
 
     private func uniquePreservingOrder(_ items: [String]) -> [String] {
@@ -663,14 +675,9 @@ struct FeedPlaceholderView: View {
             return
         }
 
-        let quickReactionUserID: String?
-        if quickReactionPreferMomentAuthor {
-            quickReactionUserID = row.authorID
-        } else {
-            quickReactionUserID = resolvedQuickReactionUserID
-        }
+        let quickReactionUserID = resolvedQuickReactionUserID(for: row)
 
-        guard let quickReactionUserID, !quickReactionUserID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+        guard let quickReactionUserID else {
             fetchError = quickReactionPreferMomentAuthor
                 ? "Author user UUID của moment là bắt buộc khi bật quick react prefer author."
                 : "Reaction user UUID hoặc session user là bắt buộc để quick react từ moment row."

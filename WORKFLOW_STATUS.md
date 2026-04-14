@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 205
+- Batch: 206
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 205 iOS feed seam friction reduction — add quick-react prefer-moment-author toggle
+- Scope: batch 206 iOS feed seam friction reduction — harden per-row quick reaction user resolution with explicit mode labels
 - Status: verify
 - Files:
   - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
@@ -12,11 +12,14 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest commit: `20c9879` — `batch204: add ios feed row quick reaction create`
-  - working tree: bẩn (batch205 changes in progress, chưa commit, chưa push)
+  - latest commit: `4e82ada` — `batch205: add ios feed quick react prefer author toggle`
+  - working tree: bẩn (batch206 changes in progress, chưa commit, chưa push)
 - Blocker: none
-- Next: chốt batch205 (commit local) rồi mở batch206 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
+- Next: chốt batch206 (commit local) rồi mở batch207 cho 1 friction slice hẹp tiếp theo trong feed/inbox seam MVP
 - Context rule: mỗi lane dùng 1 agent cố định (`pikamen`, `pikachu-web`, `pikame-ios`); khi mở batch mới, main agent phải clear context của session lane đó bằng handoff note ngắn, không kéo full history cũ
+- Batch 205 handoff:
+  - `4e82ada` — `batch205: add ios feed quick react prefer author toggle`
+  - prefer-author toggle remains MVP-testable while batch 206 hardens per-row quick reaction user resolution and mode visibility.
 - Batch 204 handoff:
   - `20c9879` — `batch204: add ios feed row quick reaction create`
   - row-level quick reaction create remains MVP-testable while batch 205 adds prefer-moment-author option to reduce user-target mismatch.

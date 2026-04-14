@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **205 — iOS feed quick-react prefer-author toggle slice is in verify**.
+- Batch workflow chính thức mới nhất trong checklist/status: **206 — iOS feed quick-react user resolution hardening slice is in verify**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **205**
-- Scope hiện tại: iOS feed seam friction reduction — thêm toggle `Quick react uses selected moment author as user` để quick reaction theo row có thể dùng author của moment làm reaction user, giảm mismatch user-target khi verify `POST/GET /moments/{id}/reactions`.
+- Batch workflow chính thức hiện tại: **206**
+- Scope hiện tại: iOS feed seam friction reduction — harden quick reaction per-row user resolution theo mode (author-mode vs current-user-mode), đồng thời hiển thị rõ mode label trên CTA để giảm nhầm context khi verify `POST/GET /moments/{id}/reactions`.
 - Trạng thái hiện tại: **verify**
 - File đã đụng:
   - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
@@ -100,12 +100,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅ pass
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `20c9879` — `batch204: add ios feed row quick reaction create`
-  - working tree hiện tại: bẩn (đang có thay đổi batch205, chưa commit)
+  - commit gần nhất đã chốt: `4e82ada` — `batch205: add ios feed quick react prefer author toggle`
+  - working tree hiện tại: bẩn (đang có thay đổi batch206, chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit local batch205 rồi mở batch206 cho 1 friction slice hẹp tiếp theo ở feed/inbox seam MVP
+  - commit local batch206 rồi mở batch207 cho 1 friction slice hẹp tiếp theo ở feed/inbox seam MVP
 
 ## Batch handoff note
 
