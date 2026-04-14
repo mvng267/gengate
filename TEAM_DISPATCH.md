@@ -12,8 +12,8 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 171
-- Trục công việc: iOS inbox seam hardening — thêm quick-copy triage line cho source-hint state.
+- Batch workflow chính thức hiện tại: 172
+- Trục công việc: iOS inbox seam hardening — thêm inline triage-line preview cho source-hint state.
 
 ## Batch 54 handoff (closed)
 - Batch vừa xong: **54**
@@ -51,9 +51,9 @@
 - Trạng thái: paused_by_directive.
 
 ### pikame-ios — iOS
-- Scope hiện tại: batch 171 iOS inbox read-status UX hardening.
-- Kết quả gần nhất: thêm nút `Copy source-hint triage line` + feedback line để copy nhanh line gộp branch+selection+guidance cho bug note ngắn.
-- Trạng thái: verify_batch171_ios.
+- Scope hiện tại: batch 172 iOS inbox read-status UX hardening.
+- Kết quả gần nhất: thêm line `Triage line preview` inline để scan/cross-check nhanh trước khi dùng copy actions.
+- Trạng thái: verify_batch172_ios.
 
 ## Conflict rule
 - Backend chỉ đụng `apps/backend-python/**`.
