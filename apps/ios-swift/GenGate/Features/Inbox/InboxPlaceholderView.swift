@@ -1318,9 +1318,17 @@ struct InboxPlaceholderView: View {
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
 
-                    Text("Quick copy send result: \(lastSendQuickCopy)")
-                        .font(.footnote.monospaced())
-                        .foregroundStyle(.secondary)
+                    HStack(alignment: .center, spacing: 8) {
+                        Text("Quick copy send result: \(lastSendQuickCopy)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Button("Copy quick send result") {
+                            copyLastSendQuickCopyResult()
+                        }
+                        .buttonStyle(.bordered)
+                    }
 
                     Text("Attachment target message_id: \(resolvedAttachmentTargetMessageID ?? "(not resolved)")")
                         .font(.footnote.monospaced())
@@ -2373,6 +2381,17 @@ use_when=\(useWhenText)
         let headCount = max(limit - 1, 0)
         let head = trimmedText.prefix(headCount)
         return "\(head)…"
+    }
+
+    private func copyLastSendQuickCopyResult() {
+        let normalizedText = lastSendQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            sendStatusHint = "send_result_quick_copy_empty"
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        sendStatusHint = "Copied send-result quick copy to clipboard (\(normalizedText))."
     }
 
     private func copyRecipientDeviceSourceHint(_ hintText: String) {

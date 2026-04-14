@@ -241,6 +241,26 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setIsLoadingAttachments(false);
   }
 
+  async function handleCopySendResultQuickCopy() {
+    const normalizedText = lastSendQuickCopy.trim();
+    if (!normalizedText) {
+      setStatus("send_result_quick_copy_empty");
+      return;
+    }
+
+    if (typeof navigator === "undefined" || typeof navigator.clipboard?.writeText !== "function") {
+      setStatus("send_result_quick_copy_clipboard_unavailable");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(normalizedText);
+      setStatus(`Copied send-result quick copy to clipboard (${normalizedText}).`);
+    } catch {
+      setStatus("send_result_quick_copy_failed");
+    }
+  }
+
   return (
     <section>
       <p>
@@ -253,6 +273,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       <p>
         Quick copy send result: <code>{lastSendQuickCopy}</code>
       </p>
+      <button type="button" onClick={() => void handleCopySendResultQuickCopy()}>
+        Copy quick send result
+      </button>
 
       <div>
         <label>
