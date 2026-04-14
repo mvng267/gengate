@@ -98,12 +98,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_location_audience_api.py` → ✅ `4 passed`
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `0bdd965` — `batch235: sync workflow docs after read-cursor cleanup`
-  - working tree hiện tại: bẩn (batch236 complete, chưa commit)
+  - commit gần nhất đã chốt: `dae57a8` — `batch236: clear location audience when sharing stops`
+  - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - commit batch236; sau đó mở 1 slice hẹp notification shell.
+  - mở 1 slice hẹp notification shell.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - iOS Profile: Session -> Profile -> load graph -> inbound pending row -> `Reject request` -> graph auto reload và row chuyển `rejected`.

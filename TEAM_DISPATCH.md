@@ -32,7 +32,7 @@
 ## Batch 236 handoff (closed)
 - Batch vừa xong: **236**
 - Commit đã chốt:
-  - pending_commit_batch236
+  - `dae57a8` — `batch236: clear location audience when sharing stops`
 - Test/verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_location_audience_api.py` ✅ (4 passed)
 - Blocker/rủi ro còn lại:

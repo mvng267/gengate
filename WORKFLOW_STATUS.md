@@ -15,12 +15,12 @@
 - Test:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_location_audience_api.py` ✅ (4 passed)
 - Git:
-  - latest feature commit: `0bdd965` — `batch235: sync workflow docs after read-cursor cleanup`
-  - working tree: dirty (batch236 complete, chưa commit)
+  - latest feature commit: `dae57a8` — `batch236: clear location audience when sharing stops`
+  - working tree: clean
 - Blocker: none
 - Next: mở batch237 với 1 slice hẹp notification shell.
 - Batch 236 handoff:
-  - pending_commit_batch236
+  - `dae57a8` — `batch236: clear location audience when sharing stops`
   - stop-sharing now clears share audience entries so backend list/state aligns with inactive sharing semantics.
 - Batch 235 handoff:
   - `2c4c637` — `batch235: clear stale read cursor when message is deleted`
