@@ -24,10 +24,11 @@ struct NotificationsPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Notifications",
                     summary: "iOS native notification center shell now supports create + read/unread mutation so notification flow can be exercised end-to-end from native UI.",
-                    status: "Status: native notification center now supports create + read/unread toggles; delete remains intentionally out of scope for this slice.",
+                    status: "Status: native notification center now supports create + read/unread toggles + quick unread summary line; delete remains intentionally out of scope for this slice.",
                     bullets: [
                         "Paste a backend user UUID to create and load notifications for that user.",
                         "This shell can create via `POST /notifications`, then read `/notifications/{user_id}` and toggle each row via `/notifications/{id}/read` + `/notifications/{id}/unread`.",
+                        "Quick unread summary line (`current_page_unread / total_unread_count`) helps parity scan quickly with backend/web payloads.",
                         "Use this tab to run minimal notification lifecycle checks from iOS without relying on web seeding first."
                     ]
                 )
@@ -232,6 +233,10 @@ struct NotificationsPlaceholderView: View {
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
 
+                    Text("Quick unread summary: \(quickUnreadSummaryLine)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
                     if let listMeta {
                         Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount) · Limit: \(listMeta.limit) · Offset: \(listMeta.offset) · Filter mode: \(listMeta.unreadOnly ? "Unread only" : "All notifications")")
                             .font(.footnote.monospaced())
@@ -346,6 +351,14 @@ struct NotificationsPlaceholderView: View {
         return hasPendingWindowChange
             ? "Window hint: current user/page/filter differs from last loaded window. Reload to sync."
             : "Window hint: current user/page/filter is in sync with last loaded window."
+    }
+
+    private var quickUnreadSummaryLine: String {
+        guard let listMeta else {
+            return "current_page_unread=(none) / total_unread_count=(none)"
+        }
+
+        return "current_page_unread=\(listMeta.unreadCount) / total_unread_count=\(listMeta.totalUnreadCount)"
     }
 
     private func prefillFromCurrentSessionUserIfNeeded() {
