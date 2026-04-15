@@ -1,15 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 284
+- Batch: 285
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 284 direct-message shell — add read-cursor apply-state marker (`read_cursor_apply_state=noop|updated`) in quick-copy + status text so testers can distinguish no-op vs updated apply outcomes on web+iOS.
+- Scope: batch 285 direct-message shell — add previous-cursor baseline note (`previous_cursor_message`) into read-cursor apply quick-copy so noop apply-state can be explained deterministically on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
-  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor apply result` và verify có thêm `read_cursor_apply_state=noop|updated`; status update read-cursor cũng có suffix apply-state.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor apply result` và verify có thêm `read_cursor_apply_state=noop|updated`; `sendStatusHint` cũng append `Read-cursor apply state: ...`.
+  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor apply result` và verify có thêm `previous_cursor_message=...` cùng `read_cursor_apply_state=...` để giải thích rõ vì sao noop/updated.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor apply result` và verify có thêm `previous_cursor_message=...` cùng `read_cursor_apply_state=...`.
 - Files:
   - apps/web-nextjs/components/direct-message-shell.tsx
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -17,10 +17,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `3c09772` — `batch284: add read-cursor apply-state markers on web and ios`
-  - working tree: clean after batch284 commit
+  - latest feature commit: `(pending in this run)` — `batch285: add previous-cursor baseline to read-cursor apply quick copy`
+  - working tree: clean after batch285 commit
 - Blocker: none
-- Next: mở batch285 với 1 slice hẹp direct-message shell: thêm quick-copy note cho last-read baseline (`previous_cursor_message`) để explain tại sao apply_state=noop trên web+iOS.
+- Next: mở batch286 với 1 slice hẹp direct-message shell: thêm quick-copy token cho current member cursor snapshot (`current_member_cursor`) để đối chiếu trực tiếp với previous/applied trong cùng dòng trên web+iOS.
+- Batch 285 handoff:
+  - `(pending in this run)` — `batch285: add previous-cursor baseline to read-cursor apply quick copy`
+  - web/iOS read-cursor apply quick-copy line thêm `previous_cursor_message`, giúp explain chính xác case `read_cursor_apply_state=noop`.
 - Batch 284 handoff:
   - `3c09772` — `batch284: add read-cursor apply-state markers on web and ios`
   - web/iOS read-cursor apply quick-copy line thêm `read_cursor_apply_state`, và status text có marker apply-state để tách rõ outcome noop vs updated.
