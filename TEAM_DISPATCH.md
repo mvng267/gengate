@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 313
-- Trục công việc: feed shell — web+iOS add marker `delete_summary_copy_source=quick_delete_parity|last_delete_result|copied_feedback` vào status copy success để audit rõ nguồn action copy delete summary.
-- Trạng thái: batch313_complete_feed_delete_summary_copy_source_markers_web_ios.
+- Batch workflow chính thức hiện tại: 314
+- Trục công việc: feed shell — web+iOS add quick-copy audit token line `delete_copy_audit=source:.../value:...` + copy action để report nguồn copy delete summary bằng payload một-dòng.
+- Trạng thái: batch314_complete_feed_delete_copy_audit_quick_copy_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 314 handoff (closed)
+- Batch vừa xong: **314**
+- Commit đã chốt:
+  - `f3e8398` — `batch314: add delete copy audit quick-copy line on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **315**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell (web+iOS): thêm `delete_copy_audit_source` quick filter chips (`quick_delete_parity` / `last_delete_result` / `copied_feedback`) để QA force-generate audit token theo từng source mà không phải nhớ thứ tự click.
 
 ## Batch 313 handoff (closed)
 - Batch vừa xong: **313**

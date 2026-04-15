@@ -49,6 +49,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [deleteMomentIdDraft, setDeleteMomentIdDraft] = useState("");
   const [lastCopiedFeedVisibilityDeltaLine, setLastCopiedFeedVisibilityDeltaLine] = useState<string | null>(null);
   const [lastCopiedDeleteSummaryLine, setLastCopiedDeleteSummaryLine] = useState<string | null>(null);
+  const [lastDeleteCopyAuditLine, setLastDeleteCopyAuditLine] = useState<string | null>(null);
   const [feedVisibilityGateSnapshotSource, setFeedVisibilityGateSnapshotSource] =
     useState<FeedGateSnapshotSource>("reload_flow");
   const [deleteSnapshotSource, setDeleteSnapshotSource] = useState<DeleteSnapshotSource>("manual_input");
@@ -188,11 +189,13 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     try {
       await navigator.clipboard.writeText(normalizedText);
       onCopied?.(normalizedText);
-      setStatus(
-        successSource
-          ? `${statusPrefix} (delete_summary_copy_source=${successSource} / ${normalizedText}).`
-          : `${statusPrefix} (${normalizedText}).`,
-      );
+      if (successSource) {
+        const deleteCopyAuditLine = `delete_copy_audit=source:${successSource}/value:${normalizedText}`;
+        setLastDeleteCopyAuditLine(deleteCopyAuditLine);
+        setStatus(`${statusPrefix} (delete_summary_copy_source=${successSource} / ${normalizedText}).`);
+      } else {
+        setStatus(`${statusPrefix} (${normalizedText}).`);
+      }
     } catch {
       setStatus(failedCode);
     }
@@ -258,6 +261,15 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       "last_copied_delete_summary_copy_failed",
       undefined,
       "copied_feedback",
+    );
+  }
+
+  async function handleCopyDeleteCopyAuditLine() {
+    await copyToClipboard(
+      lastDeleteCopyAuditLine ?? "",
+      "Copied delete copy audit line to clipboard",
+      "delete_copy_audit_missing",
+      "delete_copy_audit_copy_failed",
     );
   }
 
@@ -467,6 +479,18 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
           <p>
             <button type="button" onClick={() => void handleCopyLastCopiedDeleteSummaryFeedback()}>
               Copy last copied delete summary feedback
+            </button>
+          </p>
+        </>
+      ) : null}
+      {lastDeleteCopyAuditLine ? (
+        <>
+          <p>
+            Delete copy audit: <code>{lastDeleteCopyAuditLine}</code>
+          </p>
+          <p>
+            <button type="button" onClick={() => void handleCopyDeleteCopyAuditLine()}>
+              Copy delete copy audit line
             </button>
           </p>
         </>
