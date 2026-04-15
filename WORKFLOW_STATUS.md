@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(pending in this run)` — `batch284: add read-cursor apply-state markers on web and ios`
+  - latest feature commit: `3c09772` — `batch284: add read-cursor apply-state markers on web and ios`
   - working tree: clean after batch284 commit
 - Blocker: none
 - Next: mở batch285 với 1 slice hẹp direct-message shell: thêm quick-copy note cho last-read baseline (`previous_cursor_message`) để explain tại sao apply_state=noop trên web+iOS.
 - Batch 284 handoff:
-  - `(pending in this run)` — `batch284: add read-cursor apply-state markers on web and ios`
+  - `3c09772` — `batch284: add read-cursor apply-state markers on web and ios`
   - web/iOS read-cursor apply quick-copy line thêm `read_cursor_apply_state`, và status text có marker apply-state để tách rõ outcome noop vs updated.
 - Batch 283 handoff:
   - `0578cae` — `batch283: add first-unread guard quick-copy markers on web and ios`

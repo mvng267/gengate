@@ -56,7 +56,7 @@
 ## Batch 284 handoff (closed)
 - Batch vừa xong: **284**
 - Commit đã chốt:
-  - `(pending in this run)` — `batch284: add read-cursor apply-state markers on web and ios`
+  - `3c09772` — `batch284: add read-cursor apply-state markers on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
