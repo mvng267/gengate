@@ -38,6 +38,7 @@ struct InboxPlaceholderView: View {
     @State private var isSendingMessage = false
     @State private var sendStatusHint: String?
     @State private var lastSendQuickCopy: String = "sender=(none) | message_id=(none)"
+    @State private var lastSenderKeepPairQuickCopy: String = "user_pair_source=(none) | sender_source=(none) | sender=(none) | user_a=(none) | user_b=(none) | message_id=(none)"
     @State private var lastReadCursorApplyQuickCopy: String = "target_user=(none) | previous_cursor_message=(none) | applied_message=(none) | current_member_cursor=(none) | focus_user=(none) | read_state=unknown | read_cursor_apply_state=unknown"
     @State private var lastReadCursorTriageQuickCopy: String = "read_cursor_triage=target_user:(none),previous:(none),applied:(none),current:(none),apply_state:unknown"
     @State private var lastFirstUnreadJumpQuickCopy: String = "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown"
@@ -1414,6 +1415,18 @@ struct InboxPlaceholderView: View {
                     }
 
                     HStack(alignment: .center, spacing: 8) {
+                        Text("Quick copy sender keep-pair marker: \(lastSenderKeepPairQuickCopy)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Button("Copy quick sender keep-pair marker") {
+                            copySenderKeepPairQuickCopySummary()
+                        }
+                        .buttonStyle(.bordered)
+                    }
+
+                    HStack(alignment: .center, spacing: 8) {
                         Text("Quick copy read cursor: \(readCursorQuickCopySummary)")
                             .font(.footnote.monospaced())
                             .foregroundStyle(.secondary)
@@ -2738,6 +2751,17 @@ use_when=\(useWhenText)
         sendStatusHint = "Copied send-result quick copy to clipboard (\(normalizedText))."
     }
 
+    private func copySenderKeepPairQuickCopySummary() {
+        let normalizedText = lastSenderKeepPairQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            sendStatusHint = "sender_keep_pair_quick_copy_empty"
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        sendStatusHint = "Copied sender keep-pair quick copy to clipboard (\(normalizedText))."
+    }
+
     private func copyReadCursorQuickCopySummary() {
         let normalizedText = readCursorQuickCopySummary.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
@@ -3364,8 +3388,16 @@ use_when=\(useWhenText)
             senderStatus = "Kept User A + User B as-is (user_pair_source=kept_user_a+user_b). Applied current session user as sender (sender_source=session_user)."
         }
 
+        let resolvedUserAForQuickCopy = currentUserAID.isEmpty ? "(empty)" : currentUserAID
+        let resolvedUserBForQuickCopy = currentUserBID.isEmpty ? "(empty)" : currentUserBID
+        let senderKeepPairQuickCopyPrefix = "user_pair_source=kept_user_a+user_b | sender_source=session_user | sender=\(trimmedCurrentSessionUserID) | user_a=\(resolvedUserAForQuickCopy) | user_b=\(resolvedUserBForQuickCopy)"
+
         sendStatusHint = "\(senderStatus) Sending direct message shell..."
-        await sendMessage(senderUserIDOverride: trimmedCurrentSessionUserID, statusPrefix: senderStatus)
+        await sendMessage(
+            senderUserIDOverride: trimmedCurrentSessionUserID,
+            statusPrefix: senderStatus,
+            senderKeepPairQuickCopyPrefix: senderKeepPairQuickCopyPrefix
+        )
     }
 
     private func applyCurrentSessionUserAsReadStatusFocusUser() {
@@ -3687,6 +3719,7 @@ use_when=\(useWhenText)
         if !silent {
             fetchError = nil
             lastSendQuickCopy = "sender=(none) | message_id=(none)"
+            lastSenderKeepPairQuickCopy = "user_pair_source=(none) | sender_source=(none) | sender=(none) | user_a=(none) | user_b=(none) | message_id=(none)"
             if let normalizedStatusPrefix, !normalizedStatusPrefix.isEmpty {
                 sendStatusHint = "\(normalizedStatusPrefix) Loading inbox thread..."
             }
@@ -3813,9 +3846,14 @@ use_when=\(useWhenText)
         await sendMessage(senderUserIDOverride: nil, statusPrefix: nil)
     }
 
-    private func sendMessage(senderUserIDOverride: String?, statusPrefix: String?) async {
+    private func sendMessage(
+        senderUserIDOverride: String?,
+        statusPrefix: String?,
+        senderKeepPairQuickCopyPrefix: String? = nil
+    ) async {
         let trimmedUserA = senderUserIDOverride?.trimmingCharacters(in: .whitespacesAndNewlines) ?? userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedPayload = messageDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedSenderKeepPairQuickCopyPrefix = senderKeepPairQuickCopyPrefix?.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard let conversationID = conversationSummary?.id else {
             fetchError = "Load direct thread trước khi gửi message."
@@ -3853,6 +3891,10 @@ use_when=\(useWhenText)
             let sentStatus = "Sent message \(created.id) into direct thread \(conversationID)."
             let senderValue = trimmedUserA.isEmpty ? "(empty)" : trimmedUserA
             lastSendQuickCopy = "sender=\(senderValue) | message_id=\(created.id)"
+            if let normalizedSenderKeepPairQuickCopyPrefix,
+               !normalizedSenderKeepPairQuickCopyPrefix.isEmpty {
+                lastSenderKeepPairQuickCopy = "\(normalizedSenderKeepPairQuickCopyPrefix) | message_id=\(created.id)"
+            }
             if let statusPrefix {
                 sendStatusHint = "\(statusPrefix) \(sentStatus)"
             } else {
