@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **305 — feed shell (web+iOS quick-copy feed-visibility gate summary) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **307 — feed shell (web+iOS gate snapshot source marker cho create-vs-reload parity) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **305**
-- Scope hiện tại: feed shell (web+iOS) — thêm quick-copy feed visibility gate summary `viewer_access + visible_count + first_moment_id` ngay sau reload.
+- Batch workflow chính thức hiện tại: **307**
+- Scope hiện tại: feed shell (web+iOS) — thêm marker `gate_snapshot_source=create_flow|reload_flow` vào feed visibility gate summary để parity create-vs-reload rõ ràng hơn.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/moment-compose-shell.tsx`
@@ -99,38 +99,53 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `2a12d7b` — `batch305: add feed-visibility gate quick copy on web and ios`
-  - commit liền trước: `0ecd3fd` — `batch304: add lifecycle-pair transition markers in notification shell`
+  - commit gần nhất đã chốt: `e7d337d` — `batch307: add gate snapshot source markers for feed parity`
+  - commit liền trước: `09c44f2` — `batch306: add feed visibility reason markers in status and quick copy`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch306 với 1 slice hẹp feed shell (web+iOS): thêm visibility gate context marker `viewer_access_reason=viewer_missing|empty_or_blocked|granted` vào status/copy payload để chẩn đoán nhanh nguyên nhân gate outcome.
+  - mở batch308 với 1 slice hẹp feed shell phía web: thêm delete moment action parity (`DELETE /moments/{id}`) + status summary để human tester verify vòng create->delete trên web mà không cần fallback sang iOS.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
-  - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> verify line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` -> bấm `Copy last create feed-visibility delta` và paste kiểm tra payload đúng format.
-  - iOS Feed: set `Author user UUID` + `Viewer user UUID` -> `Create moment + image` -> verify line `Last create feed visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` -> bấm `Copy last create feed visibility delta` và paste kiểm tra payload đúng format.
+  - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Bấm `Copy quick feed visibility gate summary` và `Copy last create feed-visibility delta` để paste kiểm tra payload đúng format.
+  - iOS Feed: set `Author user UUID` + `Viewer user UUID` -> `Create moment + image` -> `Reload private feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Bấm `Copy quick feed visibility gate summary` và `Copy last create feed visibility delta` để paste kiểm tra payload đúng format.
   - Web Location (`/location`): nhập owner/share -> `Reload counts` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - iOS Location: nhập owner/share -> `Load location status` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - Web Friend graph (`/profile`): load snapshot -> bấm `Accept` hoặc `Reject` trên inbound pending request -> verify status hiển thị `accepted_count/pending_inbound/pending_outbound`; bấm `Copy quick delta summary` hoặc `Copy last action delta` và paste kiểm tra payload đúng format.
   - iOS Profile: load friend graph -> accept/reject request -> verify status hiển thị `accepted_count/pending_inbound/pending_outbound`; bấm `Copy quick delta summary` hoặc `Copy last action delta` và paste kiểm tra payload đúng format.
-  - Web Inbox: nhập user A/B -> `Open direct thread` -> bấm `Use current session user for read-cursor target + read focus` -> bấm `Mark latest message as read (target user)` -> verify status có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
+  - Web Inbox: nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
 
 ## Batch handoff note
 
-- Batch vừa xong: **305**
+- Batch vừa xong: **307**
 - Commit cuối đã chốt:
-  - `2a12d7b` — `batch305: add feed-visibility gate quick copy on web and ios`
+  - `e7d337d` — `batch307: add gate snapshot source markers for feed parity`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
   - none
 - Batch kế tiếp:
-  - **306**
+  - **308**
 - Scope hẹp đầu tiên của batch kế tiếp:
-  - feed shell (web+iOS): thêm visibility gate context marker `viewer_access_reason=viewer_missing|empty_or_blocked|granted` vào status/copy payload để chẩn đoán nhanh nguyên nhân gate outcome.
+  - feed shell phía web: thêm delete moment action parity (`DELETE /moments/{id}`) + status summary để verify vòng create->delete ngay trên web.
+
+---
+
+- Batch vừa xong: **306**
+- Commit cuối đã chốt:
+  - `09c44f2` — `batch306: add feed visibility reason markers in status and quick copy`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **307**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell (web+iOS): thêm create-vs-reload gate parity marker `gate_snapshot_source=create_flow|reload_flow` để đối chiếu nhanh nguồn snapshot trong report.
 
 ---
 

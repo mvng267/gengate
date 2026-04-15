@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 305
-- Trục công việc: feed shell — web+iOS add quick-copy feed visibility gate summary `viewer_access + visible_count + first_moment_id`.
-- Trạng thái: batch305_complete_feed_visibility_gate_quick_copy_web_ios.
+- Batch workflow chính thức hiện tại: 307
+- Trục công việc: feed shell — web+iOS add gate snapshot source marker `gate_snapshot_source=create_flow|reload_flow` vào gate summary payload.
+- Trạng thái: batch307_complete_feed_gate_snapshot_source_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,32 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 307 handoff (closed)
+- Batch vừa xong: **307**
+- Commit đã chốt:
+  - `e7d337d` — `batch307: add gate snapshot source markers for feed parity`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **308**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell phía web: thêm delete moment action parity (`DELETE /moments/{id}`) + status summary để verify vòng create->delete ngay trên web.
+
+## Batch 306 handoff (closed)
+- Batch vừa xong: **306**
+- Commit đã chốt:
+  - `09c44f2` — `batch306: add feed visibility reason markers in status and quick copy`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **307**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell (web+iOS): thêm create-vs-reload gate parity marker `gate_snapshot_source=create_flow|reload_flow` để human tester đối chiếu nhanh nguồn snapshot trong report.
 
 ## Batch 305 handoff (closed)
 - Batch vừa xong: **305**
