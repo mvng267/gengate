@@ -250,7 +250,7 @@ struct InboxPlaceholderView: View {
                             await applyCurrentSessionUserAsUserAUserBAndOpenDirectThread()
                         }
                     } label: {
-                        Text(isLoading ? "Applying session user + loading..." : "Use current session user as user_a + user_b + open direct thread")
+                        Text(isLoading ? "Applying session user + loading..." : "Use current session user as user_a + keep peer as user_b + open direct thread")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
@@ -3225,19 +3225,30 @@ use_when=\(useWhenText)
         let currentUserAID = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let currentUserBID = userBIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
 
+        let peerCandidates = [
+            currentUserAID,
+            currentUserBID
+        ] + conversationMembers.map { $0.userID.trimmingCharacters(in: .whitespacesAndNewlines) }
+
+        guard let resolvedPeerUserID = peerCandidates.first(where: { !$0.isEmpty && $0 != trimmedCurrentSessionUserID }) else {
+            userAIDDraft = trimmedCurrentSessionUserID
+            sendStatusHint = "session_peer_user_missing_for_quick_apply"
+            return
+        }
+
         let pairStatus: String
-        if currentUserAID == trimmedCurrentSessionUserID, currentUserBID == trimmedCurrentSessionUserID {
-            pairStatus = "User A + User B already match current session user (user_pair_source=session_user)."
+        if currentUserAID == trimmedCurrentSessionUserID, currentUserBID == resolvedPeerUserID {
+            pairStatus = "User A + User B already match current session + peer context (user_pair_source=session_user+peer_context)."
         } else {
-            pairStatus = "Applied current session user as User A + User B (user_pair_source=session_user)."
+            pairStatus = "Applied current session user as User A + resolved peer as User B (user_pair_source=session_user+peer_context)."
         }
 
         userAIDDraft = trimmedCurrentSessionUserID
-        userBIDDraft = trimmedCurrentSessionUserID
+        userBIDDraft = resolvedPeerUserID
         sendStatusHint = "\(pairStatus) Loading inbox thread..."
         await loadInboxThread(
             userAIDOverride: trimmedCurrentSessionUserID,
-            userBIDOverride: trimmedCurrentSessionUserID,
+            userBIDOverride: resolvedPeerUserID,
             statusPrefix: pairStatus
         )
     }
