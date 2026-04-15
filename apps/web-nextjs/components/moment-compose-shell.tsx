@@ -20,6 +20,12 @@ type FeedGateSnapshotSource = "create_flow" | "reload_flow";
 type DeleteSnapshotSource = "manual_input" | "preset_row" | "first_authored_quick_pick";
 type DeleteSummaryCopySource = "quick_delete_parity" | "last_delete_result" | "copied_feedback";
 
+const deleteSummaryCopySources: DeleteSummaryCopySource[] = [
+  "quick_delete_parity",
+  "last_delete_result",
+  "copied_feedback",
+];
+
 const initialForm = {
   authorUserId: "",
   viewerUserId: "",
@@ -50,6 +56,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [lastCopiedFeedVisibilityDeltaLine, setLastCopiedFeedVisibilityDeltaLine] = useState<string | null>(null);
   const [lastCopiedDeleteSummaryLine, setLastCopiedDeleteSummaryLine] = useState<string | null>(null);
   const [lastDeleteCopyAuditLine, setLastDeleteCopyAuditLine] = useState<string | null>(null);
+  const [deleteCopyAuditSourceDraft, setDeleteCopyAuditSourceDraft] = useState<DeleteSummaryCopySource>("quick_delete_parity");
   const [feedVisibilityGateSnapshotSource, setFeedVisibilityGateSnapshotSource] =
     useState<FeedGateSnapshotSource>("reload_flow");
   const [deleteSnapshotSource, setDeleteSnapshotSource] = useState<DeleteSnapshotSource>("manual_input");
@@ -96,6 +103,22 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     ` / delete_snapshot_source=${deleteSnapshotSource}`;
   const lastCopiedDeleteSummaryFeedbackLine =
     lastCopiedDeleteSummaryLine ? `Last copied delete summary: ${lastCopiedDeleteSummaryLine}` : "";
+  const buildDeleteCopyAuditLine = (source: DeleteSummaryCopySource, value: string) => {
+    const normalizedValue = value.trim();
+    return `delete_copy_audit=source:${source}/value:${normalizedValue}`;
+  };
+  const resolveDeleteCopyAuditSourceValue = (source: DeleteSummaryCopySource) => {
+    switch (source) {
+      case "quick_delete_parity":
+        return deleteMomentQuickCopyLine;
+      case "last_delete_result":
+        return lastDeletedMomentSummaryLine ?? "";
+      case "copied_feedback":
+        return lastCopiedDeleteSummaryFeedbackLine;
+      default:
+        return "";
+    }
+  };
 
   useEffect(() => {
     setForm((current) => ({
@@ -190,8 +213,9 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       await navigator.clipboard.writeText(normalizedText);
       onCopied?.(normalizedText);
       if (successSource) {
-        const deleteCopyAuditLine = `delete_copy_audit=source:${successSource}/value:${normalizedText}`;
+        const deleteCopyAuditLine = buildDeleteCopyAuditLine(successSource, normalizedText);
         setLastDeleteCopyAuditLine(deleteCopyAuditLine);
+        setDeleteCopyAuditSourceDraft(successSource);
         setStatus(`${statusPrefix} (delete_summary_copy_source=${successSource} / ${normalizedText}).`);
       } else {
         setStatus(`${statusPrefix} (${normalizedText}).`);
@@ -267,6 +291,26 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   async function handleCopyDeleteCopyAuditLine() {
     await copyToClipboard(
       lastDeleteCopyAuditLine ?? "",
+      "Copied delete copy audit line to clipboard",
+      "delete_copy_audit_missing",
+      "delete_copy_audit_copy_failed",
+    );
+  }
+
+  async function handleCopyDeleteCopyAuditSourceValue(source: DeleteSummaryCopySource) {
+    const sourceValue = resolveDeleteCopyAuditSourceValue(source);
+    const normalizedSourceValue = sourceValue.trim();
+    if (!normalizedSourceValue) {
+      setStatus(`delete_copy_audit_source_value_missing:${source}`);
+      return;
+    }
+
+    const auditLine = buildDeleteCopyAuditLine(source, normalizedSourceValue);
+    setDeleteCopyAuditSourceDraft(source);
+    setLastDeleteCopyAuditLine(auditLine);
+
+    await copyToClipboard(
+      auditLine,
       "Copied delete copy audit line to clipboard",
       "delete_copy_audit_missing",
       "delete_copy_audit_copy_failed",
@@ -483,6 +527,30 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
           </p>
         </>
       ) : null}
+      <p>
+        Delete copy audit source:
+        {" "}
+        {deleteSummaryCopySources.map((source) => {
+          const isActiveSource = deleteCopyAuditSourceDraft === source;
+          return (
+            <button
+              key={source}
+              type="button"
+              onClick={() => void handleCopyDeleteCopyAuditSourceValue(source)}
+              style={{
+                marginLeft: 8,
+                padding: "2px 8px",
+                borderRadius: 999,
+                border: "1px solid",
+                borderColor: isActiveSource ? "currentColor" : "#c7c7c7",
+                background: isActiveSource ? "#f4f4f5" : "transparent",
+              }}
+            >
+              {source}
+            </button>
+          );
+        })}
+      </p>
       {lastDeleteCopyAuditLine ? (
         <>
           <p>

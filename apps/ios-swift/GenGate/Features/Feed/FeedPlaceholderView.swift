@@ -32,6 +32,7 @@ struct FeedPlaceholderView: View {
     @State private var lastDeleteSummaryCopiedAt: Date?
     @State private var lastDeleteSummaryCopiedText: String = ""
     @State private var deleteSnapshotSource: String = "manual_input"
+    @State private var deleteCopyAuditSourceDraft: String = "quick_delete_parity"
     @State private var lastDeleteCopyAuditLine: String?
     @State private var isLoading = false
     @State private var isLoadingAuthoredMoments = false
@@ -400,6 +401,37 @@ struct FeedPlaceholderView: View {
                             copyLastDeleteSummaryCopiedFeedbackText()
                         }
                         .buttonStyle(.bordered)
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Delete copy audit source")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(deleteCopyAuditSourceOptions, id: \.self) { source in
+                                    let isSelected = deleteCopyAuditSourceDraft == source
+                                    Button {
+                                        copyDeleteCopyAuditLineForSource(source)
+                                    } label: {
+                                        Text(source)
+                                            .font(.caption.monospaced())
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .foregroundStyle(isSelected ? .primary : .secondary)
+                                            .background(
+                                                isSelected
+                                                    ? Color.accentColor.opacity(0.22)
+                                                    : Color.secondary.opacity(0.12)
+                                            )
+                                            .clipShape(Capsule())
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.vertical, 2)
+                        }
                     }
 
                     if let lastDeleteCopyAuditLine {
@@ -991,6 +1023,23 @@ struct FeedPlaceholderView: View {
         return "delete_moment_id=\(normalizedDeleteMomentID) / authored_count=\(authoredMomentRows.count) / feed_count=\(momentRows.count) / gate_snapshot_source=\(feedVisibilityGateSnapshotSource) / delete_snapshot_source=\(deleteSnapshotSource)"
     }
 
+    private var deleteCopyAuditSourceOptions: [String] {
+        ["quick_delete_parity", "last_delete_result", "copied_feedback"]
+    }
+
+    private func deleteCopyAuditSourceValue(for source: String) -> String {
+        switch source {
+        case "quick_delete_parity":
+            return quickDeleteParitySummaryLine
+        case "last_delete_result":
+            return lastDeletedMomentSummaryLine ?? ""
+        case "copied_feedback":
+            return lastDeleteSummaryCopiedFeedbackText ?? ""
+        default:
+            return ""
+        }
+    }
+
     private var lastCreateFeedVisibilityDeltaCopiedFeedbackText: String? {
         guard let lastCreateFeedVisibilityDeltaCopiedAt else {
             return nil
@@ -1358,6 +1407,7 @@ struct FeedPlaceholderView: View {
 
         lastDeleteSummaryCopiedText = normalizedText
         lastDeleteSummaryCopiedAt = Date()
+        deleteCopyAuditSourceDraft = "quick_delete_parity"
         lastDeleteCopyAuditLine = buildDeleteCopyAuditLine(source: "quick_delete_parity", value: normalizedText)
         statusMessage = "Copied quick delete parity summary to clipboard (delete_summary_copy_source=quick_delete_parity / \(normalizedText))."
         fetchError = nil
@@ -1385,6 +1435,7 @@ struct FeedPlaceholderView: View {
 
         lastDeleteSummaryCopiedText = normalizedText
         lastDeleteSummaryCopiedAt = Date()
+        deleteCopyAuditSourceDraft = "last_delete_result"
         lastDeleteCopyAuditLine = buildDeleteCopyAuditLine(source: "last_delete_result", value: normalizedText)
         statusMessage = "Copied last delete result summary to clipboard (delete_summary_copy_source=last_delete_result / \(normalizedText))."
         fetchError = nil
@@ -1410,6 +1461,7 @@ struct FeedPlaceholderView: View {
             return
         }
 
+        deleteCopyAuditSourceDraft = "copied_feedback"
         lastDeleteCopyAuditLine = buildDeleteCopyAuditLine(source: "copied_feedback", value: normalizedText)
         statusMessage = "Copied copied delete summary feedback to clipboard (delete_summary_copy_source=copied_feedback / \(normalizedText))."
         fetchError = nil
@@ -1436,6 +1488,28 @@ struct FeedPlaceholderView: View {
         }
 
         statusMessage = "Copied delete copy audit line to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyDeleteCopyAuditLineForSource(_ source: String) {
+        let sourceValue = deleteCopyAuditSourceValue(for: source).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !sourceValue.isEmpty else {
+            statusMessage = nil
+            fetchError = "delete_copy_audit_source_value_missing:\(source)"
+            return
+        }
+
+        let auditLine = buildDeleteCopyAuditLine(source: source, value: sourceValue)
+        deleteCopyAuditSourceDraft = source
+        lastDeleteCopyAuditLine = auditLine
+
+        guard copyToClipboard(auditLine) else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        statusMessage = "Copied delete copy audit line to clipboard (\(auditLine))."
         fetchError = nil
     }
 
