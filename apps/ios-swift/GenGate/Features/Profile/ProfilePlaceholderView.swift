@@ -6,6 +6,9 @@ import UIKit
 import AppKit
 #endif
 
+private let friendRequestCreateQuickCopyEmpty = "request_id=(none) / action=created / requester=(none) / receiver=(none)"
+private let friendRequestRejectQuickCopyEmpty = "request_id=(none) / action=rejected / accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)"
+
 struct ProfilePlaceholderView: View {
     @Environment(AppSessionStore.self) private var sessionStore
 
@@ -24,6 +27,9 @@ struct ProfilePlaceholderView: View {
     @State private var lastFriendGraphActionDeltaLine: String?
     @State private var lastFriendGraphActionDeltaCopiedAt: Date?
     @State private var lastFriendGraphActionDeltaCopiedText: String = ""
+    @State private var lastFriendRequestCreateQuickCopy: String = friendRequestCreateQuickCopyEmpty
+    @State private var lastFriendRequestRejectQuickCopy: String = friendRequestRejectQuickCopyEmpty
+    @State private var lastFriendRequestCreateRejectBundleQuickCopy: String = "friend_request_create_marker={\(friendRequestCreateQuickCopyEmpty)} | friend_request_reject_marker={\(friendRequestRejectQuickCopyEmpty)}"
 
     var body: some View {
         ScrollView {
@@ -199,6 +205,36 @@ struct ProfilePlaceholderView: View {
 
                         Button("Copy quick delta summary") {
                             copyQuickFriendGraphDeltaSummary()
+                        }
+                        .buttonStyle(.bordered)
+
+                        Text("Quick copy friend-request create marker: \(lastFriendRequestCreateQuickCopy)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+
+                        Button("Copy quick friend-request create marker") {
+                            copyFriendRequestCreateQuickCopy()
+                        }
+                        .buttonStyle(.bordered)
+
+                        Text("Quick copy friend-request reject marker: \(lastFriendRequestRejectQuickCopy)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+
+                        Button("Copy quick friend-request reject marker") {
+                            copyFriendRequestRejectQuickCopy()
+                        }
+                        .buttonStyle(.bordered)
+
+                        Text("Quick copy friend-request create + reject bundle: \(lastFriendRequestCreateRejectBundleQuickCopy)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+
+                        Button("Copy quick friend-request create + reject bundle") {
+                            copyFriendRequestCreateRejectBundleQuickCopy()
                         }
                         .buttonStyle(.bordered)
 
@@ -454,6 +490,72 @@ struct ProfilePlaceholderView: View {
         return "Copied friend graph action delta (\(Int(elapsed))s ago): \(lastFriendGraphActionDeltaCopiedText)"
     }
 
+    private func buildFriendRequestCreateRejectBundleQuickCopy(
+        createQuickCopy: String? = nil,
+        rejectQuickCopy: String? = nil
+    ) -> String {
+        let normalizedCreateQuickCopy = createQuickCopy?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedRejectQuickCopy = rejectQuickCopy?.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let createMarker = normalizedCreateQuickCopy?.isEmpty == false
+            ? normalizedCreateQuickCopy!
+            : (lastFriendRequestCreateQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                ? friendRequestCreateQuickCopyEmpty
+                : lastFriendRequestCreateQuickCopy)
+        let rejectMarker = normalizedRejectQuickCopy?.isEmpty == false
+            ? normalizedRejectQuickCopy!
+            : (lastFriendRequestRejectQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                ? friendRequestRejectQuickCopyEmpty
+                : lastFriendRequestRejectQuickCopy)
+
+        return "friend_request_create_marker={\(createMarker)} | friend_request_reject_marker={\(rejectMarker)}"
+    }
+
+    private func copyFriendRequestCreateQuickCopy() {
+        let normalizedText = lastFriendRequestCreateQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "friend_request_create_quick_copy_empty"
+            return
+        }
+
+        copyToClipboard(normalizedText)
+        lastFriendGraphActionDeltaCopiedText = normalizedText
+        lastFriendGraphActionDeltaCopiedAt = Date()
+        statusMessage = "Copied friend-request create quick copy to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyFriendRequestRejectQuickCopy() {
+        let normalizedText = lastFriendRequestRejectQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "friend_request_reject_quick_copy_empty"
+            return
+        }
+
+        copyToClipboard(normalizedText)
+        lastFriendGraphActionDeltaCopiedText = normalizedText
+        lastFriendGraphActionDeltaCopiedAt = Date()
+        statusMessage = "Copied friend-request reject quick copy to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyFriendRequestCreateRejectBundleQuickCopy() {
+        let normalizedText = lastFriendRequestCreateRejectBundleQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "friend_request_create_reject_bundle_quick_copy_empty"
+            return
+        }
+
+        copyToClipboard(normalizedText)
+        lastFriendGraphActionDeltaCopiedText = normalizedText
+        lastFriendGraphActionDeltaCopiedAt = Date()
+        statusMessage = "Copied friend-request create + reject bundle quick copy to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
     private func prefillFromCurrentSessionUserIfNeeded() {
         guard userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let currentSessionUserID else {
@@ -557,9 +659,14 @@ struct ProfilePlaceholderView: View {
         fetchError = nil
 
         do {
-            try await FriendGraphAPIClient().createFriendRequest(
+            let createdRequestID = try await FriendGraphAPIClient().createFriendRequest(
                 requesterUserID: requesterUserID,
                 receiverUserID: receiverUserID
+            )
+            let createQuickCopy = "request_id=\(createdRequestID) / action=created / requester=\(requesterUserID) / receiver=\(receiverUserID)"
+            lastFriendRequestCreateQuickCopy = createQuickCopy
+            lastFriendRequestCreateRejectBundleQuickCopy = buildFriendRequestCreateRejectBundleQuickCopy(
+                createQuickCopy: createQuickCopy
             )
             await loadFriendGraph(
                 statusMessage: "\(statusPrefix) Friend request created. Reloading friend graph..."
@@ -572,7 +679,7 @@ struct ProfilePlaceholderView: View {
         isCreatingRequest = false
     }
 
-    private func applyFriendGraphDeltaLine(requestID: String, action: String, snapshot: FriendGraphSnapshot) {
+    private func applyFriendGraphDeltaLine(requestID: String, action: String, snapshot: FriendGraphSnapshot) -> String {
         let requestedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
 
         let pendingInboundCount = snapshot.pendingRequests.filter {
@@ -582,7 +689,9 @@ struct ProfilePlaceholderView: View {
             $0.status == "pending" && $0.requesterUserID == requestedUserID
         }.count
 
-        lastFriendGraphActionDeltaLine = "request_id=\(requestID) / action=\(action) / accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(pendingInboundCount) / pending_outbound=\(pendingOutboundCount)"
+        let deltaLine = "request_id=\(requestID) / action=\(action) / accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(pendingInboundCount) / pending_outbound=\(pendingOutboundCount)"
+        lastFriendGraphActionDeltaLine = deltaLine
+        return deltaLine
     }
 
     private func copyQuickFriendGraphDeltaSummary() {
@@ -706,9 +815,14 @@ struct ProfilePlaceholderView: View {
         fetchError = nil
 
         do {
-            try await FriendGraphAPIClient().createFriendRequest(
+            let createdRequestID = try await FriendGraphAPIClient().createFriendRequest(
                 requesterUserID: requesterUserID,
                 receiverUserID: receiverUserID
+            )
+            let createQuickCopy = "request_id=\(createdRequestID) / action=created / requester=\(requesterUserID) / receiver=\(receiverUserID)"
+            lastFriendRequestCreateQuickCopy = createQuickCopy
+            lastFriendRequestCreateRejectBundleQuickCopy = buildFriendRequestCreateRejectBundleQuickCopy(
+                createQuickCopy: createQuickCopy
             )
             await loadFriendGraph(statusMessage: "Friend request created. Receiver kept for quick dedupe re-test. Reloading friend graph...")
             lastFriendGraphActionDeltaLine = nil
@@ -761,7 +875,7 @@ struct ProfilePlaceholderView: View {
             friendshipCount = snapshot.friendshipCount
             pendingRequestRows = snapshot.pendingRequests
             friendshipRows = snapshot.friendships
-            applyFriendGraphDeltaLine(requestID: requestID, action: "accepted", snapshot: snapshot)
+            _ = applyFriendGraphDeltaLine(requestID: requestID, action: "accepted", snapshot: snapshot)
 
             let requestedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
             let pendingInboundCount = snapshot.pendingRequests.filter {
@@ -797,7 +911,11 @@ struct ProfilePlaceholderView: View {
             friendshipCount = snapshot.friendshipCount
             pendingRequestRows = snapshot.pendingRequests
             friendshipRows = snapshot.friendships
-            applyFriendGraphDeltaLine(requestID: requestID, action: "rejected", snapshot: snapshot)
+            let rejectQuickCopy = applyFriendGraphDeltaLine(requestID: requestID, action: "rejected", snapshot: snapshot)
+            lastFriendRequestRejectQuickCopy = rejectQuickCopy
+            lastFriendRequestCreateRejectBundleQuickCopy = buildFriendRequestCreateRejectBundleQuickCopy(
+                rejectQuickCopy: rejectQuickCopy
+            )
 
             let requestedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
             let pendingInboundCount = snapshot.pendingRequests.filter {
@@ -965,7 +1083,7 @@ private struct FriendGraphAPIClient {
         )
     }
 
-    func createFriendRequest(requesterUserID: String, receiverUserID: String) async throws {
+    func createFriendRequest(requesterUserID: String, receiverUserID: String) async throws -> String {
         var request = URLRequest(url: try makeURL(path: "/friends/requests"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -984,7 +1102,8 @@ private struct FriendGraphAPIClient {
         }
 
         do {
-            _ = try JSONDecoder().decode(FriendRequestCreateResponse.self, from: data)
+            let created = try JSONDecoder().decode(FriendRequestCreateResponse.self, from: data)
+            return created.id
         } catch {
             throw APIError.invalidResponse
         }
