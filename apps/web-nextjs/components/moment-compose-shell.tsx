@@ -92,6 +92,8 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     ` / feed_count=${feedItems.length}` +
     ` / gate_snapshot_source=${feedVisibilityGateSnapshotSource}` +
     ` / delete_snapshot_source=${deleteSnapshotSource}`;
+  const lastCopiedDeleteSummaryFeedbackLine =
+    lastCopiedDeleteSummaryLine ? `Last copied delete summary: ${lastCopiedDeleteSummaryLine}` : "";
 
   useEffect(() => {
     setForm((current) => ({
@@ -237,6 +239,15 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       "last_delete_result_summary_missing",
       "last_delete_result_summary_copy_failed",
       setLastCopiedDeleteSummaryLine,
+    );
+  }
+
+  async function handleCopyLastCopiedDeleteSummaryFeedback() {
+    await copyToClipboard(
+      lastCopiedDeleteSummaryFeedbackLine,
+      "Copied last copied delete summary feedback to clipboard",
+      "last_copied_delete_summary_missing",
+      "last_copied_delete_summary_copy_failed",
     );
   }
 
@@ -439,9 +450,16 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         </p>
       ) : null}
       {lastCopiedDeleteSummaryLine ? (
-        <p>
-          Last copied delete summary: <code>{lastCopiedDeleteSummaryLine}</code>
-        </p>
+        <>
+          <p>
+            Last copied delete summary: <code>{lastCopiedDeleteSummaryLine}</code>
+          </p>
+          <p>
+            <button type="button" onClick={() => void handleCopyLastCopiedDeleteSummaryFeedback()}>
+              Copy last copied delete summary feedback
+            </button>
+          </p>
+        </>
       ) : null}
 
       <form onSubmit={(event) => void handleCreate(event)}>

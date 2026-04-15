@@ -394,6 +394,11 @@ struct FeedPlaceholderView: View {
                         Text(lastDeleteSummaryCopiedFeedbackText)
                             .font(.footnote)
                             .foregroundStyle(.secondary)
+
+                        Button("Copy copied delete summary feedback") {
+                            copyLastDeleteSummaryCopiedFeedbackText()
+                        }
+                        .buttonStyle(.bordered)
                     }
 
                     if let fetchError {
@@ -1362,6 +1367,30 @@ struct FeedPlaceholderView: View {
         lastDeleteSummaryCopiedText = normalizedText
         lastDeleteSummaryCopiedAt = Date()
         statusMessage = "Copied last delete result summary to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyLastDeleteSummaryCopiedFeedbackText() {
+        guard let lastDeleteSummaryCopiedFeedbackText else {
+            statusMessage = nil
+            fetchError = "last_copied_delete_summary_missing"
+            return
+        }
+
+        let normalizedText = lastDeleteSummaryCopiedFeedbackText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "last_copied_delete_summary_missing"
+            return
+        }
+
+        guard copyToClipboard(normalizedText) else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        statusMessage = "Copied copied delete summary feedback to clipboard (\(normalizedText))."
         fetchError = nil
     }
 
