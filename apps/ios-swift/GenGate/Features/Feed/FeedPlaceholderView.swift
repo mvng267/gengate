@@ -419,6 +419,11 @@ struct FeedPlaceholderView: View {
                     }
                     .buttonStyle(.bordered)
 
+                    Button("Copy delete copy audit source-state snapshot line") {
+                        copyDeleteCopyAuditSourceStateSnapshotLine()
+                    }
+                    .buttonStyle(.bordered)
+
                     Button("Copy delete copy audit first-ready source line") {
                         copyDeleteCopyAuditFirstReadySourceLine()
                     }
@@ -1567,6 +1572,24 @@ struct FeedPlaceholderView: View {
         }
 
         statusMessage = "Copied delete copy audit first-ready source line to clipboard (\(line))."
+        fetchError = nil
+    }
+
+    private func copyDeleteCopyAuditSourceStateSnapshotLine() {
+        let normalizedText = deleteCopyAuditSourceStateLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "delete_copy_audit_source_state_missing"
+            return
+        }
+
+        guard copyToClipboard(normalizedText) else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        statusMessage = "Copied delete copy audit source-state snapshot line to clipboard (\(normalizedText))."
         fetchError = nil
     }
 
