@@ -16,7 +16,7 @@ type MomentComposeShellProps = {
   initialViewerUserId?: string;
 };
 
-type FeedGateSnapshotSource = "create_flow" | "reload_flow";
+type FeedGateSnapshotSource = "create_flow" | "reload_flow" | "delete_flow";
 type DeleteSnapshotSource = "manual_input" | "preset_row" | "first_authored_quick_pick";
 type DeleteSummaryCopySource = "quick_delete_parity" | "last_delete_result" | "copied_feedback";
 
@@ -57,6 +57,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [lastCopiedFeedVisibilityDeltaLine, setLastCopiedFeedVisibilityDeltaLine] = useState<string | null>(null);
   const [lastCopiedCreateFeedGateBundleLine, setLastCopiedCreateFeedGateBundleLine] = useState<string | null>(null);
   const [lastCopiedLastCreateFeedGateBundleLine, setLastCopiedLastCreateFeedGateBundleLine] = useState<string | null>(null);
+  const [lastCopiedLastDeleteFeedGateBundleLine, setLastCopiedLastDeleteFeedGateBundleLine] = useState<string | null>(null);
   const [lastCopiedDeleteSummaryLine, setLastCopiedDeleteSummaryLine] = useState<string | null>(null);
   const [lastDeleteCopyAuditLine, setLastDeleteCopyAuditLine] = useState<string | null>(null);
   const [lastDeleteCopyAuditFirstReadySourceLine, setLastDeleteCopyAuditFirstReadySourceLine] = useState<string | null>(null);
@@ -110,6 +111,10 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     lastCreateFeedVisibilityDeltaLine && lastCreateFeedGateSummaryLine
       ? `last_create_feed_visibility_delta={${lastCreateFeedVisibilityDeltaLine}} | ` +
         `feed_gate_summary={${lastCreateFeedGateSummaryLine}}`
+      : "";
+  const lastDeleteFeedGateBundleLine =
+    lastDeletedMomentSummaryLine && quickFeedVisibilityGateSummaryLine
+      ? `last_delete_result={${lastDeletedMomentSummaryLine}} | feed_gate_summary={${quickFeedVisibilityGateSummaryLine}}`
       : "";
   const deleteMomentQuickCopyLine =
     `delete_moment_id=${deleteMomentId || "(empty)"}` +
@@ -366,6 +371,16 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     );
   }
 
+  async function handleCopyLastDeleteFeedGateBundle() {
+    await copyToClipboard(
+      lastDeleteFeedGateBundleLine,
+      "Copied last delete + feed-gate bundle to clipboard",
+      "last_delete_feed_gate_bundle_missing",
+      "last_delete_feed_gate_bundle_copy_failed",
+      setLastCopiedLastDeleteFeedGateBundleLine,
+    );
+  }
+
   async function handleCopyLastDeleteResultSummary() {
     await copyToClipboard(
       lastDeletedMomentSummaryLine ?? "",
@@ -613,14 +628,17 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     try {
       const deleted = await deleteMoment(normalizedDeleteMomentId);
       const deletedSummary = buildDeleteMomentSummary(deleted);
+      const nextFeedItems = feedItems.filter((item) => item.id !== deleted.id);
+      const deleteGateSummary = buildFeedVisibilityGateSummary(form.viewerUserId.trim(), nextFeedItems, "delete_flow").summaryLine;
 
       setDeleteMomentIdDraft(deleted.id);
       setDeleteSnapshotSource("manual_input");
+      setFeedVisibilityGateSnapshotSource("delete_flow");
       setLastDeletedMomentSummaryLine(deletedSummary);
       setItems((current) => current.filter((item) => item.id !== deleted.id));
-      setFeedItems((current) => current.filter((item) => item.id !== deleted.id));
+      setFeedItems(nextFeedItems);
 
-      setStatus(`Deleted moment ${deleted.id}. ${deletedSummary}.`);
+      setStatus(`Deleted moment ${deleted.id}. ${deletedSummary}. Feed visibility gate summary: ${deleteGateSummary}.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "moment_shell_delete_failed");
     }
@@ -721,6 +739,14 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
               Copy last delete result summary
             </button>
           </p>
+          <p>
+            Last delete + feed-gate bundle: <code>{lastDeleteFeedGateBundleLine}</code>
+          </p>
+          <p>
+            <button type="button" onClick={() => void handleCopyLastDeleteFeedGateBundle()}>
+              Copy last delete + feed-gate bundle
+            </button>
+          </p>
         </>
       ) : null}
       {lastCopiedFeedVisibilityDeltaLine ? (
@@ -736,6 +762,11 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       {lastCopiedLastCreateFeedGateBundleLine ? (
         <p>
           Last copied last create + feed-gate bundle: <code>{lastCopiedLastCreateFeedGateBundleLine}</code>
+        </p>
+      ) : null}
+      {lastCopiedLastDeleteFeedGateBundleLine ? (
+        <p>
+          Last copied last delete + feed-gate bundle: <code>{lastCopiedLastDeleteFeedGateBundleLine}</code>
         </p>
       ) : null}
       {lastCopiedDeleteSummaryLine ? (
