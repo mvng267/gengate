@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 291
+- Batch: 292
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 291 notification shell — add iOS one-tap copy action for quick unread summary line (`current_page_unread / total_unread_count`) to speed parity reporting.
+- Scope: batch 292 notification shell — add web one-tap copy action for quick unread summary line (`current_page_unread / total_unread_count`) to complete parity reporting with iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -10,18 +10,21 @@
   - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
   - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
-  - Web Notifications (`/notifications`): nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...` và so khớp với page meta line phía dưới.
+  - Web Notifications (`/notifications`): nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...`, bấm `Copy quick unread summary`, rồi paste kiểm tra payload đúng format.
   - iOS Notifications: nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...`, bấm `Copy quick unread summary`, rồi paste kiểm tra payload đúng format.
 - Files:
-  - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
+  - apps/web-nextjs/components/notification-shell.tsx
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
 - Git:
-  - latest feature commit: `5d9a0a5` — `batch291: add ios quick unread summary copy action`
-  - previous feature commit: `de5a40c` — `batch290: add web quick unread summary line in notification shell`
-  - working tree: clean after batch291 commit
+  - latest feature commit: `70c6749` — `batch292: add web quick unread summary copy action`
+  - previous feature commit: `5d9a0a5` — `batch291: add ios quick unread summary copy action`
+  - working tree: clean after batch292 commit
 - Blocker: none
-- Next: mở batch292 với 1 slice hẹp notification shell (web): thêm one-tap copy action cho quick unread summary line (`current_page_unread / total_unread_count`) để parity report đầy đủ web+iOS.
+- Next: mở batch293 với 1 slice hẹp notification shell (iOS): thêm `Quick copy notification page meta` line (`count/unread_count/total_unread_count/limit/offset/filter_mode`) để parity report nhanh hơn khi paging/filter.
+- Batch 292 handoff:
+  - `70c6749` — `batch292: add web quick unread summary copy action`
+  - web notification shell có nút `Copy quick unread summary`, copy đúng line `current_page_unread=... / total_unread_count=...`.
 - Batch 291 handoff:
   - `5d9a0a5` — `batch291: add ios quick unread summary copy action`
   - iOS notification shell có nút `Copy quick unread summary`, copy đúng line `current_page_unread=... / total_unread_count=...` và hiển thị feedback copied.

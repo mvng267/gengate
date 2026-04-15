@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 291
-- Trục công việc: notification shell — iOS add one-tap copy action for quick unread summary line `current_page_unread / total_unread_count`.
-- Trạng thái: batch291_complete_ios_quick_unread_summary_copy_action.
+- Batch workflow chính thức hiện tại: 292
+- Trục công việc: notification shell — web add one-tap copy action for quick unread summary line `current_page_unread / total_unread_count`.
+- Trạng thái: batch292_complete_web_quick_unread_summary_copy_action.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 292 handoff (closed)
+- Batch vừa xong: **292**
+- Commit đã chốt:
+  - `70c6749` — `batch292: add web quick unread summary copy action`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **293**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell (iOS): thêm quick copy page meta line (`count/unread_count/total_unread_count/limit/offset/filter_mode`) để parity report nhanh khi paging/filter.
 
 ## Batch 291 handoff (closed)
 - Batch vừa xong: **291**
