@@ -56,7 +56,7 @@
 ## Batch 314 handoff (closed)
 - Batch vừa xong: **314**
 - Commit đã chốt:
-  - `f3e8398` — `batch314: add delete copy audit quick-copy line on web and ios`
+  - `bb09591` — `batch314: add delete copy audit quick-copy line on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅

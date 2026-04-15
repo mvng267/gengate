@@ -22,7 +22,7 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `f3e8398` — `batch314: add delete copy audit quick-copy line on web and ios`
+  - latest feature commit: `bb09591` — `batch314: add delete copy audit quick-copy line on web and ios`
   - previous feature commit: `4bccf18` — `batch313: add delete summary copy-source markers on web and ios`
   - working tree: clean after batch314 feature + workflow sync commits
 - Blocker: none

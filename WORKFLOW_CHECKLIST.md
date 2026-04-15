@@ -99,7 +99,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `f3e8398` — `batch314: add delete copy audit quick-copy line on web and ios`
+  - commit gần nhất đã chốt: `bb09591` — `batch314: add delete copy audit quick-copy line on web and ios`
   - commit liền trước: `4bccf18` — `batch313: add delete summary copy-source markers on web and ios`
   - working tree hiện tại: sạch
 - Blocker nếu có:
@@ -121,7 +121,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch vừa xong: **314**
 - Commit cuối đã chốt:
-  - `f3e8398` — `batch314: add delete copy audit quick-copy line on web and ios`
+  - `bb09591` — `batch314: add delete copy audit quick-copy line on web and ios`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass
