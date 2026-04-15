@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **301 — notification shell (web+iOS quick-copy lifecycle pair after create+toggle) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **302 — notification shell (web+iOS lifecycle-pair state marker on quick-copy lifecycle line) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **301**
-- Scope hiện tại: notification shell (web+iOS) — thêm quick-copy lifecycle pair line gộp `create_result + mutation_delta` sau create+toggle + copy action.
+- Batch workflow chính thức hiện tại: **302**
+- Scope hiện tại: notification shell (web+iOS) — thêm lifecycle-pair state marker `lifecycle_pair_state=matched|mismatched|missing` trên quick-copy lifecycle line.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/notification-shell.tsx`
@@ -99,13 +99,13 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `0db7546` — `batch301: add notification lifecycle-pair quick copy on web and ios`
-  - commit liền trước: `47deb98` — `batch300: add notification create-result delta quick copy on web and ios`
+  - commit gần nhất đã chốt: `729d3f4` — `batch302: add lifecycle-pair state markers in notification shell`
+  - commit liền trước: `0db7546` — `batch301: add notification lifecycle-pair quick copy on web and ios`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch302 với 1 slice hẹp notification shell (web+iOS): thêm quick-copy lifecycle pair status marker `lifecycle_pair_state=matched|mismatched|missing` để report chain outcome rõ hơn.
+  - mở batch303 với 1 slice hẹp notification shell (web+iOS): thêm guard marker `lifecycle_pair_subject=same_notification|cross_notification` để tách rõ matched/mismatched root cause.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> verify line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` -> bấm `Copy last create feed-visibility delta` và paste kiểm tra payload đúng format.
@@ -118,6 +118,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **302**
+- Commit cuối đã chốt:
+  - `729d3f4` — `batch302: add lifecycle-pair state markers in notification shell`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **303**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell (web+iOS): thêm guard marker `lifecycle_pair_subject=same_notification|cross_notification` để tách rõ matched/mismatched root cause.
+
+---
 
 - Batch vừa xong: **301**
 - Commit cuối đã chốt:
