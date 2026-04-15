@@ -258,6 +258,17 @@ struct InboxPlaceholderView: View {
 
                     Button {
                         Task {
+                            await applyCurrentSessionUserAsUserBKeepUserAAndOpenThread()
+                        }
+                    } label: {
+                        Text(isLoading ? "Applying peer context + loading..." : "Use current session user as user_b (peer) + keep user_a + open direct thread")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(isLoading || currentSessionUserID == nil)
+
+                    Button {
+                        Task {
                             await loadInboxThread()
                         }
                     } label: {
@@ -3249,6 +3260,44 @@ use_when=\(useWhenText)
         await loadInboxThread(
             userAIDOverride: trimmedCurrentSessionUserID,
             userBIDOverride: resolvedPeerUserID,
+            statusPrefix: pairStatus
+        )
+    }
+
+    private func applyCurrentSessionUserAsUserBKeepUserAAndOpenThread() async {
+        guard let currentSessionUserID else {
+            sendStatusHint = "session_user_missing_for_quick_apply"
+            return
+        }
+
+        let trimmedCurrentSessionUserID = currentSessionUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentUserAID = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentUserBID = userBIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let peerCandidates = [
+            currentUserAID,
+            currentUserBID
+        ] + conversationMembers.map { $0.userID.trimmingCharacters(in: .whitespacesAndNewlines) }
+
+        guard let resolvedPeerUserID = peerCandidates.first(where: { !$0.isEmpty && $0 != trimmedCurrentSessionUserID }) else {
+            userBIDDraft = trimmedCurrentSessionUserID
+            sendStatusHint = "session_peer_user_missing_for_quick_apply"
+            return
+        }
+
+        let pairStatus: String
+        if currentUserAID == resolvedPeerUserID, currentUserBID == trimmedCurrentSessionUserID {
+            pairStatus = "User A + User B already match peer context + current session (user_pair_source=peer_context+session_user)."
+        } else {
+            pairStatus = "Applied resolved peer as User A + current session user as User B (user_pair_source=peer_context+session_user)."
+        }
+
+        userAIDDraft = resolvedPeerUserID
+        userBIDDraft = trimmedCurrentSessionUserID
+        sendStatusHint = "\(pairStatus) Loading inbox thread..."
+        await loadInboxThread(
+            userAIDOverride: resolvedPeerUserID,
+            userBIDOverride: trimmedCurrentSessionUserID,
             statusPrefix: pairStatus
         )
     }
