@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 346
-- Trục công việc: DM shell (iOS) — add explicit quick-copy line/action for sender keep-pair marker (`user_pair_source=kept_user_a+user_b` + `sender_source=session_user`) for copy-debug parity with web marker path.
-- Trạng thái: batch346_complete_dm_ios_sender_keep_pair_quick_copy_marker.
+- Batch workflow chính thức hiện tại: 348
+- Trục công việc: DM shell (iOS) — add one-tap quick-copy bundle action for sender keep-pair marker + send result for faster parity report.
+- Trạng thái: batch348_complete_dm_ios_sender_keep_pair_send_result_bundle_quick_copy.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,30 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 348 handoff (closed)
+- Batch vừa xong: **348**
+- Commit đã chốt:
+  - `770589e` — `batch348: add sender keep-pair plus send-result bundle quick copy in ios dm shell`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **349**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - DM shell (web): thêm one-tap action `Copy quick sender keep-pair + send result bundle` để parity bundle copy path với iOS.
+
+## Batch 347 handoff (closed)
+- Batch vừa xong: **347**
+- Commit đã chốt:
+  - `dc919a8` — `batch347: add sender keep-pair quick-copy marker in web dm shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **348**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - DM shell (iOS): thêm one-tap action `Copy quick sender keep-pair + send result bundle` để copy cùng lúc send-result + keep-pair marker cho report parity nhanh.
 
 ## Batch 346 handoff (closed)
 - Batch vừa xong: **346**
