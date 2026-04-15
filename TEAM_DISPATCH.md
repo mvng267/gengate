@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 304
-- Trục công việc: notification shell — web+iOS add lifecycle-pair transition markers `lifecycle_pair_transition` + `lifecycle_pair_transition_context` on quick-copy lifecycle line.
-- Trạng thái: batch304_complete_notification_lifecycle_pair_transition_markers_web_ios.
+- Batch workflow chính thức hiện tại: 305
+- Trục công việc: feed shell — web+iOS add quick-copy feed visibility gate summary `viewer_access + visible_count + first_moment_id`.
+- Trạng thái: batch305_complete_feed_visibility_gate_quick_copy_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 305 handoff (closed)
+- Batch vừa xong: **305**
+- Commit đã chốt:
+  - `2a12d7b` — `batch305: add feed-visibility gate quick copy on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **306**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell (web+iOS): thêm visibility gate context marker `viewer_access_reason=viewer_missing|empty_or_blocked|granted` vào status/copy payload để chẩn đoán nhanh nguyên nhân gate outcome.
 
 ## Batch 304 handoff (closed)
 - Batch vừa xong: **304**

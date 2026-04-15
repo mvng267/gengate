@@ -1,14 +1,14 @@
 # GenGate Workflow Status
 
-- Batch: 304
+- Batch: 305
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 304 notification shell — add web+iOS lifecycle-pair transition markers (`lifecycle_pair_transition` + `lifecycle_pair_transition_context`) on quick-copy lifecycle line for clearer seam #6 create->toggle outcome verification.
+- Scope: batch 305 feed shell — add web+iOS quick-copy feed-visibility gate summary (`viewer_access + visible_count + first_moment_id`) for clearer seam #3 private friend feed contract verification.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
-  - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> verify line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` -> bấm `Copy last create feed-visibility delta` và paste kiểm tra payload đúng format.
-  - iOS Feed: set `Author user UUID` + `Viewer user UUID` -> `Create moment + image` -> verify line `Last create feed visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` -> bấm `Copy last create feed visibility delta` và paste kiểm tra payload đúng format.
+  - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / visible_count=... / first_moment_id=...` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; bấm `Copy quick feed visibility gate summary` và `Copy last create feed-visibility delta` để paste kiểm tra payload đúng format.
+  - iOS Feed: set `Author user UUID` + `Viewer user UUID` -> `Create moment + image` -> `Reload private feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / visible_count=... / first_moment_id=...` + line `Last create feed visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; bấm `Copy quick feed visibility gate summary` và `Copy last create feed visibility delta` để paste kiểm tra payload đúng format.
   - Web Location (`/location`): nhập owner/share -> `Reload counts` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - iOS Location: nhập owner/share -> `Load location status` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
@@ -16,17 +16,17 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
-  - apps/web-nextjs/components/notification-shell.tsx
-  - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
+  - apps/web-nextjs/components/moment-compose-shell.tsx
+  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `0ecd3fd` — `batch304: add lifecycle-pair transition markers in notification shell`
-  - previous feature commit: `0d74159` — `batch303: add lifecycle-pair subject markers in notification shell`
-  - working tree: clean after batch304 feature + workflow sync commits
+  - latest feature commit: `2a12d7b` — `batch305: add feed-visibility gate quick copy on web and ios`
+  - previous feature commit: `0ecd3fd` — `batch304: add lifecycle-pair transition markers in notification shell`
+  - working tree: clean after batch305 feature + workflow sync commits
 - Blocker: none
-- Next: mở batch305 với 1 slice hẹp feed shell (web+iOS) — thêm quick-copy feed visibility gate summary `viewer_access + visible_count + first_moment_id` ngay sau reload để human tester verify private feed contract nhanh hơn.
+- Next: mở batch306 với 1 slice hẹp feed shell (web+iOS) — thêm visibility gate context marker `viewer_access_reason=viewer_missing|empty_or_blocked|granted` vào status/copy payload để human tester chẩn đoán nhanh nguyên nhân gate outcome.
 - Batch 295 handoff:
   - `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
   - web friend graph shell thêm reject action parity + quick delta summary line + last action delta (`request_id/action/accepted_count/pending_inbound/pending_outbound`) và nút copy.

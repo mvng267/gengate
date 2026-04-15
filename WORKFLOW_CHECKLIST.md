@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **304 — notification shell (web+iOS lifecycle-pair transition markers on quick-copy lifecycle line) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **305 — feed shell (web+iOS quick-copy feed-visibility gate summary) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **304**
-- Scope hiện tại: notification shell (web+iOS) — thêm lifecycle-pair transition markers `lifecycle_pair_transition` + `lifecycle_pair_transition_context` trên quick-copy lifecycle line.
+- Batch workflow chính thức hiện tại: **305**
+- Scope hiện tại: feed shell (web+iOS) — thêm quick-copy feed visibility gate summary `viewer_access + visible_count + first_moment_id` ngay sau reload.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/components/notification-shell.tsx`
-  - `apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift`
+  - `apps/web-nextjs/components/moment-compose-shell.tsx`
+  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `0ecd3fd` — `batch304: add lifecycle-pair transition markers in notification shell`
-  - commit liền trước: `0d74159` — `batch303: add lifecycle-pair subject markers in notification shell`
+  - commit gần nhất đã chốt: `2a12d7b` — `batch305: add feed-visibility gate quick copy on web and ios`
+  - commit liền trước: `0ecd3fd` — `batch304: add lifecycle-pair transition markers in notification shell`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch305 với 1 slice hẹp feed shell (web+iOS): thêm quick-copy feed visibility gate summary `viewer_access + visible_count + first_moment_id` ngay sau reload để verify private feed contract nhanh hơn.
+  - mở batch306 với 1 slice hẹp feed shell (web+iOS): thêm visibility gate context marker `viewer_access_reason=viewer_missing|empty_or_blocked|granted` vào status/copy payload để chẩn đoán nhanh nguyên nhân gate outcome.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> verify line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` -> bấm `Copy last create feed-visibility delta` và paste kiểm tra payload đúng format.
@@ -118,6 +118,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **305**
+- Commit cuối đã chốt:
+  - `2a12d7b` — `batch305: add feed-visibility gate quick copy on web and ios`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **306**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell (web+iOS): thêm visibility gate context marker `viewer_access_reason=viewer_missing|empty_or_blocked|granted` vào status/copy payload để chẩn đoán nhanh nguyên nhân gate outcome.
+
+---
 
 - Batch vừa xong: **304**
 - Commit cuối đã chốt:
