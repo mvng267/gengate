@@ -1217,6 +1217,24 @@ struct InboxPlaceholderView: View {
                         )
 
                         Button {
+                            applyFocusUserAndFirstUnreadCandidatePreset()
+                        } label: {
+                            Text("Use focus user + first unread candidate")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(
+                            isLoading ||
+                            isSendingMessage ||
+                            isCreatingAttachment ||
+                            isCreatingDeviceKey ||
+                            isDeletingMessage ||
+                            isUpdatingReadCursor ||
+                            conversationSummary == nil ||
+                            (resolvedReadStatusFocusUserID?.isEmpty ?? true)
+                        )
+
+                        Button {
                             Task {
                                 await jumpToFirstUnreadCandidateForFocusUser()
                             }
@@ -3831,6 +3849,28 @@ use_when=\(useWhenText)
         }
 
         await performReadCursorUpdate(targetUserID: targetUserID, targetMessageID: targetMessageID)
+    }
+
+    private func applyFocusUserAndFirstUnreadCandidatePreset() {
+        guard let targetUserID = resolvedReadStatusFocusUserID,
+              !targetUserID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            sendStatusHint = "focus_user_missing_for_first_unread_preset"
+            return
+        }
+
+        readCursorTargetUserIDDraft = targetUserID
+
+        guard let targetMessageID = firstUnreadMessageIDForFocusUser,
+              !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            readCursorTargetMessageIDDraft = ""
+            lastFirstUnreadGuardQuickCopy = "focus_user=\(targetUserID) | first_unread_guard_state=already_at_latest_or_no_unread | candidate=(none)"
+            sendStatusHint = "Applied focus user as read-cursor target; no first unread candidate (read_cursor_first_unread_preset_source=focus_user)."
+            return
+        }
+
+        readCursorTargetMessageIDDraft = targetMessageID
+        lastFirstUnreadGuardQuickCopy = "focus_user=\(targetUserID) | first_unread_guard_state=candidate_available | candidate=\(targetMessageID)"
+        sendStatusHint = "Applied focus user + first unread candidate as read-cursor target/message (read_cursor_first_unread_preset_source=focus_user)."
     }
 
     private func jumpToFirstUnreadCandidateForFocusUser() async {
