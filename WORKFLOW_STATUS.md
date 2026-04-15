@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 342
+- Batch: 343
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 342 DM shell (web) — add quick action `Use current session user as user_b (peer) + keep user_a + open direct thread` for one-tap peer-context apply parity with existing user_a path.
+- Scope: batch 343 DM shell (iOS) — add quick action `Use current session user as user_b (peer) + keep user_a + open direct thread` for one-tap peer-context apply parity with web DM path.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -12,19 +12,23 @@
   - Web Location (`/location`): nhập owner/share -> `Reload counts` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - iOS Location: nhập owner/share -> `Load location status` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - Web Inbox (`/inbox`): nhập user A/B (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread`, hoặc bấm `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
-  - iOS Inbox: nhập User A/B (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
+  - iOS Inbox: nhập User A/B (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread`, hoặc bấm `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
-  - apps/web-nextjs/components/direct-message-shell.tsx
+  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `423f858` — `batch342: add session-user-b keep-user-a quick open in web dm shell`
-  - previous feature commit: `3d328e2` — `batch341: add session-viewer keep-author quick load in ios moment shell`
+  - latest feature commit: `e7d156c` — `batch343: add session-user-b keep-user-a quick open in ios dm shell`
+  - previous feature commit: `423f858` — `batch342: add session-user-b keep-user-a quick open in web dm shell`
   - working tree: clean
 - Blocker: none
-- Next: mở batch343 với 1 slice hẹp DM shell (iOS): thêm quick action `Use current session user as user_b (peer) + keep user_a + open direct thread` để one-tap parity với web DM peer-context apply path.
+- Next: mở batch344 với 1 slice hẹp DM shell (iOS): thêm quick action `Use current session user as sender + keep user_a/user_b pair + send` để one-tap send parity với web sender quick-send path mà không đổi pair context.
+- Batch 343 handoff:
+  - `e7d156c` — `batch343: add session-user-b keep-user-a quick open in ios dm shell`
+  - iOS Inbox shell thêm one-tap action `Use current session user as user_b (peer) + keep user_a + open direct thread` để parity với web DM peer-context apply path.
+  - flow resolve peer từ form/member context, giữ guard marker `session_peer_user_missing_for_quick_apply`, và mở thread ngay với status prefix marker `user_pair_source=peer_context+session_user` (unchanged/applied).
 - Batch 342 handoff:
   - `423f858` — `batch342: add session-user-b keep-user-a quick open in web dm shell`
   - web DM shell thêm one-tap action `Use current session user as user_b (peer) + keep user_a + open direct thread` để complement path user_a hiện có.
