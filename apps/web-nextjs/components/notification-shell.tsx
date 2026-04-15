@@ -214,6 +214,13 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     ` / create_result(notification_id=${lifecycleCreateResult?.notificationId ?? "(none)"},read_state=${lifecycleCreateResult?.readState ?? "(none)"},current_page_unread=${lifecycleCreateResult?.currentPageUnread ?? "(none)"},total_unread_count=${lifecycleCreateResult?.totalUnreadCount ?? "(none)"})` +
     ` / mutation_delta(notification_id=${lifecycleMutationDelta?.notificationId ?? "(none)"},read_state=${lifecycleMutationDelta?.readState ?? "(none)"},current_page_unread=${lifecycleMutationDelta?.currentPageUnread ?? "(none)"},total_unread_count=${lifecycleMutationDelta?.totalUnreadCount ?? "(none)"})`;
 
+  const quickLifecyclePairMutationLine =
+    `lifecycle_pair_state=${quickLifecyclePairState}` +
+    ` / lifecycle_pair_subject=${lifecyclePairSubject}` +
+    ` / ${lifecyclePairTransitionText}` +
+    ` / ${lifecyclePairTransitionContextText}` +
+    ` / mutation_delta(notification_id=${lifecycleMutationDelta?.notificationId ?? "(none)"},read_state=${lifecycleMutationDelta?.readState ?? "(none)"},current_page_unread=${lifecycleMutationDelta?.currentPageUnread ?? "(none)"},total_unread_count=${lifecycleMutationDelta?.totalUnreadCount ?? "(none)"})`;
+
   async function submitNotificationCreateFlow(input?: NotificationCreateFlowInput) {
     const userId = (input?.userIdOverride ?? form.userId).trim();
     const normalizedStatusPrefix = input?.statusPrefix?.trim();
@@ -501,6 +508,20 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     );
   }
 
+  async function handleCopyQuickLifecyclePairMutation() {
+    if (!lifecycleMutationDelta) {
+      setStatus("quick_lifecycle_pair_mutation_missing");
+      return;
+    }
+
+    await copyToClipboard(
+      quickLifecyclePairMutationLine,
+      "Copied quick lifecycle pair mutation to clipboard",
+      "quick_lifecycle_pair_mutation_missing",
+      "quick_lifecycle_pair_mutation_copy_failed",
+    );
+  }
+
   return (
     <section>
       <p>
@@ -569,6 +590,14 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       <p>
         <button type="button" onClick={() => void handleCopyQuickLifecyclePair()}>
           Copy quick lifecycle pair
+        </button>
+      </p>
+      <p>
+        Quick lifecycle pair mutation: <code>{quickLifecyclePairMutationLine}</code>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickLifecyclePairMutation()}>
+          Copy quick lifecycle pair mutation
         </button>
       </p>
       <p>Filter mode: {pagination.unreadOnly ? "Unread only" : "All notifications"}</p>
