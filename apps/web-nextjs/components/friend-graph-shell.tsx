@@ -14,9 +14,10 @@ import {
 
 type FriendGraphShellProps = {
   userId: string;
+  autoloadSnapshot?: boolean;
 };
 
-export function FriendGraphShell({ userId }: FriendGraphShellProps) {
+export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGraphShellProps) {
   const [snapshot, setSnapshot] = useState<FriendGraphSnapshot | null>(null);
   const [status, setStatus] = useState("Ready to load the friend graph snapshot for this profile context.");
   const [targetUserId, setTargetUserId] = useState("");
@@ -26,6 +27,7 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
   const [lastFriendGraphDeltaLine, setLastFriendGraphDeltaLine] = useState<string | null>(null);
   const [lastFriendGraphDeltaCopiedLine, setLastFriendGraphDeltaCopiedLine] = useState<string | null>(null);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
+  const [hasAutoLoadedSnapshot, setHasAutoLoadedSnapshot] = useState(false);
 
   const feedHref = `/feed?author=${encodeURIComponent(userId)}&viewer=${encodeURIComponent(userId)}`;
   const inboxHref = `/inbox?userA=${encodeURIComponent(userId)}&sender=${encodeURIComponent(userId)}`;
@@ -63,6 +65,15 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
     const persistedSession = readPersistedAuthSession();
     setCurrentSessionUserId(persistedSession?.session.user_id?.trim() ?? "");
   }, []);
+
+  useEffect(() => {
+    if (!autoloadSnapshot || hasAutoLoadedSnapshot || !userId.trim()) {
+      return;
+    }
+
+    setHasAutoLoadedSnapshot(true);
+    void loadSnapshot("Auto-loading friend graph snapshot for profile context...");
+  }, [autoloadSnapshot, hasAutoLoadedSnapshot, userId]);
 
   async function loadSnapshot(message?: string) {
     setIsLoadingSnapshot(true);
@@ -166,7 +177,7 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
     );
   }
 
-  async function handleApplyCurrentSessionUserAsRequester() {
+  async function handleApplyCurrentSessionUserAsRequesterAndLoad() {
     const sessionUserId = currentSessionUserId.trim();
     if (!sessionUserId) {
       setStatus("session_requester_missing_for_quick_apply");
@@ -178,8 +189,10 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
       return;
     }
 
-    setStatus("Applied current session user as requester (requester_source=session_user). Redirecting profile context...");
-    window.location.assign(`/profile?user=${encodeURIComponent(sessionUserId)}`);
+    setStatus(
+      "Applied current session user as requester (requester_source=session_user). Redirecting profile context and auto-loading friend graph snapshot...",
+    );
+    window.location.assign(`/profile?user=${encodeURIComponent(sessionUserId)}&autoload=1`);
   }
 
   async function handleCreateRequest(event: React.FormEvent<HTMLFormElement>) {
@@ -347,10 +360,10 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
         </button>
         <button
           type="button"
-          onClick={() => void handleApplyCurrentSessionUserAsRequester()}
+          onClick={() => void handleApplyCurrentSessionUserAsRequesterAndLoad()}
           disabled={!currentSessionUserId || isLoadingSnapshot || isCreatingRequest}
         >
-          Use current session user as requester
+          Use current session user as requester + load friend graph
         </button>
       </div>
 

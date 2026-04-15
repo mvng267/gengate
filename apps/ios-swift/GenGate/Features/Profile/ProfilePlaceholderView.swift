@@ -52,8 +52,10 @@ struct ProfilePlaceholderView: View {
                         .background(Color.secondary.opacity(0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                    Button("Use current session user as requester") {
-                        applyCurrentSessionUserAsRequester()
+                    Button("Use current session user as requester + load friend graph") {
+                        Task {
+                            await applyCurrentSessionUserAsRequesterAndLoadFriendGraph()
+                        }
                     }
                     .buttonStyle(.bordered)
                     .disabled(currentSessionUserID == nil)
@@ -444,7 +446,7 @@ struct ProfilePlaceholderView: View {
         userIDDraft = currentSessionUserID
     }
 
-    private func applyCurrentSessionUserAsRequester() {
+    private func applyCurrentSessionUserAsRequesterAndLoadFriendGraph() async {
         guard let currentSessionUserID else {
             statusMessage = nil
             fetchError = "session_requester_missing_for_quick_apply"
@@ -455,14 +457,16 @@ struct ProfilePlaceholderView: View {
         let trimmedRequester = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
 
         if trimmedRequester == trimmedSessionUserID {
-            statusMessage = "Requester already matches current session user (requester_source=session_user)."
-            fetchError = nil
+            await loadFriendGraph(
+                statusMessage: "Requester already matches current session user (requester_source=session_user). Reloading friend graph snapshot..."
+            )
             return
         }
 
         userIDDraft = trimmedSessionUserID
-        statusMessage = "Applied current session user as requester (requester_source=session_user)."
-        fetchError = nil
+        await loadFriendGraph(
+            statusMessage: "Applied current session user as requester (requester_source=session_user). Reloading friend graph snapshot..."
+        )
     }
 
     private func applyFriendGraphDeltaLine(requestID: String, action: String, snapshot: FriendGraphSnapshot) {
