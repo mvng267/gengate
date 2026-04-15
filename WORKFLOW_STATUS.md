@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 288
+- Batch: 290
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 288 direct-message shell — add iOS one-tap preset to apply focus user + first unread candidate into read-cursor target fields before jump/mark flow.
+- Scope: batch 290 notification shell — add web quick unread summary line (`current_page_unread / total_unread_count`) to mirror iOS/backend unread summary payload quickly.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -10,15 +10,24 @@
   - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
   - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
+  - Web Notifications (`/notifications`): nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...` và so khớp với page meta line phía dưới.
+  - iOS Notifications: nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...` và so khớp với page meta line.
 - Files:
-  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
+  - apps/web-nextjs/components/notification-shell.tsx
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
 - Git:
-  - latest feature commit: `1de4e8d` — `batch288: add ios focus-user first-unread preset action`
-  - working tree: clean after batch288 commit
+  - latest feature commit: `de5a40c` — `batch290: add web quick unread summary line in notification shell`
+  - previous feature commit: `00cbf0d` — `batch289: add ios quick unread summary line in notification shell`
+  - working tree: clean after batch290 commit
 - Blocker: none
-- Next: mở batch289 với 1 slice hẹp notification shell: hiển thị quick unread summary line (`current_page_unread / total_unread_count`) trên iOS để parity scan nhanh với web/backend payload.
+- Next: mở batch291 với 1 slice hẹp notification shell trên iOS: thêm one-tap copy quick unread summary line (`current_page_unread / total_unread_count`) để parity report nhanh hơn.
+- Batch 290 handoff:
+  - `de5a40c` — `batch290: add web quick unread summary line in notification shell`
+  - web notification shell hiển thị line `Quick unread summary: current_page_unread=... / total_unread_count=...` để parity scan nhanh với iOS/backend.
+- Batch 289 handoff:
+  - `00cbf0d` — `batch289: add ios quick unread summary line in notification shell`
+  - iOS notification shell hiển thị line `Quick unread summary: current_page_unread=... / total_unread_count=...` ngay cạnh status/meta để tester scan nhanh.
 - Batch 288 handoff:
   - `1de4e8d` — `batch288: add ios focus-user first-unread preset action`
   - iOS read-cursor form thêm one-tap preset `Use focus user + first unread candidate` để auto-fill target user/message theo focus context trước khi jump/mark flow.

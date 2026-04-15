@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 288
-- Trục công việc: direct-message shell — iOS add one-tap preset `Use focus user + first unread candidate` to auto-fill read-cursor target user/message before jump/mark flow.
-- Trạng thái: batch288_complete_ios_focus_user_first_unread_preset.
+- Batch workflow chính thức hiện tại: 290
+- Trục công việc: notification shell — web add quick unread summary line `current_page_unread / total_unread_count` for fast parity scan with iOS/backend payload.
+- Trạng thái: batch290_complete_web_quick_unread_summary_line.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,30 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 290 handoff (closed)
+- Batch vừa xong: **290**
+- Commit đã chốt:
+  - `de5a40c` — `batch290: add web quick unread summary line in notification shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **291**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell (iOS): thêm one-tap copy quick unread summary line (`current_page_unread / total_unread_count`) để report parity nhanh.
+
+## Batch 289 handoff (closed)
+- Batch vừa xong: **289**
+- Commit đã chốt:
+  - `00cbf0d` — `batch289: add ios quick unread summary line in notification shell`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **290**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell (web): thêm quick unread summary line (`current_page_unread / total_unread_count`) để parity scan nhanh với iOS/backend payload.
 
 ## Batch 288 handoff (closed)
 - Batch vừa xong: **288**
