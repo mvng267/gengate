@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 345
-- Trục công việc: DM shell (web) — add quick action `Use current session user as sender + keep user_a/user_b pair + send` for one-tap sender quick-send parity with iOS path.
-- Trạng thái: batch345_complete_dm_web_session_sender_keep_pair_quick_send.
+- Batch workflow chính thức hiện tại: 346
+- Trục công việc: DM shell (iOS) — add explicit quick-copy line/action for sender keep-pair marker (`user_pair_source=kept_user_a+user_b` + `sender_source=session_user`) for copy-debug parity with web marker path.
+- Trạng thái: batch346_complete_dm_ios_sender_keep_pair_quick_copy_marker.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 346 handoff (closed)
+- Batch vừa xong: **346**
+- Commit đã chốt:
+  - `119d3c3` — `batch346: add sender keep-pair quick-copy marker in ios dm shell`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **347**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - DM shell (web): thêm quick-copy action cho sender keep-pair marker payload (`user_pair_source=kept_user_a+user_b` + `sender_source=session_user`) để parity one-tap copy-debug với iOS.
 
 ## Batch 345 handoff (closed)
 - Batch vừa xong: **345**

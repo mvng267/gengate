@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 345
+- Batch: 346
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 345 DM shell (web) — add quick action `Use current session user as sender + keep user_a/user_b pair + send` for one-tap sender quick-send parity with iOS path.
+- Scope: batch 346 DM shell (iOS) — add explicit quick-copy line for sender keep-pair marker (`user_pair_source=kept_user_a+user_b` + `sender_source=session_user`) for copy-debug parity with web status marker.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -12,19 +12,23 @@
   - Web Location (`/location`): nhập owner/share -> `Reload counts` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - iOS Location: nhập owner/share -> `Load location status` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - Web Inbox (`/inbox`): nhập user A/B (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread`, hoặc bấm `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> `Open direct thread` -> nhập message text -> bấm `Use current session user as sender + keep user_a/user_b pair + send` và verify status có marker `user_pair_source=kept_user_a+user_b` + `sender_source=session_user` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
-  - iOS Inbox: nhập User A/B (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread`, hoặc bấm `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> `Load inbox thread` -> nhập message text -> bấm `Use current session user as sender + keep user_a/user_b pair + send` và verify status có marker `user_pair_source=kept_user_a+user_b` + `sender_source=session_user` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
+  - iOS Inbox: nhập User A/B (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread`, hoặc bấm `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> `Load inbox thread` -> nhập message text -> bấm `Use current session user as sender + keep user_a/user_b pair + send` và verify status có marker `user_pair_source=kept_user_a+user_b` + `sender_source=session_user` -> bấm `Copy quick sender keep-pair marker` để verify payload `user_pair_source=kept_user_a+user_b | sender_source=session_user | sender=... | user_a=... | user_b=... | message_id=...` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
-  - apps/web-nextjs/components/direct-message-shell.tsx
+  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `7f8240d` — `batch345: add session-sender keep-pair quick send in web dm shell`
-  - previous feature commit: `4975c0f` — `batch344: add session-sender keep-pair quick send in ios dm shell`
+  - latest feature commit: `119d3c3` — `batch346: add sender keep-pair quick-copy marker in ios dm shell`
+  - previous feature commit: `7f8240d` — `batch345: add session-sender keep-pair quick send in web dm shell`
   - working tree: clean
 - Blocker: none
-- Next: mở batch346 với 1 slice hẹp DM shell (iOS): thêm explicit quick-copy line cho sender quick-send marker (`user_pair_source=kept_user_a+user_b` + `sender_source=session_user`) để parity copy-debug trực tiếp với web status marker.
+- Next: mở batch347 với 1 slice hẹp DM shell (web): thêm quick-copy action cho sender keep-pair marker payload (`user_pair_source=kept_user_a+user_b` + `sender_source=session_user`) để parity one-tap copy-debug với iOS.
+- Batch 346 handoff:
+  - `119d3c3` — `batch346: add sender keep-pair quick-copy marker in ios dm shell`
+  - iOS Inbox shell thêm line `Quick copy sender keep-pair marker` + action `Copy quick sender keep-pair marker` để one-tap copy payload marker `user_pair_source=kept_user_a+user_b` + `sender_source=session_user` cùng sender/user_a/user_b/message_id.
+  - flow sender keep-pair send now injects prefix marker into send path và persist payload sau khi gửi để debug/cross-platform parity report nhanh.
 - Batch 345 handoff:
   - `7f8240d` — `batch345: add session-sender keep-pair quick send in web dm shell`
   - web Inbox shell đổi quick action send sang `Use current session user as sender + keep user_a/user_b pair + send` để explicit giữ nguyên pair context khi apply session sender.
