@@ -12,6 +12,7 @@ struct NotificationsPlaceholderView: View {
     @State private var userIDDraft: String = ""
     @State private var createTypeDraft: String = "ios_shell_notice"
     @State private var createPayloadDraft: String = "hello from ios notifications shell"
+    @State private var createPayloadJsonDraft: String = "{\"source\":\"ios_notifications_shell\",\"message\":\"hello from ios notifications shell\"}"
     @State private var notificationRows: [NotificationRow] = []
     @State private var listMeta: NotificationListMeta?
     @State private var pageLimitDraft: String = "20"
@@ -236,7 +237,7 @@ struct NotificationsPlaceholderView: View {
                             .background(Color.secondary.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                        TextField("Payload message", text: $createPayloadDraft)
+                        TextField("Payload message (legacy fallback)", text: $createPayloadDraft)
 #if os(iOS)
                             .textInputAutocapitalization(.sentences)
                             .autocorrectionDisabled(false)
@@ -244,6 +245,21 @@ struct NotificationsPlaceholderView: View {
                             .padding(12)
                             .background(Color.secondary.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        TextField("Payload JSON", text: $createPayloadJsonDraft, axis: .vertical)
+#if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+#endif
+                            .lineLimit(3...8)
+                            .font(.footnote.monospaced())
+                            .padding(12)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                        Text("Payload JSON must be a valid JSON object. Invalid input returns marker `notification_payload_json_invalid`.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
 
                         Button {
                             Task {
@@ -831,10 +847,96 @@ struct NotificationsPlaceholderView: View {
         isLoading = false
     }
 
+    private enum NotificationPayloadParseError: Error {
+        case invalidJSONRoot
+        case unsupportedValueType
+    }
+
+    private func parsePayloadJSON(
+        _ rawPayloadJSON: String,
+        fallbackMessage: String
+    ) throws -> [String: NotificationsAPIClient.StringOrIntOrBool] {
+        let trimmedJSON = rawPayloadJSON.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedJSON.isEmpty {
+            return [
+                "source": .string("ios_notifications_shell"),
+                "message": .string(fallbackMessage)
+            ]
+        }
+
+        guard let jsonData = trimmedJSON.data(using: .utf8) else {
+            throw NotificationPayloadParseError.invalidJSONRoot
+        }
+
+        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
+        guard let objectPayload = jsonObject as? [String: Any] else {
+            throw NotificationPayloadParseError.invalidJSONRoot
+        }
+
+        var parsedPayload: [String: NotificationsAPIClient.StringOrIntOrBool] = [:]
+        parsedPayload.reserveCapacity(objectPayload.count)
+
+        for (key, value) in objectPayload {
+            parsedPayload[key] = try convertJSONValueToNotificationPayloadValue(value)
+        }
+
+        return parsedPayload
+    }
+
+    private func convertJSONValueToNotificationPayloadValue(
+        _ value: Any
+    ) throws -> NotificationsAPIClient.StringOrIntOrBool {
+        if let stringValue = value as? String {
+            return .string(stringValue)
+        }
+
+        if let boolValue = value as? Bool {
+            return .bool(boolValue)
+        }
+
+        if let intValue = value as? Int {
+            return .int(intValue)
+        }
+
+        if let doubleValue = value as? Double {
+            return .double(doubleValue)
+        }
+
+        if let numberValue = value as? NSNumber {
+            let numericValue = numberValue.doubleValue
+            if floor(numericValue) == numericValue,
+               numericValue <= Double(Int.max),
+               numericValue >= Double(Int.min) {
+                return .int(Int(numericValue))
+            }
+            return .double(numericValue)
+        }
+
+        if value is NSNull {
+            return .null
+        }
+
+        if let nestedArray = value as? [Any] {
+            return .array(try nestedArray.map { try convertJSONValueToNotificationPayloadValue($0) })
+        }
+
+        if let nestedObject = value as? [String: Any] {
+            var mappedObject: [String: NotificationsAPIClient.StringOrIntOrBool] = [:]
+            mappedObject.reserveCapacity(nestedObject.count)
+            for (nestedKey, nestedValue) in nestedObject {
+                mappedObject[nestedKey] = try convertJSONValueToNotificationPayloadValue(nestedValue)
+            }
+            return .object(mappedObject)
+        }
+
+        throw NotificationPayloadParseError.unsupportedValueType
+    }
+
     private func submitNotificationCreateFlow(_ input: NotificationCreateFlowInput = NotificationCreateFlowInput()) async {
         let trimmedUserID = (input.userIDOverride ?? userIDDraft).trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedType = createTypeDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedPayload = createPayloadDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedPayloadJson = createPayloadJsonDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let normalizedStatusPrefix = input.statusPrefix?.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedUserID.isEmpty else {
@@ -849,6 +951,18 @@ struct NotificationsPlaceholderView: View {
             return
         }
 
+        let payloadJSON: [String: NotificationsAPIClient.StringOrIntOrBool]
+        do {
+            payloadJSON = try parsePayloadJSON(
+                trimmedPayloadJson,
+                fallbackMessage: trimmedPayload.isEmpty ? "sent from ios notifications shell" : trimmedPayload
+            )
+        } catch {
+            statusMessage = "notification_payload_json_invalid"
+            fetchError = nil
+            return
+        }
+
         isCreatingNotification = true
         fetchError = nil
         statusMessage = normalizedStatusPrefix.map { "\($0) Creating notification shell item..." } ?? "Creating notification shell item..."
@@ -857,7 +971,7 @@ struct NotificationsPlaceholderView: View {
             let createdRow = try await NotificationsAPIClient().createNotification(
                 userID: trimmedUserID,
                 notificationType: trimmedType,
-                payloadMessage: trimmedPayload.isEmpty ? "sent from ios notifications shell" : trimmedPayload
+                payloadJSON: payloadJSON
             )
 
             var nextMeta = listMeta
@@ -1170,18 +1284,23 @@ private struct NotificationsAPIClient {
     private struct NotificationCreateRequest: Encodable {
         let user_id: String
         let notification_type: String
-        let payload_json: [String: String]
+        let payload_json: [String: StringOrIntOrBool]
     }
 
-    private enum StringOrIntOrBool: Decodable, CustomStringConvertible {
+    enum StringOrIntOrBool: Codable, CustomStringConvertible, Sendable {
         case string(String)
         case int(Int)
         case bool(Bool)
         case double(Double)
+        case object([String: StringOrIntOrBool])
+        case array([StringOrIntOrBool])
+        case null
 
         init(from decoder: Decoder) throws {
             let container = try decoder.singleValueContainer()
-            if let stringValue = try? container.decode(String.self) {
+            if container.decodeNil() {
+                self = .null
+            } else if let stringValue = try? container.decode(String.self) {
                 self = .string(stringValue)
             } else if let intValue = try? container.decode(Int.self) {
                 self = .int(intValue)
@@ -1189,6 +1308,10 @@ private struct NotificationsAPIClient {
                 self = .bool(boolValue)
             } else if let doubleValue = try? container.decode(Double.self) {
                 self = .double(doubleValue)
+            } else if let objectValue = try? container.decode([String: StringOrIntOrBool].self) {
+                self = .object(objectValue)
+            } else if let arrayValue = try? container.decode([StringOrIntOrBool].self) {
+                self = .array(arrayValue)
             } else {
                 throw DecodingError.typeMismatch(
                     StringOrIntOrBool.self,
@@ -1197,12 +1320,46 @@ private struct NotificationsAPIClient {
             }
         }
 
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+            switch self {
+            case let .string(value):
+                try container.encode(value)
+            case let .int(value):
+                try container.encode(value)
+            case let .bool(value):
+                try container.encode(value)
+            case let .double(value):
+                try container.encode(value)
+            case let .object(value):
+                try container.encode(value)
+            case let .array(value):
+                try container.encode(value)
+            case .null:
+                try container.encodeNil()
+            }
+        }
+
         var description: String {
             switch self {
-            case let .string(value): return value
-            case let .int(value): return String(value)
-            case let .bool(value): return value ? "true" : "false"
-            case let .double(value): return String(value)
+            case let .string(value):
+                return value
+            case let .int(value):
+                return String(value)
+            case let .bool(value):
+                return value ? "true" : "false"
+            case let .double(value):
+                return String(value)
+            case let .object(value):
+                let objectText = value
+                    .sorted { $0.key < $1.key }
+                    .map { "\($0.key):\($0.value.description)" }
+                    .joined(separator: ",")
+                return "{\(objectText)}"
+            case let .array(values):
+                return "[\(values.map { $0.description }.joined(separator: ","))]"
+            case .null:
+                return "null"
             }
         }
     }
@@ -1260,7 +1417,11 @@ private struct NotificationsAPIClient {
         }
     }
 
-    func createNotification(userID: String, notificationType: String, payloadMessage: String) async throws -> NotificationRow {
+    func createNotification(
+        userID: String,
+        notificationType: String,
+        payloadJSON: [String: StringOrIntOrBool]
+    ) async throws -> NotificationRow {
         var request = URLRequest(url: try makeURL(path: "/notifications"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -1268,10 +1429,7 @@ private struct NotificationsAPIClient {
             NotificationCreateRequest(
                 user_id: userID,
                 notification_type: notificationType,
-                payload_json: [
-                    "source": "ios_notifications_shell",
-                    "message": payloadMessage,
-                ]
+                payload_json: payloadJSON
             )
         )
 
