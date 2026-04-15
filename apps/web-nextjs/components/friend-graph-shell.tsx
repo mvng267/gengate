@@ -701,7 +701,10 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
       ) : (
         <ul>
           {snapshot.pendingRequests.map((request) => {
-            const canAccept = request.receiver.id === userId && request.status === "pending";
+            const isPending = request.status === "pending";
+            const canAccept = isPending && request.receiver.id === userId;
+            const canReject = isPending && (request.receiver.id === userId || request.requester.id === userId);
+
             return (
               <li key={request.id}>
                 <strong>{request.requester.username ?? request.requester.email}</strong>
@@ -719,6 +722,10 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
                     >
                       {busyRequestId === request.id ? "Processing..." : "Accept"}
                     </button>
+                  </>
+                ) : null}
+                {canReject ? (
+                  <>
                     {" "}
                     <button
                       type="button"
