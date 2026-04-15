@@ -86,6 +86,17 @@ struct LocationPlaceholderView: View {
 
                     Button {
                         Task {
+                            await applyCurrentSessionUserAsOwnerAndLoadLocationStatus()
+                        }
+                    } label: {
+                        Text(isLoading ? "Applying session owner + loading..." : "Use current session user as owner + load location status")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(isLoading || currentSessionUserID == nil)
+
+                    Button {
+                        Task {
                             await loadLocationStatus()
                         }
                     } label: {
@@ -290,9 +301,31 @@ struct LocationPlaceholderView: View {
         ownerUserIDDraft = currentSessionUserID
     }
 
-    private func loadLocationStatus() async {
-        let trimmedOwnerID = ownerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+    private func applyCurrentSessionUserAsOwnerAndLoadLocationStatus() async {
+        guard let currentSessionUserID else {
+            statusMessage = "session_owner_missing_for_quick_apply"
+            fetchError = nil
+            return
+        }
+
+        let trimmedCurrentSessionUserID = currentSessionUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let ownerStatus: String
+        if ownerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == trimmedCurrentSessionUserID {
+            ownerStatus = "Owner already matches current session user (owner_source=session_user)."
+        } else {
+            ownerStatus = "Applied current session user as owner (owner_source=session_user)."
+        }
+
+        ownerUserIDDraft = trimmedCurrentSessionUserID
+        statusMessage = "\(ownerStatus) Loading location status..."
+        fetchError = nil
+        await loadLocationStatus(ownerUserIDOverride: trimmedCurrentSessionUserID, statusPrefix: ownerStatus)
+    }
+
+    private func loadLocationStatus(ownerUserIDOverride: String? = nil, statusPrefix: String? = nil) async {
+        let trimmedOwnerID = (ownerUserIDOverride ?? ownerUserIDDraft).trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedShareID = effectiveShareID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedStatusPrefix = statusPrefix?.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedOwnerID.isEmpty else {
             fetchError = "Owner UUID là bắt buộc để load location status."
@@ -312,6 +345,7 @@ struct LocationPlaceholderView: View {
 
             snapshotCount = loadedSnapshotCount
             totalShareCount = loadedTotalShareCount
+            ownerUserIDDraft = trimmedOwnerID
 
             if trimmedShareID.isEmpty {
                 audienceCount = nil
@@ -319,12 +353,21 @@ struct LocationPlaceholderView: View {
                 audienceCount = try await apiClient.fetchAudienceCount(shareID: trimmedShareID)
             }
 
-            statusMessage = "Loaded location status counts successfully."
+            let loadedStatus = "Loaded location status counts successfully."
+            if let normalizedStatusPrefix, !normalizedStatusPrefix.isEmpty {
+                statusMessage = "\(normalizedStatusPrefix) \(loadedStatus)"
+            } else {
+                statusMessage = loadedStatus
+            }
         } catch {
             snapshotCount = nil
             totalShareCount = nil
             audienceCount = nil
-            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            let errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            fetchError = errorMessage
+            if let normalizedStatusPrefix, !normalizedStatusPrefix.isEmpty {
+                statusMessage = "\(normalizedStatusPrefix) \(errorMessage)"
+            }
         }
 
         isLoading = false
