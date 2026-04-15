@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 355
-- Trục công việc: friend graph shell (iOS) — add quick-copy friend-request create+accept bundle line for one-tap happy-path parity report (parity with web batch354).
-- Trạng thái: batch355_in_progress_ios_friend_graph_create_accept_bundle_quick_copy.
+- Batch workflow chính thức hiện tại: 358
+- Trục công việc: private-feed shell (web) — add quick-copy last-create + gate-summary bundle line (with created_moment_id) for deterministic one-tap report after create flow.
+- Trạng thái: batch358_complete_web_private_feed_last_create_gate_bundle_quick_copy.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,43 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 358 handoff (closed)
+- Batch vừa xong: **358**
+- Commit đã chốt:
+  - `92196fa` — `batch358: add last-create feed-gate bundle quick copy in web moment shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **359**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - private-feed shell (iOS): thêm quick-copy last-create + gate-summary bundle line (kèm created_moment_id) để parity với web batch358.
+
+## Batch 357 handoff (closed)
+- Batch vừa xong: **357**
+- Commit đã chốt:
+  - `93e8a14` — `batch357: add moment create-feed-gate bundle quick copy in ios shell`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **358**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - private-feed shell (web): thêm quick-copy last-create + gate-summary bundle line (kèm created_moment_id) để one-tap report deterministic sau create flow.
+
+## Batch 356 handoff (closed)
+- Batch vừa xong: **356**
+- Commit đã chốt:
+  - `95b6f3a` — `batch356: add moment create-feed-gate bundle quick copy in web shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **357**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - moment shell (iOS): thêm quick-copy create + feed-gate bundle line (image + caption + gate summary) để parity với web batch356.
 
 ## Batch 354 handoff (closed)
 - Batch vừa xong: **354**
