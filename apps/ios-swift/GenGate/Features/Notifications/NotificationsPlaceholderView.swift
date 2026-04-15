@@ -1,4 +1,10 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
+#if canImport(AppKit)
+import AppKit
+#endif
 
 struct NotificationsPlaceholderView: View {
     @Environment(AppSessionStore.self) private var sessionStore
@@ -17,6 +23,8 @@ struct NotificationsPlaceholderView: View {
     @State private var isLoading = false
     @State private var isCreatingNotification = false
     @State private var lastLoadedWindow: NotificationLoadWindow?
+    @State private var quickUnreadSummaryCopiedAt: Date?
+    @State private var lastQuickUnreadSummaryCopiedText: String = ""
 
     var body: some View {
         ScrollView {
@@ -237,6 +245,17 @@ struct NotificationsPlaceholderView: View {
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
 
+                    Button("Copy quick unread summary") {
+                        copyQuickUnreadSummaryLine()
+                    }
+                    .buttonStyle(.bordered)
+
+                    if let quickUnreadSummaryCopiedFeedbackText {
+                        Text(quickUnreadSummaryCopiedFeedbackText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     if let listMeta {
                         Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount) · Limit: \(listMeta.limit) · Offset: \(listMeta.offset) · Filter mode: \(listMeta.unreadOnly ? "Unread only" : "All notifications")")
                             .font(.footnote.monospaced())
@@ -359,6 +378,19 @@ struct NotificationsPlaceholderView: View {
         }
 
         return "current_page_unread=\(listMeta.unreadCount) / total_unread_count=\(listMeta.totalUnreadCount)"
+    }
+
+    private var quickUnreadSummaryCopiedFeedbackText: String? {
+        guard let quickUnreadSummaryCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(quickUnreadSummaryCopiedAt)
+        guard elapsed >= 0, elapsed < 6 else {
+            return nil
+        }
+
+        return "Copied quick unread summary (\(Int(elapsed))s ago): \(lastQuickUnreadSummaryCopiedText)"
     }
 
     private func prefillFromCurrentSessionUserIfNeeded() {
@@ -506,6 +538,28 @@ struct NotificationsPlaceholderView: View {
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
+    }
+
+    private func copyQuickUnreadSummaryLine() {
+        let normalizedText = quickUnreadSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        lastQuickUnreadSummaryCopiedText = normalizedText
+        quickUnreadSummaryCopiedAt = Date()
+        statusMessage = "Copied quick unread summary to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func writeToClipboard(_ text: String) {
+#if canImport(UIKit)
+        UIPasteboard.general.string = text
+#elseif canImport(AppKit)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+#endif
     }
 }
 
