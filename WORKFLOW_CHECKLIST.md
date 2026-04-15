@@ -89,30 +89,44 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **292**
-- Scope hiện tại: notification shell (web) — thêm one-tap copy action cho quick unread summary line `current_page_unread / total_unread_count` để parity report đồng bộ với iOS.
+- Batch workflow chính thức hiện tại: **293**
+- Scope hiện tại: notification shell (iOS) — thêm quick-copy page meta line `count/unread_count/total_unread_count/limit/offset/filter_mode` để parity report nhanh khi paging/filter.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/components/notification-shell.tsx`
+  - `apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run -s typecheck` → ✅
+  - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `70c6749` — `batch292: add web quick unread summary copy action`
-  - commit liền trước: `5d9a0a5` — `batch291: add ios quick unread summary copy action`
+  - commit gần nhất đã chốt: `18cf958` — `batch293: add ios quick page-meta copy action in notification shell`
+  - commit liền trước: `70c6749` — `batch292: add web quick unread summary copy action`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch293 với 1 slice hẹp notification shell (iOS): thêm quick copy page meta line (`count/unread_count/total_unread_count/limit/offset/filter_mode`) để parity report nhanh khi paging/filter.
+  - mở batch294 với 1 slice hẹp notification shell (web): thêm quick-copy page meta line (`count/unread_count/total_unread_count/limit/offset/filter_mode`) để parity report đầy đủ web+iOS khi paging/filter.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed: bấm quick action `Use current session user as viewer + load` -> verify status `viewer_source=session_user` + feed reload.
   - Web Inbox: nhập user A/B -> `Open direct thread` -> bấm `Use current session user for read-cursor target + read focus` -> bấm `Mark latest message as read (target user)` -> verify status có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
   - Web Notifications: vào `/notifications`, nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...` -> bấm `Copy quick unread summary` -> paste và verify payload đúng format.
-  - iOS Notifications: nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...` -> bấm `Copy quick unread summary` -> paste và verify payload đúng format.
+  - iOS Notifications: nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...` -> bấm `Copy quick unread summary` và `Copy quick page meta` -> paste và verify payload đúng format.
 
 ## Batch handoff note
+
+- Batch vừa xong: **293**
+- Commit cuối đã chốt:
+  - `18cf958` — `batch293: add ios quick page-meta copy action in notification shell`
+- Test-verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **294**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell (web): thêm quick-copy page meta line (`count/unread_count/total_unread_count/limit/offset/filter_mode`) để parity report đầy đủ web+iOS khi paging/filter.
+
+---
 
 - Batch vừa xong: **292**
 - Commit cuối đã chốt:
