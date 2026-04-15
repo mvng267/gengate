@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 326
+- Batch: 327
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 326 feed shell (web+iOS) — add status marker `last_source_state_snapshot_source_line_copied` when copying `last_source_state_snapshot_source=...` so QA can confirm source-line copy without opening clipboard.
+- Scope: batch 327 friend graph shell (web+iOS) — add quick action `Use current session user as requester` to reduce manual UUID input before creating friend requests.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,17 +16,21 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
-  - apps/web-nextjs/components/moment-compose-shell.tsx
-  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
+  - apps/web-nextjs/components/friend-graph-shell.tsx
+  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `c81893d` — `batch326: add snapshot source-line copied status markers on web and ios`
-  - previous feature commit: `09c7ee8` — `batch325: add snapshot source-line quick copy on web and ios`
-  - working tree: clean after batch326 feature + workflow sync commits
+  - latest feature commit: `a5a973e` — `batch327: add session-requester quick action in friend graph shells`
+  - previous feature commit: `c81893d` — `batch326: add snapshot source-line copied status markers on web and ios`
+  - working tree: clean after batch327 feature commit
 - Blocker: none
-- Next: mở batch327 với 1 slice hẹp friend graph shell (web+iOS) — thêm quick action `Use current session user as requester` để giảm nhập tay ở bước tạo friend request và giữ seam friend-graph trơn hơn cho human retest.
+- Next: mở batch328 với 1 slice hẹp friend graph shell (web+iOS) — thêm quick action `Use current session user as requester + load friend graph` để one-tap apply context và reload snapshot ngay sau khi apply.
+- Batch 327 handoff:
+  - `a5a973e` — `batch327: add session-requester quick action in friend graph shells`
+  - web friend graph shell thêm action `Use current session user as requester`, hiển thị `current session user_id`, và redirect về `/profile?user=<session_user_id>` (hoặc reload snapshot khi requester đã trùng session user).
+  - iOS Profile friend graph shell đổi action thành `Use current session user as requester` với status marker `requester_source=session_user` cho both unchanged/applied paths.
 - Batch 295 handoff:
   - `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
   - web friend graph shell thêm reject action parity + quick delta summary line + last action delta (`request_id/action/accepted_count/pending_inbound/pending_outbound`) và nút copy.

@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **326 — feed shell (web+iOS snapshot-source-line copied status marker) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **327 — friend graph shell (web+iOS session-requester quick action) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **326**
-- Scope hiện tại: feed shell (web+iOS) — thêm status marker `last_source_state_snapshot_source_line_copied` khi copy line `last_source_state_snapshot_source=...` để QA xác nhận copy marker nguồn ngay trong status.
+- Batch workflow chính thức hiện tại: **327**
+- Scope hiện tại: friend graph shell (web+iOS) — thêm quick action `Use current session user as requester` để giảm nhập tay khi tạo friend request.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/components/moment-compose-shell.tsx`
-  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
+  - `apps/web-nextjs/components/friend-graph-shell.tsx`
+  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `c81893d` — `batch326: add snapshot source-line copied status markers on web and ios`
-  - commit liền trước: `09c7ee8` — `batch325: add snapshot source-line quick copy on web and ios`
+  - commit gần nhất đã chốt: `a5a973e` — `batch327: add session-requester quick action in friend graph shells`
+  - commit liền trước: `c81893d` — `batch326: add snapshot source-line copied status markers on web and ios`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch327 với 1 slice hẹp friend graph shell (web+iOS): thêm quick action `Use current session user as requester` để giảm nhập tay khi gửi friend request.
+  - mở batch328 với 1 slice hẹp friend graph shell (web+iOS): thêm quick action `Use current session user as requester + load friend graph` để one-tap apply requester context rồi reload snapshot ngay.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`; bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy last copied delete summary feedback`, verify line source-state rồi bấm `Copy delete copy audit for first ready source` để one-shot copy `delete_copy_audit=source:.../value:...`; đối chiếu source được pick với line source-state.
@@ -118,6 +118,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
 
 ## Batch handoff note
+
+- Batch vừa xong: **327**
+- Commit cuối đã chốt:
+  - `a5a973e` — `batch327: add session-requester quick action in friend graph shells`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **328**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - friend graph shell (web+iOS): thêm quick action `Use current session user as requester + load friend graph` để one-tap apply requester context rồi reload snapshot ngay.
+
+---
 
 - Batch vừa xong: **326**
 - Commit cuối đã chốt:
