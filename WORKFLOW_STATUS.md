@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 328
+- Batch: 329
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 328 friend graph shell (web+iOS) — add quick action `Use current session user as requester + load friend graph` for one-tap context apply + snapshot reload.
+- Scope: batch 329 friend graph shell (web+iOS) — add quick action `Use current session user as receiver + send friend request` for one-tap outbound request test from requester=session user.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -17,17 +17,20 @@
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
   - apps/web-nextjs/components/friend-graph-shell.tsx
-  - apps/web-nextjs/app/profile/page.tsx
   - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `6be60e8` — `batch328: add session-requester auto-load friend graph actions`
-  - previous feature commit: `a5a973e` — `batch327: add session-requester quick action in friend graph shells`
-  - working tree: clean after batch328 feature commit
+  - latest feature commit: `3dd4fc9` — `batch329: add session-receiver quick-send actions in friend graph shells`
+  - previous feature commit: `6be60e8` — `batch328: add session-requester auto-load friend graph actions`
+  - working tree: clean after batch329 feature commit
 - Blocker: none
-- Next: mở batch329 với 1 slice hẹp friend graph shell (web+iOS) — thêm quick action `Use current session user as receiver + send friend request` để one-tap test chiều outbound request từ requester=session user.
+- Next: mở batch330 với 1 slice hẹp moment posting shell (web+iOS) — thêm quick action `Use current session user as author + create moment + reload feed` để one-tap verify seam post→feed.
+- Batch 329 handoff:
+  - `3dd4fc9` — `batch329: add session-receiver quick-send actions in friend graph shells`
+  - web friend graph shell thêm action `Use current session user as receiver + send friend request`, auto-fill receiver theo session user + gọi create request ngay + reload snapshot; có guard marker `session_receiver_missing_for_quick_apply` và invalid self-pair marker.
+  - iOS Profile friend graph shell thêm action tương ứng `Use current session user as receiver + send friend request`, auto-apply receiver + create request + reload snapshot trong 1 thao tác.
 - Batch 328 handoff:
   - `6be60e8` — `batch328: add session-requester auto-load friend graph actions`
   - web friend graph shell đổi action thành `Use current session user as requester + load friend graph`; khi requester khác session user thì redirect `/profile?user=<session_user_id>&autoload=1`, shell auto-load snapshot bằng `autoload=1`; khi đã trùng thì reload snapshot ngay.
