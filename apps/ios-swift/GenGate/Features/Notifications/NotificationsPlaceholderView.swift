@@ -42,6 +42,8 @@ struct NotificationsPlaceholderView: View {
     @State private var lastQuickLifecyclePairMutationCopiedText: String = ""
     @State private var quickUnreadLifecycleMutationBundleCopiedAt: Date?
     @State private var lastQuickUnreadLifecycleMutationBundleCopiedText: String = ""
+    @State private var quickLifecycleSnapshotAuditCopiedAt: Date?
+    @State private var lastQuickLifecycleSnapshotAuditCopiedText: String = ""
     @State private var lastLifecyclePair: NotificationLifecyclePair?
 
     private struct NotificationCreateFlowInput {
@@ -69,7 +71,7 @@ struct NotificationsPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Notifications",
                     summary: "iOS native notification center shell now supports create + read/unread mutation so notification flow can be exercised end-to-end from native UI.",
-                    status: "Status: native notification center now supports create + read/unread toggles + quick unread summary + quick page cursor summary + quick mutation delta + quick create-result delta + quick lifecycle pair lines + quick lifecycle pair mutation line + quick unread lifecycle mutation bundle line; delete remains intentionally out of scope for this slice.",
+                    status: "Status: native notification center now supports create + read/unread toggles + quick unread summary + quick page cursor summary + quick mutation delta + quick create-result delta + quick lifecycle pair lines + quick lifecycle pair mutation line + quick unread lifecycle mutation bundle line + quick lifecycle snapshot audit line; delete remains intentionally out of scope for this slice.",
                     bullets: [
                         "Paste a backend user UUID to create and load notifications for that user.",
                         "This shell can create via `POST /notifications`, then read `/notifications/{user_id}` and toggle each row via `/notifications/{id}/read` + `/notifications/{id}/unread`.",
@@ -80,6 +82,7 @@ struct NotificationsPlaceholderView: View {
                         "Quick lifecycle pair line (`lifecycle_pair_state + lifecycle_pair_subject + lifecycle_pair_transition + lifecycle_pair_transition_context + create_result + mutation_delta`) lets testers report a full create->toggle chain with root-cause + transition marker in one payload.",
                         "Quick lifecycle pair mutation line (`lifecycle_pair_state + lifecycle_pair_subject + lifecycle_pair_transition + lifecycle_pair_transition_context + mutation_delta`) gives one-tap mutation-focused parity payload aligned with web notifications shell.",
                         "Quick unread lifecycle mutation bundle line (`unread_summary + lifecycle markers + mutation_delta`) gives deterministic one-tap payload to report unread counters and mutation transition together (parity with web batch364).",
+                        "Quick lifecycle snapshot audit line (`lifecycle_pair_state + lifecycle_pair_subject + lifecycle_pair_transition + lifecycle_pair_transition_context + create_notification_id + mutation_notification_id + unread_summary + window(limit/offset/filter_mode)`) gives deterministic one-tap lifecycle snapshot payload for backend/web/iOS parity (parity with web batch366).",
                         "Use this tab to run minimal notification lifecycle checks from iOS without relying on web seeding first."
                     ]
                 )
@@ -431,6 +434,21 @@ struct NotificationsPlaceholderView: View {
                             .foregroundStyle(.secondary)
                     }
 
+                    Text("Quick lifecycle snapshot audit: \(quickLifecycleSnapshotAuditLine)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
+                    Button("Copy quick lifecycle snapshot audit") {
+                        copyQuickLifecycleSnapshotAuditLine()
+                    }
+                    .buttonStyle(.bordered)
+
+                    if let quickLifecycleSnapshotAuditCopiedFeedbackText {
+                        Text(quickLifecycleSnapshotAuditCopiedFeedbackText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     if let listMeta {
                         Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount) · Limit: \(listMeta.limit) · Offset: \(listMeta.offset) · Filter mode: \(listMeta.unreadOnly ? "Unread only" : "All notifications")")
                             .font(.footnote.monospaced())
@@ -758,6 +776,23 @@ struct NotificationsPlaceholderView: View {
         return "unread_summary(\(quickUnreadSummaryLine)) / lifecycle_pair_state=\(lifecyclePairState) / lifecycle_pair_subject=\(lifecyclePairSubject) / lifecycle_pair_transition=\(lifecyclePairTransition) / lifecycle_pair_transition_context=\(lifecyclePairTransitionContext) / mutation_delta(notification_id=\(mutationDeltaID),read_state=\(mutationDeltaReadState),current_page_unread=\(mutationDeltaCurrentPageUnread),total_unread_count=\(mutationDeltaTotalUnreadCount))"
     }
 
+    private var quickLifecycleSnapshotAuditLine: String {
+        let createResult = lastLifecyclePair?.createResult ?? lastCreateResultDelta
+        let mutationDelta = lastLifecyclePair?.mutationDelta ?? lastMutationDelta
+
+        let createNotificationID = createResult?.notificationID ?? "(none)"
+        let mutationNotificationID = mutationDelta?.notificationID ?? "(none)"
+
+        let cursorWindow = lastLoadedWindow ?? NotificationLoadWindow(
+            userID: userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines),
+            limit: normalizedLimit,
+            offset: normalizedOffset,
+            unreadOnly: pageUnreadOnly
+        )
+
+        return "lifecycle_pair_state=\(lifecyclePairState) / lifecycle_pair_subject=\(lifecyclePairSubject) / lifecycle_pair_transition=\(lifecyclePairTransition) / lifecycle_pair_transition_context=\(lifecyclePairTransitionContext) / create_notification_id=\(createNotificationID) / mutation_notification_id=\(mutationNotificationID) / unread_summary(\(quickUnreadSummaryLine)) / window(limit=\(cursorWindow.limit),offset=\(cursorWindow.offset),filter_mode=\(cursorWindow.unreadOnly ? "unread_only" : "all"))"
+    }
+
     private var quickLifecyclePairCopiedFeedbackText: String? {
         guard let quickLifecyclePairCopiedAt else {
             return nil
@@ -795,6 +830,19 @@ struct NotificationsPlaceholderView: View {
         }
 
         return "Copied quick unread lifecycle mutation bundle (\(Int(elapsed))s ago): \(lastQuickUnreadLifecycleMutationBundleCopiedText)"
+    }
+
+    private var quickLifecycleSnapshotAuditCopiedFeedbackText: String? {
+        guard let quickLifecycleSnapshotAuditCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(quickLifecycleSnapshotAuditCopiedAt)
+        guard elapsed >= 0, elapsed < 6 else {
+            return nil
+        }
+
+        return "Copied quick lifecycle snapshot audit (\(Int(elapsed))s ago): \(lastQuickLifecycleSnapshotAuditCopiedText)"
     }
 
     private func prefillFromCurrentSessionUserIfNeeded() {
@@ -1301,6 +1349,25 @@ struct NotificationsPlaceholderView: View {
         lastQuickUnreadLifecycleMutationBundleCopiedText = normalizedText
         quickUnreadLifecycleMutationBundleCopiedAt = Date()
         statusMessage = "Copied quick unread lifecycle mutation bundle to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyQuickLifecycleSnapshotAuditLine() {
+        guard lastCreateResultDelta != nil || (lastLifecyclePair?.mutationDelta ?? lastMutationDelta) != nil else {
+            statusMessage = "quick_lifecycle_snapshot_audit_missing"
+            return
+        }
+
+        let normalizedText = quickLifecycleSnapshotAuditLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = "quick_lifecycle_snapshot_audit_missing"
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        lastQuickLifecycleSnapshotAuditCopiedText = normalizedText
+        quickLifecycleSnapshotAuditCopiedAt = Date()
+        statusMessage = "Copied quick lifecycle snapshot audit to clipboard (\(normalizedText))."
         fetchError = nil
     }
 
