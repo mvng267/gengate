@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 338
+- Batch: 339
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 338 friend graph shell (iOS) — add quick action `Use current session user as requester + keep receiver + send friend request` for one-tap session requester send parity.
+- Scope: batch 339 friend graph shell (web) — add quick action `Use current session user as requester + keep receiver + send friend request` for one-tap session requester send parity.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,15 +16,20 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
-  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
+  - apps/web-nextjs/components/friend-graph-shell.tsx
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
 - Git:
-  - latest feature commit: `eedda47` — `batch338: add session-requester keep-receiver quick send in ios friend graph shell`
-  - previous feature commit: `20cdb3f` — `batch337: add payload-json validation marker in ios notification shell`
+  - latest feature commit: `6faffce` — `batch339: add session-requester keep-receiver quick send in web friend graph shell`
+  - previous feature commit: `eedda47` — `batch338: add session-requester keep-receiver quick send in ios friend graph shell`
   - working tree: clean
 - Blocker: none
-- Next: mở batch339 với 1 slice hẹp friend graph shell (web): thêm quick action `Use current session user as requester + keep receiver + send friend request` để giữ one-tap parity web/iOS cho session requester send path.
+- Next: mở batch340 với 1 slice hẹp moment shell (web): thêm quick action `Use current session user as viewer + keep author + load private feed` để one-tap parity với hướng session-viewer verify feed gate mà không đụng create flow.
+- Batch 339 handoff:
+  - `6faffce` — `batch339: add session-requester keep-receiver quick send in web friend graph shell`
+  - web friend graph shell thêm one-tap action `Use current session user as requester + keep receiver + send friend request`.
+  - action giữ nguyên `receiver` đang nhập, apply `requester` từ current session user và gửi request ngay trong một flow; guard marker rõ ràng: `session_requester_missing_for_quick_apply`, `friend_request_receiver_missing_for_quick_send`, và invalid self-pair marker chuẩn `friend_request_invalid_request code=invalid_request detail=requester và receiver phải khác nhau`.
+  - flow quick send được refactor qua helper `submitSessionBoundFriendRequestCreateFlow(...)` để dùng chung cho cả session requester/receiver paths, giữ status prefix markers `requester_source=session_user`/`receiver_source=session_user` nhất quán.
 - Batch 338 handoff:
   - `eedda47` — `batch338: add session-requester keep-receiver quick send in ios friend graph shell`
   - iOS friend graph shell thêm one-tap action `Use current session user as requester + keep receiver + send friend request`.

@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 338
-- Trục công việc: friend graph shell (iOS) — add quick action `Use current session user as requester + keep receiver + send friend request` for one-tap session requester send parity.
-- Trạng thái: batch338_complete_friend_graph_ios_session_requester_keep_receiver_send_status.
+- Batch workflow chính thức hiện tại: 339
+- Trục công việc: friend graph shell (web) — add quick action `Use current session user as requester + keep receiver + send friend request` for one-tap session requester send parity.
+- Trạng thái: batch339_complete_friend_graph_web_session_requester_keep_receiver_send_status.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 339 handoff (closed)
+- Batch vừa xong: **339**
+- Commit đã chốt:
+  - `6faffce` — `batch339: add session-requester keep-receiver quick send in web friend graph shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **340**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - moment shell (web): thêm quick action `Use current session user as viewer + keep author + load private feed` để one-tap parity với hướng session-viewer verify feed gate mà không đụng create flow.
 
 ## Batch 338 handoff (closed)
 - Batch vừa xong: **338**
