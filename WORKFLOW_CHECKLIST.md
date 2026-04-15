@@ -99,7 +99,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `f5ec9c4` — `batch310: add delete summary quick-copy actions on web and ios`
+  - commit gần nhất đã chốt: `079f731` — `batch310: add delete summary quick-copy actions on web and ios`
   - commit liền trước: `2b07ac7` — `batch309: add ios feed delete parity summary markers`
   - working tree hiện tại: sạch
 - Blocker nếu có:
@@ -121,7 +121,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch vừa xong: **310**
 - Commit cuối đã chốt:
-  - `f5ec9c4` — `batch310: add delete summary quick-copy actions on web and ios`
+  - `079f731` — `batch310: add delete summary quick-copy actions on web and ios`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass

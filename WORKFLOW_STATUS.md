@@ -22,7 +22,7 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `f5ec9c4` — `batch310: add delete summary quick-copy actions on web and ios`
+  - latest feature commit: `079f731` — `batch310: add delete summary quick-copy actions on web and ios`
   - previous feature commit: `2b07ac7` — `batch309: add ios feed delete parity summary markers`
   - working tree: clean after batch310 feature + workflow sync commits
 - Blocker: none

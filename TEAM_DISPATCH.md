@@ -56,7 +56,7 @@
 ## Batch 310 handoff (closed)
 - Batch vừa xong: **310**
 - Commit đã chốt:
-  - `f5ec9c4` — `batch310: add delete summary quick-copy actions on web and ios`
+  - `079f731` — `batch310: add delete summary quick-copy actions on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
