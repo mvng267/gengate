@@ -1648,7 +1648,7 @@ struct FeedPlaceholderView: View {
             return
         }
 
-        statusMessage = "Copied last source-state snapshot source line to clipboard (\(snapshotSourceLine))."
+        statusMessage = "Copied last source-state snapshot source line to clipboard (\(snapshotSourceLine)) / last_source_state_snapshot_source_line_copied."
         fetchError = nil
     }
 

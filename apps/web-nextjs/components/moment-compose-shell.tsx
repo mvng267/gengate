@@ -363,7 +363,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   async function handleCopyLastDeleteCopyAuditSourceStateSnapshotSourceLine() {
     await copyToClipboard(
       lastDeleteCopyAuditSourceStateSnapshotSourceLine ?? "",
-      "Copied last source-state snapshot source line to clipboard",
+      "Copied last source-state snapshot source line to clipboard / last_source_state_snapshot_source_line_copied",
       "delete_copy_audit_source_state_snapshot_source_line_missing",
       "delete_copy_audit_source_state_snapshot_source_line_copy_failed",
     );
