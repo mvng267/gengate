@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 344
-- Trục công việc: DM shell (iOS) — add quick action `Use current session user as sender + keep user_a/user_b pair + send` for one-tap sender quick-send parity with web path.
-- Trạng thái: batch344_complete_dm_ios_session_sender_keep_pair_quick_send.
+- Batch workflow chính thức hiện tại: 345
+- Trục công việc: DM shell (web) — add quick action `Use current session user as sender + keep user_a/user_b pair + send` for one-tap sender quick-send parity with iOS path.
+- Trạng thái: batch345_complete_dm_web_session_sender_keep_pair_quick_send.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 345 handoff (closed)
+- Batch vừa xong: **345**
+- Commit đã chốt:
+  - `7f8240d` — `batch345: add session-sender keep-pair quick send in web dm shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **346**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - DM shell (iOS): thêm explicit quick-copy line cho sender quick-send marker (`user_pair_source=kept_user_a+user_b` + `sender_source=session_user`) để parity copy-debug trực tiếp với web status marker.
 
 ## Batch 344 handoff (closed)
 - Batch vừa xong: **344**

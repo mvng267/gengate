@@ -89,21 +89,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **344**
-- Scope hiện tại: DM shell (iOS) — thêm quick action `Use current session user as sender + keep user_a/user_b pair + send` để one-tap sender quick-send parity với web path.
+- Batch workflow chính thức hiện tại: **345**
+- Scope hiện tại: DM shell (web) — thêm quick action `Use current session user as sender + keep user_a/user_b pair + send` để one-tap sender quick-send parity với iOS path.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
+  - `apps/web-nextjs/components/direct-message-shell.tsx`
 - Test-verify:
-  - `cd apps/ios-swift && swift build` → ✅
+  - `cd apps/web-nextjs && npm run -s typecheck` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `4975c0f` — `batch344: add session-sender keep-pair quick send in ios dm shell`
-  - commit liền trước: `e7d156c` — `batch343: add session-user-b keep-user-a quick open in ios dm shell`
+  - commit gần nhất đã chốt: `7f8240d` — `batch345: add session-sender keep-pair quick send in web dm shell`
+  - commit liền trước: `4975c0f` — `batch344: add session-sender keep-pair quick send in ios dm shell`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch345 với 1 slice hẹp DM shell (web): thêm quick action `Use current session user as sender + keep user_a/user_b pair + send` để one-tap sender quick-send parity với iOS path vừa bổ sung.
+  - mở batch346 với 1 slice hẹp DM shell (iOS): thêm explicit quick-copy line cho sender quick-send marker (`user_pair_source=kept_user_a+user_b` + `sender_source=session_user`) để parity copy-debug trực tiếp với web status marker.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`; bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy last copied delete summary feedback`, verify line source-state rồi bấm `Copy delete copy audit for first ready source` để one-shot copy `delete_copy_audit=source:.../value:...`; đối chiếu source được pick với line source-state.
@@ -112,10 +112,24 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Location: nhập owner/share -> `Load location status` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - Web Friend graph (`/profile`): load snapshot -> bấm `Accept` hoặc `Reject` trên inbound pending request -> verify status hiển thị `accepted_count/pending_inbound/pending_outbound`; bấm `Copy quick delta summary` hoặc `Copy last action delta` và paste kiểm tra payload đúng format.
   - iOS Profile: load friend graph -> accept/reject request -> verify status hiển thị `accepted_count/pending_inbound/pending_outbound`; bấm `Copy quick delta summary` hoặc `Copy last action delta` và paste kiểm tra payload đúng format.
-  - Web Inbox: nhập user A/B -> `Open direct thread` (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread` / `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread` / `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
+  - Web Inbox: nhập user A/B -> `Open direct thread` (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread` / `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> nhập message text rồi bấm `Use current session user as sender + keep user_a/user_b pair + send` và verify status có marker `user_pair_source=kept_user_a+user_b` + `sender_source=session_user` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread` / `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> nhập message text rồi bấm `Use current session user as sender + keep user_a/user_b pair + send` và verify status có marker `user_pair_source=kept_user_a+user_b` + `sender_source=session_user` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
 
 ## Batch handoff note
+
+- Batch vừa xong: **345**
+- Commit cuối đã chốt:
+  - `7f8240d` — `batch345: add session-sender keep-pair quick send in web dm shell`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **346**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - DM shell (iOS): thêm explicit quick-copy line cho sender quick-send marker (`user_pair_source=kept_user_a+user_b` + `sender_source=session_user`) để parity copy-debug trực tiếp với web status marker.
+
+---
 
 - Batch vừa xong: **344**
 - Commit cuối đã chốt:
