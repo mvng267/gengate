@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 343
+- Batch: 344
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 343 DM shell (iOS) — add quick action `Use current session user as user_b (peer) + keep user_a + open direct thread` for one-tap peer-context apply parity with web DM path.
+- Scope: batch 344 DM shell (iOS) — add quick action `Use current session user as sender + keep user_a/user_b pair + send` for one-tap sender quick-send parity with web path.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -20,11 +20,15 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `e7d156c` — `batch343: add session-user-b keep-user-a quick open in ios dm shell`
-  - previous feature commit: `423f858` — `batch342: add session-user-b keep-user-a quick open in web dm shell`
+  - latest feature commit: `4975c0f` — `batch344: add session-sender keep-pair quick send in ios dm shell`
+  - previous feature commit: `e7d156c` — `batch343: add session-user-b keep-user-a quick open in ios dm shell`
   - working tree: clean
 - Blocker: none
-- Next: mở batch344 với 1 slice hẹp DM shell (iOS): thêm quick action `Use current session user as sender + keep user_a/user_b pair + send` để one-tap send parity với web sender quick-send path mà không đổi pair context.
+- Next: mở batch345 với 1 slice hẹp DM shell (web): thêm quick action `Use current session user as sender + keep user_a/user_b pair + send` để one-tap sender quick-send parity với iOS path vừa bổ sung.
+- Batch 344 handoff:
+  - `4975c0f` — `batch344: add session-sender keep-pair quick send in ios dm shell`
+  - iOS Inbox shell thêm one-tap action `Use current session user as sender + keep user_a/user_b pair + send` để gửi message bằng session sender mà không chỉnh pair context hiện tại.
+  - flow giữ nguyên `userA/userB` trong form, áp sender override bằng session user, và status marker nêu rõ `user_pair_source=kept_user_a+user_b` + `sender_source=session_user`.
 - Batch 343 handoff:
   - `e7d156c` — `batch343: add session-user-b keep-user-a quick open in ios dm shell`
   - iOS Inbox shell thêm one-tap action `Use current session user as user_b (peer) + keep user_a + open direct thread` để parity với web DM peer-context apply path.

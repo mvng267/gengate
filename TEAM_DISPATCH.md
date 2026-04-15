@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 343
-- Trục công việc: DM shell (iOS) — add quick action `Use current session user as user_b (peer) + keep user_a + open direct thread` for one-tap peer-context apply parity with web DM path.
-- Trạng thái: batch343_complete_dm_ios_session_user_b_keep_user_a_open_direct_thread.
+- Batch workflow chính thức hiện tại: 344
+- Trục công việc: DM shell (iOS) — add quick action `Use current session user as sender + keep user_a/user_b pair + send` for one-tap sender quick-send parity with web path.
+- Trạng thái: batch344_complete_dm_ios_session_sender_keep_pair_quick_send.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 344 handoff (closed)
+- Batch vừa xong: **344**
+- Commit đã chốt:
+  - `4975c0f` — `batch344: add session-sender keep-pair quick send in ios dm shell`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **345**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - DM shell (web): thêm quick action `Use current session user as sender + keep user_a/user_b pair + send` để one-tap sender quick-send parity với iOS path vừa bổ sung.
 
 ## Batch 343 handoff (closed)
 - Batch vừa xong: **343**
