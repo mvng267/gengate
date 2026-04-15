@@ -24,6 +24,9 @@ struct FeedPlaceholderView: View {
     @State private var statusMessage: String?
     @State private var fetchError: String?
     @State private var latestQuickReactionLog: String?
+    @State private var lastCreateFeedVisibilityDeltaLine: String?
+    @State private var lastCreateFeedVisibilityDeltaCopiedAt: Date?
+    @State private var lastCreateFeedVisibilityDeltaCopiedText: String = ""
     @State private var isLoading = false
     @State private var isLoadingAuthoredMoments = false
     @State private var isCreatingMoment = false
@@ -314,6 +317,29 @@ struct FeedPlaceholderView: View {
                             .font(.footnote.monospaced())
                             .foregroundStyle(.secondary)
                             .textSelection(.enabled)
+
+                        Button("Copy quick feed visibility delta") {
+                            copyQuickFeedVisibilityDeltaSummary()
+                        }
+                        .buttonStyle(.bordered)
+                    }
+
+                    if let lastCreateFeedVisibilityDeltaLine {
+                        Text("Last create feed visibility delta: \(lastCreateFeedVisibilityDeltaLine)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+
+                        Button("Copy last create feed visibility delta") {
+                            copyLastCreateFeedVisibilityDeltaLine()
+                        }
+                        .buttonStyle(.bordered)
+                    }
+
+                    if let lastCreateFeedVisibilityDeltaCopiedFeedbackText {
+                        Text(lastCreateFeedVisibilityDeltaCopiedFeedbackText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
                     }
 
                     if let fetchError {
@@ -851,6 +877,28 @@ struct FeedPlaceholderView: View {
         return "viewer=\(normalizedViewer) | feed_count=\(feedCount) | first_moment_id=\(firstMomentID)"
     }
 
+    private var quickFeedVisibilityDeltaSummaryLine: String {
+        let viewer = viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedViewer = viewer.isEmpty ? "(empty)" : viewer
+        let feedCount = momentRows.count
+        let firstMomentID = momentRows.first?.id ?? "(none)"
+
+        return "viewer=\(normalizedViewer) / feed_count=\(feedCount) / first_moment_id=\(firstMomentID)"
+    }
+
+    private var lastCreateFeedVisibilityDeltaCopiedFeedbackText: String? {
+        guard let lastCreateFeedVisibilityDeltaCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(lastCreateFeedVisibilityDeltaCopiedAt)
+        guard elapsed < 8 else {
+            return nil
+        }
+
+        return "Copied feed-visibility delta (\(Int(elapsed))s ago): \(lastCreateFeedVisibilityDeltaCopiedText)"
+    }
+
     private var resolvedQuickReactionUserID: String? {
         if let currentSessionUserID {
             return currentSessionUserID
@@ -1104,17 +1152,71 @@ struct FeedPlaceholderView: View {
         latestQuickReactionLog = fetchError
     }
 
+    private func copyQuickFeedVisibilityDeltaSummary() {
+        let normalizedText = quickFeedVisibilityDeltaSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "quick_feed_visibility_delta_empty"
+            return
+        }
+
+        guard copyToClipboard(normalizedText) else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        lastCreateFeedVisibilityDeltaCopiedText = normalizedText
+        lastCreateFeedVisibilityDeltaCopiedAt = Date()
+        statusMessage = "Copied quick feed visibility delta to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyLastCreateFeedVisibilityDeltaLine() {
+        guard let lastCreateFeedVisibilityDeltaLine else {
+            statusMessage = nil
+            fetchError = "last_create_feed_visibility_delta_missing"
+            return
+        }
+
+        let normalizedText = lastCreateFeedVisibilityDeltaLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "last_create_feed_visibility_delta_missing"
+            return
+        }
+
+        guard copyToClipboard(normalizedText) else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        lastCreateFeedVisibilityDeltaCopiedText = normalizedText
+        lastCreateFeedVisibilityDeltaCopiedAt = Date()
+        statusMessage = "Copied last create feed visibility delta to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyToClipboard(_ text: String) -> Bool {
+#if canImport(UIKit)
+        UIPasteboard.general.string = text
+        return true
+#else
+        return false
+#endif
+    }
+
     private func copyLatestQuickReactionLogToClipboard() {
         guard let latestQuickReactionLog else {
             return
         }
 
-#if canImport(UIKit)
-        UIPasteboard.general.string = latestQuickReactionLog
-        statusMessage = "qr:copied log"
-#else
-        statusMessage = "qr:copy_unavailable"
-#endif
+        if copyToClipboard(latestQuickReactionLog) {
+            statusMessage = "qr:copied log"
+        } else {
+            statusMessage = "qr:copy_unavailable"
+        }
     }
 
     private func clearLatestQuickReactionLog() {
@@ -1225,8 +1327,18 @@ struct FeedPlaceholderView: View {
             statusMessage = "Created moment \(createdMomentID). Reloading authored list..."
             await loadAuthoredMoments()
 
-            if !viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let trimmedViewerID = viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmedViewerID.isEmpty {
                 await loadPrivateFeed()
+                let firstMomentID = momentRows.first?.id ?? "(none)"
+                lastCreateFeedVisibilityDeltaLine = "created_moment_id=\(createdMomentID) / viewer=\(trimmedViewerID) / feed_count=\(momentRows.count) / first_moment_id=\(firstMomentID)"
+                statusMessage =
+                    "Created moment \(createdMomentID). Feed visibility delta: " +
+                    "viewer=\(trimmedViewerID) / feed_count=\(momentRows.count) / first_moment_id=\(firstMomentID)."
+            } else {
+                lastCreateFeedVisibilityDeltaLine = "created_moment_id=\(createdMomentID) / viewer=(empty) / feed_count=(not_loaded) / first_moment_id=(not_loaded)"
+                statusMessage =
+                    "Created moment \(createdMomentID). Set feed viewer UUID, then load private feed to verify visibility delta."
             }
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription

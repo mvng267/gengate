@@ -33,8 +33,10 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [items, setItems] = useState<MomentListItem[]>([]);
   const [feedItems, setFeedItems] = useState<MomentListItem[]>([]);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
+  const [lastCreateFeedVisibilityDeltaLine, setLastCreateFeedVisibilityDeltaLine] = useState<string | null>(null);
+  const [lastCopiedFeedVisibilityDeltaLine, setLastCopiedFeedVisibilityDeltaLine] = useState<string | null>(null);
   const momentPayloadQuickCopy = `author=${form.authorUserId.trim() || "(empty)"} | image_url=${form.imageStorageKey.trim() || "(empty)"} | caption=${form.captionText.trim() || "(empty)"}`;
-  const privateFeedQuickCopy = `viewer=${form.viewerUserId.trim() || "(empty)"} | feed_count=${feedItems.length} | first_moment_id=${feedItems[0]?.id ?? "(none)"}`;
+  const quickFeedVisibilityDeltaLine = `viewer=${form.viewerUserId.trim() || "(empty)"} / feed_count=${feedItems.length} / first_moment_id=${feedItems[0]?.id ?? "(none)"}`;
 
   useEffect(() => {
     setForm((current) => ({
@@ -103,6 +105,45 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     setIsLoadingFeed(false);
   }
 
+  async function copyToClipboard(text: string, statusPrefix: string, emptyCode: string, failedCode: string) {
+    const normalizedText = text.trim();
+    if (!normalizedText) {
+      setStatus(emptyCode);
+      return;
+    }
+
+    if (typeof navigator === "undefined" || typeof navigator.clipboard?.writeText !== "function") {
+      setStatus("quick_copy_clipboard_unavailable");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(normalizedText);
+      setLastCopiedFeedVisibilityDeltaLine(normalizedText);
+      setStatus(`${statusPrefix} (${normalizedText}).`);
+    } catch {
+      setStatus(failedCode);
+    }
+  }
+
+  async function handleCopyQuickFeedVisibilityDelta() {
+    await copyToClipboard(
+      quickFeedVisibilityDeltaLine,
+      "Copied quick feed-visibility delta to clipboard",
+      "quick_feed_visibility_delta_empty",
+      "quick_feed_visibility_delta_copy_failed",
+    );
+  }
+
+  async function handleCopyLastCreateFeedVisibilityDelta() {
+    await copyToClipboard(
+      lastCreateFeedVisibilityDeltaLine ?? "",
+      "Copied last create feed-visibility delta to clipboard",
+      "last_create_feed_visibility_delta_missing",
+      "last_create_feed_visibility_delta_copy_failed",
+    );
+  }
+
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
@@ -118,7 +159,38 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         imageHeight: Number(form.imageHeight),
       });
       setItems((current) => [created, ...current.filter((item) => item.id !== created.id)]);
-      setStatus(`Created moment ${created.id} with ${created.media_items.length} image item(s).`);
+
+      const viewerUserId = form.viewerUserId.trim();
+      if (!viewerUserId) {
+        const deltaLine = `created_moment_id=${created.id} / viewer=(empty) / feed_count=(not_loaded) / first_moment_id=(not_loaded)`;
+        setLastCreateFeedVisibilityDeltaLine(deltaLine);
+        setStatus(
+          `Created moment ${created.id} with ${created.media_items.length} image item(s). ` +
+            "Set feed viewer UUID, then reload private friend feed to verify visibility delta.",
+        );
+      } else {
+        try {
+          const nextFeedItems = await listPrivateFeed(viewerUserId);
+          setFeedItems(nextFeedItems);
+
+          const firstMomentId = nextFeedItems[0]?.id ?? "(none)";
+          const deltaLine =
+            `created_moment_id=${created.id} / viewer=${viewerUserId} / ` +
+            `feed_count=${nextFeedItems.length} / first_moment_id=${firstMomentId}`;
+          setLastCreateFeedVisibilityDeltaLine(deltaLine);
+
+          setStatus(
+            `Created moment ${created.id} with ${created.media_items.length} image item(s). ` +
+              `Feed visibility delta: viewer=${viewerUserId} / feed_count=${nextFeedItems.length} / first_moment_id=${firstMomentId}.`,
+          );
+        } catch (error) {
+          const deltaLine =
+            `created_moment_id=${created.id} / viewer=${viewerUserId} / ` +
+            "feed_count=(feed_reload_failed) / first_moment_id=(feed_reload_failed)";
+          setLastCreateFeedVisibilityDeltaLine(deltaLine);
+          setStatus(error instanceof Error ? error.message : "private_feed_failed_after_moment_create");
+        }
+      }
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "moment_shell_create_failed");
     }
@@ -166,8 +238,30 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         Quick copy payload: <code>{momentPayloadQuickCopy}</code>
       </p>
       <p>
-        Quick copy feed: <code>{privateFeedQuickCopy}</code>
+        Quick feed-visibility delta: <code>{quickFeedVisibilityDeltaLine}</code>
       </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickFeedVisibilityDelta()}>
+          Copy quick feed-visibility delta
+        </button>
+      </p>
+      {lastCreateFeedVisibilityDeltaLine ? (
+        <>
+          <p>
+            Last create feed-visibility delta: <code>{lastCreateFeedVisibilityDeltaLine}</code>
+          </p>
+          <p>
+            <button type="button" onClick={() => void handleCopyLastCreateFeedVisibilityDelta()}>
+              Copy last create feed-visibility delta
+            </button>
+          </p>
+        </>
+      ) : null}
+      {lastCopiedFeedVisibilityDeltaLine ? (
+        <p>
+          Last copied feed delta: <code>{lastCopiedFeedVisibilityDeltaLine}</code>
+        </p>
+      ) : null}
 
       <form onSubmit={(event) => void handleCreate(event)}>
         <label>
