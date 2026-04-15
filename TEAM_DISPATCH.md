@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 366
-- Trục công việc: notifications shell (web) — add quick-copy lifecycle snapshot audit line for deterministic parity report (`pair markers + create/mutation IDs + unread summary + paging window`).
-- Trạng thái: batch366_complete_web_notification_lifecycle_snapshot_audit_quick_copy.
+- Batch workflow chính thức hiện tại: 367
+- Trục công việc: notifications shell (iOS) — add quick-copy lifecycle snapshot audit line for deterministic parity report (`pair markers + create/mutation IDs + unread summary + paging window`).
+- Trạng thái: batch367_complete_ios_notification_lifecycle_snapshot_audit_quick_copy.
+
+## Batch 367 handoff (closed)
+- Batch vừa xong: **367**
+- Commit đã chốt:
+  - `fd6b95f` — `batch367: add lifecycle snapshot audit quick copy in ios notification shell`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **368**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notifications slice tiếp theo theo workflow dispatch lane.
 
 ## Batch 366 handoff (closed)
 - Batch vừa xong: **366**

@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 366
+- Batch: 367
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 366 notifications shell (web) — add one-tap quick-copy `lifecycle snapshot audit` line để report deterministic notification lifecycle state (`pair markers + create/mutation IDs + unread summary + paging window`) cho parity đối chiếu backend + web + iOS.
+- Scope: batch 367 notifications shell (iOS) — add one-tap quick-copy `lifecycle snapshot audit` line để report deterministic notification lifecycle state (`pair markers + create/mutation IDs + unread summary + paging window`) cho parity đối chiếu backend + web + iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -14,17 +14,21 @@
   - Web Inbox (`/inbox`): nhập user A/B (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread`, hoặc bấm `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> `Open direct thread` -> nhập message text -> bấm `Use current session user as sender + keep user_a/user_b pair + send` và verify status có marker `user_pair_source=kept_user_a+user_b` + `sender_source=session_user` -> bấm `Copy quick sender keep-pair marker` để verify payload marker riêng -> bấm `Copy quick sender keep-pair + send result bundle` để verify payload bundle dạng `sender_keep_pair_marker={...} | send_result={sender=... | message_id=...}` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
   - iOS Inbox: nhập User A/B (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread`, hoặc bấm `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> `Load inbox thread` -> nhập message text -> bấm `Use current session user as sender + keep user_a/user_b pair + send` và verify status có marker `user_pair_source=kept_user_a+user_b` + `sender_source=session_user` -> bấm `Copy quick sender keep-pair marker` để verify payload marker riêng -> bấm `Copy quick sender keep-pair + send result bundle` để verify payload bundle dạng `sender_keep_pair_marker={...} | send_result={sender=... | message_id=...}` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`.
-  - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`.
+  - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`.
 - Files:
-  - apps/web-nextjs/components/notification-shell.tsx
+  - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
 - Test:
-  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `2260dea` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
-  - previous feature commit: `81d7832` — `batch365: add unread lifecycle mutation bundle quick copy in ios notification shell`
+  - latest feature commit: `fd6b95f` — `batch367: add lifecycle snapshot audit quick copy in ios notification shell`
+  - previous feature commit: `2260dea` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
   - working tree: clean
 - Blocker: none
-- Next: mở batch367 với 1 slice hẹp notifications parity (iOS) — thêm quick-copy lifecycle snapshot audit line để one-tap parity payload với web batch366.
+- Next: mở batch368 với 1 slice hẹp notifications doc parity refresh + dispatch sang lane kế tiếp theo workflow.
+- Batch 367 handoff:
+  - `fd6b95f` — `batch367: add lifecycle snapshot audit quick copy in ios notification shell`
+  - iOS notifications shell thêm line + action copy `Quick lifecycle snapshot audit`.
+  - payload format: `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`.
 - Batch 366 handoff:
   - `2260dea` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
   - web notifications shell thêm line + action copy `Quick lifecycle snapshot audit`.
