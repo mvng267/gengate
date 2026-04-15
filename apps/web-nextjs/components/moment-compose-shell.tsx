@@ -174,6 +174,27 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     setStatus("Applied current session user as create author (author_source=session_user).");
   }
 
+  async function handleApplyCurrentSessionUserAsAuthorCreateAndReloadFeed() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_author_missing_for_quick_apply");
+      return;
+    }
+
+    const draftAuthorUserId = form.authorUserId.trim();
+    const sourceStatus =
+      draftAuthorUserId === sessionUserId
+        ? "Create author already matches current session user (author_source=session_user)."
+        : "Applied current session user as create author (author_source=session_user).";
+
+    setForm((current) => ({
+      ...current,
+      authorUserId: sessionUserId,
+    }));
+
+    await submitMomentCreateFlow(sessionUserId, sourceStatus);
+  }
+
   async function applyCurrentSessionUserAsViewerAndLoad() {
     const sessionUserId = currentSessionUserId.trim();
     if (!sessionUserId) {
@@ -406,14 +427,16 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     );
   }
 
-  async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function submitMomentCreateFlow(authorUserId: string, sourceStatusPrefix?: string) {
+    const composeStatus = (message: string) =>
+      sourceStatusPrefix ? `${sourceStatusPrefix} ${message}` : message;
+
     setIsSubmitting(true);
-    setStatus("Creating moment + image shell...");
+    setStatus(composeStatus("Creating moment + image shell..."));
 
     try {
       const created = await createMomentWithImage({
-        authorUserId: form.authorUserId.trim(),
+        authorUserId,
         captionText: form.captionText.trim(),
         imageStorageKey: form.imageStorageKey.trim(),
         imageMimeType: form.imageMimeType.trim(),
@@ -429,9 +452,11 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         setFeedVisibilityGateSnapshotSource("create_flow");
         const gateSummary = buildFeedVisibilityGateSummary("", [], "create_flow");
         setStatus(
-          `Created moment ${created.id} with ${created.media_items.length} image item(s). ` +
-            "Set feed viewer UUID, then reload private friend feed to verify visibility delta. " +
-            `Gate summary: ${gateSummary.summaryLine}.`,
+          composeStatus(
+            `Created moment ${created.id} with ${created.media_items.length} image item(s). ` +
+              "Set feed viewer UUID, then reload private friend feed to verify visibility delta. " +
+              `Gate summary: ${gateSummary.summaryLine}.`,
+          ),
         );
       } else {
         try {
@@ -447,23 +472,32 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
           setFeedVisibilityGateSnapshotSource("create_flow");
           const gateSummary = buildFeedVisibilityGateSummary(viewerUserId, nextFeedItems, "create_flow").summaryLine;
           setStatus(
-            `Created moment ${created.id} with ${created.media_items.length} image item(s). ` +
-              `Feed visibility delta: viewer=${viewerUserId} / feed_count=${nextFeedItems.length} / first_moment_id=${firstMomentId}. ` +
-              `Feed visibility gate summary: ${gateSummary}.`,
+            composeStatus(
+              `Created moment ${created.id} with ${created.media_items.length} image item(s). ` +
+                `Feed visibility delta: viewer=${viewerUserId} / feed_count=${nextFeedItems.length} / first_moment_id=${firstMomentId}. ` +
+                `Feed visibility gate summary: ${gateSummary}.`,
+            ),
           );
         } catch (error) {
           const deltaLine =
             `created_moment_id=${created.id} / viewer=${viewerUserId} / ` +
             "feed_count=(feed_reload_failed) / first_moment_id=(feed_reload_failed)";
           setLastCreateFeedVisibilityDeltaLine(deltaLine);
-          setStatus(error instanceof Error ? error.message : "private_feed_failed_after_moment_create");
+          const fallbackStatus = error instanceof Error ? error.message : "private_feed_failed_after_moment_create";
+          setStatus(composeStatus(fallbackStatus));
         }
       }
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "moment_shell_create_failed");
+      const fallbackStatus = error instanceof Error ? error.message : "moment_shell_create_failed";
+      setStatus(composeStatus(fallbackStatus));
     }
 
     setIsSubmitting(false);
+  }
+
+  async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await submitMomentCreateFlow(form.authorUserId.trim());
   }
 
   async function handleReload() {
@@ -709,6 +743,13 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         </label>
         <button type="button" onClick={applyCurrentSessionUserAsAuthor} disabled={currentSessionUserId.trim().length === 0 || isSubmitting}>
           Use current session user as create author
+        </button>
+        <button
+          type="button"
+          onClick={() => void handleApplyCurrentSessionUserAsAuthorCreateAndReloadFeed()}
+          disabled={currentSessionUserId.trim().length === 0 || isSubmitting || isDeleting || isLoadingFeed}
+        >
+          Use current session user as author + create moment + reload feed
         </button>
         <label>
           Feed viewer UUID

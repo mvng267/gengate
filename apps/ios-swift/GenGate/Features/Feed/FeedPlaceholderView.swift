@@ -123,6 +123,14 @@ struct FeedPlaceholderView: View {
                     .buttonStyle(.bordered)
                     .disabled(currentSessionUserID == nil || isCreatingMoment)
 
+                    Button("Use current session user as author + create moment + reload feed") {
+                        Task {
+                            await applyCurrentSessionUserAsAuthorCreateAndReloadFeed()
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(currentSessionUserID == nil || isCreatingMoment || isLoading || isDeletingMoment)
+
                     Button {
                         Task {
                             await loadPrivateFeed()
@@ -1251,6 +1259,32 @@ struct FeedPlaceholderView: View {
         fetchError = nil
     }
 
+    private func applyCurrentSessionUserAsAuthorCreateAndReloadFeed() async {
+        guard let currentSessionUserID else {
+            statusMessage = nil
+            fetchError = "session_author_missing_for_quick_apply"
+            return
+        }
+
+        let trimmedSessionUserID = currentSessionUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedSessionUserID.isEmpty else {
+            statusMessage = nil
+            fetchError = "session_author_missing_for_quick_apply"
+            return
+        }
+
+        let trimmedAuthorDraft = normalizedAuthorUserIDDraft
+        let sourceStatus: String
+        if trimmedAuthorDraft == trimmedSessionUserID {
+            sourceStatus = "Create author already matches current session user (author_source=session_user)."
+        } else {
+            authorUserIDDraft = trimmedSessionUserID
+            sourceStatus = "Applied current session user as create author (author_source=session_user)."
+        }
+
+        await createMomentWithImage(statusPrefix: sourceStatus)
+    }
+
     private func fillReactionFromLatestMoment() {
         guard let latestLoadedMomentID else {
             return
@@ -1785,7 +1819,14 @@ struct FeedPlaceholderView: View {
         isLoadingAuthoredMoments = false
     }
 
-    private func createMomentWithImage() async {
+    private func createMomentWithImage(statusPrefix: String? = nil) async {
+        let composeStatus: (String) -> String = { message in
+            guard let statusPrefix, !statusPrefix.isEmpty else {
+                return message
+            }
+            return "\(statusPrefix) \(message)"
+        }
+
         let trimmedAuthorID = authorUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedCaption = captionDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedStorageKey = imageStorageKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -1810,6 +1851,7 @@ struct FeedPlaceholderView: View {
 
         isCreatingMoment = true
         fetchError = nil
+        statusMessage = composeStatus("Creating moment + image shell...")
 
         do {
             let createdMomentID = try await PrivateFeedAPIClient().createMomentWithImage(
@@ -1823,7 +1865,7 @@ struct FeedPlaceholderView: View {
 
             captionDraft = ""
             reactionTargetMomentIDDraft = createdMomentID
-            statusMessage = "Created moment \(createdMomentID). Reloading authored list..."
+            statusMessage = composeStatus("Created moment \(createdMomentID). Reloading authored list...")
             await loadAuthoredMoments()
 
             let trimmedViewerID = viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -1833,20 +1875,23 @@ struct FeedPlaceholderView: View {
                 lastCreateFeedVisibilityDeltaLine = "created_moment_id=\(createdMomentID) / viewer=\(trimmedViewerID) / feed_count=\(momentRows.count) / first_moment_id=\(firstMomentID)"
                 feedVisibilityGateSnapshotSource = "create_flow"
                 let gateSummary = buildFeedVisibilityGateSummary(viewerRawID: trimmedViewerID, rows: momentRows, snapshotSource: "create_flow")
-                statusMessage =
+                statusMessage = composeStatus(
                     "Created moment \(createdMomentID). Feed visibility delta: " +
                     "viewer=\(trimmedViewerID) / feed_count=\(momentRows.count) / first_moment_id=\(firstMomentID). " +
                     "Feed visibility gate summary: \(gateSummary.summaryLine)."
+                )
             } else {
                 lastCreateFeedVisibilityDeltaLine = "created_moment_id=\(createdMomentID) / viewer=(empty) / feed_count=(not_loaded) / first_moment_id=(not_loaded)"
                 feedVisibilityGateSnapshotSource = "create_flow"
                 let gateSummary = buildFeedVisibilityGateSummary(viewerRawID: "", rows: [], snapshotSource: "create_flow")
-                statusMessage =
+                statusMessage = composeStatus(
                     "Created moment \(createdMomentID). Set feed viewer UUID, then load private feed to verify visibility delta. " +
                     "Gate summary: \(gateSummary.summaryLine)."
+                )
             }
         } catch {
-            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            let errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            fetchError = composeStatus(errorMessage)
         }
 
         isCreatingMoment = false
