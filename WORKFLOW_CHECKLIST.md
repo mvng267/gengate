@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **307 — feed shell (web+iOS gate snapshot source marker cho create-vs-reload parity) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **308 — feed shell (web delete moment parity action + quick delete summary) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,27 +89,26 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **307**
-- Scope hiện tại: feed shell (web+iOS) — thêm marker `gate_snapshot_source=create_flow|reload_flow` vào feed visibility gate summary để parity create-vs-reload rõ ràng hơn.
+- Batch workflow chính thức hiện tại: **308**
+- Scope hiện tại: feed shell (web) — thêm delete moment parity action (`DELETE /moments/{id}`) + quick delete summary để verify vòng create->delete ngay trên web.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
+  - `apps/web-nextjs/lib/moments/client.ts`
   - `apps/web-nextjs/components/moment-compose-shell.tsx`
-  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
-  - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `e7d337d` — `batch307: add gate snapshot source markers for feed parity`
-  - commit liền trước: `09c44f2` — `batch306: add feed visibility reason markers in status and quick copy`
+  - commit gần nhất đã chốt: `6091c72` — `batch308: add web feed delete moment parity shell`
+  - commit liền trước: `e7d337d` — `batch307: add gate snapshot source markers for feed parity`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch308 với 1 slice hẹp feed shell phía web: thêm delete moment action parity (`DELETE /moments/{id}`) + status summary để human tester verify vòng create->delete trên web mà không cần fallback sang iOS.
+  - mở batch309 với 1 slice hẹp feed shell phía iOS: mirror delete-result quick summary marker parity (`delete_result/moment_id/deleted_at/author_loaded_count/feed_match_count`) để web+iOS create->delete report cùng format.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
-  - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Bấm `Copy quick feed visibility gate summary` và `Copy last create feed-visibility delta` để paste kiểm tra payload đúng format.
-  - iOS Feed: set `Author user UUID` + `Viewer user UUID` -> `Create moment + image` -> `Reload private feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Bấm `Copy quick feed visibility gate summary` và `Copy last create feed visibility delta` để paste kiểm tra payload đúng format.
+  - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=...`.
+  - iOS Feed: set `Author user UUID` + `Viewer user UUID` -> `Create moment + image` -> `Reload private feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`.
   - Web Location (`/location`): nhập owner/share -> `Reload counts` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - iOS Location: nhập owner/share -> `Load location status` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - Web Friend graph (`/profile`): load snapshot -> bấm `Accept` hoặc `Reject` trên inbound pending request -> verify status hiển thị `accepted_count/pending_inbound/pending_outbound`; bấm `Copy quick delta summary` hoặc `Copy last action delta` và paste kiểm tra payload đúng format.
@@ -118,6 +117,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
 
 ## Batch handoff note
+
+- Batch vừa xong: **308**
+- Commit cuối đã chốt:
+  - `6091c72` — `batch308: add web feed delete moment parity shell`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **309**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell phía iOS: mirror delete-result quick summary marker parity (`delete_result/moment_id/deleted_at/author_loaded_count/feed_match_count`) để report đồng format với web.
+
+---
 
 - Batch vừa xong: **307**
 - Commit cuối đã chốt:

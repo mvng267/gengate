@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 307
-- Trục công việc: feed shell — web+iOS add gate snapshot source marker `gate_snapshot_source=create_flow|reload_flow` vào gate summary payload.
-- Trạng thái: batch307_complete_feed_gate_snapshot_source_web_ios.
+- Batch workflow chính thức hiện tại: 308
+- Trục công việc: feed shell — web add delete moment parity action (`DELETE /moments/{id}`) + quick delete summary để verify create->delete trực tiếp trên web.
+- Trạng thái: batch308_complete_feed_web_delete_parity_shell.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 308 handoff (closed)
+- Batch vừa xong: **308**
+- Commit đã chốt:
+  - `6091c72` — `batch308: add web feed delete moment parity shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **309**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell phía iOS: mirror delete-result quick summary marker parity (`delete_result/moment_id/deleted_at/author_loaded_count/feed_match_count`) để report đồng format với web.
 
 ## Batch 307 handoff (closed)
 - Batch vừa xong: **307**

@@ -1,13 +1,13 @@
 # GenGate Workflow Status
 
-- Batch: 307
+- Batch: 308
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 307 feed shell — add web+iOS gate snapshot source marker (`gate_snapshot_source=create_flow|reload_flow`) into feed visibility gate summary for clearer create-vs-reload parity diagnosis in seam #3 private friend feed.
+- Scope: batch 308 feed shell (web) — add delete moment parity action (`DELETE /moments/{id}`) + quick delete summary for create->delete verification without iOS fallback in seam #3 private friend feed.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
-  - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Bấm `Copy quick feed visibility gate summary` và `Copy last create feed-visibility delta` để paste kiểm tra payload đúng format.
+  - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=...`.
   - iOS Feed: set `Author user UUID` + `Viewer user UUID` -> `Create moment + image` -> `Reload private feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Bấm `Copy quick feed visibility gate summary` và `Copy last create feed visibility delta` để paste kiểm tra payload đúng format.
   - Web Location (`/location`): nhập owner/share -> `Reload counts` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - iOS Location: nhập owner/share -> `Load location status` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
@@ -16,17 +16,16 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
+  - apps/web-nextjs/lib/moments/client.ts
   - apps/web-nextjs/components/moment-compose-shell.tsx
-  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `e7d337d` — `batch307: add gate snapshot source markers for feed parity`
-  - previous feature commit: `09c44f2` — `batch306: add feed visibility reason markers in status and quick copy`
-  - working tree: clean after batch307 feature + workflow sync commits
+  - latest feature commit: `6091c72` — `batch308: add web feed delete moment parity shell`
+  - previous feature commit: `e7d337d` — `batch307: add gate snapshot source markers for feed parity`
+  - working tree: clean after batch308 feature + workflow sync commits
 - Blocker: none
-- Next: mở batch308 với 1 slice hẹp feed shell phía web — thêm delete moment action parity (`DELETE /moments/{id}`) + status summary để human tester verify vòng create->delete trên web mà không cần fallback sang iOS.
+- Next: mở batch309 với 1 slice hẹp feed shell phía iOS — mirror delete-result quick summary marker parity (`delete_result/moment_id/deleted_at/author_loaded_count/feed_match_count`) để web+iOS create->delete report cùng format.
 - Batch 295 handoff:
   - `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
   - web friend graph shell thêm reject action parity + quick delta summary line + last action delta (`request_id/action/accepted_count/pending_inbound/pending_outbound`) và nút copy.
