@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 336
+- Batch: 337
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 336 notification shell (iOS) — add quick action `Use current session user + create notification + load` for one-tap create→load lifecycle smoke path parity.
+- Scope: batch 337 notification shell (iOS) — add payload JSON input + validation marker `notification_payload_json_invalid` for create-flow parity với web notification shell.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -20,11 +20,16 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `5c925e2` — `batch336: add session-user create-and-load quick action in ios notification shell`
-  - previous feature commit: `012ebe9` — `batch335: add session-user create-and-load quick action in web notification shell`
+  - latest feature commit: `20cdb3f` — `batch337: add payload-json validation marker in ios notification shell`
+  - previous feature commit: `5c925e2` — `batch336: add session-user create-and-load quick action in ios notification shell`
   - working tree: clean
 - Blocker: none
-- Next: mở batch337 với 1 slice hẹp notification shell (iOS): thêm payload JSON input + validation marker `notification_payload_json_invalid` để parity guard với web create flow.
+- Next: mở batch338 với 1 slice hẹp friend graph shell (iOS): thêm quick action `Use current session user as requester + keep receiver + send friend request` để one-tap send path parity với các session-user quick action khác.
+- Batch 337 handoff:
+  - `20cdb3f` — `batch337: add payload-json validation marker in ios notification shell`
+  - iOS notification shell thêm input `Payload JSON` cho create flow; parse JSON object trước khi create để parity với web payload_json contract.
+  - invalid JSON/object/value type trả marker `notification_payload_json_invalid`; khi để trống `Payload JSON` vẫn fallback payload legacy `source/message` để giữ smoke path nhanh.
+  - `NotificationsAPIClient` create request chuyển sang encode `payload_json` typed value (string/int/bool/double/object/array/null) để gửi nested JSON hợp lệ.
 - Batch 336 handoff:
   - `5c925e2` — `batch336: add session-user create-and-load quick action in ios notification shell`
   - iOS notification shell thêm one-tap action `Use current session user + create notification + load`; action auto-apply user từ current session, create notification, rồi reload page đầu trong cùng thao tác.
