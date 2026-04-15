@@ -195,6 +195,34 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     await submitMomentCreateFlow(sessionUserId, sourceStatus);
   }
 
+  async function handleApplyCurrentSessionUserAsViewerAuthorCreateAndReloadFeed() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_user_missing_for_quick_apply");
+      return;
+    }
+
+    const draftAuthorUserId = form.authorUserId.trim();
+    const draftViewerUserId = form.viewerUserId.trim();
+
+    const authorStatus =
+      draftAuthorUserId === sessionUserId
+        ? "Create author already matches current session user (author_source=session_user)."
+        : "Applied current session user as create author (author_source=session_user).";
+    const viewerStatus =
+      draftViewerUserId === sessionUserId
+        ? "Viewer already matches current session user (viewer_source=session_user)."
+        : "Applied current session user as feed viewer (viewer_source=session_user).";
+
+    setForm((current) => ({
+      ...current,
+      authorUserId: sessionUserId,
+      viewerUserId: sessionUserId,
+    }));
+
+    await submitMomentCreateFlow(sessionUserId, `${authorStatus} ${viewerStatus}`, sessionUserId);
+  }
+
   async function applyCurrentSessionUserAsViewerAndLoad() {
     const sessionUserId = currentSessionUserId.trim();
     if (!sessionUserId) {
@@ -427,7 +455,11 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     );
   }
 
-  async function submitMomentCreateFlow(authorUserId: string, sourceStatusPrefix?: string) {
+  async function submitMomentCreateFlow(
+    authorUserId: string,
+    sourceStatusPrefix?: string,
+    viewerUserIdOverride?: string,
+  ) {
     const composeStatus = (message: string) =>
       sourceStatusPrefix ? `${sourceStatusPrefix} ${message}` : message;
 
@@ -445,7 +477,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       });
       setItems((current) => [created, ...current.filter((item) => item.id !== created.id)]);
 
-      const viewerUserId = form.viewerUserId.trim();
+      const viewerUserId = viewerUserIdOverride?.trim() ?? form.viewerUserId.trim();
       if (!viewerUserId) {
         const deltaLine = `created_moment_id=${created.id} / viewer=(empty) / feed_count=(not_loaded) / first_moment_id=(not_loaded)`;
         setLastCreateFeedVisibilityDeltaLine(deltaLine);
@@ -750,6 +782,13 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
           disabled={currentSessionUserId.trim().length === 0 || isSubmitting || isDeleting || isLoadingFeed}
         >
           Use current session user as author + create moment + reload feed
+        </button>
+        <button
+          type="button"
+          onClick={() => void handleApplyCurrentSessionUserAsViewerAuthorCreateAndReloadFeed()}
+          disabled={currentSessionUserId.trim().length === 0 || isSubmitting || isDeleting || isLoadingFeed}
+        >
+          Use current session user as viewer + author + create moment + reload feed
         </button>
         <label>
           Feed viewer UUID

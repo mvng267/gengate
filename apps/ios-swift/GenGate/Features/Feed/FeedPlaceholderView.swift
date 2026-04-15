@@ -131,6 +131,14 @@ struct FeedPlaceholderView: View {
                     .buttonStyle(.bordered)
                     .disabled(currentSessionUserID == nil || isCreatingMoment || isLoading || isDeletingMoment)
 
+                    Button("Use current session user as viewer + author + create moment + reload feed") {
+                        Task {
+                            await applyCurrentSessionUserAsViewerAuthorCreateAndReloadFeed()
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(currentSessionUserID == nil || isCreatingMoment || isLoading || isDeletingMoment)
+
                     Button {
                         Task {
                             await loadPrivateFeed()
@@ -974,6 +982,10 @@ struct FeedPlaceholderView: View {
         authorUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    private var normalizedViewerUserIDDraft: String {
+        viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     private var normalizedDeleteMomentIDDraft: String {
         deleteMomentIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -1283,6 +1295,44 @@ struct FeedPlaceholderView: View {
         }
 
         await createMomentWithImage(statusPrefix: sourceStatus)
+    }
+
+    private func applyCurrentSessionUserAsViewerAuthorCreateAndReloadFeed() async {
+        guard let currentSessionUserID else {
+            statusMessage = nil
+            fetchError = "session_user_missing_for_quick_apply"
+            return
+        }
+
+        let trimmedSessionUserID = currentSessionUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedSessionUserID.isEmpty else {
+            statusMessage = nil
+            fetchError = "session_user_missing_for_quick_apply"
+            return
+        }
+
+        let trimmedAuthorDraft = normalizedAuthorUserIDDraft
+        let trimmedViewerDraft = normalizedViewerUserIDDraft
+
+        let authorStatus: String
+        if trimmedAuthorDraft == trimmedSessionUserID {
+            authorStatus = "Create author already matches current session user (author_source=session_user)."
+        } else {
+            authorStatus = "Applied current session user as create author (author_source=session_user)."
+        }
+
+        let viewerStatus: String
+        if trimmedViewerDraft == trimmedSessionUserID {
+            viewerStatus = "Viewer already matches current session user (viewer_source=session_user)."
+        } else {
+            viewerStatus = "Applied current session user as feed viewer (viewer_source=session_user)."
+        }
+
+        authorUserIDDraft = trimmedSessionUserID
+        viewerUserIDDraft = trimmedSessionUserID
+        fetchError = nil
+
+        await createMomentWithImage(statusPrefix: "\(authorStatus) \(viewerStatus)", viewerUserIDOverride: trimmedSessionUserID)
     }
 
     private func fillReactionFromLatestMoment() {
@@ -1819,7 +1869,7 @@ struct FeedPlaceholderView: View {
         isLoadingAuthoredMoments = false
     }
 
-    private func createMomentWithImage(statusPrefix: String? = nil) async {
+    private func createMomentWithImage(statusPrefix: String? = nil, viewerUserIDOverride: String? = nil) async {
         let composeStatus: (String) -> String = { message in
             guard let statusPrefix, !statusPrefix.isEmpty else {
                 return message
@@ -1868,7 +1918,7 @@ struct FeedPlaceholderView: View {
             statusMessage = composeStatus("Created moment \(createdMomentID). Reloading authored list...")
             await loadAuthoredMoments()
 
-            let trimmedViewerID = viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedViewerID = (viewerUserIDOverride ?? viewerUserIDDraft).trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmedViewerID.isEmpty {
                 await loadPrivateFeed()
                 let firstMomentID = momentRows.first?.id ?? "(none)"
