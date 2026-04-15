@@ -334,7 +334,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     await sendMessageWithCurrentSender();
   }
 
-  async function applyCurrentSessionUserAsSenderAndSend() {
+  async function applyCurrentSessionUserAsSenderKeepPairAndSend() {
     const sessionUserId = currentSessionUserId.trim();
     if (!sessionUserId) {
       setStatus("session_sender_missing_for_quick_apply");
@@ -346,10 +346,12 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       return;
     }
 
-    const senderStatus =
-      form.senderUserId.trim() === sessionUserId
-        ? "Sender already matches current session user (sender_source=session_user)."
-        : "Applied current session user as sender (sender_source=session_user).";
+    const userAId = form.userAId.trim();
+    const userBId = form.userBId.trim();
+    const pairIncludesSessionUser = userAId === sessionUserId || userBId === sessionUserId;
+    const senderStatus = pairIncludesSessionUser
+      ? "Current pair already includes current session user; kept User A + User B as-is (user_pair_source=kept_user_a+user_b). Using session sender (sender_source=session_user)."
+      : "Kept User A + User B as-is (user_pair_source=kept_user_a+user_b). Applied current session user as sender (sender_source=session_user).";
 
     setForm((current) => ({
       ...current,
@@ -1108,10 +1110,10 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
         </label>
         <button
           type="button"
-          onClick={() => void applyCurrentSessionUserAsSenderAndSend()}
+          onClick={() => void applyCurrentSessionUserAsSenderKeepPairAndSend()}
           disabled={isSending || !conversation || currentSessionUserId.trim().length === 0}
         >
-          Use current session user as sender + send
+          Use current session user as sender + keep user_a/user_b pair + send
         </button>
         <button type="submit" disabled={isSending || !conversation}>
           {isSending ? "Sending..." : "Send text message"}
