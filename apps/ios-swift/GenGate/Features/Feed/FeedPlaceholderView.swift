@@ -25,6 +25,7 @@ struct FeedPlaceholderView: View {
     @State private var fetchError: String?
     @State private var latestQuickReactionLog: String?
     @State private var lastCreateFeedVisibilityDeltaLine: String?
+    @State private var lastDeletedMomentSummaryLine: String?
     @State private var feedVisibilityGateSnapshotSource: String = "reload_flow"
     @State private var lastCreateFeedVisibilityDeltaCopiedAt: Date?
     @State private var lastCreateFeedVisibilityDeltaCopiedText: String = ""
@@ -351,6 +352,18 @@ struct FeedPlaceholderView: View {
                         Text(lastCreateFeedVisibilityDeltaCopiedFeedbackText)
                             .font(.footnote)
                             .foregroundStyle(.secondary)
+                    }
+
+                    Text("Quick delete parity summary: \(quickDeleteParitySummaryLine)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+
+                    if let lastDeletedMomentSummaryLine {
+                        Text("Last delete result summary: \(lastDeletedMomentSummaryLine)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
                     }
 
                     if let fetchError {
@@ -923,6 +936,11 @@ struct FeedPlaceholderView: View {
             rows: momentRows,
             snapshotSource: feedVisibilityGateSnapshotSource
         ).summaryLine
+    }
+
+    private var quickDeleteParitySummaryLine: String {
+        let normalizedDeleteMomentID = normalizedDeleteMomentIDDraft.isEmpty ? "(empty)" : normalizedDeleteMomentIDDraft
+        return "delete_moment_id=\(normalizedDeleteMomentID) / authored_count=\(authoredMomentRows.count) / feed_count=\(momentRows.count) / gate_snapshot_source=\(feedVisibilityGateSnapshotSource)"
     }
 
     private var lastCreateFeedVisibilityDeltaCopiedFeedbackText: String? {
@@ -1503,16 +1521,28 @@ struct FeedPlaceholderView: View {
         case row
     }
 
+    private func buildDeleteMomentSummary(_ deleted: PrivateFeedMomentDeleteResult) -> String {
+        let normalizedDeletedAt = deleted.deleted_at?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let deletedAt = (normalizedDeletedAt?.isEmpty == false) ? normalizedDeletedAt! : "(none)"
+        let authorLoadedCount = authoredMomentRows.filter { $0.authorID == deleted.author_user_id }.count
+        let feedMatchCount = momentRows.filter { $0.id == deleted.id }.count
+
+        return "delete_result=deleted / moment_id=\(deleted.id) / author_user_id=\(deleted.author_user_id) / deleted_at=\(deletedAt) / author_loaded_count=\(authorLoadedCount) / feed_match_count=\(feedMatchCount)"
+    }
+
     private func performDeleteMoment(momentID: String, origin: DeleteMomentOrigin) async {
         isDeletingMoment = true
         deleteMomentIDInFlight = origin == .row ? momentID : nil
         fetchError = nil
 
         do {
-            _ = try await PrivateFeedAPIClient().deleteMoment(momentID: momentID)
+            let deleted = try await PrivateFeedAPIClient().deleteMoment(momentID: momentID)
+            let deletedSummary = buildDeleteMomentSummary(deleted)
+
             statusMessage = origin == .row
                 ? "Deleted moment \(momentID) from row action. Reloading lists..."
                 : "Deleted moment \(momentID). Reloading lists..."
+            lastDeletedMomentSummaryLine = deletedSummary
 
             if reactionTargetMomentIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == momentID {
                 reactionTargetMomentIDDraft = ""
@@ -1526,6 +1556,8 @@ struct FeedPlaceholderView: View {
             if !authorUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 await loadAuthoredMoments()
             }
+
+            statusMessage = "Deleted moment \(momentID). \(deletedSummary)."
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
@@ -1551,6 +1583,12 @@ private struct MomentReactionRow: Identifiable {
     let reactionType: String
 }
 
+private struct PrivateFeedMomentDeleteResult: Decodable {
+    let id: String
+    let author_user_id: String
+    let deleted_at: String?
+}
+
 private struct PrivateFeedAPIClient {
     private struct MomentListResponse: Decodable {
         let count: Int
@@ -1561,6 +1599,7 @@ private struct PrivateFeedAPIClient {
         let id: String
         let caption_text: String?
         let visibility_scope: String
+        let deleted_at: String?
         let author: MomentAuthorSummary
         let media_items: [MomentMediaItem]
     }
@@ -1723,7 +1762,7 @@ private struct PrivateFeedAPIClient {
         }
     }
 
-    func deleteMoment(momentID: String) async throws -> PrivateFeedMomentRow {
+    func deleteMoment(momentID: String) async throws -> PrivateFeedMomentDeleteResult {
         var request = URLRequest(url: try makeURL(path: "/moments/\(momentID)"))
         request.httpMethod = "DELETE"
 
@@ -1735,16 +1774,7 @@ private struct PrivateFeedAPIClient {
         }
 
         do {
-            let payload = try JSONDecoder().decode(MomentListItem.self, from: data)
-            return PrivateFeedMomentRow(
-                id: payload.id,
-                authorID: payload.author.id,
-                authorLabel: payload.author.username ?? payload.author.email,
-                caption: payload.caption_text ?? "(no caption)",
-                visibilityScope: payload.visibility_scope,
-                mediaCount: payload.media_items.count,
-                firstMediaKey: payload.media_items.first?.storage_key
-            )
+            return try JSONDecoder().decode(PrivateFeedMomentDeleteResult.self, from: data)
         } catch {
             throw APIError.invalidResponse
         }

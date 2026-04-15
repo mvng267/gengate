@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 308
-- Trục công việc: feed shell — web add delete moment parity action (`DELETE /moments/{id}`) + quick delete summary để verify create->delete trực tiếp trên web.
-- Trạng thái: batch308_complete_feed_web_delete_parity_shell.
+- Batch workflow chính thức hiện tại: 309
+- Trục công việc: feed shell — iOS mirror delete-result quick summary marker parity (`delete_result/moment_id/deleted_at/author_loaded_count/feed_match_count`) để verify create->delete đồng format với web.
+- Trạng thái: batch309_complete_feed_ios_delete_parity_shell.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 309 handoff (closed)
+- Batch vừa xong: **309**
+- Commit đã chốt:
+  - `d5ddf9e` — `batch309: add ios feed delete parity summary markers`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **310**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell (web+iOS): thêm quick-copy action cho `Quick delete parity summary` + `Last delete result summary` để report create->delete tokens nhanh hơn.
 
 ## Batch 308 handoff (closed)
 - Batch vừa xong: **308**
