@@ -247,6 +247,17 @@ struct InboxPlaceholderView: View {
 
                     Button {
                         Task {
+                            await applyCurrentSessionUserAsUserAUserBAndOpenDirectThread()
+                        }
+                    } label: {
+                        Text(isLoading ? "Applying session user + loading..." : "Use current session user as user_a + user_b + open direct thread")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(isLoading || currentSessionUserID == nil)
+
+                    Button {
+                        Task {
                             await loadInboxThread()
                         }
                     } label: {
@@ -3204,6 +3215,33 @@ use_when=\(useWhenText)
         userAIDDraft = currentSessionUserID
     }
 
+    private func applyCurrentSessionUserAsUserAUserBAndOpenDirectThread() async {
+        guard let currentSessionUserID else {
+            sendStatusHint = "session_user_missing_for_quick_apply"
+            return
+        }
+
+        let trimmedCurrentSessionUserID = currentSessionUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentUserAID = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentUserBID = userBIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let pairStatus: String
+        if currentUserAID == trimmedCurrentSessionUserID, currentUserBID == trimmedCurrentSessionUserID {
+            pairStatus = "User A + User B already match current session user (user_pair_source=session_user)."
+        } else {
+            pairStatus = "Applied current session user as User A + User B (user_pair_source=session_user)."
+        }
+
+        userAIDDraft = trimmedCurrentSessionUserID
+        userBIDDraft = trimmedCurrentSessionUserID
+        sendStatusHint = "\(pairStatus) Loading inbox thread..."
+        await loadInboxThread(
+            userAIDOverride: trimmedCurrentSessionUserID,
+            userBIDOverride: trimmedCurrentSessionUserID,
+            statusPrefix: pairStatus
+        )
+    }
+
     private func applyCurrentSessionUserAsUserAAndSend() async {
         guard let currentSessionUserID else {
             sendStatusHint = "session_sender_missing_for_quick_apply"
@@ -3525,9 +3563,15 @@ use_when=\(useWhenText)
         clearRecipientDeviceContext()
     }
 
-    private func loadInboxThread(silent: Bool = false) async {
-        let trimmedUserA = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedUserB = userBIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+    private func loadInboxThread(
+        userAIDOverride: String? = nil,
+        userBIDOverride: String? = nil,
+        statusPrefix: String? = nil,
+        silent: Bool = false
+    ) async {
+        let trimmedUserA = (userAIDOverride ?? userAIDDraft).trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedUserB = (userBIDOverride ?? userBIDDraft).trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedStatusPrefix = statusPrefix?.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedUserA.isEmpty, !trimmedUserB.isEmpty else {
             if !silent {
@@ -3540,6 +3584,9 @@ use_when=\(useWhenText)
         if !silent {
             fetchError = nil
             lastSendQuickCopy = "sender=(none) | message_id=(none)"
+            if let normalizedStatusPrefix, !normalizedStatusPrefix.isEmpty {
+                sendStatusHint = "\(normalizedStatusPrefix) Loading inbox thread..."
+            }
         }
 
         do {
@@ -3558,6 +3605,8 @@ use_when=\(useWhenText)
             messageRows = messages
             attachmentMap = nextAttachmentMap
             deviceKeyMap = nextDeviceKeyMap
+            userAIDDraft = trimmedUserA
+            userBIDDraft = trimmedUserB
 
             let manualReadCursorMessageID = readCursorTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
             if !manualReadCursorMessageID.isEmpty,
@@ -3630,6 +3679,12 @@ use_when=\(useWhenText)
                     )
                 }
             }
+
+            if !silent,
+               let normalizedStatusPrefix,
+               !normalizedStatusPrefix.isEmpty {
+                sendStatusHint = "\(normalizedStatusPrefix) Loaded direct thread \(directConversation.id) with \(messages.count) message(s)."
+            }
         } catch {
             if !silent {
                 conversationSummary = nil
@@ -3639,7 +3694,12 @@ use_when=\(useWhenText)
                 deviceKeyMap = [:]
                 clearCursorFormSyncHintIfIdentityChanged()
                 clearRecipientDeviceContext()
-                fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                let errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                fetchError = errorMessage
+                if let normalizedStatusPrefix,
+                   !normalizedStatusPrefix.isEmpty {
+                    sendStatusHint = "\(normalizedStatusPrefix) \(errorMessage)"
+                }
             }
         }
 

@@ -167,13 +167,61 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   }, []);
 
   async function handleOpenThread() {
+    await openDirectThreadFlow();
+  }
+
+  async function applyCurrentSessionUserAsUserAUserBAndOpenThread() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_user_missing_for_quick_apply");
+      return;
+    }
+
+    const alreadyMatched = form.userAId.trim() === sessionUserId && form.userBId.trim() === sessionUserId;
+    const pairStatus = alreadyMatched
+      ? "User A + User B already match current session user (user_pair_source=session_user)."
+      : "Applied current session user as User A + User B (user_pair_source=session_user).";
+
+    setForm((current) => ({
+      ...current,
+      userAId: sessionUserId,
+      userBId: sessionUserId,
+      senderUserId: sessionUserId,
+    }));
+
+    await openDirectThreadFlow({
+      userAIdOverride: sessionUserId,
+      userBIdOverride: sessionUserId,
+      senderUserIdOverride: sessionUserId,
+      statusPrefix: pairStatus,
+    });
+  }
+
+  async function openDirectThreadFlow(input?: {
+    userAIdOverride?: string;
+    userBIdOverride?: string;
+    senderUserIdOverride?: string;
+    statusPrefix?: string;
+  }) {
+    const userAId = (input?.userAIdOverride ?? form.userAId).trim();
+    const userBId = (input?.userBIdOverride ?? form.userBId).trim();
+    const senderUserId = (input?.senderUserIdOverride ?? form.senderUserId).trim();
+    const normalizedSenderUserId = senderUserId || userAId;
+    const statusPrefix = input?.statusPrefix?.trim();
+
     setIsOpening(true);
-    setStatus("Opening direct thread shell...");
+    setStatus(statusPrefix ? `${statusPrefix} Opening direct thread shell...` : "Opening direct thread shell...");
     setLastSendQuickCopy("sender=(none) | message_id=(none)");
 
     try {
-      const nextConversation = await getOrCreateDirectConversation(form.userAId.trim(), form.userBId.trim());
+      const nextConversation = await getOrCreateDirectConversation(userAId, userBId);
       setConversation(nextConversation);
+      setForm((current) => ({
+        ...current,
+        userAId,
+        userBId,
+        senderUserId: normalizedSenderUserId,
+      }));
       const [nextMessages, nextMembers] = await Promise.all([
         listMessages(nextConversation.id),
         listConversationMembers(nextConversation.id),
@@ -191,9 +239,11 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
         setAttachmentForm((current) => ({ ...current, targetMessageId: "" }));
       }
 
-      setStatus(`Loaded direct thread ${nextConversation.id} with ${nextMessages.length} message(s).`);
+      const loadedStatus = `Loaded direct thread ${nextConversation.id} with ${nextMessages.length} message(s).`;
+      setStatus(statusPrefix ? `${statusPrefix} ${loadedStatus}` : loadedStatus);
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "direct_conversation_failed");
+      const failureStatus = error instanceof Error ? error.message : "direct_conversation_failed";
+      setStatus(statusPrefix ? `${statusPrefix} ${failureStatus}` : failureStatus);
     }
 
     setIsOpening(false);
@@ -959,6 +1009,15 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
             placeholder="paste second user uuid"
           />
         </label>
+        <button
+          type="button"
+          onClick={() => void applyCurrentSessionUserAsUserAUserBAndOpenThread()}
+          disabled={isOpening || currentSessionUserId.trim().length === 0}
+        >
+          {isOpening
+            ? "Applying session user + opening..."
+            : "Use current session user as user_a + user_b + open direct thread"}
+        </button>
         <button type="button" onClick={() => void handleOpenThread()} disabled={isOpening}>
           {isOpening ? "Opening..." : "Open direct thread"}
         </button>
