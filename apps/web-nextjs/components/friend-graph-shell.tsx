@@ -19,6 +19,8 @@ type FriendGraphShellProps = {
 
 const FRIEND_REQUEST_CREATE_QUICK_COPY_EMPTY =
   "request_id=(none) / action=created / requester=(none) / receiver=(none)";
+const FRIEND_REQUEST_ACCEPT_QUICK_COPY_EMPTY =
+  "request_id=(none) / action=accepted / accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)";
 const FRIEND_REQUEST_REJECT_QUICK_COPY_EMPTY =
   "request_id=(none) / action=rejected / accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)";
 
@@ -32,7 +34,11 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
   const [lastFriendGraphDeltaLine, setLastFriendGraphDeltaLine] = useState<string | null>(null);
   const [lastFriendGraphDeltaCopiedLine, setLastFriendGraphDeltaCopiedLine] = useState<string | null>(null);
   const [lastFriendRequestCreateQuickCopy, setLastFriendRequestCreateQuickCopy] = useState(FRIEND_REQUEST_CREATE_QUICK_COPY_EMPTY);
+  const [lastFriendRequestAcceptQuickCopy, setLastFriendRequestAcceptQuickCopy] = useState(FRIEND_REQUEST_ACCEPT_QUICK_COPY_EMPTY);
   const [lastFriendRequestRejectQuickCopy, setLastFriendRequestRejectQuickCopy] = useState(FRIEND_REQUEST_REJECT_QUICK_COPY_EMPTY);
+  const [lastFriendRequestCreateAcceptBundleQuickCopy, setLastFriendRequestCreateAcceptBundleQuickCopy] = useState(
+    `friend_request_create_marker={${FRIEND_REQUEST_CREATE_QUICK_COPY_EMPTY}} | friend_request_accept_marker={${FRIEND_REQUEST_ACCEPT_QUICK_COPY_EMPTY}}`,
+  );
   const [lastFriendRequestCreateRejectBundleQuickCopy, setLastFriendRequestCreateRejectBundleQuickCopy] = useState(
     `friend_request_create_marker={${FRIEND_REQUEST_CREATE_QUICK_COPY_EMPTY}} | friend_request_reject_marker={${FRIEND_REQUEST_REJECT_QUICK_COPY_EMPTY}}`,
   );
@@ -70,6 +76,18 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
   const quickDeltaSummary = pendingDirectionSummary
     ? `accepted_count=${snapshot?.friendshipCount ?? 0} / pending_inbound=${pendingDirectionSummary.inbound} / pending_outbound=${pendingDirectionSummary.outbound}`
     : "accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)";
+
+  function buildFriendRequestCreateAcceptBundleQuickCopy(input?: {
+    createQuickCopy?: string;
+    acceptQuickCopy?: string;
+  }) {
+    const normalizedCreateQuickCopy =
+      input?.createQuickCopy?.trim() || lastFriendRequestCreateQuickCopy || FRIEND_REQUEST_CREATE_QUICK_COPY_EMPTY;
+    const normalizedAcceptQuickCopy =
+      input?.acceptQuickCopy?.trim() || lastFriendRequestAcceptQuickCopy || FRIEND_REQUEST_ACCEPT_QUICK_COPY_EMPTY;
+
+    return `friend_request_create_marker={${normalizedCreateQuickCopy}} | friend_request_accept_marker={${normalizedAcceptQuickCopy}}`;
+  }
 
   function buildFriendRequestCreateRejectBundleQuickCopy(input?: {
     createQuickCopy?: string;
@@ -209,12 +227,30 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
     );
   }
 
+  async function handleCopyFriendRequestAcceptQuickCopy() {
+    await copyToClipboard(
+      lastFriendRequestAcceptQuickCopy,
+      "Copied friend-request accept quick copy to clipboard",
+      "friend_request_accept_quick_copy_empty",
+      "friend_request_accept_quick_copy_failed",
+    );
+  }
+
   async function handleCopyFriendRequestRejectQuickCopy() {
     await copyToClipboard(
       lastFriendRequestRejectQuickCopy,
       "Copied friend-request reject quick copy to clipboard",
       "friend_request_reject_quick_copy_empty",
       "friend_request_reject_quick_copy_failed",
+    );
+  }
+
+  async function handleCopyFriendRequestCreateAcceptBundleQuickCopy() {
+    await copyToClipboard(
+      lastFriendRequestCreateAcceptBundleQuickCopy,
+      "Copied friend-request create + accept bundle quick copy to clipboard",
+      "friend_request_create_accept_bundle_quick_copy_empty",
+      "friend_request_create_accept_bundle_quick_copy_failed",
     );
   }
 
@@ -264,6 +300,11 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
         `request_id=${created.id} / action=created / requester=${input.requesterUserId} / ` +
         `receiver=${input.receiverUserId}`;
       setLastFriendRequestCreateQuickCopy(createQuickCopy);
+      setLastFriendRequestCreateAcceptBundleQuickCopy(
+        buildFriendRequestCreateAcceptBundleQuickCopy({
+          createQuickCopy,
+        }),
+      );
       setLastFriendRequestCreateRejectBundleQuickCopy(
         buildFriendRequestCreateRejectBundleQuickCopy({
           createQuickCopy,
@@ -351,6 +392,11 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
         `request_id=${created.id} / action=created / requester=${userId.trim()} / ` +
         `receiver=${receiverUserId}`;
       setLastFriendRequestCreateQuickCopy(createQuickCopy);
+      setLastFriendRequestCreateAcceptBundleQuickCopy(
+        buildFriendRequestCreateAcceptBundleQuickCopy({
+          createQuickCopy,
+        }),
+      );
       setLastFriendRequestCreateRejectBundleQuickCopy(
         buildFriendRequestCreateRejectBundleQuickCopy({
           createQuickCopy,
@@ -375,7 +421,13 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
       await acceptFriendRequest(requestId);
       const nextSnapshot = await fetchFriendGraphSnapshot(userId);
       setSnapshot(nextSnapshot);
-      applyDeltaFromSnapshot(nextSnapshot, requestId, "accepted");
+      const acceptQuickCopy = applyDeltaFromSnapshot(nextSnapshot, requestId, "accepted");
+      setLastFriendRequestAcceptQuickCopy(acceptQuickCopy);
+      setLastFriendRequestCreateAcceptBundleQuickCopy(
+        buildFriendRequestCreateAcceptBundleQuickCopy({
+          acceptQuickCopy,
+        }),
+      );
 
       const pendingBreakdown = nextSnapshot.pendingRequests.reduce(
         (acc, request) => {
@@ -493,11 +545,27 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
             </button>
           </p>
           <p>
+            Quick copy friend-request accept marker: <code>{lastFriendRequestAcceptQuickCopy}</code>
+          </p>
+          <p>
+            <button type="button" onClick={() => void handleCopyFriendRequestAcceptQuickCopy()}>
+              Copy quick friend-request accept marker
+            </button>
+          </p>
+          <p>
             Quick copy friend-request reject marker: <code>{lastFriendRequestRejectQuickCopy}</code>
           </p>
           <p>
             <button type="button" onClick={() => void handleCopyFriendRequestRejectQuickCopy()}>
               Copy quick friend-request reject marker
+            </button>
+          </p>
+          <p>
+            Quick copy friend-request create + accept bundle: <code>{lastFriendRequestCreateAcceptBundleQuickCopy}</code>
+          </p>
+          <p>
+            <button type="button" onClick={() => void handleCopyFriendRequestCreateAcceptBundleQuickCopy()}>
+              Copy quick friend-request create + accept bundle
             </button>
           </p>
           <p>
