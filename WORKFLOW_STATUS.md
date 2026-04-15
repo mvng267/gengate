@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 339
+- Batch: 340
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 339 friend graph shell (web) — add quick action `Use current session user as requester + keep receiver + send friend request` for one-tap session requester send parity.
+- Scope: batch 340 moment shell (web) — add quick action `Use current session user as viewer + keep author + load private feed` for one-tap session-viewer feed gate verify.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,15 +16,19 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
-  - apps/web-nextjs/components/friend-graph-shell.tsx
+  - apps/web-nextjs/components/moment-compose-shell.tsx
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
 - Git:
-  - latest feature commit: `6faffce` — `batch339: add session-requester keep-receiver quick send in web friend graph shell`
-  - previous feature commit: `eedda47` — `batch338: add session-requester keep-receiver quick send in ios friend graph shell`
+  - latest feature commit: `813905c` — `batch340: add session-viewer keep-author quick load in web moment shell`
+  - previous feature commit: `6faffce` — `batch339: add session-requester keep-receiver quick send in web friend graph shell`
   - working tree: clean
 - Blocker: none
-- Next: mở batch340 với 1 slice hẹp moment shell (web): thêm quick action `Use current session user as viewer + keep author + load private feed` để one-tap parity với hướng session-viewer verify feed gate mà không đụng create flow.
+- Next: mở batch341 với 1 slice hẹp moment shell (iOS): thêm quick action `Use current session user as viewer + keep author + load private feed` để one-tap parity với web session-viewer keep-author feed load path.
+- Batch 340 handoff:
+  - `813905c` — `batch340: add session-viewer keep-author quick load in web moment shell`
+  - web moment shell đổi quick action viewer-load sang `Use current session user as viewer + keep author + load private feed` để explicit giữ nguyên author context khi verify private feed gate.
+  - flow vẫn giữ guard marker `session_viewer_missing_for_quick_apply` và marker `viewer_source=session_user`, chỉ update status copy để nêu rõ `kept create author as-is` trong cả loading/success.
 - Batch 339 handoff:
   - `6faffce` — `batch339: add session-requester keep-receiver quick send in web friend graph shell`
   - web friend graph shell thêm one-tap action `Use current session user as requester + keep receiver + send friend request`.
