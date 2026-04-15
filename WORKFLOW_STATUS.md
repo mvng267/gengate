@@ -1,15 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 281
+- Batch: 282
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 281 direct-message shell — add first-unread jump status/read-state quick-copy markers so testers can copy deterministic first-unread apply results after jump-first-unread actions on web+iOS.
+- Scope: batch 282 direct-message shell — add first-unread no-op guard/status markers (`already_at_latest_or_no_unread`) for jump/member actions so testers can distinguish no-op vs update on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
-  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> bấm `Jump focus user to first unread candidate` hoặc trong `Conversation members` bấm `Use member focus + first unread + mark read` -> bấm `Copy quick first-unread jump result` và paste format `focus_user=... | first_unread_candidate=... | applied_message=... | read_state=...`.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Jump focus user to first unread candidate` hoặc trong `Member read-cursor summary` bấm `Use member focus + first unread + mark read` -> bấm `Copy quick first-unread jump result` và paste format `focus_user=... | first_unread_candidate=... | applied_message=... | read_state=...`.
+  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> bấm `Jump focus user to first unread candidate`; nếu không còn unread thì status/guard line hiển thị `already_at_latest_or_no_unread` thay vì fail mơ hồ; member-row action `Use member focus + first unread + mark read` cũng trả marker no-op tương tự.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Jump focus user to first unread candidate`; nếu không còn unread thì status hint `already_at_latest_or_no_unread (read_cursor_first_unread_focus_source=focus_user)` và guard line `first_unread_guard=already_at_latest_or_no_unread`; member-row action cũng trả marker no-op tương tự.
 - Files:
   - apps/web-nextjs/components/direct-message-shell.tsx
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -17,10 +17,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `a690ecf` — `batch281: add first-unread jump quick-copy markers on web and ios`
-  - working tree: clean after batch281 commit
+  - latest feature commit: `(pending in this run)` — `batch282: add first-unread no-op guard status markers on web and ios`
+  - working tree: clean after batch282 commit
 - Blocker: none
-- Next: mở batch282 với 1 slice hẹp direct-message shell: thêm guard/status khi first-unread candidate không đổi (already_at_latest_or_no_unread) để testers đỡ nhầm kết quả no-op trên web+iOS.
+- Next: mở batch283 với 1 slice hẹp direct-message shell: thêm quick-copy snapshot marker cho no-op guard (`first_unread_guard_state`) để report parity một dòng trên web+iOS.
+- Batch 282 handoff:
+  - `(pending in this run)` — `batch282: add first-unread no-op guard status markers on web and ios`
+  - web/iOS jump-first-unread flow và member-first-unread auto-mark flow trả marker `already_at_latest_or_no_unread` khi không còn unread candidate, giảm ambiguity giữa no-op và lỗi.
 - Batch 281 handoff:
   - `a690ecf` — `batch281: add first-unread jump quick-copy markers on web and ios`
   - web/iOS thêm quick copy line + clipboard action cho first-unread jump result, format chuẩn `focus_user + first_unread_candidate + applied_message + read_state`.

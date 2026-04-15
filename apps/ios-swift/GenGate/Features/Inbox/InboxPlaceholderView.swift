@@ -1231,12 +1231,15 @@ struct InboxPlaceholderView: View {
                             isDeletingMessage ||
                             isUpdatingReadCursor ||
                             conversationSummary == nil ||
-                            (firstUnreadMessageIDForFocusUser?.isEmpty ?? true) ||
                             (resolvedReadStatusFocusUserID?.isEmpty ?? true)
                         )
 
                         if let firstUnreadMessageIDForFocusUser {
                             Text("first_unread_candidate_message_id: \(firstUnreadMessageIDForFocusUser)")
+                                .font(.caption.monospaced())
+                                .foregroundStyle(.secondary)
+                        } else if conversationSummary != nil, (resolvedReadStatusFocusUserID?.isEmpty ?? true) == false {
+                            Text("first_unread_guard=already_at_latest_or_no_unread")
                                 .font(.caption.monospaced())
                                 .foregroundStyle(.secondary)
                         }
@@ -3380,7 +3383,7 @@ use_when=\(useWhenText)
 
         guard let firstUnreadMessageID = firstUnreadMessageIDForFocusUser,
               !firstUnreadMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            sendStatusHint = "first_unread_candidate_missing_for_member_focus_auto_mark"
+            sendStatusHint = "already_at_latest_or_no_unread (first_unread_candidate_missing_for_member_focus_auto_mark)"
             return
         }
 
@@ -3789,10 +3792,12 @@ use_when=\(useWhenText)
 
         guard let targetMessageID = firstUnreadMessageIDForFocusUser,
               !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            fetchError = "Không có first unread candidate cho focus user."
+            sendStatusHint = "already_at_latest_or_no_unread (read_cursor_first_unread_focus_source=focus_user)"
+            fetchError = nil
             return
         }
 
+        sendStatusHint = "Applying focus user + first unread candidate and marking read now (read_cursor_first_unread_focus_source=focus_user)."
         await performReadCursorUpdate(targetUserID: targetUserID, targetMessageID: targetMessageID)
     }
 
