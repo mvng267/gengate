@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 300
-- Trục công việc: notification shell — web+iOS add quick-copy create-result delta after create `notification_id/read_state/current_page_unread/total_unread_count` + clipboard action.
-- Trạng thái: batch300_complete_notification_create_result_delta_copy_actions_web_ios.
+- Batch workflow chính thức hiện tại: 301
+- Trục công việc: notification shell — web+iOS add quick-copy lifecycle pair line (`create_result + mutation_delta`) after create+toggle + clipboard action.
+- Trạng thái: batch301_complete_notification_lifecycle_pair_copy_actions_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 301 handoff (closed)
+- Batch vừa xong: **301**
+- Commit đã chốt:
+  - `0db7546` — `batch301: add notification lifecycle-pair quick copy on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **302**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell (web+iOS): thêm quick-copy lifecycle pair status marker `lifecycle_pair_state=matched|mismatched|missing` để report chain outcome rõ hơn.
 
 ## Batch 300 handoff (closed)
 - Batch vừa xong: **300**
