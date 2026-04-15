@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 320
-- Trục công việc: feed shell — web+iOS append `ready_count=<n>/total=<n>` aggregate into delete-copy source-state line.
-- Trạng thái: batch320_complete_feed_delete_copy_audit_ready_count_web_ios.
+- Batch workflow chính thức hiện tại: 321
+- Trục công việc: feed shell — web+iOS add dedicated quick-copy action for source-state snapshot line (`delete_copy_audit_source_state=.../ready_count=.../total=...`).
+- Trạng thái: batch321_complete_feed_source_state_snapshot_quick_copy_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 321 handoff (closed)
+- Batch vừa xong: **321**
+- Commit đã chốt:
+  - `d8a2309` — `batch321: add source-state snapshot quick copy on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **322**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell (web+iOS): thêm token `last_source_state_snapshot=...` để lưu payload source-state vừa copy cho QA đối chiếu nhanh.
 
 ## Batch 320 handoff (closed)
 - Batch vừa xong: **320**

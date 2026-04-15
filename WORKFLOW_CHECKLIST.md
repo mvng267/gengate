@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **320 — feed shell (web+iOS source-state ready_count aggregate) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **321 — feed shell (web+iOS source-state snapshot quick copy) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **320**
-- Scope hiện tại: feed shell (web+iOS) — bổ sung aggregate `ready_count=<n>/total=<n>` trong line `delete_copy_audit_source_state=...` để QA scan nhanh mức source readiness.
+- Batch workflow chính thức hiện tại: **321**
+- Scope hiện tại: feed shell (web+iOS) — thêm quick-copy action riêng cho source-state snapshot line (đã gồm `ready_count`) để QA copy full readiness snapshot bằng 1 click.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/moment-compose-shell.tsx`
@@ -99,13 +99,13 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `f7f16a2` — `batch320: add delete copy audit ready-count source-state on web and ios`
-  - commit liền trước: `f876528` — `batch319: add first-ready source-line quick copy on web and ios`
+  - commit gần nhất đã chốt: `d8a2309` — `batch321: add source-state snapshot quick copy on web and ios`
+  - commit liền trước: `f7f16a2` — `batch320: add delete copy audit ready-count source-state on web and ios`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch321 với 1 slice hẹp feed shell (web+iOS): thêm quick-copy action riêng cho source-state line đã có `ready_count` để QA copy readiness snapshot đầy đủ bằng 1 click.
+  - mở batch322 với 1 slice hẹp feed shell (web+iOS): thêm token `last_source_state_snapshot=...` để lưu/hiển thị payload source-state vừa copy cho QA đối chiếu nhanh.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`; bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy last copied delete summary feedback`, verify line source-state rồi bấm `Copy delete copy audit for first ready source` để one-shot copy `delete_copy_audit=source:.../value:...`; đối chiếu source được pick với line source-state.
@@ -118,6 +118,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
 
 ## Batch handoff note
+
+- Batch vừa xong: **321**
+- Commit cuối đã chốt:
+  - `d8a2309` — `batch321: add source-state snapshot quick copy on web and ios`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **322**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell (web+iOS): thêm token `last_source_state_snapshot=...` để lưu payload source-state vừa copy cho QA đối chiếu history nhanh.
+
+---
 
 - Batch vừa xong: **320**
 - Commit cuối đã chốt:
