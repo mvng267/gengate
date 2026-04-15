@@ -46,6 +46,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [lastDeletedMomentSummaryLine, setLastDeletedMomentSummaryLine] = useState<string | null>(null);
   const [deleteMomentIdDraft, setDeleteMomentIdDraft] = useState("");
   const [lastCopiedFeedVisibilityDeltaLine, setLastCopiedFeedVisibilityDeltaLine] = useState<string | null>(null);
+  const [lastCopiedDeleteSummaryLine, setLastCopiedDeleteSummaryLine] = useState<string | null>(null);
   const [feedVisibilityGateSnapshotSource, setFeedVisibilityGateSnapshotSource] =
     useState<FeedGateSnapshotSource>("reload_flow");
   const buildFeedVisibilityGateSummary = (
@@ -159,7 +160,13 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     setIsLoadingFeed(false);
   }
 
-  async function copyToClipboard(text: string, statusPrefix: string, emptyCode: string, failedCode: string) {
+  async function copyToClipboard(
+    text: string,
+    statusPrefix: string,
+    emptyCode: string,
+    failedCode: string,
+    onCopied?: (normalizedText: string) => void,
+  ) {
     const normalizedText = text.trim();
     if (!normalizedText) {
       setStatus(emptyCode);
@@ -173,7 +180,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
 
     try {
       await navigator.clipboard.writeText(normalizedText);
-      setLastCopiedFeedVisibilityDeltaLine(normalizedText);
+      onCopied?.(normalizedText);
       setStatus(`${statusPrefix} (${normalizedText}).`);
     } catch {
       setStatus(failedCode);
@@ -186,6 +193,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       "Copied quick feed-visibility delta to clipboard",
       "quick_feed_visibility_delta_empty",
       "quick_feed_visibility_delta_copy_failed",
+      setLastCopiedFeedVisibilityDeltaLine,
     );
   }
 
@@ -195,6 +203,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       "Copied quick feed-visibility gate summary to clipboard",
       "quick_feed_visibility_gate_summary_empty",
       "quick_feed_visibility_gate_summary_copy_failed",
+      setLastCopiedFeedVisibilityDeltaLine,
     );
   }
 
@@ -204,6 +213,27 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       "Copied last create feed-visibility delta to clipboard",
       "last_create_feed_visibility_delta_missing",
       "last_create_feed_visibility_delta_copy_failed",
+      setLastCopiedFeedVisibilityDeltaLine,
+    );
+  }
+
+  async function handleCopyQuickDeleteParitySummary() {
+    await copyToClipboard(
+      deleteMomentQuickCopyLine,
+      "Copied quick delete parity summary to clipboard",
+      "quick_delete_parity_summary_empty",
+      "quick_delete_parity_summary_copy_failed",
+      setLastCopiedDeleteSummaryLine,
+    );
+  }
+
+  async function handleCopyLastDeleteResultSummary() {
+    await copyToClipboard(
+      lastDeletedMomentSummaryLine ?? "",
+      "Copied last delete result summary to clipboard",
+      "last_delete_result_summary_missing",
+      "last_delete_result_summary_copy_failed",
+      setLastCopiedDeleteSummaryLine,
     );
   }
 
@@ -382,14 +412,31 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       <p>
         Quick delete parity summary: <code>{deleteMomentQuickCopyLine}</code>
       </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickDeleteParitySummary()}>
+          Copy quick delete parity summary
+        </button>
+      </p>
       {lastDeletedMomentSummaryLine ? (
-        <p>
-          Last delete result summary: <code>{lastDeletedMomentSummaryLine}</code>
-        </p>
+        <>
+          <p>
+            Last delete result summary: <code>{lastDeletedMomentSummaryLine}</code>
+          </p>
+          <p>
+            <button type="button" onClick={() => void handleCopyLastDeleteResultSummary()}>
+              Copy last delete result summary
+            </button>
+          </p>
+        </>
       ) : null}
       {lastCopiedFeedVisibilityDeltaLine ? (
         <p>
           Last copied feed delta: <code>{lastCopiedFeedVisibilityDeltaLine}</code>
+        </p>
+      ) : null}
+      {lastCopiedDeleteSummaryLine ? (
+        <p>
+          Last copied delete summary: <code>{lastCopiedDeleteSummaryLine}</code>
         </p>
       ) : null}
 

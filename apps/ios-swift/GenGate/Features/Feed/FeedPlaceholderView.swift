@@ -29,6 +29,8 @@ struct FeedPlaceholderView: View {
     @State private var feedVisibilityGateSnapshotSource: String = "reload_flow"
     @State private var lastCreateFeedVisibilityDeltaCopiedAt: Date?
     @State private var lastCreateFeedVisibilityDeltaCopiedText: String = ""
+    @State private var lastDeleteSummaryCopiedAt: Date?
+    @State private var lastDeleteSummaryCopiedText: String = ""
     @State private var isLoading = false
     @State private var isLoadingAuthoredMoments = false
     @State private var isCreatingMoment = false
@@ -359,11 +361,27 @@ struct FeedPlaceholderView: View {
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
 
+                    Button("Copy quick delete parity summary") {
+                        copyQuickDeleteParitySummaryLine()
+                    }
+                    .buttonStyle(.bordered)
+
                     if let lastDeletedMomentSummaryLine {
                         Text("Last delete result summary: \(lastDeletedMomentSummaryLine)")
                             .font(.footnote.monospaced())
                             .foregroundStyle(.secondary)
                             .textSelection(.enabled)
+
+                        Button("Copy last delete result summary") {
+                            copyLastDeleteResultSummaryLine()
+                        }
+                        .buttonStyle(.bordered)
+                    }
+
+                    if let lastDeleteSummaryCopiedFeedbackText {
+                        Text(lastDeleteSummaryCopiedFeedbackText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
                     }
 
                     if let fetchError {
@@ -956,6 +974,19 @@ struct FeedPlaceholderView: View {
         return "Copied feed-visibility delta (\(Int(elapsed))s ago): \(lastCreateFeedVisibilityDeltaCopiedText)"
     }
 
+    private var lastDeleteSummaryCopiedFeedbackText: String? {
+        guard let lastDeleteSummaryCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(lastDeleteSummaryCopiedAt)
+        guard elapsed < 8 else {
+            return nil
+        }
+
+        return "Copied delete summary (\(Int(elapsed))s ago): \(lastDeleteSummaryCopiedText)"
+    }
+
     private var resolvedQuickReactionUserID: String? {
         if let currentSessionUserID {
             return currentSessionUserID
@@ -1272,6 +1303,52 @@ struct FeedPlaceholderView: View {
         lastCreateFeedVisibilityDeltaCopiedText = normalizedText
         lastCreateFeedVisibilityDeltaCopiedAt = Date()
         statusMessage = "Copied last create feed visibility delta to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyQuickDeleteParitySummaryLine() {
+        let normalizedText = quickDeleteParitySummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "quick_delete_parity_summary_empty"
+            return
+        }
+
+        guard copyToClipboard(normalizedText) else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        lastDeleteSummaryCopiedText = normalizedText
+        lastDeleteSummaryCopiedAt = Date()
+        statusMessage = "Copied quick delete parity summary to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyLastDeleteResultSummaryLine() {
+        guard let lastDeletedMomentSummaryLine else {
+            statusMessage = nil
+            fetchError = "last_delete_result_summary_missing"
+            return
+        }
+
+        let normalizedText = lastDeletedMomentSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "last_delete_result_summary_missing"
+            return
+        }
+
+        guard copyToClipboard(normalizedText) else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        lastDeleteSummaryCopiedText = normalizedText
+        lastDeleteSummaryCopiedAt = Date()
+        statusMessage = "Copied last delete result summary to clipboard (\(normalizedText))."
         fetchError = nil
     }
 

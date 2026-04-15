@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 309
-- Trục công việc: feed shell — iOS mirror delete-result quick summary marker parity (`delete_result/moment_id/deleted_at/author_loaded_count/feed_match_count`) để verify create->delete đồng format với web.
-- Trạng thái: batch309_complete_feed_ios_delete_parity_shell.
+- Batch workflow chính thức hiện tại: 310
+- Trục công việc: feed shell — web+iOS add quick-copy actions cho `Quick delete parity summary` + `Last delete result summary` để report create->delete tokens nhanh hơn.
+- Trạng thái: batch310_complete_feed_delete_summary_quick_copy_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 310 handoff (closed)
+- Batch vừa xong: **310**
+- Commit đã chốt:
+  - `f5ec9c4` — `batch310: add delete summary quick-copy actions on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **311**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell (web+iOS): thêm `delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick` marker vào quick delete parity summary để trace nguồn delete target rõ hơn.
 
 ## Batch 309 handoff (closed)
 - Batch vừa xong: **309**
