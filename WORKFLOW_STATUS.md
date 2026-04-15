@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 359
+- Batch: 360
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 359 private-feed shell (iOS) — add one-tap quick-copy last-create + gate-summary bundle line (with created_moment_id) for parity with web batch358.
+- Scope: batch 360 friend-graph shell (web) — add one-tap quick-copy last-action request summary bundle (`create + decision + counts`) for deterministic report after mutate flow.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,15 +16,19 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`.
 - Files:
-  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
+  - apps/web-nextjs/components/friend-graph-shell.tsx
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
 - Git:
-  - latest feature commit: `8170945` — `batch359: add last-create feed-gate bundle quick copy in ios feed shell`
-  - previous feature commit: `92196fa` — `batch358: add last-create feed-gate bundle quick copy in web moment shell`
+  - latest feature commit: `709ea10` — `batch360: add friend-request last-action summary bundle quick copy in web friend graph shell`
+  - previous feature commit: `8170945` — `batch359: add last-create feed-gate bundle quick copy in ios feed shell`
   - working tree: docs dirty (`WORKFLOW_STATUS.md`, `WORKFLOW_CHECKLIST.md`, `TEAM_DISPATCH.md`)
 - Blocker: none
-- Next: mở batch360 với 1 slice hẹp web friend-graph shell — thêm quick-copy last-action request summary bundle (`create + decision + counts`) để one-tap deterministic friend-request report sau mutate flow.
+- Next: mở batch361 với 1 slice hẹp iOS friend-graph shell — thêm quick-copy last-action request summary bundle (`create + decision + counts`) để parity one-tap deterministic report với web batch360.
+- Batch 360 handoff:
+  - `709ea10` — `batch360: add friend-request last-action summary bundle quick copy in web friend graph shell`
+  - web Friend Graph shell thêm line + action copy cho `friend-request last-action summary bundle` để one-tap report deterministic payload sau mutate flow, gom `create marker + decision marker + counts` trong cùng payload.
+  - bundle payload format: `friend_request_create_marker={request_id=... / action=created / requester=... / receiver=...} | friend_request_decision_marker={request_id=... / action=accepted|rejected / accepted_count=... / pending_inbound=... / pending_outbound=...} | friend_request_counts={accepted_count=... / pending_inbound=... / pending_outbound=...}`.
 - Batch 359 handoff:
   - `8170945` — `batch359: add last-create feed-gate bundle quick copy in ios feed shell`
   - iOS Feed shell thêm line + action copy cho `last create + feed-gate bundle` để one-tap report deterministic payload sau create flow (gồm `created_moment_id` trong delta + gate summary cùng snapshot), parity với web batch358.

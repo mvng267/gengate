@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 359
-- Trục công việc: private-feed shell (iOS) — add quick-copy last-create + gate-summary bundle line (with created_moment_id) for parity with web batch358.
-- Trạng thái: batch359_complete_ios_private_feed_last_create_gate_bundle_quick_copy.
+- Batch workflow chính thức hiện tại: 360
+- Trục công việc: friend-graph shell (web) — add quick-copy last-action request summary bundle (`create + decision + counts`) for deterministic report after mutate flow.
+- Trạng thái: batch360_complete_web_friend_graph_last_action_request_summary_bundle_quick_copy.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 360 handoff (closed)
+- Batch vừa xong: **360**
+- Commit đã chốt:
+  - `709ea10` — `batch360: add friend-request last-action summary bundle quick copy in web friend graph shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **361**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS friend-graph shell: thêm quick-copy last-action request summary bundle (`create + decision + counts`) để parity deterministic report với web batch360.
 
 ## Batch 359 handoff (closed)
 - Batch vừa xong: **359**
