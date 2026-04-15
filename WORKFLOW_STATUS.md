@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(pending in this run)` — `batch282: add first-unread no-op guard status markers on web and ios`
+  - latest feature commit: `4eb2db4` — `batch282: add first-unread no-op guard status markers on web and ios`
   - working tree: clean after batch282 commit
 - Blocker: none
 - Next: mở batch283 với 1 slice hẹp direct-message shell: thêm quick-copy snapshot marker cho no-op guard (`first_unread_guard_state`) để report parity một dòng trên web+iOS.
 - Batch 282 handoff:
-  - `(pending in this run)` — `batch282: add first-unread no-op guard status markers on web and ios`
+  - `4eb2db4` — `batch282: add first-unread no-op guard status markers on web and ios`
   - web/iOS jump-first-unread flow và member-first-unread auto-mark flow trả marker `already_at_latest_or_no_unread` khi không còn unread candidate, giảm ambiguity giữa no-op và lỗi.
 - Batch 281 handoff:
   - `a690ecf` — `batch281: add first-unread jump quick-copy markers on web and ios`

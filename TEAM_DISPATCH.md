@@ -56,7 +56,7 @@
 ## Batch 282 handoff (closed)
 - Batch vừa xong: **282**
 - Commit đã chốt:
-  - `(pending in this run)` — `batch282: add first-unread no-op guard status markers on web and ios`
+  - `4eb2db4` — `batch282: add first-unread no-op guard status markers on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
