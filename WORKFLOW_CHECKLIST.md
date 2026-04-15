@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **270 — direct-message shell (web+iOS session-user read-cursor target + read-focus quick actions) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **296 — moment posting/feed shell (web+iOS quick-copy feed-visibility delta after create) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,33 +89,48 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **295**
-- Scope hiện tại: friend graph shell (web+iOS) — thêm quick-copy delta summary line `accepted_count/pending_inbound/pending_outbound` và last action delta payload sau accept/reject.
+- Batch workflow chính thức hiện tại: **296**
+- Scope hiện tại: moment posting/feed shell (web+iOS) — thêm quick-copy feed-visibility delta sau create `created_moment_id/viewer/feed_count/first_moment_id` + copy actions.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/lib/friends/client.ts`
-  - `apps/web-nextjs/components/friend-graph-shell.tsx`
-  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
+  - `apps/web-nextjs/components/moment-compose-shell.tsx`
+  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
-  - commit liền trước: `63107e8` — `batch294: add web quick page-meta copy action in notification shell`
+  - commit gần nhất đã chốt: `cf07bdc` — `batch296: add feed-visibility delta copy actions after moment create`
+  - commit liền trước: `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch296 với 1 slice hẹp moment posting shell (web+iOS): thêm quick-copy feed-visibility delta `viewer/feed_count/first_moment_id` ngay sau create để tăng khả năng test seam #2 theo priority.
+  - mở batch297 với 1 slice hẹp location shell (web+iOS): thêm quick-copy location state summary `owner/share_id/is_active/sharing_mode/audience_count/snapshot_count` để tăng khả năng test seam #5 theo priority.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
+  - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> verify line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` -> bấm `Copy last create feed-visibility delta` và paste kiểm tra payload đúng format.
+  - iOS Feed: set `Author user UUID` + `Viewer user UUID` -> `Create moment + image` -> verify line `Last create feed visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` -> bấm `Copy last create feed visibility delta` và paste kiểm tra payload đúng format.
   - Web Friend graph (`/profile`): load snapshot -> bấm `Accept` hoặc `Reject` trên inbound pending request -> verify status hiển thị `accepted_count/pending_inbound/pending_outbound`; bấm `Copy quick delta summary` hoặc `Copy last action delta` và paste kiểm tra payload đúng format.
   - iOS Profile: load friend graph -> accept/reject request -> verify status hiển thị `accepted_count/pending_inbound/pending_outbound`; bấm `Copy quick delta summary` hoặc `Copy last action delta` và paste kiểm tra payload đúng format.
-  - Web Feed: bấm quick action `Use current session user as viewer + load` -> verify status `viewer_source=session_user` + feed reload.
   - Web Inbox: nhập user A/B -> `Open direct thread` -> bấm `Use current session user for read-cursor target + read focus` -> bấm `Mark latest message as read (target user)` -> verify status có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **296**
+- Commit cuối đã chốt:
+  - `cf07bdc` — `batch296: add feed-visibility delta copy actions after moment create`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **297**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - location shell (web+iOS): thêm quick-copy location state summary `owner/share_id/is_active/sharing_mode/audience_count/snapshot_count` để tăng khả năng test seam #5 theo priority.
+
+---
 
 - Batch vừa xong: **295**
 - Commit cuối đã chốt:

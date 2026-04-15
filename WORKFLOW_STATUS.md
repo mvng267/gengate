@@ -1,30 +1,30 @@
 # GenGate Workflow Status
 
-- Batch: 295
+- Batch: 296
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 295 friend graph shell — add web+iOS one-tap quick-copy delta summary line (`accepted_count/pending_inbound/pending_outbound`) and last action delta payload after accept/reject.
+- Scope: batch 296 moment posting/feed shell — add web+iOS quick-copy feed-visibility delta after create (`created_moment_id/viewer/feed_count/first_moment_id`) + clipboard actions.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
-  - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
+  - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> verify line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` -> bấm `Copy last create feed-visibility delta` và paste kiểm tra payload đúng format.
+  - iOS Feed: set `Author user UUID` + `Viewer user UUID` -> `Create moment + image` -> verify line `Last create feed visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` -> bấm `Copy last create feed visibility delta` và paste kiểm tra payload đúng format.
   - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...`, bấm `Copy quick unread summary`, rồi paste kiểm tra payload đúng format.
   - iOS Notifications: nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...`, bấm `Copy quick unread summary` và `Copy quick page meta`, rồi paste kiểm tra payload đúng format.
 - Files:
-  - apps/web-nextjs/lib/friends/client.ts
-  - apps/web-nextjs/components/friend-graph-shell.tsx
-  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
+  - apps/web-nextjs/components/moment-compose-shell.tsx
+  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
-  - previous feature commit: `63107e8` — `batch294: add web quick page-meta copy action in notification shell`
-  - working tree: clean after batch295 commit
+  - latest feature commit: `cf07bdc` — `batch296: add feed-visibility delta copy actions after moment create`
+  - previous feature commit: `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
+  - working tree: clean after batch296 feature + workflow sync commits
 - Blocker: none
-- Next: mở batch296 với 1 slice hẹp moment posting shell (web+iOS) — thêm quick-copy feed-visibility delta (`viewer/feed_count/first_moment_id`) ngay sau create để tăng khả năng test seam #2 theo priority.
+- Next: mở batch297 với 1 slice hẹp location shell (web+iOS) — thêm quick-copy location state summary (`owner/share_id/is_active/sharing_mode/audience_count/snapshot_count`) để test seam #5 nhanh hơn.
 - Batch 295 handoff:
   - `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
   - web friend graph shell thêm reject action parity + quick delta summary line + last action delta (`request_id/action/accepted_count/pending_inbound/pending_outbound`) và nút copy.
