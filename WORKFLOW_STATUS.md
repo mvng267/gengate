@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 331
+- Batch: 332
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 331 moment posting shell (web+iOS) — add quick action `Use current session user as viewer + author + create moment + reload feed` for one-tap post→feed verification with shared session context.
+- Scope: batch 332 direct messaging shell (web+iOS) — add quick action `Use current session user as user_a + keep peer as user_b + open direct thread` with peer-context guard to keep direct-member contract valid (`user_a != user_b`) while preserving one-tap DM open/load smoke path.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -11,22 +11,26 @@
   - iOS Feed: set `Author user UUID` + `Viewer user UUID` -> `Create moment + image` -> `Reload private feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Sau đó nhập `Moment ID to delete` (hoặc bấm `Use row id for delete`) -> `Delete moment` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`. Bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy copied delete summary feedback`, verify line `Delete copy audit source-state: delete_copy_audit_source_state=quick_delete_parity:<ready|missing>/last_delete_result:<ready|missing>/copied_feedback:<ready|missing>/ready_count=<n>/total=3`, dùng nút `Copy delete copy audit source-state snapshot line`, rồi verify line `Last source-state snapshot: last_source_state_snapshot=...` + line `Last source-state snapshot source: last_source_state_snapshot_source=source_state_snapshot_copy`; dùng nút `Copy last source-state snapshot line` để re-copy token và verify marker source chuyển thành `last_source_state_snapshot_source=manual_recopy`; dùng nút `Copy last source-state snapshot source line` để copy marker nguồn trực tiếp và verify status có marker `last_source_state_snapshot_source_line_copied`; sau đó bấm `Copy delete copy audit for first ready source`, verify thêm line `Delete copy audit first-ready source: delete_copy_audit_first_ready_source=<source|none>` + nút copy marker tương ứng.
   - Web Location (`/location`): nhập owner/share -> `Reload counts` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - iOS Location: nhập owner/share -> `Load location status` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
-  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
+  - Web Inbox (`/inbox`): nhập user A/B (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
+  - iOS Inbox: nhập User A/B (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
-  - apps/web-nextjs/components/moment-compose-shell.tsx
-  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
+  - apps/web-nextjs/components/direct-message-shell.tsx
+  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `0a78bbc` — `batch331: add session viewer+author create-and-reload quick action`
-  - previous feature commit: `3e2c17d` — `batch330: add session-author create-and-reload quick action`
-  - working tree: clean after batch331 feature commit
+  - latest feature commit: `0e5b109` — `batch332: keep session quick-open on valid direct peer pair`
+  - previous feature commit: `71ea956` — `batch332: add session user_a+user_b open-thread quick action`
+  - working tree: clean after batch332 feature + doc-sync commits
 - Blocker: none
-- Next: mở batch332 với 1 slice hẹp direct messaging shell (web+iOS) — thêm quick action `Use current session user as user_a + user_b + open direct thread` để one-tap smoke DM open/load path không cần nhập tay cả 2 user field.
+- Next: mở batch333 với 1 slice hẹp location shell (web) — thêm quick action `Use current session user as owner + reload counts` để parity nhanh với iOS location shell.
+- Batch 332 handoff:
+  - `0e5b109` — `batch332: keep session quick-open on valid direct peer pair`
+  - web/iOS inbox shell thêm one-tap action `Use current session user as user_a + keep peer as user_b + open direct thread`; action resolve peer từ current form/member context để tránh self-pair invalid (`invalid_direct_members`) và mở/load direct thread trong một thao tác.
+  - nếu thiếu peer context, action trả marker guard `session_peer_user_missing_for_quick_apply` để báo rõ cần peer hợp lệ trước khi apply.
 - Batch 331 handoff:
   - `0a78bbc` — `batch331: add session viewer+author create-and-reload quick action`
   - web moment shell thêm action `Use current session user as viewer + author + create moment + reload feed`; action auto-apply cả author/viewer theo session user rồi reuse create flow với viewer override để reload feed ngay trong cùng thao tác.
