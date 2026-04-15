@@ -35,6 +35,13 @@ type NotificationMutationDelta = {
   totalUnreadCount: number | null;
 };
 
+type NotificationCreateResultDelta = {
+  notificationId: string;
+  readState: "read" | "unread";
+  currentPageUnread: number | null;
+  totalUnreadCount: number | null;
+};
+
 export function NotificationShell({ initialUserId = "" }: NotificationShellProps) {
   const [form, setForm] = useState({
     ...initialForm,
@@ -49,6 +56,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   const [busyId, setBusyId] = useState<string | null>(null);
   const [lastLoadedWindow, setLastLoadedWindow] = useState<NotificationLoadWindow | null>(null);
   const [lastMutationDelta, setLastMutationDelta] = useState<NotificationMutationDelta | null>(null);
+  const [lastCreateResultDelta, setLastCreateResultDelta] = useState<NotificationCreateResultDelta | null>(null);
 
   useEffect(() => {
     setForm((current) => ({
@@ -60,6 +68,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     setPagination({ limit: 20, offset: 0, unreadOnly: false });
     setLastLoadedWindow(null);
     setLastMutationDelta(null);
+    setLastCreateResultDelta(null);
   }, [initialUserId]);
 
   function currentLoadWindow(overrides?: Partial<NotificationLoadWindow>): NotificationLoadWindow {
@@ -138,6 +147,10 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     ? `notification_id=${lastMutationDelta.notificationId} / read_state=${lastMutationDelta.readState} / current_page_unread=${lastMutationDelta.currentPageUnread ?? "(none)"} / total_unread_count=${lastMutationDelta.totalUnreadCount ?? "(none)"}`
     : "notification_id=(none) / read_state=(none) / current_page_unread=(none) / total_unread_count=(none)";
 
+  const quickCreateResultDeltaLine = lastCreateResultDelta
+    ? `notification_id=${lastCreateResultDelta.notificationId} / read_state=${lastCreateResultDelta.readState} / current_page_unread=${lastCreateResultDelta.currentPageUnread ?? "(none)"} / total_unread_count=${lastCreateResultDelta.totalUnreadCount ?? "(none)"}`
+    : "notification_id=(none) / read_state=(none) / current_page_unread=(none) / total_unread_count=(none)";
+
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsCreating(true);
@@ -149,9 +162,36 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
         notificationType: form.notificationType.trim(),
         payloadJson: JSON.parse(form.payloadJson) as Record<string, unknown>,
       });
+
+      const createdIsRead = created.read_at !== null;
+      let nextMeta = listMeta;
+      if (listMeta) {
+        nextMeta = {
+          ...listMeta,
+          count: listMeta.count + 1,
+          unread_count: createdIsRead ? listMeta.unread_count : listMeta.unread_count + 1,
+          total_unread_count: createdIsRead ? listMeta.total_unread_count : listMeta.total_unread_count + 1,
+        };
+        setListMeta(nextMeta);
+      }
+
+      const createResultDelta: NotificationCreateResultDelta = {
+        notificationId: created.id,
+        readState: createdIsRead ? "read" : "unread",
+        currentPageUnread: nextMeta ? nextMeta.unread_count : null,
+        totalUnreadCount: nextMeta ? nextMeta.total_unread_count : null,
+      };
+      setLastCreateResultDelta(createResultDelta);
+
       setItems((current) => [created, ...current.filter((item) => item.id !== created.id)]);
       setLastLoadedWindow(null);
-      setStatus(`Created notification ${created.id}. Reload to refresh unread summary.`);
+      setStatus(
+        `Created notification ${created.id}. ` +
+          `Quick create-result delta: notification_id=${createResultDelta.notificationId} / ` +
+          `read_state=${createResultDelta.readState} / ` +
+          `current_page_unread=${createResultDelta.currentPageUnread ?? "(none)"} / ` +
+          `total_unread_count=${createResultDelta.totalUnreadCount ?? "(none)"}.`,
+      );
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "notification_create_failed");
     }
@@ -268,6 +308,20 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     );
   }
 
+  async function handleCopyQuickCreateResultDelta() {
+    if (!lastCreateResultDelta) {
+      setStatus("quick_create_result_delta_missing");
+      return;
+    }
+
+    await copyToClipboard(
+      quickCreateResultDeltaLine,
+      "Copied quick create-result delta to clipboard",
+      "quick_create_result_delta_missing",
+      "quick_create_result_delta_copy_failed",
+    );
+  }
+
   return (
     <section>
       <p>
@@ -305,6 +359,14 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       <p>
         <button type="button" onClick={() => void handleCopyQuickMutationDelta()}>
           Copy quick mutation delta
+        </button>
+      </p>
+      <p>
+        Quick create-result delta: <code>{quickCreateResultDeltaLine}</code>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickCreateResultDelta()}>
+          Copy quick create-result delta
         </button>
       </p>
       <p>Filter mode: {pagination.unreadOnly ? "Unread only" : "All notifications"}</p>
