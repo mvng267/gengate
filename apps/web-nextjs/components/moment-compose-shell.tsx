@@ -223,7 +223,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     await submitMomentCreateFlow(sessionUserId, `${authorStatus} ${viewerStatus}`, sessionUserId);
   }
 
-  async function applyCurrentSessionUserAsViewerAndLoad() {
+  async function applyCurrentSessionUserAsViewerKeepAuthorAndLoadPrivateFeed() {
     const sessionUserId = currentSessionUserId.trim();
     if (!sessionUserId) {
       setStatus("session_viewer_missing_for_quick_apply");
@@ -242,14 +242,16 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     }));
 
     setIsLoadingFeed(true);
-    setStatus(`${viewerStatus} Reloading private friend feed...`);
+    setStatus(`${viewerStatus} Kept create author as-is. Reloading private friend feed...`);
 
     try {
       const nextItems = await listPrivateFeed(sessionUserId);
       setFeedItems(nextItems);
       setFeedVisibilityGateSnapshotSource("reload_flow");
       const gateSummary = buildFeedVisibilityGateSummary(sessionUserId, nextItems, "reload_flow").summaryLine;
-      setStatus(`${viewerStatus} Loaded ${nextItems.length} private feed moment(s) for viewer ${sessionUserId}. Gate summary: ${gateSummary}.`);
+      setStatus(
+        `${viewerStatus} Kept create author as-is. Loaded ${nextItems.length} private feed moment(s) for viewer ${sessionUserId}. Gate summary: ${gateSummary}.`,
+      );
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "private_feed_failed");
     }
@@ -842,10 +844,10 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         </button>
         <button
           type="button"
-          onClick={() => void applyCurrentSessionUserAsViewerAndLoad()}
+          onClick={() => void applyCurrentSessionUserAsViewerKeepAuthorAndLoadPrivateFeed()}
           disabled={isLoadingFeed || currentSessionUserId.trim().length === 0}
         >
-          Use current session user as viewer + load
+          Use current session user as viewer + keep author + load private feed
         </button>
         <button type="button" onClick={() => void handleReloadFeed()} disabled={isLoadingFeed || isDeleting}>
           {isLoadingFeed ? "Reloading feed..." : "Reload private friend feed"}
