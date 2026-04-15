@@ -174,9 +174,26 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   const lifecycleCreateResult = lastLifecyclePair?.createResult ?? lastCreateResultDelta;
   const lifecycleMutationDelta = lastLifecyclePair?.mutationDelta ?? lastMutationDelta;
 
+  const lifecyclePairTransition =
+    quickLifecyclePairState === "missing"
+      ? "none->none"
+      : `${lifecycleCreateResult?.readState ?? "none"}->${lifecycleMutationDelta?.readState ?? "none"}`;
+
+  const lifecyclePairTransitionContext =
+    lifecyclePairTransition === "none->none"
+      ? "none"
+      : lifecyclePairTransition === "read->read" || lifecyclePairTransition === "unread->unread"
+        ? "unchanged"
+        : "changed";
+
+  const lifecyclePairTransitionText = `lifecycle_pair_transition=${lifecyclePairTransition}`;
+  const lifecyclePairTransitionContextText = `lifecycle_pair_transition_context=${lifecyclePairTransitionContext}`;
+
   const quickLifecyclePairLine =
     `lifecycle_pair_state=${quickLifecyclePairState}` +
     ` / lifecycle_pair_subject=${lifecyclePairSubject}` +
+    ` / ${lifecyclePairTransitionText}` +
+    ` / ${lifecyclePairTransitionContextText}` +
     ` / create_result(notification_id=${lifecycleCreateResult?.notificationId ?? "(none)"},read_state=${lifecycleCreateResult?.readState ?? "(none)"},current_page_unread=${lifecycleCreateResult?.currentPageUnread ?? "(none)"},total_unread_count=${lifecycleCreateResult?.totalUnreadCount ?? "(none)"})` +
     ` / mutation_delta(notification_id=${lifecycleMutationDelta?.notificationId ?? "(none)"},read_state=${lifecycleMutationDelta?.readState ?? "(none)"},current_page_unread=${lifecycleMutationDelta?.currentPageUnread ?? "(none)"},total_unread_count=${lifecycleMutationDelta?.totalUnreadCount ?? "(none)"})`;
 
@@ -426,6 +443,12 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       </p>
       <p>
         Quick lifecycle pair subject: <code>lifecycle_pair_subject={lifecyclePairSubject}</code>
+      </p>
+      <p>
+        Quick lifecycle pair transition: <code>{lifecyclePairTransitionText}</code>
+      </p>
+      <p>
+        Quick lifecycle pair transition context: <code>{lifecyclePairTransitionContextText}</code>
       </p>
       <p>
         Quick lifecycle pair: <code>{quickLifecyclePairLine}</code>

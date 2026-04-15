@@ -53,7 +53,7 @@ struct NotificationsPlaceholderView: View {
                         "Quick page cursor summary line (`user_id/limit/offset/filter_mode/count/unread_count/total_unread_count`) helps verify paging/filter window quickly.",
                         "Quick mutation delta line (`notification_id/read_state/current_page_unread/total_unread_count`) lets testers report mark read/unread outcome without manual counting.",
                         "Quick create-result delta line (`notification_id/read_state/current_page_unread/total_unread_count`) lets testers report create outcome quickly trước khi chuyển qua toggle.",
-                        "Quick lifecycle pair line (`lifecycle_pair_state + lifecycle_pair_subject + create_result + mutation_delta`) lets testers report a full create->toggle chain with root-cause marker in one payload.",
+                        "Quick lifecycle pair line (`lifecycle_pair_state + lifecycle_pair_subject + lifecycle_pair_transition + lifecycle_pair_transition_context + create_result + mutation_delta`) lets testers report a full create->toggle chain with root-cause + transition marker in one payload.",
                         "Use this tab to run minimal notification lifecycle checks from iOS without relying on web seeding first."
                     ]
                 )
@@ -323,6 +323,14 @@ struct NotificationsPlaceholderView: View {
                         .foregroundStyle(.secondary)
 
                     Text("Quick lifecycle pair subject: lifecycle_pair_subject=\(lifecyclePairSubject)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
+                    Text("Quick lifecycle pair transition: lifecycle_pair_transition=\(lifecyclePairTransition)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
+                    Text("Quick lifecycle pair transition context: lifecycle_pair_transition_context=\(lifecyclePairTransitionContext)")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
 
@@ -607,6 +615,30 @@ struct NotificationsPlaceholderView: View {
         }
     }
 
+    private var lifecyclePairTransition: String {
+        let createResult = lastLifecyclePair?.createResult ?? lastCreateResultDelta
+        let mutationDelta = lastLifecyclePair?.mutationDelta ?? lastMutationDelta
+
+        guard lifecyclePairState != "missing" else {
+            return "none->none"
+        }
+
+        let createReadState = createResult?.readState ?? "none"
+        let mutationReadState = mutationDelta?.readState ?? "none"
+        return "\(createReadState)->\(mutationReadState)"
+    }
+
+    private var lifecyclePairTransitionContext: String {
+        switch lifecyclePairTransition {
+        case "none->none":
+            return "none"
+        case "read->read", "unread->unread":
+            return "unchanged"
+        default:
+            return "changed"
+        }
+    }
+
     private var quickLifecyclePairLine: String {
         let createResult = lastLifecyclePair?.createResult ?? lastCreateResultDelta
         let mutationDelta = lastLifecyclePair?.mutationDelta ?? lastMutationDelta
@@ -621,7 +653,7 @@ struct NotificationsPlaceholderView: View {
         let mutationDeltaCurrentPageUnread = mutationDelta?.currentPageUnreadText ?? "(none)"
         let mutationDeltaTotalUnreadCount = mutationDelta?.totalUnreadCountText ?? "(none)"
 
-        return "lifecycle_pair_state=\(lifecyclePairState) / lifecycle_pair_subject=\(lifecyclePairSubject) / create_result(notification_id=\(createResultID),read_state=\(createResultReadState),current_page_unread=\(createResultCurrentPageUnread),total_unread_count=\(createResultTotalUnreadCount)) / mutation_delta(notification_id=\(mutationDeltaID),read_state=\(mutationDeltaReadState),current_page_unread=\(mutationDeltaCurrentPageUnread),total_unread_count=\(mutationDeltaTotalUnreadCount))"
+        return "lifecycle_pair_state=\(lifecyclePairState) / lifecycle_pair_subject=\(lifecyclePairSubject) / lifecycle_pair_transition=\(lifecyclePairTransition) / lifecycle_pair_transition_context=\(lifecyclePairTransitionContext) / create_result(notification_id=\(createResultID),read_state=\(createResultReadState),current_page_unread=\(createResultCurrentPageUnread),total_unread_count=\(createResultTotalUnreadCount)) / mutation_delta(notification_id=\(mutationDeltaID),read_state=\(mutationDeltaReadState),current_page_unread=\(mutationDeltaCurrentPageUnread),total_unread_count=\(mutationDeltaTotalUnreadCount))"
     }
 
     private var quickLifecyclePairCopiedFeedbackText: String? {
