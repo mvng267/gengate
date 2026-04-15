@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 322
-- Trục công việc: feed shell — web+iOS persist/display `last_source_state_snapshot=...` token after source-state snapshot copy.
-- Trạng thái: batch322_complete_feed_source_state_snapshot_token_web_ios.
+- Batch workflow chính thức hiện tại: 323
+- Trục công việc: feed shell — web+iOS add dedicated quick-copy action for `last_source_state_snapshot=...` line.
+- Trạng thái: batch323_complete_feed_last_source_state_snapshot_quick_copy_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 323 handoff (closed)
+- Batch vừa xong: **323**
+- Commit đã chốt:
+  - `e9fac07` — `batch323: add last source-state snapshot quick copy on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **324**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell (web+iOS): thêm source marker `last_source_state_snapshot_source=source_state_snapshot_copy|manual_recopy` để QA phân biệt token mới refresh vs re-copy.
 
 ## Batch 322 handoff (closed)
 - Batch vừa xong: **322**
