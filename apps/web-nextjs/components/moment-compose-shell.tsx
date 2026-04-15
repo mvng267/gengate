@@ -122,11 +122,17 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         return "";
     }
   };
+  const deleteCopyAuditSourceReadiness = deleteSummaryCopySources.map((source) => ({
+    source,
+    hasValue: resolveDeleteCopyAuditSourceValue(source).trim().length > 0,
+  }));
+  const deleteCopyAuditReadyCount = deleteCopyAuditSourceReadiness.filter(({ hasValue }) => hasValue).length;
   const deleteCopyAuditSourceStateLine =
     "delete_copy_audit_source_state=" +
-    deleteSummaryCopySources
-      .map((source) => `${source}:${resolveDeleteCopyAuditSourceValue(source).trim().length > 0 ? "ready" : "missing"}`)
-      .join("/");
+    deleteCopyAuditSourceReadiness
+      .map(({ source, hasValue }) => `${source}:${hasValue ? "ready" : "missing"}`)
+      .join("/") +
+    `/ready_count=${deleteCopyAuditReadyCount}/total=${deleteSummaryCopySources.length}`;
 
   useEffect(() => {
     setForm((current) => ({

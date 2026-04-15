@@ -1054,13 +1054,17 @@ struct FeedPlaceholderView: View {
     }
 
     private var deleteCopyAuditSourceStateLine: String {
-        let segments = deleteCopyAuditSourceOptions.map { source in
+        let readiness = deleteCopyAuditSourceOptions.map { source -> (source: String, hasValue: Bool) in
             let hasValue = !deleteCopyAuditSourceValue(for: source)
                 .trimmingCharacters(in: .whitespacesAndNewlines)
                 .isEmpty
-            return "\(source):\(hasValue ? "ready" : "missing")"
+            return (source: source, hasValue: hasValue)
         }
-        return "delete_copy_audit_source_state=\(segments.joined(separator: "/"))"
+        let segments = readiness.map { entry in
+            "\(entry.source):\(entry.hasValue ? "ready" : "missing")"
+        }
+        let readyCount = readiness.filter(\.hasValue).count
+        return "delete_copy_audit_source_state=\(segments.joined(separator: "/"))/ready_count=\(readyCount)/total=\(deleteCopyAuditSourceOptions.count)"
     }
 
     private func deleteCopyAuditSourceValue(for source: String) -> String {
