@@ -311,6 +311,23 @@ struct InboxPlaceholderView: View {
 
                         Button {
                             Task {
+                                await applyCurrentSessionUserAsSenderKeepPairAndSend()
+                            }
+                        } label: {
+                            Text(isSendingMessage ? "Applying session sender + sending..." : "Use current session user as sender + keep user_a/user_b pair + send")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(
+                            isLoading ||
+                            isSendingMessage ||
+                            conversationSummary == nil ||
+                            currentSessionUserID == nil ||
+                            messageDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        )
+
+                        Button {
+                            Task {
                                 await sendMessage()
                             }
                         } label: {
@@ -3323,6 +3340,32 @@ use_when=\(useWhenText)
         userAIDDraft = currentSessionUserID
         sendStatusHint = "\(senderStatus) Sending direct message shell..."
         await sendMessage(senderUserIDOverride: currentSessionUserID, statusPrefix: senderStatus)
+    }
+
+    private func applyCurrentSessionUserAsSenderKeepPairAndSend() async {
+        guard let currentSessionUserID else {
+            sendStatusHint = "session_sender_missing_for_quick_apply"
+            return
+        }
+
+        guard conversationSummary != nil else {
+            fetchError = "Load direct thread trước khi gửi message."
+            return
+        }
+
+        let trimmedCurrentSessionUserID = currentSessionUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentUserAID = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentUserBID = userBIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let senderStatus: String
+        if currentUserAID == trimmedCurrentSessionUserID || currentUserBID == trimmedCurrentSessionUserID {
+            senderStatus = "Current pair already includes current session user; kept User A + User B as-is (user_pair_source=kept_user_a+user_b). Using session sender (sender_source=session_user)."
+        } else {
+            senderStatus = "Kept User A + User B as-is (user_pair_source=kept_user_a+user_b). Applied current session user as sender (sender_source=session_user)."
+        }
+
+        sendStatusHint = "\(senderStatus) Sending direct message shell..."
+        await sendMessage(senderUserIDOverride: trimmedCurrentSessionUserID, statusPrefix: senderStatus)
     }
 
     private func applyCurrentSessionUserAsReadStatusFocusUser() {
