@@ -97,7 +97,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `d5ddf9e` — `batch309: add ios feed delete parity summary markers`
+  - commit gần nhất đã chốt: `2b07ac7` — `batch309: add ios feed delete parity summary markers`
   - commit liền trước: `6091c72` — `batch308: add web feed delete moment parity shell`
   - working tree hiện tại: sạch
 - Blocker nếu có:
@@ -119,7 +119,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch vừa xong: **309**
 - Commit cuối đã chốt:
-  - `d5ddf9e` — `batch309: add ios feed delete parity summary markers`
+  - `2b07ac7` — `batch309: add ios feed delete parity summary markers`
 - Test-verify cuối:
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:

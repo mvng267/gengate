@@ -56,7 +56,7 @@
 ## Batch 309 handoff (closed)
 - Batch vừa xong: **309**
 - Commit đã chốt:
-  - `d5ddf9e` — `batch309: add ios feed delete parity summary markers`
+  - `2b07ac7` — `batch309: add ios feed delete parity summary markers`
 - Test/verify cuối:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Blocker/rủi ro còn lại:

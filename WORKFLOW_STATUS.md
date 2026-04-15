@@ -20,7 +20,7 @@
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `d5ddf9e` — `batch309: add ios feed delete parity summary markers`
+  - latest feature commit: `2b07ac7` — `batch309: add ios feed delete parity summary markers`
   - previous feature commit: `6091c72` — `batch308: add web feed delete moment parity shell`
   - working tree: clean after batch309 feature + workflow sync commits
 - Blocker: none
