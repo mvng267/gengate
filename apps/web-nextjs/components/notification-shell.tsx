@@ -151,6 +151,35 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     setBusyId(null);
   }
 
+  async function copyToClipboard(text: string, statusPrefix: string, emptyCode: string, failedCode: string) {
+    const normalizedText = text.trim();
+    if (!normalizedText) {
+      setStatus(emptyCode);
+      return;
+    }
+
+    if (typeof navigator === "undefined" || typeof navigator.clipboard?.writeText !== "function") {
+      setStatus("quick_copy_clipboard_unavailable");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(normalizedText);
+      setStatus(`${statusPrefix} (${normalizedText}).`);
+    } catch {
+      setStatus(failedCode);
+    }
+  }
+
+  async function handleCopyQuickUnreadSummary() {
+    await copyToClipboard(
+      quickUnreadSummaryLine,
+      "Copied quick unread summary to clipboard",
+      "quick_unread_summary_empty",
+      "quick_unread_summary_copy_failed",
+    );
+  }
+
   return (
     <section>
       <p>
@@ -160,6 +189,11 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       <p>{pendingWindowHint}</p>
       <p>
         Quick unread summary: <code>{quickUnreadSummaryLine}</code>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickUnreadSummary()}>
+          Copy quick unread summary
+        </button>
       </p>
       <p>Filter mode: {pagination.unreadOnly ? "Unread only" : "All notifications"}</p>
 
