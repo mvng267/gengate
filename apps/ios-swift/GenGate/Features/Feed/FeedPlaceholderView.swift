@@ -25,6 +25,7 @@ struct FeedPlaceholderView: View {
     @State private var fetchError: String?
     @State private var latestQuickReactionLog: String?
     @State private var lastCreateFeedVisibilityDeltaLine: String?
+    @State private var feedVisibilityGateSnapshotSource: String = "reload_flow"
     @State private var lastCreateFeedVisibilityDeltaCopiedAt: Date?
     @State private var lastCreateFeedVisibilityDeltaCopiedText: String = ""
     @State private var isLoading = false
@@ -896,7 +897,7 @@ struct FeedPlaceholderView: View {
         return "viewer=\(normalizedViewer) / feed_count=\(feedCount) / first_moment_id=\(firstMomentID)"
     }
 
-    private func buildFeedVisibilityGateSummary(viewerRawID: String, rows: [PrivateFeedMomentRow]) -> (viewerAccess: String, viewerAccessReason: String, visibleCount: Int, firstMomentID: String, summaryLine: String) {
+    private func buildFeedVisibilityGateSummary(viewerRawID: String, rows: [PrivateFeedMomentRow], snapshotSource: String) -> (viewerAccess: String, viewerAccessReason: String, visibleCount: Int, firstMomentID: String, summaryLine: String) {
         let normalizedViewerID = viewerRawID.trimmingCharacters(in: .whitespacesAndNewlines)
         let viewerAccessReason: String
 
@@ -911,13 +912,17 @@ struct FeedPlaceholderView: View {
         let viewerAccess = viewerAccessReason == "granted" ? "granted" : "not_granted"
         let visibleCount = rows.count
         let firstMomentID = rows.first?.id ?? "(none)"
-        let summaryLine = "viewer_access=\(viewerAccess) / viewer_access_reason=\(viewerAccessReason) / visible_count=\(visibleCount) / first_moment_id=\(firstMomentID)"
+        let summaryLine = "viewer_access=\(viewerAccess) / viewer_access_reason=\(viewerAccessReason) / gate_snapshot_source=\(snapshotSource) / visible_count=\(visibleCount) / first_moment_id=\(firstMomentID)"
 
         return (viewerAccess, viewerAccessReason, visibleCount, firstMomentID, summaryLine)
     }
 
     private var quickFeedVisibilityGateSummaryLine: String {
-        buildFeedVisibilityGateSummary(viewerRawID: viewerUserIDDraft, rows: momentRows).summaryLine
+        buildFeedVisibilityGateSummary(
+            viewerRawID: viewerUserIDDraft,
+            rows: momentRows,
+            snapshotSource: feedVisibilityGateSnapshotSource
+        ).summaryLine
     }
 
     private var lastCreateFeedVisibilityDeltaCopiedFeedbackText: String? {
@@ -1307,7 +1312,8 @@ struct FeedPlaceholderView: View {
         do {
             momentRows = try await PrivateFeedAPIClient().fetchFeed(viewerUserID: trimmedViewerID)
             synchronizeReactionTargetWithLoadedMoments()
-            let gateSummary = buildFeedVisibilityGateSummary(viewerRawID: trimmedViewerID, rows: momentRows)
+            feedVisibilityGateSnapshotSource = "reload_flow"
+            let gateSummary = buildFeedVisibilityGateSummary(viewerRawID: trimmedViewerID, rows: momentRows, snapshotSource: "reload_flow")
             statusMessage = "Loaded \(momentRows.count) private feed moment(s). Gate summary: \(gateSummary.summaryLine)."
         } catch {
             momentRows = []
@@ -1387,14 +1393,16 @@ struct FeedPlaceholderView: View {
                 await loadPrivateFeed()
                 let firstMomentID = momentRows.first?.id ?? "(none)"
                 lastCreateFeedVisibilityDeltaLine = "created_moment_id=\(createdMomentID) / viewer=\(trimmedViewerID) / feed_count=\(momentRows.count) / first_moment_id=\(firstMomentID)"
-                let gateSummary = buildFeedVisibilityGateSummary(viewerRawID: trimmedViewerID, rows: momentRows)
+                feedVisibilityGateSnapshotSource = "create_flow"
+                let gateSummary = buildFeedVisibilityGateSummary(viewerRawID: trimmedViewerID, rows: momentRows, snapshotSource: "create_flow")
                 statusMessage =
                     "Created moment \(createdMomentID). Feed visibility delta: " +
                     "viewer=\(trimmedViewerID) / feed_count=\(momentRows.count) / first_moment_id=\(firstMomentID). " +
                     "Feed visibility gate summary: \(gateSummary.summaryLine)."
             } else {
                 lastCreateFeedVisibilityDeltaLine = "created_moment_id=\(createdMomentID) / viewer=(empty) / feed_count=(not_loaded) / first_moment_id=(not_loaded)"
-                let gateSummary = buildFeedVisibilityGateSummary(viewerRawID: "", rows: [])
+                feedVisibilityGateSnapshotSource = "create_flow"
+                let gateSummary = buildFeedVisibilityGateSummary(viewerRawID: "", rows: [], snapshotSource: "create_flow")
                 statusMessage =
                     "Created moment \(createdMomentID). Set feed viewer UUID, then load private feed to verify visibility delta. " +
                     "Gate summary: \(gateSummary.summaryLine)."
