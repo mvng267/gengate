@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 330
+- Batch: 331
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 330 moment posting shell (web+iOS) — add quick action `Use current session user as author + create moment + reload feed` for one-tap post→feed verification.
+- Scope: batch 331 moment posting shell (web+iOS) — add quick action `Use current session user as viewer + author + create moment + reload feed` for one-tap post→feed verification with shared session context.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -22,11 +22,15 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `3e2c17d` — `batch330: add session-author create-and-reload quick action`
-  - previous feature commit: `3dd4fc9` — `batch329: add session-receiver quick-send actions in friend graph shells`
-  - working tree: clean after batch330 feature commit
+  - latest feature commit: `0a78bbc` — `batch331: add session viewer+author create-and-reload quick action`
+  - previous feature commit: `3e2c17d` — `batch330: add session-author create-and-reload quick action`
+  - working tree: clean after batch331 feature commit
 - Blocker: none
-- Next: mở batch331 với 1 slice hẹp moment posting shell (web+iOS) — thêm quick action `Use current session user as viewer + author + create moment + reload feed` để one-tap giảm dependency nhập tay viewer trong post→feed retest.
+- Next: mở batch332 với 1 slice hẹp direct messaging shell (web+iOS) — thêm quick action `Use current session user as user_a + user_b + open direct thread` để one-tap smoke DM open/load path không cần nhập tay cả 2 user field.
+- Batch 331 handoff:
+  - `0a78bbc` — `batch331: add session viewer+author create-and-reload quick action`
+  - web moment shell thêm action `Use current session user as viewer + author + create moment + reload feed`; action auto-apply cả author/viewer theo session user rồi reuse create flow với viewer override để reload feed ngay trong cùng thao tác.
+  - iOS Feed shell thêm action cùng tên, auto-apply viewer+author theo session user rồi gọi create flow với viewer override để giữ one-tap parity web/iOS.
 - Batch 330 handoff:
   - `3e2c17d` — `batch330: add session-author create-and-reload quick action`
   - web moment shell thêm action `Use current session user as author + create moment + reload feed`; reuse create flow để tạo moment ngay với author=session user và reload private feed nếu viewer đang có.
