@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(pending in this run)` — `batch283: add first-unread guard quick-copy markers on web and ios`
+  - latest feature commit: `0578cae` — `batch283: add first-unread guard quick-copy markers on web and ios`
   - working tree: clean after batch283 commit
 - Blocker: none
 - Next: mở batch284 với 1 slice hẹp direct-message shell: thêm read-cursor no-op apply marker (`read_cursor_apply_state=noop|updated`) để tách rõ no-op guard và apply result trên web+iOS.
 - Batch 283 handoff:
-  - `(pending in this run)` — `batch283: add first-unread guard quick-copy markers on web and ios`
+  - `0578cae` — `batch283: add first-unread guard quick-copy markers on web and ios`
   - web/iOS thêm quick-copy line + clipboard action `first_unread_guard_state`, cập nhật theo cả jump-focus flow và member-row first-unread auto-mark flow.
 - Batch 282 handoff:
   - `4eb2db4` — `batch282: add first-unread no-op guard status markers on web and ios`

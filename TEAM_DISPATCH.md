@@ -56,7 +56,7 @@
 ## Batch 283 handoff (closed)
 - Batch vừa xong: **283**
 - Commit đã chốt:
-  - `(pending in this run)` — `batch283: add first-unread guard quick-copy markers on web and ios`
+  - `0578cae` — `batch283: add first-unread guard quick-copy markers on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
