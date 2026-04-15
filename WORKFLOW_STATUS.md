@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 340
+- Batch: 342
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 340 moment shell (web) — add quick action `Use current session user as viewer + keep author + load private feed` for one-tap session-viewer feed gate verify.
+- Scope: batch 342 DM shell (web) — add quick action `Use current session user as user_b (peer) + keep user_a + open direct thread` for one-tap peer-context apply parity with existing user_a path.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -11,20 +11,28 @@
   - iOS Feed: set `Author user UUID` + `Viewer user UUID` -> `Create moment + image` -> `Reload private feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Sau đó nhập `Moment ID to delete` (hoặc bấm `Use row id for delete`) -> `Delete moment` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`. Bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy copied delete summary feedback`, verify line `Delete copy audit source-state: delete_copy_audit_source_state=quick_delete_parity:<ready|missing>/last_delete_result:<ready|missing>/copied_feedback:<ready|missing>/ready_count=<n>/total=3`, dùng nút `Copy delete copy audit source-state snapshot line`, rồi verify line `Last source-state snapshot: last_source_state_snapshot=...` + line `Last source-state snapshot source: last_source_state_snapshot_source=source_state_snapshot_copy`; dùng nút `Copy last source-state snapshot line` để re-copy token và verify marker source chuyển thành `last_source_state_snapshot_source=manual_recopy`; dùng nút `Copy last source-state snapshot source line` để copy marker nguồn trực tiếp và verify status có marker `last_source_state_snapshot_source_line_copied`; sau đó bấm `Copy delete copy audit for first ready source`, verify thêm line `Delete copy audit first-ready source: delete_copy_audit_first_ready_source=<source|none>` + nút copy marker tương ứng.
   - Web Location (`/location`): nhập owner/share -> `Reload counts` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - iOS Location: nhập owner/share -> `Load location status` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
-  - Web Inbox (`/inbox`): nhập user A/B (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
+  - Web Inbox (`/inbox`): nhập user A/B (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread`, hoặc bấm `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
   - iOS Inbox: nhập User A/B (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
-  - apps/web-nextjs/components/moment-compose-shell.tsx
+  - apps/web-nextjs/components/direct-message-shell.tsx
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
 - Git:
-  - latest feature commit: `813905c` — `batch340: add session-viewer keep-author quick load in web moment shell`
-  - previous feature commit: `6faffce` — `batch339: add session-requester keep-receiver quick send in web friend graph shell`
+  - latest feature commit: `423f858` — `batch342: add session-user-b keep-user-a quick open in web dm shell`
+  - previous feature commit: `3d328e2` — `batch341: add session-viewer keep-author quick load in ios moment shell`
   - working tree: clean
 - Blocker: none
-- Next: mở batch341 với 1 slice hẹp moment shell (iOS): thêm quick action `Use current session user as viewer + keep author + load private feed` để one-tap parity với web session-viewer keep-author feed load path.
+- Next: mở batch343 với 1 slice hẹp DM shell (iOS): thêm quick action `Use current session user as user_b (peer) + keep user_a + open direct thread` để one-tap parity với web DM peer-context apply path.
+- Batch 342 handoff:
+  - `423f858` — `batch342: add session-user-b keep-user-a quick open in web dm shell`
+  - web DM shell thêm one-tap action `Use current session user as user_b (peer) + keep user_a + open direct thread` để complement path user_a hiện có.
+  - flow resolve peer từ form/member context, giữ guard marker `session_peer_user_missing_for_quick_apply`, và mở thread ngay với status prefix marker `user_pair_source=peer_context+session_user` (unchanged/applied).
+- Batch 341 handoff:
+  - `3d328e2` — `batch341: add session-viewer keep-author quick load in ios moment shell`
+  - iOS moment shell thêm one-tap action `Use current session user as viewer + keep author + load private feed` để explicit giữ nguyên author context khi verify private feed gate.
+  - flow thêm helper status-prefix cho `loadPrivateFeed(...)`, giữ guard marker `session_viewer_missing_for_quick_apply` + marker `viewer_source=session_user`, và status copy nêu rõ `Kept create author as-is.` cho loading/success/error path.
 - Batch 340 handoff:
   - `813905c` — `batch340: add session-viewer keep-author quick load in web moment shell`
   - web moment shell đổi quick action viewer-load sang `Use current session user as viewer + keep author + load private feed` để explicit giữ nguyên author context khi verify private feed gate.

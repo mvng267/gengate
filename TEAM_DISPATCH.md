@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 340
-- Trục công việc: moment shell (web) — add quick action `Use current session user as viewer + keep author + load private feed` for one-tap session-viewer feed gate verify.
-- Trạng thái: batch340_complete_moment_web_session_viewer_keep_author_load_status.
+- Batch workflow chính thức hiện tại: 342
+- Trục công việc: DM shell (web) — add quick action `Use current session user as user_b (peer) + keep user_a + open direct thread` for one-tap peer-context apply parity with existing user_a path.
+- Trạng thái: batch342_complete_dm_web_session_user_b_keep_user_a_open_direct_thread.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,30 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 342 handoff (closed)
+- Batch vừa xong: **342**
+- Commit đã chốt:
+  - `423f858` — `batch342: add session-user-b keep-user-a quick open in web dm shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **343**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - DM shell (iOS): thêm quick action `Use current session user as user_b (peer) + keep user_a + open direct thread` để one-tap parity với web DM peer-context apply path.
+
+## Batch 341 handoff (closed)
+- Batch vừa xong: **341**
+- Commit đã chốt:
+  - `3d328e2` — `batch341: add session-viewer keep-author quick load in ios moment shell`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **342**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - DM shell (web): thêm quick action `Use current session user as user_b (peer) + keep user_a + open direct thread` để hoàn thiện cặp one-tap context apply song song với path user_a hiện có.
 
 ## Batch 340 handoff (closed)
 - Batch vừa xong: **340**
