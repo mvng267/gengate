@@ -19,6 +19,7 @@ struct NotificationsPlaceholderView: View {
     @State private var pageOffsetDraft: String = "0"
     @State private var pageUnreadOnly: Bool = false
     @State private var mutatingNotificationIDs: Set<String> = []
+    @State private var deletingNotificationIDs: Set<String> = []
     @State private var fetchError: String?
     @State private var statusMessage: String?
     @State private var isLoading = false
@@ -44,6 +45,9 @@ struct NotificationsPlaceholderView: View {
     @State private var lastQuickUnreadLifecycleMutationBundleCopiedText: String = ""
     @State private var quickLifecycleSnapshotAuditCopiedAt: Date?
     @State private var lastQuickLifecycleSnapshotAuditCopiedText: String = ""
+    @State private var quickDeleteResultSummaryCopiedAt: Date?
+    @State private var lastQuickDeleteResultSummaryCopiedText: String = ""
+    @State private var lastDeleteResultDelta: NotificationDeleteResultDelta?
     @State private var lastLifecyclePair: NotificationLifecyclePair?
 
     private struct NotificationCreateFlowInput {
@@ -70,11 +74,11 @@ struct NotificationsPlaceholderView: View {
             VStack(alignment: .leading, spacing: 20) {
                 FeaturePlaceholderView(
                     title: "Notifications",
-                    summary: "iOS native notification center shell now supports create + read/unread mutation so notification flow can be exercised end-to-end from native UI.",
-                    status: "Status: native notification center now supports create + read/unread toggles + quick unread summary + quick page cursor summary + quick mutation delta + quick create-result delta + quick lifecycle pair lines + quick lifecycle pair mutation line + quick unread lifecycle mutation bundle line + quick lifecycle snapshot audit line; delete remains intentionally out of scope for this slice.",
+                    summary: "iOS native notification center shell now supports create + read/unread mutation + delete so notification flow can be exercised end-to-end from native UI.",
+                    status: "Status: native notification center now supports create + read/unread toggles + delete + quick unread summary + quick page cursor summary + quick mutation delta + quick create-result delta + quick lifecycle pair lines + quick lifecycle pair mutation line + quick unread lifecycle mutation bundle line + quick lifecycle snapshot audit line + quick delete result summary line.",
                     bullets: [
                         "Paste a backend user UUID to create and load notifications for that user.",
-                        "This shell can create via `POST /notifications`, then read `/notifications/{user_id}` and toggle each row via `/notifications/{id}/read` + `/notifications/{id}/unread`.",
+                        "This shell can create via `POST /notifications`, then read `/notifications/{user_id}`, toggle each row via `/notifications/{id}/read` + `/notifications/{id}/unread`, and delete via `DELETE /notifications/{id}`.",
                         "Quick unread summary line (`current_page_unread / total_unread_count`) helps parity scan quickly with backend/web payloads.",
                         "Quick page cursor summary line (`user_id/limit/offset/filter_mode/count/unread_count/total_unread_count`) helps verify paging/filter window quickly.",
                         "Quick mutation delta line (`notification_id/read_state/current_page_unread/total_unread_count`) lets testers report mark read/unread outcome without manual counting.",
@@ -83,6 +87,7 @@ struct NotificationsPlaceholderView: View {
                         "Quick lifecycle pair mutation line (`lifecycle_pair_state + lifecycle_pair_subject + lifecycle_pair_transition + lifecycle_pair_transition_context + mutation_delta`) gives one-tap mutation-focused parity payload aligned with web notifications shell.",
                         "Quick unread lifecycle mutation bundle line (`unread_summary + lifecycle markers + mutation_delta`) gives deterministic one-tap payload to report unread counters and mutation transition together (parity with web batch364).",
                         "Quick lifecycle snapshot audit line (`lifecycle_pair_state + lifecycle_pair_subject + lifecycle_pair_transition + lifecycle_pair_transition_context + create_notification_id + mutation_notification_id + unread_summary + window(limit/offset/filter_mode)`) gives deterministic one-tap lifecycle snapshot payload for backend/web/iOS parity (parity with web batch366).",
+                        "Quick delete result summary line (`delete_result + notification_id + previous_read_state + current_page_count/current_page_unread/total_unread_count + window`) gives deterministic one-tap delete parity payload aligned with web batch368.",
                         "Use this tab to run minimal notification lifecycle checks from iOS without relying on web seeding first."
                     ]
                 )
@@ -449,6 +454,21 @@ struct NotificationsPlaceholderView: View {
                             .foregroundStyle(.secondary)
                     }
 
+                    Text("Quick delete result summary: \(quickDeleteResultSummaryLine)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
+                    Button("Copy quick delete result summary") {
+                        copyQuickDeleteResultSummaryLine()
+                    }
+                    .buttonStyle(.bordered)
+
+                    if let quickDeleteResultSummaryCopiedFeedbackText {
+                        Text(quickDeleteResultSummaryCopiedFeedbackText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     if let listMeta {
                         Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount) · Limit: \(listMeta.limit) · Offset: \(listMeta.offset) · Filter mode: \(listMeta.unreadOnly ? "Unread only" : "All notifications")")
                             .font(.footnote.monospaced())
@@ -486,6 +506,7 @@ struct NotificationsPlaceholderView: View {
                     } else {
                         ForEach(notificationRows) { row in
                             let isMutating = mutatingNotificationIDs.contains(row.id)
+                            let isDeleting = deletingNotificationIDs.contains(row.id)
 
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(row.notificationType)
@@ -510,7 +531,17 @@ struct NotificationsPlaceholderView: View {
                                     Text(isMutating ? "Updating..." : "\(row.isRead ? "●" : "○") \(row.isRead ? "Mark unread" : "Mark read")")
                                 }
                                 .buttonStyle(.bordered)
-                                .disabled(isMutating || isLoading)
+                                .disabled(isMutating || isDeleting || isLoading)
+
+                                Button {
+                                    Task {
+                                        await deleteNotification(for: row)
+                                    }
+                                } label: {
+                                    Text(isDeleting ? "Deleting..." : "Delete")
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(isMutating || isDeleting || isLoading)
 
                                 Text("payload: \(row.payloadSummary)")
                                     .font(.footnote)
@@ -845,6 +876,27 @@ struct NotificationsPlaceholderView: View {
         return "Copied quick lifecycle snapshot audit (\(Int(elapsed))s ago): \(lastQuickLifecycleSnapshotAuditCopiedText)"
     }
 
+    private var quickDeleteResultSummaryLine: String {
+        guard let lastDeleteResultDelta else {
+            return "delete_result=(none) / notification_id=(none) / previous_read_state=(none) / current_page_count=(none) / current_page_unread=(none) / total_unread_count=(none) / window(limit=(none),offset=(none),filter_mode=(none))"
+        }
+
+        return "delete_result=deleted / notification_id=\(lastDeleteResultDelta.notificationID) / previous_read_state=\(lastDeleteResultDelta.previousReadState) / current_page_count=\(lastDeleteResultDelta.currentPageCountText) / current_page_unread=\(lastDeleteResultDelta.currentPageUnreadText) / total_unread_count=\(lastDeleteResultDelta.totalUnreadCountText) / window(limit=\(lastDeleteResultDelta.window.limit),offset=\(lastDeleteResultDelta.window.offset),filter_mode=\(lastDeleteResultDelta.window.unreadOnly ? "unread_only" : "all"))"
+    }
+
+    private var quickDeleteResultSummaryCopiedFeedbackText: String? {
+        guard let quickDeleteResultSummaryCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(quickDeleteResultSummaryCopiedAt)
+        guard elapsed >= 0, elapsed < 6 else {
+            return nil
+        }
+
+        return "Copied quick delete result summary (\(Int(elapsed))s ago): \(lastQuickDeleteResultSummaryCopiedText)"
+    }
+
     private func prefillFromCurrentSessionUserIfNeeded() {
         guard userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let currentSessionUserID else {
@@ -916,6 +968,7 @@ struct NotificationsPlaceholderView: View {
     ) async {
         lastMutationDelta = nil
         lastCreateResultDelta = nil
+        lastDeleteResultDelta = nil
         lastLifecyclePair = nil
 
         let normalizedStatusPrefix = statusPrefix?.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -954,6 +1007,7 @@ struct NotificationsPlaceholderView: View {
                 unreadOnly: pageUnreadOnly
             )
             mutatingNotificationIDs = []
+            deletingNotificationIDs = []
             lastLoadedWindow = NotificationLoadWindow(
                 userID: trimmedUserID,
                 limit: safeLimit,
@@ -967,6 +1021,7 @@ struct NotificationsPlaceholderView: View {
             notificationRows = []
             listMeta = nil
             mutatingNotificationIDs = []
+            deletingNotificationIDs = []
             lastLoadedWindow = nil
 
             let errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
@@ -1125,6 +1180,7 @@ struct NotificationsPlaceholderView: View {
                 totalUnreadCount: nextMeta?.totalUnreadCount
             )
             lastCreateResultDelta = createResultDelta
+            lastDeleteResultDelta = nil
             lastLifecyclePair = nil
 
             userIDDraft = trimmedUserID
@@ -1203,6 +1259,7 @@ struct NotificationsPlaceholderView: View {
                 currentPageUnread: nextMeta?.unreadCount,
                 totalUnreadCount: nextMeta?.totalUnreadCount
             )
+            lastDeleteResultDelta = nil
             lastMutationDelta = mutationDelta
             if let lastCreateResultDelta, lastCreateResultDelta.notificationID == updated.id {
                 lastLifecyclePair = NotificationLifecyclePair(
@@ -1218,6 +1275,69 @@ struct NotificationsPlaceholderView: View {
                 ? "Marked notification \(updated.id) as read (●). Quick mutation delta: \(mutationDeltaLine)."
                 : "Marked notification \(updated.id) as unread (○). Quick mutation delta: \(mutationDeltaLine)."
             lastLoadedWindow = nil
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+    }
+
+    private func deleteNotification(for row: NotificationRow) async {
+        guard !deletingNotificationIDs.contains(row.id) else {
+            return
+        }
+
+        deletingNotificationIDs.insert(row.id)
+        defer {
+            deletingNotificationIDs.remove(row.id)
+        }
+
+        fetchError = nil
+        statusMessage = "Deleting notification..."
+
+        do {
+            let deleted = try await NotificationsAPIClient().deleteNotification(notificationID: row.id)
+
+            let currentWindow = lastLoadedWindow ?? NotificationLoadWindow(
+                userID: userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines),
+                limit: normalizedLimit,
+                offset: normalizedOffset,
+                unreadOnly: pageUnreadOnly
+            )
+
+            var nextMeta = listMeta
+            if var currentMeta = listMeta {
+                let unreadDelta = row.isRead ? 0 : -1
+                currentMeta = NotificationListMeta(
+                    count: max(0, currentMeta.count - 1),
+                    unreadCount: max(0, currentMeta.unreadCount + unreadDelta),
+                    totalUnreadCount: max(0, currentMeta.totalUnreadCount + unreadDelta),
+                    limit: currentMeta.limit,
+                    offset: currentMeta.offset,
+                    unreadOnly: currentMeta.unreadOnly
+                )
+                listMeta = currentMeta
+                nextMeta = currentMeta
+            }
+
+            notificationRows.removeAll { $0.id == deleted.id }
+            lastLoadedWindow = nil
+            lastMutationDelta = nil
+            if lastCreateResultDelta?.notificationID == deleted.id {
+                lastCreateResultDelta = nil
+            }
+            lastLifecyclePair = nil
+
+            let deleteResultDelta = NotificationDeleteResultDelta(
+                notificationID: deleted.id,
+                previousReadState: row.isRead ? "read" : "unread",
+                currentPageCount: nextMeta?.count,
+                currentPageUnread: nextMeta?.unreadCount,
+                totalUnreadCount: nextMeta?.totalUnreadCount,
+                window: currentWindow
+            )
+            lastDeleteResultDelta = deleteResultDelta
+
+            let deleteSummaryLine = "delete_result=deleted / notification_id=\(deleteResultDelta.notificationID) / previous_read_state=\(deleteResultDelta.previousReadState) / current_page_count=\(deleteResultDelta.currentPageCountText) / current_page_unread=\(deleteResultDelta.currentPageUnreadText) / total_unread_count=\(deleteResultDelta.totalUnreadCountText) / window(limit=\(deleteResultDelta.window.limit),offset=\(deleteResultDelta.window.offset),filter_mode=\(deleteResultDelta.window.unreadOnly ? "unread_only" : "all"))"
+            statusMessage = "Deleted notification \(deleted.id). Quick delete result summary: \(deleteSummaryLine)."
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
@@ -1371,6 +1491,25 @@ struct NotificationsPlaceholderView: View {
         fetchError = nil
     }
 
+    private func copyQuickDeleteResultSummaryLine() {
+        guard lastDeleteResultDelta != nil else {
+            statusMessage = "quick_delete_result_summary_missing"
+            return
+        }
+
+        let normalizedText = quickDeleteResultSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = "quick_delete_result_summary_missing"
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        lastQuickDeleteResultSummaryCopiedText = normalizedText
+        quickDeleteResultSummaryCopiedAt = Date()
+        statusMessage = "Copied quick delete result summary to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
     private func writeToClipboard(_ text: String) {
 #if canImport(UIKit)
         UIPasteboard.general.string = text
@@ -1428,6 +1567,27 @@ private struct NotificationCreateResultDelta {
     let readState: String
     let currentPageUnread: Int?
     let totalUnreadCount: Int?
+
+    var currentPageUnreadText: String {
+        currentPageUnread.map(String.init) ?? "(none)"
+    }
+
+    var totalUnreadCountText: String {
+        totalUnreadCount.map(String.init) ?? "(none)"
+    }
+}
+
+private struct NotificationDeleteResultDelta {
+    let notificationID: String
+    let previousReadState: String
+    let currentPageCount: Int?
+    let currentPageUnread: Int?
+    let totalUnreadCount: Int?
+    let window: NotificationLoadWindow
+
+    var currentPageCountText: String {
+        currentPageCount.map(String.init) ?? "(none)"
+    }
 
     var currentPageUnreadText: String {
         currentPageUnread.map(String.init) ?? "(none)"
@@ -1643,6 +1803,25 @@ private struct NotificationsAPIClient {
 
         guard httpResponse.statusCode == 200 else {
             throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Notification mutation failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(NotificationResponse.self, from: data)
+            return mapNotification(payload)
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func deleteNotification(notificationID: String) async throws -> NotificationRow {
+        var request = URLRequest(url: try makeURL(path: "/notifications/\(notificationID)"))
+        request.httpMethod = "DELETE"
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 200 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Notification delete failed"))
         }
 
         do {
