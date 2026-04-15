@@ -71,6 +71,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [lastReadCursorApplyQuickCopy, setLastReadCursorApplyQuickCopy] = useState(
     "target_user=(none) | previous_cursor_message=(none) | applied_message=(none) | current_member_cursor=(none) | focus_user=(none) | read_state=unknown | read_cursor_apply_state=unknown",
   );
+  const [lastReadCursorTriageQuickCopy, setLastReadCursorTriageQuickCopy] = useState(
+    "read_cursor_triage=target_user:(none),previous:(none),applied:(none),current:(none),apply_state:unknown",
+  );
   const [lastFirstUnreadJumpQuickCopy, setLastFirstUnreadJumpQuickCopy] = useState(
     "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown",
   );
@@ -148,6 +151,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setLastReadCursorQuickCopy("focus_user=(none) | resolved_message=(none) | read_state=unknown");
     setLastReadCursorApplyQuickCopy(
       "target_user=(none) | previous_cursor_message=(none) | applied_message=(none) | current_member_cursor=(none) | focus_user=(none) | read_state=unknown | read_cursor_apply_state=unknown",
+    );
+    setLastReadCursorTriageQuickCopy(
+      "read_cursor_triage=target_user:(none),previous:(none),applied:(none),current:(none),apply_state:unknown",
     );
     setLastFirstUnreadJumpQuickCopy(
       "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown",
@@ -707,8 +713,14 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       const currentMemberCursorMessageId =
         nextMembers.find((member) => member.user_id === updated.user_id)?.last_read_message_id ?? null;
 
+      const normalizedPreviousCursor = priorMemberCursorMessageId ?? "(none)";
+      const normalizedCurrentCursor = currentMemberCursorMessageId ?? "(none)";
+
       setLastReadCursorApplyQuickCopy(
-        `target_user=${updated.user_id} | previous_cursor_message=${priorMemberCursorMessageId ?? "(none)"} | applied_message=${normalizedAppliedMessageId} | current_member_cursor=${currentMemberCursorMessageId ?? "(none)"} | focus_user=${normalizedFocusUserId || "(none)"} | read_state=${appliedReadState} | read_cursor_apply_state=${readCursorApplyState}`,
+        `target_user=${updated.user_id} | previous_cursor_message=${normalizedPreviousCursor} | applied_message=${normalizedAppliedMessageId} | current_member_cursor=${normalizedCurrentCursor} | focus_user=${normalizedFocusUserId || "(none)"} | read_state=${appliedReadState} | read_cursor_apply_state=${readCursorApplyState}`,
+      );
+      setLastReadCursorTriageQuickCopy(
+        `read_cursor_triage=target_user:${updated.user_id},previous:${normalizedPreviousCursor},applied:${normalizedAppliedMessageId},current:${normalizedCurrentCursor},apply_state:${readCursorApplyState}`,
       );
 
       const successStatus = `Updated read cursor for ${updated.user_id} to ${updated.last_read_message_id ?? "(none)"} in thread ${conversation.id} (read_cursor_apply_state=${readCursorApplyState}).`;
@@ -784,6 +796,15 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     );
   }
 
+  async function handleCopyReadCursorTriageQuickCopy() {
+    await copyToClipboard(
+      lastReadCursorTriageQuickCopy,
+      "Copied read-cursor triage quick copy to clipboard",
+      "read_cursor_triage_quick_copy_empty",
+      "read_cursor_triage_quick_copy_failed",
+    );
+  }
+
   async function handleCopyFirstUnreadJumpQuickCopy() {
     await copyToClipboard(
       lastFirstUnreadJumpQuickCopy,
@@ -828,6 +849,12 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       </p>
       <button type="button" onClick={() => void handleCopyReadCursorApplyQuickCopy()}>
         Copy quick read-cursor apply result
+      </button>
+      <p>
+        Quick copy read-cursor triage line: <code>{lastReadCursorTriageQuickCopy}</code>
+      </p>
+      <button type="button" onClick={() => void handleCopyReadCursorTriageQuickCopy()}>
+        Copy quick read-cursor triage line
       </button>
       <p>
         Quick copy first-unread jump result: <code>{lastFirstUnreadJumpQuickCopy}</code>

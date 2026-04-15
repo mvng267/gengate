@@ -1,15 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 286
+- Batch: 287
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 286 direct-message shell — add current cursor snapshot token (`current_member_cursor`) into read-cursor apply quick-copy so previous/applied/current can be compared in one line on web+iOS.
+- Scope: batch 287 direct-message shell — add one-tap read-cursor triage line quick-copy (`read_cursor_triage=...`) so previous/applied/current/apply_state can be pasted in one compact tokenized line on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
-  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor apply result` và verify có thêm cụm `previous_cursor_message=... | applied_message=... | current_member_cursor=... | read_cursor_apply_state=...`.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor apply result` và verify có thêm `current_member_cursor=...` cạnh `previous_cursor_message=...`.
+  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
 - Files:
   - apps/web-nextjs/components/direct-message-shell.tsx
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -17,10 +17,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `d6bb3a4` — `batch286: add current-member cursor snapshot to apply quick copy`
-  - working tree: clean after batch286 commit
+  - latest feature commit: `(pending in this run)` — `batch287: add read-cursor triage quick-copy line on web and ios`
+  - working tree: clean after batch287 commit
 - Blocker: none
-- Next: mở batch287 với 1 slice hẹp direct-message shell: thêm one-tap `copy read-cursor triage line` (tokenized previous/applied/current/apply_state) để report parity nhanh hơn trên web+iOS.
+- Next: mở batch288 với 1 slice hẹp direct-message shell: thêm one-tap preset `apply focus user + first unread candidate` trên iOS parity với web jump action status-copy flow.
+- Batch 287 handoff:
+  - `(pending in this run)` — `batch287: add read-cursor triage quick-copy line on web and ios`
+  - web/iOS thêm quick-copy triage line `read_cursor_triage=...` và nút copy riêng để report parity ngắn gọn.
 - Batch 286 handoff:
   - `d6bb3a4` — `batch286: add current-member cursor snapshot to apply quick copy`
   - web/iOS read-cursor apply quick-copy line thêm `current_member_cursor`, giúp đối chiếu one-line previous/applied/current mà không cần mở member list.

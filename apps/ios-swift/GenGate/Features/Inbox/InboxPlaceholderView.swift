@@ -39,6 +39,7 @@ struct InboxPlaceholderView: View {
     @State private var sendStatusHint: String?
     @State private var lastSendQuickCopy: String = "sender=(none) | message_id=(none)"
     @State private var lastReadCursorApplyQuickCopy: String = "target_user=(none) | previous_cursor_message=(none) | applied_message=(none) | current_member_cursor=(none) | focus_user=(none) | read_state=unknown | read_cursor_apply_state=unknown"
+    @State private var lastReadCursorTriageQuickCopy: String = "read_cursor_triage=target_user:(none),previous:(none),applied:(none),current:(none),apply_state:unknown"
     @State private var lastFirstUnreadJumpQuickCopy: String = "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown"
     @State private var lastFirstUnreadGuardQuickCopy: String = "focus_user=(none) | first_unread_guard_state=unknown | candidate=(none)"
     @State private var isCreatingAttachment = false
@@ -1380,6 +1381,18 @@ struct InboxPlaceholderView: View {
                     }
 
                     HStack(alignment: .center, spacing: 8) {
+                        Text("Quick copy read-cursor triage line: \(lastReadCursorTriageQuickCopy)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Button("Copy quick read-cursor triage line") {
+                            copyReadCursorTriageQuickCopySummary()
+                        }
+                        .buttonStyle(.bordered)
+                    }
+
+                    HStack(alignment: .center, spacing: 8) {
                         Text("Quick copy first-unread jump result: \(lastFirstUnreadJumpQuickCopy)")
                             .font(.footnote.monospaced())
                             .foregroundStyle(.secondary)
@@ -2690,6 +2703,17 @@ use_when=\(useWhenText)
         sendStatusHint = "Copied read-cursor apply quick copy to clipboard (\(normalizedText))."
     }
 
+    private func copyReadCursorTriageQuickCopySummary() {
+        let normalizedText = lastReadCursorTriageQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            sendStatusHint = "read_cursor_triage_quick_copy_empty"
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        sendStatusHint = "Copied read-cursor triage quick copy to clipboard (\(normalizedText))."
+    }
+
     private func copyFirstUnreadJumpQuickCopySummary() {
         let normalizedText = lastFirstUnreadJumpQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
@@ -3864,6 +3888,7 @@ use_when=\(useWhenText)
             let normalizedPreviousCursorMessageID = previousMemberCursorMessageID ?? "(none)"
             let normalizedCurrentMemberCursorMessageID = updatedMemberRow.lastReadMessageID ?? "(none)"
             lastReadCursorApplyQuickCopy = "target_user=\(targetUserID) | previous_cursor_message=\(normalizedPreviousCursorMessageID) | applied_message=\(targetMessageID) | current_member_cursor=\(normalizedCurrentMemberCursorMessageID) | focus_user=\(normalizedFocusUserID) | read_state=\(appliedReadState) | read_cursor_apply_state=\(readCursorApplyState)"
+            lastReadCursorTriageQuickCopy = "read_cursor_triage=target_user:\(targetUserID),previous:\(normalizedPreviousCursorMessageID),applied:\(targetMessageID),current:\(normalizedCurrentMemberCursorMessageID),apply_state:\(readCursorApplyState)"
 
             if sendStatusHint?.contains("read_cursor_first_unread_focus_auto_source=member_row") == true ||
                 sendStatusHint?.contains("read_cursor_first_unread_focus_source=focus_user") == true {

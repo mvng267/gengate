@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **286**
-- Scope hiện tại: direct-message shell — thêm token `current_member_cursor` vào read-cursor apply quick-copy để so sánh previous/applied/current một dòng trên web+iOS.
+- Batch workflow chính thức hiện tại: **287**
+- Scope hiện tại: direct-message shell — thêm one-tap quick-copy triage line `read_cursor_triage=...` để report compact previous/applied/current/apply_state trên web+iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/direct-message-shell.tsx`
@@ -99,12 +99,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `d6bb3a4` — `batch286: add current-member cursor snapshot to apply quick copy`
+  - commit gần nhất đã chốt: `(pending in this run)` — `batch287: add read-cursor triage quick-copy line on web and ios`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch287 với 1 slice hẹp direct-message shell: thêm one-tap `copy read-cursor triage line` (tokenized previous/applied/current/apply_state) để report parity nhanh hơn trên web+iOS.
+  - mở batch288 với 1 slice hẹp direct-message shell: thêm one-tap preset `apply focus user + first unread candidate` trên iOS parity với web jump action status-copy flow.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed: bấm quick action `Use current session user as viewer + load` -> verify status `viewer_source=session_user` + feed reload.
@@ -112,6 +112,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **287**
+- Commit cuối đã chốt:
+  - `(pending in this run)` — `batch287: add read-cursor triage quick-copy line on web and ios`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **288**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm one-tap preset `apply focus user + first unread candidate` trên iOS parity với web jump action status-copy flow.
+
+---
 
 - Batch vừa xong: **286**
 - Commit cuối đã chốt:
