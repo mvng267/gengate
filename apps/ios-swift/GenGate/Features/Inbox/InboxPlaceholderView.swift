@@ -1427,6 +1427,18 @@ struct InboxPlaceholderView: View {
                     }
 
                     HStack(alignment: .center, spacing: 8) {
+                        Text("Quick copy sender keep-pair + send result bundle: \(senderKeepPairAndSendResultBundleQuickCopySummary)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Button("Copy quick sender keep-pair + send result bundle") {
+                            copySenderKeepPairAndSendResultBundleQuickCopySummary()
+                        }
+                        .buttonStyle(.bordered)
+                    }
+
+                    HStack(alignment: .center, spacing: 8) {
                         Text("Quick copy read cursor: \(readCursorQuickCopySummary)")
                             .font(.footnote.monospaced())
                             .foregroundStyle(.secondary)
@@ -2665,6 +2677,16 @@ use_when=\(useWhenText)
         return "focus_user=\(focusUserID) | resolved_message=\(resolvedMessageID) | read_state=\(readState)"
     }
 
+    private var senderKeepPairAndSendResultBundleQuickCopySummary: String {
+        let normalizedSenderKeepPair = lastSenderKeepPairQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedSendResult = lastSendQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let senderKeepPairValue = normalizedSenderKeepPair.isEmpty ? "(none)" : normalizedSenderKeepPair
+        let sendResultValue = normalizedSendResult.isEmpty ? "(none)" : normalizedSendResult
+
+        return "sender_keep_pair_marker={\(senderKeepPairValue)} | send_result={\(sendResultValue)}"
+    }
+
     private var latestLoadedMessageID: String? {
         messageRows.last?.id
     }
@@ -2760,6 +2782,17 @@ use_when=\(useWhenText)
 
         writeToClipboard(normalizedText)
         sendStatusHint = "Copied sender keep-pair quick copy to clipboard (\(normalizedText))."
+    }
+
+    private func copySenderKeepPairAndSendResultBundleQuickCopySummary() {
+        let normalizedText = senderKeepPairAndSendResultBundleQuickCopySummary.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            sendStatusHint = "sender_keep_pair_send_bundle_quick_copy_empty"
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        sendStatusHint = "Copied sender keep-pair + send result bundle quick copy to clipboard (\(normalizedText))."
     }
 
     private func copyReadCursorQuickCopySummary() {
