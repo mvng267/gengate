@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 296
-- Trục công việc: moment posting/feed shell — web+iOS add quick-copy feed-visibility delta after create `created_moment_id/viewer/feed_count/first_moment_id` + clipboard actions.
-- Trạng thái: batch296_complete_moment_feed_visibility_delta_copy_actions_web_ios.
+- Batch workflow chính thức hiện tại: 297
+- Trục công việc: location shell — web+iOS add quick-copy location state summary `owner/share_id/is_active/sharing_mode/audience_count/snapshot_count` + clipboard actions.
+- Trạng thái: batch297_complete_location_state_summary_copy_actions_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 297 handoff (closed)
+- Batch vừa xong: **297**
+- Commit đã chốt:
+  - `985de64` — `batch297: add quick location state summary copy actions on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **298**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell (web+iOS): thêm quick-copy notification page cursor summary `user_id/limit/offset/filter_mode/count/unread_count/total_unread_count` để tăng khả năng test seam #6 theo priority.
 
 ## Batch 296 handoff (closed)
 - Batch vừa xong: **296**

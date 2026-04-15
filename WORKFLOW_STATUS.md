@@ -1,30 +1,32 @@
 # GenGate Workflow Status
 
-- Batch: 296
+- Batch: 297
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 296 moment posting/feed shell — add web+iOS quick-copy feed-visibility delta after create (`created_moment_id/viewer/feed_count/first_moment_id`) + clipboard actions.
+- Scope: batch 297 location shell — add web+iOS quick-copy location state summary (`owner/share_id/is_active/sharing_mode/audience_count/snapshot_count`) for faster seam #5 verification.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> verify line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` -> bấm `Copy last create feed-visibility delta` và paste kiểm tra payload đúng format.
   - iOS Feed: set `Author user UUID` + `Viewer user UUID` -> `Create moment + image` -> verify line `Last create feed visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` -> bấm `Copy last create feed visibility delta` và paste kiểm tra payload đúng format.
+  - Web Location (`/location`): nhập owner/share -> `Reload counts` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
+  - iOS Location: nhập owner/share -> `Load location status` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...`, bấm `Copy quick unread summary`, rồi paste kiểm tra payload đúng format.
   - iOS Notifications: nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...`, bấm `Copy quick unread summary` và `Copy quick page meta`, rồi paste kiểm tra payload đúng format.
 - Files:
-  - apps/web-nextjs/components/moment-compose-shell.tsx
-  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
+  - apps/web-nextjs/components/location-shell.tsx
+  - apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `cf07bdc` — `batch296: add feed-visibility delta copy actions after moment create`
-  - previous feature commit: `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
-  - working tree: clean after batch296 feature + workflow sync commits
+  - latest feature commit: `985de64` — `batch297: add quick location state summary copy actions on web and ios`
+  - previous feature commit: `cf07bdc` — `batch296: add feed-visibility delta copy actions after moment create`
+  - working tree: clean after batch297 feature + workflow sync commits
 - Blocker: none
-- Next: mở batch297 với 1 slice hẹp location shell (web+iOS) — thêm quick-copy location state summary (`owner/share_id/is_active/sharing_mode/audience_count/snapshot_count`) để test seam #5 nhanh hơn.
+- Next: mở batch298 với 1 slice hẹp notification shell (web+iOS) — thêm quick-copy notification page cursor summary (`user_id/limit/offset/filter_mode/count/unread_count/total_unread_count`) để test seam #6 nhanh hơn.
 - Batch 295 handoff:
   - `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
   - web friend graph shell thêm reject action parity + quick delta summary line + last action delta (`request_id/action/accepted_count/pending_inbound/pending_outbound`) và nút copy.
