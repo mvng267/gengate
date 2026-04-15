@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(pending in this run)` — `batch285: add previous-cursor baseline to read-cursor apply quick copy`
+  - latest feature commit: `8d61ece` — `batch285: add previous-cursor baseline to read-cursor apply quick copy`
   - working tree: clean after batch285 commit
 - Blocker: none
 - Next: mở batch286 với 1 slice hẹp direct-message shell: thêm quick-copy token cho current member cursor snapshot (`current_member_cursor`) để đối chiếu trực tiếp với previous/applied trong cùng dòng trên web+iOS.
 - Batch 285 handoff:
-  - `(pending in this run)` — `batch285: add previous-cursor baseline to read-cursor apply quick copy`
+  - `8d61ece` — `batch285: add previous-cursor baseline to read-cursor apply quick copy`
   - web/iOS read-cursor apply quick-copy line thêm `previous_cursor_message`, giúp explain chính xác case `read_cursor_apply_state=noop`.
 - Batch 284 handoff:
   - `3c09772` — `batch284: add read-cursor apply-state markers on web and ios`

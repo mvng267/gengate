@@ -99,7 +99,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `(pending in this run)` — `batch285: add previous-cursor baseline to read-cursor apply quick copy`
+  - commit gần nhất đã chốt: `8d61ece` — `batch285: add previous-cursor baseline to read-cursor apply quick copy`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
@@ -115,7 +115,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch vừa xong: **285**
 - Commit cuối đã chốt:
-  - `(pending in this run)` — `batch285: add previous-cursor baseline to read-cursor apply quick copy`
+  - `8d61ece` — `batch285: add previous-cursor baseline to read-cursor apply quick copy`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
   - iOS: `cd apps/ios-swift && swift build` → pass

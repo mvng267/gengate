@@ -56,7 +56,7 @@
 ## Batch 285 handoff (closed)
 - Batch vừa xong: **285**
 - Commit đã chốt:
-  - `(pending in this run)` — `batch285: add previous-cursor baseline to read-cursor apply quick copy`
+  - `8d61ece` — `batch285: add previous-cursor baseline to read-cursor apply quick copy`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
