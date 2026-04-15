@@ -89,30 +89,48 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **294**
-- Scope hiện tại: notification shell (web) — thêm quick-copy page meta line `count/unread_count/total_unread_count/limit/offset/filter_mode` để parity report đầy đủ web+iOS khi paging/filter.
+- Batch workflow chính thức hiện tại: **295**
+- Scope hiện tại: friend graph shell (web+iOS) — thêm quick-copy delta summary line `accepted_count/pending_inbound/pending_outbound` và last action delta payload sau accept/reject.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/components/notification-shell.tsx`
+  - `apps/web-nextjs/lib/friends/client.ts`
+  - `apps/web-nextjs/components/friend-graph-shell.tsx`
+  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
+  - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `63107e8` — `batch294: add web quick page-meta copy action in notification shell`
-  - commit liền trước: `18cf958` — `batch293: add ios quick page-meta copy action in notification shell`
+  - commit gần nhất đã chốt: `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
+  - commit liền trước: `63107e8` — `batch294: add web quick page-meta copy action in notification shell`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch295 với 1 slice hẹp friend graph shell (web+iOS): thêm quick-copy delta line `accepted_count/pending_inbound/pending_outbound` sau accept/reject để tăng khả năng test social seam theo priority #1.
+  - mở batch296 với 1 slice hẹp moment posting shell (web+iOS): thêm quick-copy feed-visibility delta `viewer/feed_count/first_moment_id` ngay sau create để tăng khả năng test seam #2 theo priority.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
+  - Web Friend graph (`/profile`): load snapshot -> bấm `Accept` hoặc `Reject` trên inbound pending request -> verify status hiển thị `accepted_count/pending_inbound/pending_outbound`; bấm `Copy quick delta summary` hoặc `Copy last action delta` và paste kiểm tra payload đúng format.
+  - iOS Profile: load friend graph -> accept/reject request -> verify status hiển thị `accepted_count/pending_inbound/pending_outbound`; bấm `Copy quick delta summary` hoặc `Copy last action delta` và paste kiểm tra payload đúng format.
   - Web Feed: bấm quick action `Use current session user as viewer + load` -> verify status `viewer_source=session_user` + feed reload.
   - Web Inbox: nhập user A/B -> `Open direct thread` -> bấm `Use current session user for read-cursor target + read focus` -> bấm `Mark latest message as read (target user)` -> verify status có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
-  - Web Notifications: vào `/notifications`, nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...` + `Quick page meta: count=... / unread_count=... / total_unread_count=... / limit=... / offset=... / filter_mode=...` -> bấm `Copy quick unread summary` và `Copy quick page meta` -> paste và verify payload đúng format.
-  - iOS Notifications: nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...` -> bấm `Copy quick unread summary` và `Copy quick page meta` -> paste và verify payload đúng format.
 
 ## Batch handoff note
+
+- Batch vừa xong: **295**
+- Commit cuối đã chốt:
+  - `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **296**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - moment posting shell (web+iOS): thêm quick-copy feed-visibility delta `viewer/feed_count/first_moment_id` ngay sau create để tăng khả năng test seam #2 theo priority.
+
+---
 
 - Batch vừa xong: **294**
 - Commit cuối đã chốt:

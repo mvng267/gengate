@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 294
+- Batch: 295
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 294 notification shell — add web one-tap quick-copy page meta line (`count/unread_count/total_unread_count/limit/offset/filter_mode`) for full web+iOS paging/filter parity report.
+- Scope: batch 295 friend graph shell — add web+iOS one-tap quick-copy delta summary line (`accepted_count/pending_inbound/pending_outbound`) and last action delta payload after accept/reject.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -13,15 +13,22 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...`, bấm `Copy quick unread summary`, rồi paste kiểm tra payload đúng format.
   - iOS Notifications: nhập user hợp lệ -> `Load notifications` -> verify line `Quick unread summary: current_page_unread=... / total_unread_count=...`, bấm `Copy quick unread summary` và `Copy quick page meta`, rồi paste kiểm tra payload đúng format.
 - Files:
-  - apps/web-nextjs/components/notification-shell.tsx
+  - apps/web-nextjs/lib/friends/client.ts
+  - apps/web-nextjs/components/friend-graph-shell.tsx
+  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `63107e8` — `batch294: add web quick page-meta copy action in notification shell`
-  - previous feature commit: `18cf958` — `batch293: add ios quick page-meta copy action in notification shell`
-  - working tree: clean after batch294 commit
+  - latest feature commit: `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
+  - previous feature commit: `63107e8` — `batch294: add web quick page-meta copy action in notification shell`
+  - working tree: clean after batch295 commit
 - Blocker: none
-- Next: mở batch295 với 1 slice hẹp friend graph shell (web+iOS) — thêm quick-copy delta line `accepted_count/pending_inbound/pending_outbound` sau accept/reject để tăng khả năng test social seam theo priority #1.
+- Next: mở batch296 với 1 slice hẹp moment posting shell (web+iOS) — thêm quick-copy feed-visibility delta (`viewer/feed_count/first_moment_id`) ngay sau create để tăng khả năng test seam #2 theo priority.
+- Batch 295 handoff:
+  - `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
+  - web friend graph shell thêm reject action parity + quick delta summary line + last action delta (`request_id/action/accepted_count/pending_inbound/pending_outbound`) và nút copy.
+  - iOS Profile friend graph shell thêm quick delta summary line + last action delta payload + copy actions sau accept/reject.
 - Batch 294 handoff:
   - `63107e8` — `batch294: add web quick page-meta copy action in notification shell`
   - web notification shell thêm line `Quick page meta: ...` + nút `Copy quick page meta`, copy payload `count/unread_count/total_unread_count/limit/offset/filter_mode`.
@@ -37,9 +44,6 @@
 - Batch 290 handoff:
   - `de5a40c` — `batch290: add web quick unread summary line in notification shell`
   - web notification shell hiển thị line `Quick unread summary: current_page_unread=... / total_unread_count=...` để parity scan nhanh với iOS/backend.
-- Batch 288 handoff:
-  - `1de4e8d` — `batch288: add ios focus-user first-unread preset action`
-  - iOS read-cursor form thêm one-tap preset `Use focus user + first unread candidate` để auto-fill target user/message theo focus context trước khi jump/mark flow.
 - Batch 287 handoff:
   - `6593ba2` — `batch287: add read-cursor triage quick-copy line on web and ios`
   - web/iOS thêm quick-copy triage line `read_cursor_triage=...` và nút copy riêng để report parity ngắn gọn.

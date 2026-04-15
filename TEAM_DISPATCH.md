@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 294
-- Trục công việc: notification shell — web add quick-copy page meta line `count/unread_count/total_unread_count/limit/offset/filter_mode`.
-- Trạng thái: batch294_complete_web_quick_page_meta_copy_action.
+- Batch workflow chính thức hiện tại: 295
+- Trục công việc: friend graph shell — web+iOS add quick-copy delta summary line `accepted_count/pending_inbound/pending_outbound` + last action delta payload sau accept/reject.
+- Trạng thái: batch295_complete_friend_graph_quick_delta_copy_actions_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 295 handoff (closed)
+- Batch vừa xong: **295**
+- Commit đã chốt:
+  - `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **296**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - moment posting shell (web+iOS): thêm quick-copy feed-visibility delta `viewer/feed_count/first_moment_id` ngay sau create để tăng khả năng test seam #2 theo priority.
 
 ## Batch 294 handoff (closed)
 - Batch vừa xong: **294**
