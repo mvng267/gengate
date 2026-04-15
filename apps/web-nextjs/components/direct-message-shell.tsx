@@ -74,6 +74,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [lastFirstUnreadJumpQuickCopy, setLastFirstUnreadJumpQuickCopy] = useState(
     "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown",
   );
+  const [lastFirstUnreadGuardQuickCopy, setLastFirstUnreadGuardQuickCopy] = useState(
+    "focus_user=(none) | first_unread_guard_state=unknown | candidate=(none)",
+  );
   const conversationQuickCopy = `user_a=${form.userAId.trim() || "(empty)"} | user_b=${form.userBId.trim() || "(empty)"} | message_count=${messages.length} | last_message_id=${messages[messages.length - 1]?.id ?? "(none)"}`;
 
   const resolvedReadCursorFocusUserId =
@@ -147,6 +150,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setLastFirstUnreadJumpQuickCopy(
       "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown",
     );
+    setLastFirstUnreadGuardQuickCopy("focus_user=(none) | first_unread_guard_state=unknown | candidate=(none)");
   }, [initialSenderUserId, initialUserAId, initialUserBId]);
 
   useEffect(() => {
@@ -587,9 +591,16 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
 
     const normalizedMessageId = firstUnreadCandidateMessageIdForFocusUser.trim();
     if (!normalizedMessageId) {
+      setLastFirstUnreadGuardQuickCopy(
+        `focus_user=${normalizedUserId || "(none)"} | first_unread_guard_state=already_at_latest_or_no_unread | candidate=(none)`,
+      );
       setStatus("already_at_latest_or_no_unread (first_unread_candidate_missing_for_member_focus_auto_mark)");
       return;
     }
+
+    setLastFirstUnreadGuardQuickCopy(
+      `focus_user=${normalizedUserId || "(none)"} | first_unread_guard_state=candidate_available | candidate=${normalizedMessageId}`,
+    );
 
     const currentTargetUserId = readCursorTargetUserIdDraft.trim();
     const currentTargetMessageId = readCursorTargetMessageIdDraft.trim();
@@ -727,9 +738,16 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
 
     const firstUnreadCandidateId = firstUnreadCandidateMessageIdForFocusUser.trim();
     if (!firstUnreadCandidateId) {
+      setLastFirstUnreadGuardQuickCopy(
+        `focus_user=${resolvedReadCursorFocusUserId || "(none)"} | first_unread_guard_state=already_at_latest_or_no_unread | candidate=(none)`,
+      );
       setStatus("already_at_latest_or_no_unread (read_cursor_first_unread_focus_source=focus_user)");
       return;
     }
+
+    setLastFirstUnreadGuardQuickCopy(
+      `focus_user=${resolvedReadCursorFocusUserId || "(none)"} | first_unread_guard_state=candidate_available | candidate=${firstUnreadCandidateId}`,
+    );
 
     await updateReadCursorForTargetUserAndMessage({
       targetUserId: resolvedReadCursorFocusUserId,
@@ -766,6 +784,15 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     );
   }
 
+  async function handleCopyFirstUnreadGuardQuickCopy() {
+    await copyToClipboard(
+      lastFirstUnreadGuardQuickCopy,
+      "Copied first-unread guard quick copy to clipboard",
+      "first_unread_guard_quick_copy_empty",
+      "first_unread_guard_quick_copy_failed",
+    );
+  }
+
   return (
     <section>
       <p>
@@ -798,6 +825,12 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       </p>
       <button type="button" onClick={() => void handleCopyFirstUnreadJumpQuickCopy()}>
         Copy quick first-unread jump result
+      </button>
+      <p>
+        Quick copy first-unread guard state: <code>{lastFirstUnreadGuardQuickCopy}</code>
+      </p>
+      <button type="button" onClick={() => void handleCopyFirstUnreadGuardQuickCopy()}>
+        Copy quick first-unread guard state
       </button>
 
       <div>

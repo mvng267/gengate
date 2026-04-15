@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 282
-- Trục công việc: direct-message shell — web+iOS add first-unread no-op guard/status markers (`already_at_latest_or_no_unread`) so testers can distinguish no-op vs update outcomes.
-- Trạng thái: batch282_complete_dm_first_unread_noop_guard_status_markers_web_ios.
+- Batch workflow chính thức hiện tại: 283
+- Trục công việc: direct-message shell — web+iOS add first-unread guard quick-copy marker (`first_unread_guard_state`) so testers can copy one-line guard parity snapshots.
+- Trạng thái: batch283_complete_dm_first_unread_guard_quick_copy_markers_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 283 handoff (closed)
+- Batch vừa xong: **283**
+- Commit đã chốt:
+  - `(pending in this run)` — `batch283: add first-unread guard quick-copy markers on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **284**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm read-cursor no-op apply marker (`read_cursor_apply_state=noop|updated`) để tách rõ no-op guard và apply result trên web+iOS.
 
 ## Batch 282 handoff (closed)
 - Batch vừa xong: **282**

@@ -1,15 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 282
+- Batch: 283
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 282 direct-message shell — add first-unread no-op guard/status markers (`already_at_latest_or_no_unread`) for jump/member actions so testers can distinguish no-op vs update on web+iOS.
+- Scope: batch 283 direct-message shell — add quick-copy snapshot marker for first-unread no-op guard (`first_unread_guard_state`) so testers can copy one-line guard parity status on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
-  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> bấm `Jump focus user to first unread candidate`; nếu không còn unread thì status/guard line hiển thị `already_at_latest_or_no_unread` thay vì fail mơ hồ; member-row action `Use member focus + first unread + mark read` cũng trả marker no-op tương tự.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Jump focus user to first unread candidate`; nếu không còn unread thì status hint `already_at_latest_or_no_unread (read_cursor_first_unread_focus_source=focus_user)` và guard line `first_unread_guard=already_at_latest_or_no_unread`; member-row action cũng trả marker no-op tương tự.
+  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> bấm `Jump focus user to first unread candidate` (hoặc `Use member focus + first unread + mark read`) -> bấm `Copy quick first-unread guard state` để lấy line `focus_user=... | first_unread_guard_state=... | candidate=...` cho report parity no-op/update.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Jump focus user to first unread candidate` (hoặc `Use member focus + first unread + mark read`) -> bấm `Copy quick first-unread guard state` để lấy line `focus_user=... | first_unread_guard_state=... | candidate=...` cho report parity no-op/update.
 - Files:
   - apps/web-nextjs/components/direct-message-shell.tsx
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -17,10 +17,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `4eb2db4` — `batch282: add first-unread no-op guard status markers on web and ios`
-  - working tree: clean after batch282 commit
+  - latest feature commit: `(pending in this run)` — `batch283: add first-unread guard quick-copy markers on web and ios`
+  - working tree: clean after batch283 commit
 - Blocker: none
-- Next: mở batch283 với 1 slice hẹp direct-message shell: thêm quick-copy snapshot marker cho no-op guard (`first_unread_guard_state`) để report parity một dòng trên web+iOS.
+- Next: mở batch284 với 1 slice hẹp direct-message shell: thêm read-cursor no-op apply marker (`read_cursor_apply_state=noop|updated`) để tách rõ no-op guard và apply result trên web+iOS.
+- Batch 283 handoff:
+  - `(pending in this run)` — `batch283: add first-unread guard quick-copy markers on web and ios`
+  - web/iOS thêm quick-copy line + clipboard action `first_unread_guard_state`, cập nhật theo cả jump-focus flow và member-row first-unread auto-mark flow.
 - Batch 282 handoff:
   - `4eb2db4` — `batch282: add first-unread no-op guard status markers on web and ios`
   - web/iOS jump-first-unread flow và member-first-unread auto-mark flow trả marker `already_at_latest_or_no_unread` khi không còn unread candidate, giảm ambiguity giữa no-op và lỗi.

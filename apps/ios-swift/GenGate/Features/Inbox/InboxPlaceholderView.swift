@@ -40,6 +40,7 @@ struct InboxPlaceholderView: View {
     @State private var lastSendQuickCopy: String = "sender=(none) | message_id=(none)"
     @State private var lastReadCursorApplyQuickCopy: String = "target_user=(none) | applied_message=(none) | focus_user=(none) | read_state=unknown"
     @State private var lastFirstUnreadJumpQuickCopy: String = "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown"
+    @State private var lastFirstUnreadGuardQuickCopy: String = "focus_user=(none) | first_unread_guard_state=unknown | candidate=(none)"
     @State private var isCreatingAttachment = false
     @State private var isCreatingDeviceKey = false
     @State private var isUpdatingReadCursor = false
@@ -1390,6 +1391,18 @@ struct InboxPlaceholderView: View {
                         .buttonStyle(.bordered)
                     }
 
+                    HStack(alignment: .center, spacing: 8) {
+                        Text("Quick copy first-unread guard state: \(lastFirstUnreadGuardQuickCopy)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Button("Copy quick first-unread guard state") {
+                            copyFirstUnreadGuardQuickCopySummary()
+                        }
+                        .buttonStyle(.bordered)
+                    }
+
                     Text("Attachment target message_id: \(resolvedAttachmentTargetMessageID ?? "(not resolved)")")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
@@ -2688,6 +2701,17 @@ use_when=\(useWhenText)
         sendStatusHint = "Copied first-unread jump quick copy to clipboard (\(normalizedText))."
     }
 
+    private func copyFirstUnreadGuardQuickCopySummary() {
+        let normalizedText = lastFirstUnreadGuardQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            sendStatusHint = "first_unread_guard_quick_copy_empty"
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        sendStatusHint = "Copied first-unread guard quick copy to clipboard (\(normalizedText))."
+    }
+
     private func copyRecipientDeviceSourceHint(_ hintText: String) {
         let normalizedText = hintText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
@@ -3383,11 +3407,13 @@ use_when=\(useWhenText)
 
         guard let firstUnreadMessageID = firstUnreadMessageIDForFocusUser,
               !firstUnreadMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            lastFirstUnreadGuardQuickCopy = "focus_user=\(normalizedUserID) | first_unread_guard_state=already_at_latest_or_no_unread | candidate=(none)"
             sendStatusHint = "already_at_latest_or_no_unread (first_unread_candidate_missing_for_member_focus_auto_mark)"
             return
         }
 
         let normalizedMessageID = firstUnreadMessageID.trimmingCharacters(in: .whitespacesAndNewlines)
+        lastFirstUnreadGuardQuickCopy = "focus_user=\(normalizedUserID) | first_unread_guard_state=candidate_available | candidate=\(normalizedMessageID)"
         let currentTargetUserID = readCursorTargetUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let currentTargetMessageID = readCursorTargetMessageIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let currentFocusUserID = readStatusFocusUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -3792,11 +3818,13 @@ use_when=\(useWhenText)
 
         guard let targetMessageID = firstUnreadMessageIDForFocusUser,
               !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            lastFirstUnreadGuardQuickCopy = "focus_user=\(targetUserID) | first_unread_guard_state=already_at_latest_or_no_unread | candidate=(none)"
             sendStatusHint = "already_at_latest_or_no_unread (read_cursor_first_unread_focus_source=focus_user)"
             fetchError = nil
             return
         }
 
+        lastFirstUnreadGuardQuickCopy = "focus_user=\(targetUserID) | first_unread_guard_state=candidate_available | candidate=\(targetMessageID)"
         sendStatusHint = "Applying focus user + first unread candidate and marking read now (read_cursor_first_unread_focus_source=focus_user)."
         await performReadCursorUpdate(targetUserID: targetUserID, targetMessageID: targetMessageID)
     }

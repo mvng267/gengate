@@ -89,8 +89,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **282**
-- Scope hiện tại: direct-message shell — thêm first-unread no-op guard/status marker `already_at_latest_or_no_unread` để phân biệt rõ no-op vs update trên web+iOS.
+- Batch workflow chính thức hiện tại: **283**
+- Scope hiện tại: direct-message shell — thêm quick-copy snapshot marker `first_unread_guard_state` để report một dòng trạng thái no-op/update cho first-unread flow trên web+iOS.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/direct-message-shell.tsx`
@@ -99,12 +99,12 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `4eb2db4` — `batch282: add first-unread no-op guard status markers on web and ios`
+  - commit gần nhất đã chốt: `(pending in this run)` — `batch283: add first-unread guard quick-copy markers on web and ios`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch283 với 1 slice hẹp direct-message shell: thêm quick-copy snapshot marker cho no-op guard (`first_unread_guard_state`) để report parity một dòng trên web+iOS.
+  - mở batch284 với 1 slice hẹp direct-message shell: thêm read-cursor no-op apply marker (`read_cursor_apply_state=noop|updated`) để tách rõ no-op guard và apply result trên web+iOS.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed: bấm quick action `Use current session user as viewer + load` -> verify status `viewer_source=session_user` + feed reload.
@@ -112,6 +112,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **283**
+- Commit cuối đã chốt:
+  - `(pending in this run)` — `batch283: add first-unread guard quick-copy markers on web and ios`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **284**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm read-cursor no-op apply marker (`read_cursor_apply_state=noop|updated`) để tách rõ no-op guard và apply result trên web+iOS.
+
+---
 
 - Batch vừa xong: **282**
 - Commit cuối đã chốt:
