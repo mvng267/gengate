@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 349
+- Batch: 351
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 349 DM shell (web) — add one-tap quick-copy bundle action for sender keep-pair marker + send result for parity with iOS bundle path.
+- Scope: batch 351 friend graph shell (iOS) — add one-tap quick-copy marker + bundle action for friend-request create/reject parity with web.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,15 +16,23 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
-  - apps/web-nextjs/components/direct-message-shell.tsx
+  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
 - Test:
-  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `5afe2ce` — `batch349: add sender keep-pair plus send-result bundle quick copy in web dm shell`
-  - previous feature commit: `770589e` — `batch348: add sender keep-pair plus send-result bundle quick copy in ios dm shell`
-  - working tree: clean
+  - latest feature commit: `bc95c98` — `batch351: add friend-request create-reject bundle quick copy in ios friend graph shell`
+  - previous feature commit: `bd7fe3e` — `batch350: add friend-request create-reject bundle quick copy in web friend graph shell`
+  - working tree: dirty (workflow docs updates pending commit)
 - Blocker: none
-- Next: mở batch350 với 1 slice hẹp friend graph shell (web): thêm one-tap quick copy bundle cho friend-request create/reject parity line để tiếp tục ưu tiên seam friend graph theo objective.
+- Next: mở batch352 với 1 slice hẹp notifications shell (web): thêm quick-copy last lifecycle pair mutation line để one-tap parity report create+mark-read/unread transition.
+- Batch 351 handoff:
+  - `bc95c98` — `batch351: add friend-request create-reject bundle quick copy in ios friend graph shell`
+  - iOS Friend Graph shell thêm line + action copy cho `friend-request create marker`, `friend-request reject marker`, và `friend-request create + reject bundle` để one-tap report parity create/reject trong cùng payload.
+  - bundle payload format: `friend_request_create_marker={request_id=... / action=created / requester=... / receiver=...} | friend_request_reject_marker={request_id=... / action=rejected / accepted_count=... / pending_inbound=... / pending_outbound=...}`.
+- Batch 350 handoff:
+  - `bd7fe3e` — `batch350: add friend-request create-reject bundle quick copy in web friend graph shell`
+  - web Friend Graph shell thêm line + action copy cho `friend-request create marker`, `friend-request reject marker`, và `friend-request create + reject bundle` để one-tap report parity create/reject trong cùng payload.
+  - bundle payload format: `friend_request_create_marker={request_id=... / action=created / requester=... / receiver=...} | friend_request_reject_marker={request_id=... / action=rejected / accepted_count=... / pending_inbound=... / pending_outbound=...}`.
 - Batch 349 handoff:
   - `5afe2ce` — `batch349: add sender keep-pair plus send-result bundle quick copy in web dm shell`
   - web Inbox shell thêm line `Quick copy sender keep-pair + send result bundle` + action copy tương ứng để one-tap copy payload bundle gồm marker keep-pair và send-result trong cùng một dòng.
