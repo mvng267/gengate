@@ -9,6 +9,8 @@ import AppKit
 private let friendRequestCreateQuickCopyEmpty = "request_id=(none) / action=created / requester=(none) / receiver=(none)"
 private let friendRequestAcceptQuickCopyEmpty = "request_id=(none) / action=accepted / accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)"
 private let friendRequestRejectQuickCopyEmpty = "request_id=(none) / action=rejected / accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)"
+private let friendRequestDecisionQuickCopyEmpty = "request_id=(none) / action=(none) / accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)"
+private let friendRequestCountsQuickCopyEmpty = "accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)"
 
 struct ProfilePlaceholderView: View {
     @Environment(AppSessionStore.self) private var sessionStore
@@ -31,8 +33,11 @@ struct ProfilePlaceholderView: View {
     @State private var lastFriendRequestCreateQuickCopy: String = friendRequestCreateQuickCopyEmpty
     @State private var lastFriendRequestAcceptQuickCopy: String = friendRequestAcceptQuickCopyEmpty
     @State private var lastFriendRequestRejectQuickCopy: String = friendRequestRejectQuickCopyEmpty
+    @State private var lastFriendRequestDecisionQuickCopy: String = friendRequestDecisionQuickCopyEmpty
+    @State private var lastFriendRequestCountsQuickCopy: String = friendRequestCountsQuickCopyEmpty
     @State private var lastFriendRequestCreateAcceptBundleQuickCopy: String = "friend_request_create_marker={\(friendRequestCreateQuickCopyEmpty)} | friend_request_accept_marker={\(friendRequestAcceptQuickCopyEmpty)}"
     @State private var lastFriendRequestCreateRejectBundleQuickCopy: String = "friend_request_create_marker={\(friendRequestCreateQuickCopyEmpty)} | friend_request_reject_marker={\(friendRequestRejectQuickCopyEmpty)}"
+    @State private var lastFriendRequestLastActionBundleQuickCopy: String = "friend_request_create_marker={\(friendRequestCreateQuickCopyEmpty)} | friend_request_decision_marker={\(friendRequestDecisionQuickCopyEmpty)} | friend_request_counts={\(friendRequestCountsQuickCopyEmpty)}"
 
     var body: some View {
         ScrollView {
@@ -258,6 +263,16 @@ struct ProfilePlaceholderView: View {
 
                         Button("Copy quick friend-request create + reject bundle") {
                             copyFriendRequestCreateRejectBundleQuickCopy()
+                        }
+                        .buttonStyle(.bordered)
+
+                        Text("Quick copy friend-request last-action summary bundle: \(lastFriendRequestLastActionBundleQuickCopy)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+
+                        Button("Copy quick friend-request last-action summary bundle") {
+                            copyFriendRequestLastActionBundleQuickCopy()
                         }
                         .buttonStyle(.bordered)
 
@@ -555,6 +570,34 @@ struct ProfilePlaceholderView: View {
         return "friend_request_create_marker={\(createMarker)} | friend_request_reject_marker={\(rejectMarker)}"
     }
 
+    private func buildFriendRequestLastActionBundleQuickCopy(
+        createQuickCopy: String? = nil,
+        decisionQuickCopy: String? = nil,
+        countsQuickCopy: String? = nil
+    ) -> String {
+        let normalizedCreateQuickCopy = createQuickCopy?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedDecisionQuickCopy = decisionQuickCopy?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedCountsQuickCopy = countsQuickCopy?.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let createMarker = normalizedCreateQuickCopy?.isEmpty == false
+            ? normalizedCreateQuickCopy!
+            : (lastFriendRequestCreateQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                ? friendRequestCreateQuickCopyEmpty
+                : lastFriendRequestCreateQuickCopy)
+        let decisionMarker = normalizedDecisionQuickCopy?.isEmpty == false
+            ? normalizedDecisionQuickCopy!
+            : (lastFriendRequestDecisionQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                ? friendRequestDecisionQuickCopyEmpty
+                : lastFriendRequestDecisionQuickCopy)
+        let countsMarker = normalizedCountsQuickCopy?.isEmpty == false
+            ? normalizedCountsQuickCopy!
+            : (lastFriendRequestCountsQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                ? friendRequestCountsQuickCopyEmpty
+                : lastFriendRequestCountsQuickCopy)
+
+        return "friend_request_create_marker={\(createMarker)} | friend_request_decision_marker={\(decisionMarker)} | friend_request_counts={\(countsMarker)}"
+    }
+
     private func copyFriendRequestCreateQuickCopy() {
         let normalizedText = lastFriendRequestCreateQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
@@ -627,6 +670,21 @@ struct ProfilePlaceholderView: View {
         lastFriendGraphActionDeltaCopiedText = normalizedText
         lastFriendGraphActionDeltaCopiedAt = Date()
         statusMessage = "Copied friend-request create + reject bundle quick copy to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyFriendRequestLastActionBundleQuickCopy() {
+        let normalizedText = lastFriendRequestLastActionBundleQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "friend_request_last_action_bundle_quick_copy_empty"
+            return
+        }
+
+        copyToClipboard(normalizedText)
+        lastFriendGraphActionDeltaCopiedText = normalizedText
+        lastFriendGraphActionDeltaCopiedAt = Date()
+        statusMessage = "Copied friend-request last-action summary bundle quick copy to clipboard (\(normalizedText))."
         fetchError = nil
     }
 
@@ -745,10 +803,17 @@ struct ProfilePlaceholderView: View {
             lastFriendRequestCreateRejectBundleQuickCopy = buildFriendRequestCreateRejectBundleQuickCopy(
                 createQuickCopy: createQuickCopy
             )
+            lastFriendGraphActionDeltaLine = nil
+            lastFriendRequestDecisionQuickCopy = friendRequestDecisionQuickCopyEmpty
+            lastFriendRequestCountsQuickCopy = friendRequestCountsQuickCopyEmpty
+            lastFriendRequestLastActionBundleQuickCopy = buildFriendRequestLastActionBundleQuickCopy(
+                createQuickCopy: createQuickCopy,
+                decisionQuickCopy: friendRequestDecisionQuickCopyEmpty,
+                countsQuickCopy: friendRequestCountsQuickCopyEmpty
+            )
             await loadFriendGraph(
                 statusMessage: "\(statusPrefix) Friend request created. Reloading friend graph..."
             )
-            lastFriendGraphActionDeltaLine = nil
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
@@ -756,7 +821,7 @@ struct ProfilePlaceholderView: View {
         isCreatingRequest = false
     }
 
-    private func applyFriendGraphDeltaLine(requestID: String, action: String, snapshot: FriendGraphSnapshot) -> String {
+    private func applyFriendGraphDeltaLine(requestID: String, action: String, snapshot: FriendGraphSnapshot) -> (decisionQuickCopy: String, countsQuickCopy: String, pendingInboundCount: Int, pendingOutboundCount: Int) {
         let requestedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
 
         let pendingInboundCount = snapshot.pendingRequests.filter {
@@ -766,9 +831,19 @@ struct ProfilePlaceholderView: View {
             $0.status == "pending" && $0.requesterUserID == requestedUserID
         }.count
 
-        let deltaLine = "request_id=\(requestID) / action=\(action) / accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(pendingInboundCount) / pending_outbound=\(pendingOutboundCount)"
-        lastFriendGraphActionDeltaLine = deltaLine
-        return deltaLine
+        let decisionQuickCopy = "request_id=\(requestID) / action=\(action) / accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(pendingInboundCount) / pending_outbound=\(pendingOutboundCount)"
+        let countsQuickCopy = "accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(pendingInboundCount) / pending_outbound=\(pendingOutboundCount)"
+
+        lastFriendGraphActionDeltaLine = decisionQuickCopy
+        lastFriendRequestDecisionQuickCopy = decisionQuickCopy
+        lastFriendRequestCountsQuickCopy = countsQuickCopy
+
+        return (
+            decisionQuickCopy: decisionQuickCopy,
+            countsQuickCopy: countsQuickCopy,
+            pendingInboundCount: pendingInboundCount,
+            pendingOutboundCount: pendingOutboundCount
+        )
     }
 
     private func copyQuickFriendGraphDeltaSummary() {
@@ -904,8 +979,15 @@ struct ProfilePlaceholderView: View {
             lastFriendRequestCreateRejectBundleQuickCopy = buildFriendRequestCreateRejectBundleQuickCopy(
                 createQuickCopy: createQuickCopy
             )
-            await loadFriendGraph(statusMessage: "Friend request created. Receiver kept for quick dedupe re-test. Reloading friend graph...")
             lastFriendGraphActionDeltaLine = nil
+            lastFriendRequestDecisionQuickCopy = friendRequestDecisionQuickCopyEmpty
+            lastFriendRequestCountsQuickCopy = friendRequestCountsQuickCopyEmpty
+            lastFriendRequestLastActionBundleQuickCopy = buildFriendRequestLastActionBundleQuickCopy(
+                createQuickCopy: createQuickCopy,
+                decisionQuickCopy: friendRequestDecisionQuickCopyEmpty,
+                countsQuickCopy: friendRequestCountsQuickCopyEmpty
+            )
+            await loadFriendGraph(statusMessage: "Friend request created. Receiver kept for quick dedupe re-test. Reloading friend graph...")
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
@@ -955,21 +1037,17 @@ struct ProfilePlaceholderView: View {
             friendshipCount = snapshot.friendshipCount
             pendingRequestRows = snapshot.pendingRequests
             friendshipRows = snapshot.friendships
-            let acceptQuickCopy = applyFriendGraphDeltaLine(requestID: requestID, action: "accepted", snapshot: snapshot)
-            lastFriendRequestAcceptQuickCopy = acceptQuickCopy
+            let delta = applyFriendGraphDeltaLine(requestID: requestID, action: "accepted", snapshot: snapshot)
+            lastFriendRequestAcceptQuickCopy = delta.decisionQuickCopy
             lastFriendRequestCreateAcceptBundleQuickCopy = buildFriendRequestCreateAcceptBundleQuickCopy(
-                acceptQuickCopy: acceptQuickCopy
+                acceptQuickCopy: delta.decisionQuickCopy
+            )
+            lastFriendRequestLastActionBundleQuickCopy = buildFriendRequestLastActionBundleQuickCopy(
+                decisionQuickCopy: delta.decisionQuickCopy,
+                countsQuickCopy: delta.countsQuickCopy
             )
 
-            let requestedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-            let pendingInboundCount = snapshot.pendingRequests.filter {
-                $0.status == "pending" && $0.receiverUserID == requestedUserID
-            }.count
-            let pendingOutboundCount = snapshot.pendingRequests.filter {
-                $0.status == "pending" && $0.requesterUserID == requestedUserID
-            }.count
-
-            statusMessage = "Friend request accepted. accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(pendingInboundCount) / pending_outbound=\(pendingOutboundCount)."
+            statusMessage = "Friend request accepted. accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(delta.pendingInboundCount) / pending_outbound=\(delta.pendingOutboundCount)."
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
@@ -995,21 +1073,17 @@ struct ProfilePlaceholderView: View {
             friendshipCount = snapshot.friendshipCount
             pendingRequestRows = snapshot.pendingRequests
             friendshipRows = snapshot.friendships
-            let rejectQuickCopy = applyFriendGraphDeltaLine(requestID: requestID, action: "rejected", snapshot: snapshot)
-            lastFriendRequestRejectQuickCopy = rejectQuickCopy
+            let delta = applyFriendGraphDeltaLine(requestID: requestID, action: "rejected", snapshot: snapshot)
+            lastFriendRequestRejectQuickCopy = delta.decisionQuickCopy
             lastFriendRequestCreateRejectBundleQuickCopy = buildFriendRequestCreateRejectBundleQuickCopy(
-                rejectQuickCopy: rejectQuickCopy
+                rejectQuickCopy: delta.decisionQuickCopy
+            )
+            lastFriendRequestLastActionBundleQuickCopy = buildFriendRequestLastActionBundleQuickCopy(
+                decisionQuickCopy: delta.decisionQuickCopy,
+                countsQuickCopy: delta.countsQuickCopy
             )
 
-            let requestedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-            let pendingInboundCount = snapshot.pendingRequests.filter {
-                $0.status == "pending" && $0.receiverUserID == requestedUserID
-            }.count
-            let pendingOutboundCount = snapshot.pendingRequests.filter {
-                $0.status == "pending" && $0.requesterUserID == requestedUserID
-            }.count
-
-            statusMessage = "Friend request rejected. accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(pendingInboundCount) / pending_outbound=\(pendingOutboundCount)."
+            statusMessage = "Friend request rejected. accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(delta.pendingInboundCount) / pending_outbound=\(delta.pendingOutboundCount)."
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
