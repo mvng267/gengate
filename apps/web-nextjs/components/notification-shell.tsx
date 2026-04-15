@@ -158,9 +158,19 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     ? `notification_id=${lastCreateResultDelta.notificationId} / read_state=${lastCreateResultDelta.readState} / current_page_unread=${lastCreateResultDelta.currentPageUnread ?? "(none)"} / total_unread_count=${lastCreateResultDelta.totalUnreadCount ?? "(none)"}`
     : "notification_id=(none) / read_state=(none) / current_page_unread=(none) / total_unread_count=(none)";
 
-  const quickLifecyclePairLine = lastLifecyclePair
-    ? `create_result(notification_id=${lastLifecyclePair.createResult.notificationId},read_state=${lastLifecyclePair.createResult.readState},current_page_unread=${lastLifecyclePair.createResult.currentPageUnread ?? "(none)"},total_unread_count=${lastLifecyclePair.createResult.totalUnreadCount ?? "(none)"}) / mutation_delta(notification_id=${lastLifecyclePair.mutationDelta.notificationId},read_state=${lastLifecyclePair.mutationDelta.readState},current_page_unread=${lastLifecyclePair.mutationDelta.currentPageUnread ?? "(none)"},total_unread_count=${lastLifecyclePair.mutationDelta.totalUnreadCount ?? "(none)"})`
-    : "create_result(notification_id=(none),read_state=(none),current_page_unread=(none),total_unread_count=(none)) / mutation_delta(notification_id=(none),read_state=(none),current_page_unread=(none),total_unread_count=(none))";
+  const quickLifecyclePairState = lastLifecyclePair
+    ? "matched"
+    : lastCreateResultDelta && lastMutationDelta
+      ? "mismatched"
+      : "missing";
+
+  const lifecycleCreateResult = lastLifecyclePair?.createResult ?? lastCreateResultDelta;
+  const lifecycleMutationDelta = lastLifecyclePair?.mutationDelta ?? lastMutationDelta;
+
+  const quickLifecyclePairLine =
+    `lifecycle_pair_state=${quickLifecyclePairState}` +
+    ` / create_result(notification_id=${lifecycleCreateResult?.notificationId ?? "(none)"},read_state=${lifecycleCreateResult?.readState ?? "(none)"},current_page_unread=${lifecycleCreateResult?.currentPageUnread ?? "(none)"},total_unread_count=${lifecycleCreateResult?.totalUnreadCount ?? "(none)"})` +
+    ` / mutation_delta(notification_id=${lifecycleMutationDelta?.notificationId ?? "(none)"},read_state=${lifecycleMutationDelta?.readState ?? "(none)"},current_page_unread=${lifecycleMutationDelta?.currentPageUnread ?? "(none)"},total_unread_count=${lifecycleMutationDelta?.totalUnreadCount ?? "(none)"})`;
 
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -249,6 +259,8 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
           createResult: lastCreateResultDelta,
           mutationDelta,
         });
+      } else {
+        setLastLifecyclePair(null);
       }
 
       const mutationDeltaLine =
@@ -341,7 +353,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   }
 
   async function handleCopyQuickLifecyclePair() {
-    if (!lastLifecyclePair) {
+    if (quickLifecyclePairState === "missing") {
       setStatus("quick_lifecycle_pair_missing");
       return;
     }
@@ -400,6 +412,9 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
         <button type="button" onClick={() => void handleCopyQuickCreateResultDelta()}>
           Copy quick create-result delta
         </button>
+      </p>
+      <p>
+        Quick lifecycle pair state: <code>lifecycle_pair_state={quickLifecyclePairState}</code>
       </p>
       <p>
         Quick lifecycle pair: <code>{quickLifecyclePairLine}</code>

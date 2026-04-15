@@ -318,6 +318,10 @@ struct NotificationsPlaceholderView: View {
                             .foregroundStyle(.secondary)
                     }
 
+                    Text("Quick lifecycle pair state: lifecycle_pair_state=\(lifecyclePairState)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
                     Text("Quick lifecycle pair: \(quickLifecyclePairLine)")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
@@ -576,12 +580,33 @@ struct NotificationsPlaceholderView: View {
         return "Copied quick create-result delta (\(Int(elapsed))s ago): \(lastQuickCreateResultDeltaCopiedText)"
     }
 
-    private var quickLifecyclePairLine: String {
-        guard let lastLifecyclePair else {
-            return "create_result(notification_id=(none),read_state=(none),current_page_unread=(none),total_unread_count=(none)) / mutation_delta(notification_id=(none),read_state=(none),current_page_unread=(none),total_unread_count=(none))"
+    private var lifecyclePairState: String {
+        if lastLifecyclePair != nil {
+            return "matched"
         }
 
-        return "create_result(notification_id=\(lastLifecyclePair.createResult.notificationID),read_state=\(lastLifecyclePair.createResult.readState),current_page_unread=\(lastLifecyclePair.createResult.currentPageUnreadText),total_unread_count=\(lastLifecyclePair.createResult.totalUnreadCountText)) / mutation_delta(notification_id=\(lastLifecyclePair.mutationDelta.notificationID),read_state=\(lastLifecyclePair.mutationDelta.readState),current_page_unread=\(lastLifecyclePair.mutationDelta.currentPageUnreadText),total_unread_count=\(lastLifecyclePair.mutationDelta.totalUnreadCountText))"
+        if lastCreateResultDelta != nil, lastMutationDelta != nil {
+            return "mismatched"
+        }
+
+        return "missing"
+    }
+
+    private var quickLifecyclePairLine: String {
+        let createResult = lastLifecyclePair?.createResult ?? lastCreateResultDelta
+        let mutationDelta = lastLifecyclePair?.mutationDelta ?? lastMutationDelta
+
+        let createResultID = createResult?.notificationID ?? "(none)"
+        let createResultReadState = createResult?.readState ?? "(none)"
+        let createResultCurrentPageUnread = createResult?.currentPageUnreadText ?? "(none)"
+        let createResultTotalUnreadCount = createResult?.totalUnreadCountText ?? "(none)"
+
+        let mutationDeltaID = mutationDelta?.notificationID ?? "(none)"
+        let mutationDeltaReadState = mutationDelta?.readState ?? "(none)"
+        let mutationDeltaCurrentPageUnread = mutationDelta?.currentPageUnreadText ?? "(none)"
+        let mutationDeltaTotalUnreadCount = mutationDelta?.totalUnreadCountText ?? "(none)"
+
+        return "lifecycle_pair_state=\(lifecyclePairState) / create_result(notification_id=\(createResultID),read_state=\(createResultReadState),current_page_unread=\(createResultCurrentPageUnread),total_unread_count=\(createResultTotalUnreadCount)) / mutation_delta(notification_id=\(mutationDeltaID),read_state=\(mutationDeltaReadState),current_page_unread=\(mutationDeltaCurrentPageUnread),total_unread_count=\(mutationDeltaTotalUnreadCount))"
     }
 
     private var quickLifecyclePairCopiedFeedbackText: String? {
@@ -800,6 +825,8 @@ struct NotificationsPlaceholderView: View {
                     createResult: lastCreateResultDelta,
                     mutationDelta: mutationDelta
                 )
+            } else {
+                lastLifecyclePair = nil
             }
 
             let mutationDeltaLine = "notification_id=\(mutationDelta.notificationID) / read_state=\(mutationDelta.readState) / current_page_unread=\(mutationDelta.currentPageUnreadText) / total_unread_count=\(mutationDelta.totalUnreadCountText)"
@@ -888,7 +915,7 @@ struct NotificationsPlaceholderView: View {
     }
 
     private func copyQuickLifecyclePairLine() {
-        guard lastLifecyclePair != nil else {
+        guard lifecyclePairState != "missing" else {
             statusMessage = "quick_lifecycle_pair_missing"
             return
         }
