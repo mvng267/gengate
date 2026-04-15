@@ -42,6 +42,11 @@ type NotificationCreateResultDelta = {
   totalUnreadCount: number | null;
 };
 
+type NotificationLifecyclePair = {
+  createResult: NotificationCreateResultDelta;
+  mutationDelta: NotificationMutationDelta;
+};
+
 export function NotificationShell({ initialUserId = "" }: NotificationShellProps) {
   const [form, setForm] = useState({
     ...initialForm,
@@ -57,6 +62,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   const [lastLoadedWindow, setLastLoadedWindow] = useState<NotificationLoadWindow | null>(null);
   const [lastMutationDelta, setLastMutationDelta] = useState<NotificationMutationDelta | null>(null);
   const [lastCreateResultDelta, setLastCreateResultDelta] = useState<NotificationCreateResultDelta | null>(null);
+  const [lastLifecyclePair, setLastLifecyclePair] = useState<NotificationLifecyclePair | null>(null);
 
   useEffect(() => {
     setForm((current) => ({
@@ -69,6 +75,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     setLastLoadedWindow(null);
     setLastMutationDelta(null);
     setLastCreateResultDelta(null);
+    setLastLifecyclePair(null);
   }, [initialUserId]);
 
   function currentLoadWindow(overrides?: Partial<NotificationLoadWindow>): NotificationLoadWindow {
@@ -151,6 +158,10 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     ? `notification_id=${lastCreateResultDelta.notificationId} / read_state=${lastCreateResultDelta.readState} / current_page_unread=${lastCreateResultDelta.currentPageUnread ?? "(none)"} / total_unread_count=${lastCreateResultDelta.totalUnreadCount ?? "(none)"}`
     : "notification_id=(none) / read_state=(none) / current_page_unread=(none) / total_unread_count=(none)";
 
+  const quickLifecyclePairLine = lastLifecyclePair
+    ? `create_result(notification_id=${lastLifecyclePair.createResult.notificationId},read_state=${lastLifecyclePair.createResult.readState},current_page_unread=${lastLifecyclePair.createResult.currentPageUnread ?? "(none)"},total_unread_count=${lastLifecyclePair.createResult.totalUnreadCount ?? "(none)"}) / mutation_delta(notification_id=${lastLifecyclePair.mutationDelta.notificationId},read_state=${lastLifecyclePair.mutationDelta.readState},current_page_unread=${lastLifecyclePair.mutationDelta.currentPageUnread ?? "(none)"},total_unread_count=${lastLifecyclePair.mutationDelta.totalUnreadCount ?? "(none)"})`
+    : "create_result(notification_id=(none),read_state=(none),current_page_unread=(none),total_unread_count=(none)) / mutation_delta(notification_id=(none),read_state=(none),current_page_unread=(none),total_unread_count=(none))";
+
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsCreating(true);
@@ -182,6 +193,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
         totalUnreadCount: nextMeta ? nextMeta.total_unread_count : null,
       };
       setLastCreateResultDelta(createResultDelta);
+      setLastLifecyclePair(null);
 
       setItems((current) => [created, ...current.filter((item) => item.id !== created.id)]);
       setLastLoadedWindow(null);
@@ -232,6 +244,12 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
         totalUnreadCount: nextMeta ? nextMeta.total_unread_count : null,
       };
       setLastMutationDelta(mutationDelta);
+      if (lastCreateResultDelta && lastCreateResultDelta.notificationId === updated.id) {
+        setLastLifecyclePair({
+          createResult: lastCreateResultDelta,
+          mutationDelta,
+        });
+      }
 
       const mutationDeltaLine =
         `notification_id=${mutationDelta.notificationId} / read_state=${mutationDelta.readState} / ` +
@@ -322,6 +340,20 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     );
   }
 
+  async function handleCopyQuickLifecyclePair() {
+    if (!lastLifecyclePair) {
+      setStatus("quick_lifecycle_pair_missing");
+      return;
+    }
+
+    await copyToClipboard(
+      quickLifecyclePairLine,
+      "Copied quick lifecycle pair to clipboard",
+      "quick_lifecycle_pair_missing",
+      "quick_lifecycle_pair_copy_failed",
+    );
+  }
+
   return (
     <section>
       <p>
@@ -367,6 +399,14 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       <p>
         <button type="button" onClick={() => void handleCopyQuickCreateResultDelta()}>
           Copy quick create-result delta
+        </button>
+      </p>
+      <p>
+        Quick lifecycle pair: <code>{quickLifecyclePairLine}</code>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickLifecyclePair()}>
+          Copy quick lifecycle pair
         </button>
       </p>
       <p>Filter mode: {pagination.unreadOnly ? "Unread only" : "All notifications"}</p>

@@ -35,6 +35,9 @@ struct NotificationsPlaceholderView: View {
     @State private var quickCreateResultDeltaCopiedAt: Date?
     @State private var lastQuickCreateResultDeltaCopiedText: String = ""
     @State private var lastCreateResultDelta: NotificationCreateResultDelta?
+    @State private var quickLifecyclePairCopiedAt: Date?
+    @State private var lastQuickLifecyclePairCopiedText: String = ""
+    @State private var lastLifecyclePair: NotificationLifecyclePair?
 
     var body: some View {
         ScrollView {
@@ -42,7 +45,7 @@ struct NotificationsPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Notifications",
                     summary: "iOS native notification center shell now supports create + read/unread mutation so notification flow can be exercised end-to-end from native UI.",
-                    status: "Status: native notification center now supports create + read/unread toggles + quick unread summary + quick page cursor summary + quick mutation delta + quick create-result delta lines; delete remains intentionally out of scope for this slice.",
+                    status: "Status: native notification center now supports create + read/unread toggles + quick unread summary + quick page cursor summary + quick mutation delta + quick create-result delta + quick lifecycle pair lines; delete remains intentionally out of scope for this slice.",
                     bullets: [
                         "Paste a backend user UUID to create and load notifications for that user.",
                         "This shell can create via `POST /notifications`, then read `/notifications/{user_id}` and toggle each row via `/notifications/{id}/read` + `/notifications/{id}/unread`.",
@@ -50,6 +53,7 @@ struct NotificationsPlaceholderView: View {
                         "Quick page cursor summary line (`user_id/limit/offset/filter_mode/count/unread_count/total_unread_count`) helps verify paging/filter window quickly.",
                         "Quick mutation delta line (`notification_id/read_state/current_page_unread/total_unread_count`) lets testers report mark read/unread outcome without manual counting.",
                         "Quick create-result delta line (`notification_id/read_state/current_page_unread/total_unread_count`) lets testers report create outcome quickly trước khi chuyển qua toggle.",
+                        "Quick lifecycle pair line (`create_result + mutation_delta`) lets testers report a full create->toggle chain in one payload.",
                         "Use this tab to run minimal notification lifecycle checks from iOS without relying on web seeding first."
                     ]
                 )
@@ -314,6 +318,21 @@ struct NotificationsPlaceholderView: View {
                             .foregroundStyle(.secondary)
                     }
 
+                    Text("Quick lifecycle pair: \(quickLifecyclePairLine)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
+                    Button("Copy quick lifecycle pair") {
+                        copyQuickLifecyclePairLine()
+                    }
+                    .buttonStyle(.bordered)
+
+                    if let quickLifecyclePairCopiedFeedbackText {
+                        Text(quickLifecyclePairCopiedFeedbackText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     if let listMeta {
                         Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount) · Limit: \(listMeta.limit) · Offset: \(listMeta.offset) · Filter mode: \(listMeta.unreadOnly ? "Unread only" : "All notifications")")
                             .font(.footnote.monospaced())
@@ -557,6 +576,27 @@ struct NotificationsPlaceholderView: View {
         return "Copied quick create-result delta (\(Int(elapsed))s ago): \(lastQuickCreateResultDeltaCopiedText)"
     }
 
+    private var quickLifecyclePairLine: String {
+        guard let lastLifecyclePair else {
+            return "create_result(notification_id=(none),read_state=(none),current_page_unread=(none),total_unread_count=(none)) / mutation_delta(notification_id=(none),read_state=(none),current_page_unread=(none),total_unread_count=(none))"
+        }
+
+        return "create_result(notification_id=\(lastLifecyclePair.createResult.notificationID),read_state=\(lastLifecyclePair.createResult.readState),current_page_unread=\(lastLifecyclePair.createResult.currentPageUnreadText),total_unread_count=\(lastLifecyclePair.createResult.totalUnreadCountText)) / mutation_delta(notification_id=\(lastLifecyclePair.mutationDelta.notificationID),read_state=\(lastLifecyclePair.mutationDelta.readState),current_page_unread=\(lastLifecyclePair.mutationDelta.currentPageUnreadText),total_unread_count=\(lastLifecyclePair.mutationDelta.totalUnreadCountText))"
+    }
+
+    private var quickLifecyclePairCopiedFeedbackText: String? {
+        guard let quickLifecyclePairCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(quickLifecyclePairCopiedAt)
+        guard elapsed >= 0, elapsed < 6 else {
+            return nil
+        }
+
+        return "Copied quick lifecycle pair (\(Int(elapsed))s ago): \(lastQuickLifecyclePairCopiedText)"
+    }
+
     private func prefillFromCurrentSessionUserIfNeeded() {
         guard userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let currentSessionUserID else {
@@ -594,6 +634,7 @@ struct NotificationsPlaceholderView: View {
     private func loadNotifications(forcedUserID: String? = nil, forcedOffset: Int? = nil) async {
         lastMutationDelta = nil
         lastCreateResultDelta = nil
+        lastLifecyclePair = nil
         let trimmedUserID = (forcedUserID ?? userIDDraft).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedUserID.isEmpty else {
             fetchError = "User UUID là bắt buộc để load notifications."
@@ -692,6 +733,7 @@ struct NotificationsPlaceholderView: View {
                 totalUnreadCount: nextMeta?.totalUnreadCount
             )
             lastCreateResultDelta = createResultDelta
+            lastLifecyclePair = nil
 
             notificationRows = [createdRow] + notificationRows.filter { $0.id != createdRow.id }
             lastLoadedWindow = nil
@@ -753,6 +795,12 @@ struct NotificationsPlaceholderView: View {
                 totalUnreadCount: nextMeta?.totalUnreadCount
             )
             lastMutationDelta = mutationDelta
+            if let lastCreateResultDelta, lastCreateResultDelta.notificationID == updated.id {
+                lastLifecyclePair = NotificationLifecyclePair(
+                    createResult: lastCreateResultDelta,
+                    mutationDelta: mutationDelta
+                )
+            }
 
             let mutationDeltaLine = "notification_id=\(mutationDelta.notificationID) / read_state=\(mutationDelta.readState) / current_page_unread=\(mutationDelta.currentPageUnreadText) / total_unread_count=\(mutationDelta.totalUnreadCountText)"
             statusMessage = updated.isRead
@@ -839,6 +887,24 @@ struct NotificationsPlaceholderView: View {
         fetchError = nil
     }
 
+    private func copyQuickLifecyclePairLine() {
+        guard lastLifecyclePair != nil else {
+            statusMessage = "quick_lifecycle_pair_missing"
+            return
+        }
+
+        let normalizedText = quickLifecyclePairLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        lastQuickLifecyclePairCopiedText = normalizedText
+        quickLifecyclePairCopiedAt = Date()
+        statusMessage = "Copied quick lifecycle pair to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
     private func writeToClipboard(_ text: String) {
 #if canImport(UIKit)
         UIPasteboard.general.string = text
@@ -904,6 +970,11 @@ private struct NotificationCreateResultDelta {
     var totalUnreadCountText: String {
         totalUnreadCount.map(String.init) ?? "(none)"
     }
+}
+
+private struct NotificationLifecyclePair {
+    let createResult: NotificationCreateResultDelta
+    let mutationDelta: NotificationMutationDelta
 }
 
 private struct NotificationListPayload {
