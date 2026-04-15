@@ -139,6 +139,14 @@ struct FeedPlaceholderView: View {
                     .buttonStyle(.bordered)
                     .disabled(currentSessionUserID == nil || isCreatingMoment || isLoading || isDeletingMoment)
 
+                    Button("Use current session user as viewer + keep author + load private feed") {
+                        Task {
+                            await applyCurrentSessionUserAsViewerKeepAuthorAndLoadPrivateFeed()
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(currentSessionUserID == nil || isCreatingMoment || isLoading || isDeletingMoment)
+
                     Button {
                         Task {
                             await loadPrivateFeed()
@@ -1335,6 +1343,34 @@ struct FeedPlaceholderView: View {
         await createMomentWithImage(statusPrefix: "\(authorStatus) \(viewerStatus)", viewerUserIDOverride: trimmedSessionUserID)
     }
 
+    private func applyCurrentSessionUserAsViewerKeepAuthorAndLoadPrivateFeed() async {
+        guard let currentSessionUserID else {
+            statusMessage = nil
+            fetchError = "session_viewer_missing_for_quick_apply"
+            return
+        }
+
+        let trimmedSessionUserID = currentSessionUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedSessionUserID.isEmpty else {
+            statusMessage = nil
+            fetchError = "session_viewer_missing_for_quick_apply"
+            return
+        }
+
+        let trimmedViewerDraft = normalizedViewerUserIDDraft
+        let viewerStatus: String
+        if trimmedViewerDraft == trimmedSessionUserID {
+            viewerStatus = "Viewer already matches current session user (viewer_source=session_user)."
+        } else {
+            viewerStatus = "Applied current session user as feed viewer (viewer_source=session_user)."
+        }
+
+        viewerUserIDDraft = trimmedSessionUserID
+        fetchError = nil
+
+        await loadPrivateFeed(statusPrefix: "\(viewerStatus) Kept create author as-is.")
+    }
+
     private func fillReactionFromLatestMoment() {
         guard let latestLoadedMomentID else {
             return
@@ -1821,26 +1857,34 @@ struct FeedPlaceholderView: View {
         }
     }
 
-    private func loadPrivateFeed() async {
+    private func loadPrivateFeed(statusPrefix: String? = nil) async {
+        let composeStatus: (String) -> String = { message in
+            guard let statusPrefix, !statusPrefix.isEmpty else {
+                return message
+            }
+            return "\(statusPrefix) \(message)"
+        }
+
         let trimmedViewerID = viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedViewerID.isEmpty else {
-            fetchError = "Viewer UUID là bắt buộc để load private feed."
+            fetchError = composeStatus("Viewer UUID là bắt buộc để load private feed.")
             return
         }
 
         isLoading = true
         fetchError = nil
+        statusMessage = composeStatus("Reloading private feed...")
 
         do {
             momentRows = try await PrivateFeedAPIClient().fetchFeed(viewerUserID: trimmedViewerID)
             synchronizeReactionTargetWithLoadedMoments()
             feedVisibilityGateSnapshotSource = "reload_flow"
             let gateSummary = buildFeedVisibilityGateSummary(viewerRawID: trimmedViewerID, rows: momentRows, snapshotSource: "reload_flow")
-            statusMessage = "Loaded \(momentRows.count) private feed moment(s). Gate summary: \(gateSummary.summaryLine)."
+            statusMessage = composeStatus("Loaded \(momentRows.count) private feed moment(s). Gate summary: \(gateSummary.summaryLine).")
         } catch {
             momentRows = []
             synchronizeReactionTargetWithLoadedMoments()
-            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            fetchError = composeStatus((error as? LocalizedError)?.errorDescription ?? error.localizedDescription)
         }
 
         isLoading = false
