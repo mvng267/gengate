@@ -30,6 +30,14 @@ export type MomentListItem = {
   }>;
 };
 
+export type MomentDeleteResult = {
+  id: string;
+  author_user_id: string;
+  caption_text: string | null;
+  visibility_scope: string;
+  deleted_at: string | null;
+};
+
 export async function createMomentWithImage(input: MomentComposeInput): Promise<MomentListItem> {
   const createMomentResponse = await apiRequest("/moments", {
     method: "POST",
@@ -110,4 +118,16 @@ export async function listPrivateFeed(viewerUserId: string): Promise<MomentListI
   };
 
   return payload.items;
+}
+
+export async function deleteMoment(momentId: string): Promise<MomentDeleteResult> {
+  const response = await apiRequest(`/moments/${encodeURIComponent(momentId)}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error(`moment_delete_failed:${response.status}`);
+  }
+
+  return (await response.json()) as MomentDeleteResult;
 }

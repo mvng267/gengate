@@ -3,8 +3,14 @@
 import { useEffect, useState } from "react";
 
 import { readPersistedAuthSession } from "@/lib/auth/client";
-import { createMomentWithImage, listMomentsForAuthor, listPrivateFeed, type MomentListItem } from "@/lib/moments/client";
-
+import {
+  createMomentWithImage,
+  deleteMoment,
+  listMomentsForAuthor,
+  listPrivateFeed,
+  type MomentDeleteResult,
+  type MomentListItem,
+} from "@/lib/moments/client";
 type MomentComposeShellProps = {
   initialAuthorUserId?: string;
   initialViewerUserId?: string;
@@ -30,16 +36,18 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   });
   const [status, setStatus] = useState("Provide a real user UUID, caption, and image storage key to test the moment shell.");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoadingList, setIsLoadingList] = useState(false);
   const [isLoadingFeed, setIsLoadingFeed] = useState(false);
   const [items, setItems] = useState<MomentListItem[]>([]);
   const [feedItems, setFeedItems] = useState<MomentListItem[]>([]);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
   const [lastCreateFeedVisibilityDeltaLine, setLastCreateFeedVisibilityDeltaLine] = useState<string | null>(null);
+  const [lastDeletedMomentSummaryLine, setLastDeletedMomentSummaryLine] = useState<string | null>(null);
+  const [deleteMomentIdDraft, setDeleteMomentIdDraft] = useState("");
   const [lastCopiedFeedVisibilityDeltaLine, setLastCopiedFeedVisibilityDeltaLine] = useState<string | null>(null);
   const [feedVisibilityGateSnapshotSource, setFeedVisibilityGateSnapshotSource] =
     useState<FeedGateSnapshotSource>("reload_flow");
-
   const buildFeedVisibilityGateSummary = (
     viewerRawId: string,
     nextFeedItems: MomentListItem[],
@@ -71,9 +79,15 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
 
   const momentPayloadQuickCopy = `author=${form.authorUserId.trim() || "(empty)"} | image_url=${form.imageStorageKey.trim() || "(empty)"} | caption=${form.captionText.trim() || "(empty)"}`;
   const viewerUserId = form.viewerUserId.trim();
+  const deleteMomentId = deleteMomentIdDraft.trim();
   const quickFeedVisibilityGate = buildFeedVisibilityGateSummary(viewerUserId, feedItems, feedVisibilityGateSnapshotSource);
   const quickFeedVisibilityDeltaLine = `viewer=${viewerUserId || "(empty)"} / feed_count=${feedItems.length} / first_moment_id=${feedItems[0]?.id ?? "(none)"}`;
   const quickFeedVisibilityGateSummaryLine = quickFeedVisibilityGate.summaryLine;
+  const deleteMomentQuickCopyLine =
+    `delete_moment_id=${deleteMomentId || "(empty)"}` +
+    ` / authored_count=${items.length}` +
+    ` / feed_count=${feedItems.length}` +
+    ` / gate_snapshot_source=${feedVisibilityGateSnapshotSource}`;
 
   useEffect(() => {
     setForm((current) => ({
@@ -268,6 +282,48 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     setIsLoadingList(false);
   }
 
+  function buildDeleteMomentSummary(deleted: MomentDeleteResult) {
+    const normalizedDeletedAt = deleted.deleted_at ?? "(none)";
+    const authorMatchCount = items.filter((item) => item.author.id === deleted.author_user_id).length;
+    const feedMatchCount = feedItems.filter((item) => item.id === deleted.id).length;
+
+    return (
+      `delete_result=deleted` +
+      ` / moment_id=${deleted.id}` +
+      ` / author_user_id=${deleted.author_user_id}` +
+      ` / deleted_at=${normalizedDeletedAt}` +
+      ` / author_loaded_count=${authorMatchCount}` +
+      ` / feed_match_count=${feedMatchCount}`
+    );
+  }
+
+  async function handleDeleteMoment() {
+    const normalizedDeleteMomentId = deleteMomentIdDraft.trim();
+    if (!normalizedDeleteMomentId) {
+      setStatus("delete_moment_id_required");
+      return;
+    }
+
+    setIsDeleting(true);
+    setStatus(`Deleting moment ${normalizedDeleteMomentId}...`);
+
+    try {
+      const deleted = await deleteMoment(normalizedDeleteMomentId);
+      const deletedSummary = buildDeleteMomentSummary(deleted);
+
+      setDeleteMomentIdDraft(deleted.id);
+      setLastDeletedMomentSummaryLine(deletedSummary);
+      setItems((current) => current.filter((item) => item.id !== deleted.id));
+      setFeedItems((current) => current.filter((item) => item.id !== deleted.id));
+
+      setStatus(`Deleted moment ${deleted.id}. ${deletedSummary}.`);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "moment_shell_delete_failed");
+    }
+
+    setIsDeleting(false);
+  }
+
   async function handleReloadFeed() {
     setIsLoadingFeed(true);
     setStatus("Reloading private friend feed...");
@@ -322,6 +378,14 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
             </button>
           </p>
         </>
+      ) : null}
+      <p>
+        Quick delete parity summary: <code>{deleteMomentQuickCopyLine}</code>
+      </p>
+      {lastDeletedMomentSummaryLine ? (
+        <p>
+          Last delete result summary: <code>{lastDeletedMomentSummaryLine}</code>
+        </p>
       ) : null}
       {lastCopiedFeedVisibilityDeltaLine ? (
         <p>
@@ -385,10 +449,10 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
             onChange={(event) => setForm((current) => ({ ...current, imageHeight: event.target.value }))}
           />
         </label>
-        <button type="submit" disabled={isSubmitting}>
+        <button type="submit" disabled={isSubmitting || isDeleting}>
           {isSubmitting ? "Creating..." : "Create moment + image shell"}
         </button>
-        <button type="button" onClick={() => void handleReload()} disabled={isLoadingList}>
+        <button type="button" onClick={() => void handleReload()} disabled={isLoadingList || isDeleting}>
           {isLoadingList ? "Reloading..." : "Reload authored moments"}
         </button>
         <button
@@ -398,8 +462,19 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         >
           Use current session user as viewer + load
         </button>
-        <button type="button" onClick={() => void handleReloadFeed()} disabled={isLoadingFeed}>
+        <button type="button" onClick={() => void handleReloadFeed()} disabled={isLoadingFeed || isDeleting}>
           {isLoadingFeed ? "Reloading feed..." : "Reload private friend feed"}
+        </button>
+        <label>
+          Moment ID to delete
+          <input
+            value={deleteMomentIdDraft}
+            onChange={(event) => setDeleteMomentIdDraft(event.target.value)}
+            placeholder="paste moment id for DELETE /moments/{id}"
+          />
+        </label>
+        <button type="button" onClick={() => void handleDeleteMoment()} disabled={isDeleting || deleteMomentId.length === 0}>
+          {isDeleting ? "Deleting moment..." : "Delete moment (web parity)"}
         </button>
       </form>
 
@@ -407,18 +482,29 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       {items.length === 0 ? (
         <p>No moments loaded yet.</p>
       ) : (
-        <ul>
-          {items.map((item) => (
-            <li key={item.id}>
-              <strong>{item.caption_text ?? "(no caption)"}</strong>
-              {" · author: "}
-              {item.author.username ?? item.author.email}
-              {" · media: "}
-              {item.media_items.length}
-              {item.media_items[0] ? ` · first image: ${item.media_items[0].storage_key}` : ""}
-            </li>
-          ))}
-        </ul>
+        <>
+          <p>
+            <button
+              type="button"
+              onClick={() => setDeleteMomentIdDraft(items[0]?.id ?? "")}
+              disabled={!items[0] || isDeleting}
+            >
+              Use first authored moment as delete target
+            </button>
+          </p>
+          <ul>
+            {items.map((item) => (
+              <li key={item.id}>
+                <strong>{item.caption_text ?? "(no caption)"}</strong>
+                {" · author: "}
+                {item.author.username ?? item.author.email}
+                {" · media: "}
+                {item.media_items.length}
+                {item.media_items[0] ? ` · first image: ${item.media_items[0].storage_key}` : ""}
+              </li>
+            ))}
+          </ul>
+        </>
       )}
 
       <h2>Private friend feed</h2>
