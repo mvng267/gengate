@@ -39,6 +39,25 @@ struct NotificationsPlaceholderView: View {
     @State private var lastQuickLifecyclePairCopiedText: String = ""
     @State private var lastLifecyclePair: NotificationLifecyclePair?
 
+    private struct NotificationCreateFlowInput {
+        let userIDOverride: String?
+        let statusPrefix: String?
+        let reloadAfterCreate: Bool
+        let forcedOffsetAfterReload: Int?
+
+        init(
+            userIDOverride: String? = nil,
+            statusPrefix: String? = nil,
+            reloadAfterCreate: Bool = false,
+            forcedOffsetAfterReload: Int? = nil
+        ) {
+            self.userIDOverride = userIDOverride
+            self.statusPrefix = statusPrefix
+            self.reloadAfterCreate = reloadAfterCreate
+            self.forcedOffsetAfterReload = forcedOffsetAfterReload
+        }
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -169,6 +188,17 @@ struct NotificationsPlaceholderView: View {
                     }
                     .buttonStyle(.bordered)
                     .disabled(currentSessionUserID == nil)
+
+                    Button {
+                        Task {
+                            await useCurrentSessionUserCreateAndLoad()
+                        }
+                    } label: {
+                        Text("Use current session user + create notification + load")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(isLoading || isCreatingNotification || currentSessionUserID == nil)
 
                     Button {
                         Task {
@@ -686,30 +716,67 @@ struct NotificationsPlaceholderView: View {
 
     private func useCurrentSessionUserAndLoad() async {
         guard let currentSessionUserID else {
-            fetchError = "Current session user không khả dụng."
+            statusMessage = "session_user_missing_for_quick_apply"
+            fetchError = nil
             return
         }
 
         let currentDraftUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-        if currentDraftUserID == currentSessionUserID {
-            statusMessage = "Session user already selected. Reloading first page for current user."
-        } else {
-            statusMessage = "Applied current session user. Reloading first page."
-        }
-        fetchError = nil
+        let userSourceStatus = currentDraftUserID == currentSessionUserID
+            ? "User already matches current session user (user_source=session_user)."
+            : "Applied current session user (user_source=session_user)."
 
+        fetchError = nil
         userIDDraft = currentSessionUserID
         pageOffsetDraft = "0"
-        await loadNotifications(forcedUserID: currentSessionUserID, forcedOffset: 0)
+
+        await loadNotifications(
+            forcedUserID: currentSessionUserID,
+            forcedOffset: 0,
+            statusPrefix: userSourceStatus
+        )
     }
 
-    private func loadNotifications(forcedUserID: String? = nil, forcedOffset: Int? = nil) async {
+    private func useCurrentSessionUserCreateAndLoad() async {
+        guard let currentSessionUserID else {
+            statusMessage = "session_user_missing_for_quick_apply"
+            fetchError = nil
+            return
+        }
+
+        let currentDraftUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let userSourceStatus = currentDraftUserID == currentSessionUserID
+            ? "User already matches current session user (user_source=session_user)."
+            : "Applied current session user (user_source=session_user)."
+
+        fetchError = nil
+        userIDDraft = currentSessionUserID
+        pageOffsetDraft = "0"
+
+        await submitNotificationCreateFlow(
+            NotificationCreateFlowInput(
+                userIDOverride: currentSessionUserID,
+                statusPrefix: userSourceStatus,
+                reloadAfterCreate: true,
+                forcedOffsetAfterReload: 0
+            )
+        )
+    }
+
+    private func loadNotifications(
+        forcedUserID: String? = nil,
+        forcedOffset: Int? = nil,
+        statusPrefix: String? = nil
+    ) async {
         lastMutationDelta = nil
         lastCreateResultDelta = nil
         lastLifecyclePair = nil
+
+        let normalizedStatusPrefix = statusPrefix?.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedUserID = (forcedUserID ?? userIDDraft).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedUserID.isEmpty else {
-            fetchError = "User UUID là bắt buộc để load notifications."
+            statusMessage = "notification_user_id_required"
+            fetchError = nil
             return
         }
 
@@ -722,6 +789,7 @@ struct NotificationsPlaceholderView: View {
 
         isLoading = true
         fetchError = nil
+        statusMessage = normalizedStatusPrefix.map { "\($0) Loading notifications..." } ?? "Loading notifications..."
 
         do {
             let payload = try await NotificationsAPIClient().fetchNotifications(
@@ -746,36 +814,44 @@ struct NotificationsPlaceholderView: View {
                 offset: safeOffset,
                 unreadOnly: pageUnreadOnly
             )
-            statusMessage = "Loaded \(payload.count) notification(s). Page unread: \(payload.unreadCount). Total unread: \(payload.totalUnreadCount). Page window limit=\(safeLimit), offset=\(safeOffset), unread_only=\(pageUnreadOnly ? "true" : "false"). Use First/Prev/Next to move paging window quickly."
+
+            let loadedStatus = "Loaded \(payload.count) notification(s). Page unread: \(payload.unreadCount). Total unread: \(payload.totalUnreadCount). Page window limit=\(safeLimit), offset=\(safeOffset), unread_only=\(pageUnreadOnly ? "true" : "false")."
+            statusMessage = normalizedStatusPrefix.map { "\($0) \(loadedStatus)" } ?? loadedStatus
         } catch {
             notificationRows = []
             listMeta = nil
             mutatingNotificationIDs = []
-            statusMessage = nil
             lastLoadedWindow = nil
-            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+
+            let errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            statusMessage = normalizedStatusPrefix.map { "\($0) \(errorMessage)" } ?? errorMessage
+            fetchError = errorMessage
         }
 
         isLoading = false
     }
 
-    private func createNotification() async {
-        let trimmedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+    private func submitNotificationCreateFlow(_ input: NotificationCreateFlowInput = NotificationCreateFlowInput()) async {
+        let trimmedUserID = (input.userIDOverride ?? userIDDraft).trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedType = createTypeDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedPayload = createPayloadDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedStatusPrefix = input.statusPrefix?.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedUserID.isEmpty else {
-            fetchError = "User UUID là bắt buộc để tạo notification."
+            statusMessage = "notification_user_id_required"
+            fetchError = nil
             return
         }
 
         guard !trimmedType.isEmpty else {
-            fetchError = "Notification type là bắt buộc."
+            statusMessage = "notification_type_required"
+            fetchError = nil
             return
         }
 
         isCreatingNotification = true
         fetchError = nil
+        statusMessage = normalizedStatusPrefix.map { "\($0) Creating notification shell item..." } ?? "Creating notification shell item..."
 
         do {
             let createdRow = try await NotificationsAPIClient().createNotification(
@@ -807,16 +883,33 @@ struct NotificationsPlaceholderView: View {
             lastCreateResultDelta = createResultDelta
             lastLifecyclePair = nil
 
+            userIDDraft = trimmedUserID
             notificationRows = [createdRow] + notificationRows.filter { $0.id != createdRow.id }
             lastLoadedWindow = nil
 
             let createResultDeltaLine = "notification_id=\(createResultDelta.notificationID) / read_state=\(createResultDelta.readState) / current_page_unread=\(createResultDelta.currentPageUnreadText) / total_unread_count=\(createResultDelta.totalUnreadCountText)"
-            statusMessage = "Created notification \(createdRow.id). Quick create-result delta: \(createResultDeltaLine)."
+            let createdStatus = "Created notification \(createdRow.id). Quick create-result delta: \(createResultDeltaLine)."
+
+            if input.reloadAfterCreate {
+                await loadNotifications(
+                    forcedUserID: trimmedUserID,
+                    forcedOffset: input.forcedOffsetAfterReload ?? 0,
+                    statusPrefix: normalizedStatusPrefix.map { "\($0) \(createdStatus)" } ?? createdStatus
+                )
+            } else {
+                statusMessage = normalizedStatusPrefix.map { "\($0) \(createdStatus)" } ?? createdStatus
+            }
         } catch {
-            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            let errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            statusMessage = normalizedStatusPrefix.map { "\($0) \(errorMessage)" } ?? errorMessage
+            fetchError = errorMessage
         }
 
         isCreatingNotification = false
+    }
+
+    private func createNotification() async {
+        await submitNotificationCreateFlow()
     }
 
     private func toggleReadState(for row: NotificationRow) async {
