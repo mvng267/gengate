@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 333
+- Batch: 334
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 333 location shell (web) — add quick action `Use current session user as owner + reload counts` for one-tap owner apply + count refresh parity with iOS location shell.
+- Scope: batch 334 location shell (iOS) — add quick action `Use current session user as owner + load location status` for one-tap owner apply + load parity with web location shell.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,15 +16,19 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
-  - apps/web-nextjs/components/location-shell.tsx
+  - apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift
 - Test:
-  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `902470c` — `batch333: add session-owner reload quick action in web location shell`
-  - previous feature commit: `0e5b109` — `batch332: keep session quick-open on valid direct peer pair`
+  - latest feature commit: `8c1ee46` — `batch334: add session-owner load quick action in ios location shell`
+  - previous feature commit: `902470c` — `batch333: add session-owner reload quick action in web location shell`
   - working tree: dirty (doc updates pending commit)
 - Blocker: none
-- Next: sync workflow docs for batch333 rồi commit doc-sync; sau đó mở batch334 với 1 slice hẹp tiếp theo theo ưu tiên MVP.
+- Next: sync workflow docs for batch334 rồi commit doc-sync; sau đó mở batch335 với 1 slice hẹp tiếp theo theo ưu tiên MVP.
+- Batch 334 handoff:
+  - `8c1ee46` — `batch334: add session-owner load quick action in ios location shell`
+  - iOS location shell thêm one-tap action `Use current session user as owner + load location status`; action auto-apply owner theo current session user rồi load snapshot/share/audience counts trong cùng thao tác.
+  - action có guard marker `session_owner_missing_for_quick_apply`; load flow reuse status prefix `owner_source=session_user` để parity nhanh với web location shell.
 - Batch 333 handoff:
   - `902470c` — `batch333: add session-owner reload quick action in web location shell`
   - web location shell thêm one-tap action `Use current session user as owner + reload counts`; action auto-apply owner từ persisted auth session rồi reload snapshot/audience counts ngay trong một thao tác.

@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 333
-- Trục công việc: location shell (web) — add quick action `Use current session user as owner + reload counts` for one-tap owner apply + count refresh parity with iOS location shell.
-- Trạng thái: batch333_complete_location_web_session_owner_reload_counts.
+- Batch workflow chính thức hiện tại: 334
+- Trục công việc: location shell (iOS) — add quick action `Use current session user as owner + load location status` for one-tap owner apply + load parity with web location shell.
+- Trạng thái: batch334_complete_location_ios_session_owner_load_status.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 334 handoff (closed)
+- Batch vừa xong: **334**
+- Commit đã chốt:
+  - `8c1ee46` — `batch334: add session-owner load quick action in ios location shell`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **335**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell (web): thêm quick action `Use current session user + create notification + load` để one-tap lifecycle smoke path.
 
 ## Batch 333 handoff (closed)
 - Batch vừa xong: **333**
