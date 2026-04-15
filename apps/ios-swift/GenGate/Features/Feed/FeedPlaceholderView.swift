@@ -36,6 +36,8 @@ struct FeedPlaceholderView: View {
     @State private var lastCreateFeedGateSnapshotBundleCopiedAt: Date?
     @State private var lastDeleteSummaryCopiedAt: Date?
     @State private var lastDeleteSummaryCopiedText: String = ""
+    @State private var lastDeleteFeedGateBundleCopiedAt: Date?
+    @State private var lastDeleteFeedGateBundleCopiedText: String = ""
     @State private var deleteSnapshotSource: String = "manual_input"
     @State private var deleteCopyAuditSourceDraft: String = "quick_delete_parity"
     @State private var lastDeleteCopyAuditLine: String?
@@ -456,6 +458,18 @@ struct FeedPlaceholderView: View {
                             copyLastDeleteResultSummaryLine()
                         }
                         .buttonStyle(.bordered)
+
+                        if let lastDeleteFeedGateBundleLine {
+                            Text("Last delete + feed-gate bundle: \(lastDeleteFeedGateBundleLine)")
+                                .font(.footnote.monospaced())
+                                .foregroundStyle(.secondary)
+                                .textSelection(.enabled)
+
+                            Button("Copy last delete + feed-gate bundle") {
+                                copyLastDeleteFeedGateBundleLine()
+                            }
+                            .buttonStyle(.bordered)
+                        }
                     }
 
                     if let lastDeleteSummaryCopiedFeedbackText {
@@ -467,6 +481,12 @@ struct FeedPlaceholderView: View {
                             copyLastDeleteSummaryCopiedFeedbackText()
                         }
                         .buttonStyle(.bordered)
+                    }
+
+                    if let lastDeleteFeedGateBundleCopiedFeedbackText {
+                        Text(lastDeleteFeedGateBundleCopiedFeedbackText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
                     }
 
                     Text("Delete copy audit source-state: \(deleteCopyAuditSourceStateLine)")
@@ -1156,6 +1176,22 @@ struct FeedPlaceholderView: View {
         return "last_create_feed_visibility_delta={\(lastCreateFeedVisibilityDeltaLine)} | feed_gate_summary={\(lastCreateFeedGateSummaryLine)}"
     }
 
+    private var lastDeleteFeedGateBundleLine: String? {
+        guard
+            let lastDeletedMomentSummaryLine,
+            !lastDeletedMomentSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else {
+            return nil
+        }
+
+        let gateSummaryLine = quickFeedVisibilityGateSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !gateSummaryLine.isEmpty else {
+            return nil
+        }
+
+        return "last_delete_result={\(lastDeletedMomentSummaryLine)} | feed_gate_summary={\(gateSummaryLine)}"
+    }
+
     private var quickDeleteParitySummaryLine: String {
         let normalizedDeleteMomentID = normalizedDeleteMomentIDDraft.isEmpty ? "(empty)" : normalizedDeleteMomentIDDraft
         return "delete_moment_id=\(normalizedDeleteMomentID) / authored_count=\(authoredMomentRows.count) / feed_count=\(momentRows.count) / gate_snapshot_source=\(feedVisibilityGateSnapshotSource) / delete_snapshot_source=\(deleteSnapshotSource)"
@@ -1242,6 +1278,19 @@ struct FeedPlaceholderView: View {
         }
 
         return "Copied delete summary (\(Int(elapsed))s ago): \(lastDeleteSummaryCopiedText)"
+    }
+
+    private var lastDeleteFeedGateBundleCopiedFeedbackText: String? {
+        guard let lastDeleteFeedGateBundleCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(lastDeleteFeedGateBundleCopiedAt)
+        guard elapsed < 8 else {
+            return nil
+        }
+
+        return "Copied last delete + feed-gate bundle (\(Int(elapsed))s ago): \(lastDeleteFeedGateBundleCopiedText)"
     }
 
     private func buildDeleteCopyAuditLine(source: String, value: String) -> String {
@@ -1733,6 +1782,32 @@ struct FeedPlaceholderView: View {
         fetchError = nil
     }
 
+    private func copyLastDeleteFeedGateBundleLine() {
+        guard let lastDeleteFeedGateBundleLine else {
+            statusMessage = nil
+            fetchError = "last_delete_feed_gate_bundle_missing"
+            return
+        }
+
+        let normalizedText = lastDeleteFeedGateBundleLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "last_delete_feed_gate_bundle_missing"
+            return
+        }
+
+        guard copyToClipboard(normalizedText) else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        lastDeleteFeedGateBundleCopiedText = normalizedText
+        lastDeleteFeedGateBundleCopiedAt = Date()
+        statusMessage = "Copied last delete + feed-gate bundle to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
     private func copyLastDeleteResultSummaryLine() {
         guard let lastDeletedMomentSummaryLine else {
             statusMessage = nil
@@ -1986,7 +2061,7 @@ struct FeedPlaceholderView: View {
         }
     }
 
-    private func loadPrivateFeed(statusPrefix: String? = nil) async {
+    private func loadPrivateFeed(statusPrefix: String? = nil, snapshotSource: String = "reload_flow") async {
         let composeStatus: (String) -> String = { message in
             guard let statusPrefix, !statusPrefix.isEmpty else {
                 return message
@@ -2007,8 +2082,8 @@ struct FeedPlaceholderView: View {
         do {
             momentRows = try await PrivateFeedAPIClient().fetchFeed(viewerUserID: trimmedViewerID)
             synchronizeReactionTargetWithLoadedMoments()
-            feedVisibilityGateSnapshotSource = "reload_flow"
-            let gateSummary = buildFeedVisibilityGateSummary(viewerRawID: trimmedViewerID, rows: momentRows, snapshotSource: "reload_flow")
+            feedVisibilityGateSnapshotSource = snapshotSource
+            let gateSummary = buildFeedVisibilityGateSummary(viewerRawID: trimmedViewerID, rows: momentRows, snapshotSource: snapshotSource)
             statusMessage = composeStatus("Loaded \(momentRows.count) private feed moment(s). Gate summary: \(gateSummary.summaryLine).")
         } catch {
             momentRows = []
@@ -2241,15 +2316,21 @@ struct FeedPlaceholderView: View {
                 reactionRows = []
             }
 
+            var deleteGateSummaryLine: String?
             if !viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                await loadPrivateFeed()
+                await loadPrivateFeed(snapshotSource: "delete_flow")
+                deleteGateSummaryLine = quickFeedVisibilityGateSummaryLine
             }
 
             if !authorUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 await loadAuthoredMoments()
             }
 
-            statusMessage = "Deleted moment \(momentID). \(deletedSummary)."
+            if let deleteGateSummaryLine, !deleteGateSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                statusMessage = "Deleted moment \(momentID). \(deletedSummary). Feed visibility gate summary: \(deleteGateSummaryLine)."
+            } else {
+                statusMessage = "Deleted moment \(momentID). \(deletedSummary)."
+            }
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
