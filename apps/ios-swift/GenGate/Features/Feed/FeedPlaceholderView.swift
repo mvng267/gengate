@@ -29,6 +29,8 @@ struct FeedPlaceholderView: View {
     @State private var feedVisibilityGateSnapshotSource: String = "reload_flow"
     @State private var lastCreateFeedVisibilityDeltaCopiedAt: Date?
     @State private var lastCreateFeedVisibilityDeltaCopiedText: String = ""
+    @State private var lastCreateFeedGateBundleCopiedText: String = ""
+    @State private var lastCreateFeedGateBundleCopiedAt: Date?
     @State private var lastDeleteSummaryCopiedAt: Date?
     @State private var lastDeleteSummaryCopiedText: String = ""
     @State private var deleteSnapshotSource: String = "manual_input"
@@ -368,6 +370,11 @@ struct FeedPlaceholderView: View {
                             .foregroundStyle(.secondary)
                             .textSelection(.enabled)
 
+                        Text("Quick create + feed-gate bundle: \(quickCreateFeedGateBundleLine)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+
                         Button("Copy quick feed visibility delta") {
                             copyQuickFeedVisibilityDeltaSummary()
                         }
@@ -375,6 +382,11 @@ struct FeedPlaceholderView: View {
 
                         Button("Copy quick feed visibility gate summary") {
                             copyQuickFeedVisibilityGateSummary()
+                        }
+                        .buttonStyle(.bordered)
+
+                        Button("Copy quick create + feed-gate bundle") {
+                            copyQuickCreateFeedGateBundleLine()
                         }
                         .buttonStyle(.bordered)
                     }
@@ -393,6 +405,12 @@ struct FeedPlaceholderView: View {
 
                     if let lastCreateFeedVisibilityDeltaCopiedFeedbackText {
                         Text(lastCreateFeedVisibilityDeltaCopiedFeedbackText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if let lastCreateFeedGateBundleCopiedFeedbackText {
+                        Text(lastCreateFeedGateBundleCopiedFeedbackText)
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
@@ -1099,6 +1117,11 @@ struct FeedPlaceholderView: View {
         ).summaryLine
     }
 
+    private var quickCreateFeedGateBundleLine: String {
+        let payloadSummary = momentCreateQuickCopySummary ?? "author=(empty) | image_url=(empty) | caption=(empty)"
+        return "moment_create_marker={\(payloadSummary)} | feed_gate_summary={\(quickFeedVisibilityGateSummaryLine)}"
+    }
+
     private var quickDeleteParitySummaryLine: String {
         let normalizedDeleteMomentID = normalizedDeleteMomentIDDraft.isEmpty ? "(empty)" : normalizedDeleteMomentIDDraft
         return "delete_moment_id=\(normalizedDeleteMomentID) / authored_count=\(authoredMomentRows.count) / feed_count=\(momentRows.count) / gate_snapshot_source=\(feedVisibilityGateSnapshotSource) / delete_snapshot_source=\(deleteSnapshotSource)"
@@ -1146,6 +1169,19 @@ struct FeedPlaceholderView: View {
         }
 
         return "Copied feed-visibility delta (\(Int(elapsed))s ago): \(lastCreateFeedVisibilityDeltaCopiedText)"
+    }
+
+    private var lastCreateFeedGateBundleCopiedFeedbackText: String? {
+        guard let lastCreateFeedGateBundleCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(lastCreateFeedGateBundleCopiedAt)
+        guard elapsed < 8 else {
+            return nil
+        }
+
+        return "Copied create + feed-gate bundle (\(Int(elapsed))s ago): \(lastCreateFeedGateBundleCopiedText)"
     }
 
     private var lastDeleteSummaryCopiedFeedbackText: String? {
@@ -1553,6 +1589,26 @@ struct FeedPlaceholderView: View {
         lastCreateFeedVisibilityDeltaCopiedText = normalizedText
         lastCreateFeedVisibilityDeltaCopiedAt = Date()
         statusMessage = "Copied quick feed visibility gate summary to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyQuickCreateFeedGateBundleLine() {
+        let normalizedText = quickCreateFeedGateBundleLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "quick_create_feed_gate_bundle_empty"
+            return
+        }
+
+        guard copyToClipboard(normalizedText) else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        lastCreateFeedGateBundleCopiedText = normalizedText
+        lastCreateFeedGateBundleCopiedAt = Date()
+        statusMessage = "Copied quick create + feed-gate bundle to clipboard (\(normalizedText))."
         fetchError = nil
     }
 
