@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { readPersistedAuthSession } from "@/lib/auth/client";
 import {
   createAudience,
   createShare,
@@ -54,6 +55,7 @@ export function LocationShell({
   const [isCreatingSnapshot, setIsCreatingSnapshot] = useState(false);
   const [isReloadingCounts, setIsReloadingCounts] = useState(false);
   const [lastCopiedLocationStateSummary, setLastCopiedLocationStateSummary] = useState<string | null>(null);
+  const [currentSessionUserId, setCurrentSessionUserId] = useState("");
 
   const draftSharingMode = form.sharingMode.trim();
   const resolvedSharingMode = share?.sharing_mode ?? (draftSharingMode || "(unknown)");
@@ -86,15 +88,27 @@ export function LocationShell({
     setSnapshotCount(0);
   }, [initialAllowedUserId, initialOwnerUserId, initialShareId]);
 
-  async function reloadCounts(currentShareId?: string) {
-    const ownerUserId = form.ownerUserId.trim();
+  useEffect(() => {
+    const persistedSession = readPersistedAuthSession();
+    setCurrentSessionUserId(persistedSession?.session.user_id?.trim() ?? "");
+  }, []);
+
+  async function reloadCounts(input?: {
+    shareIdOverride?: string;
+    ownerUserIdOverride?: string;
+    statusPrefix?: string;
+  }) {
+    const ownerUserId = (input?.ownerUserIdOverride ?? form.ownerUserId).trim();
+    const currentShareId = input?.shareIdOverride ?? share?.id;
+    const statusPrefix = input?.statusPrefix?.trim();
+
     if (!ownerUserId) {
       setStatus("owner_user_id_required");
       return;
     }
 
     setIsReloadingCounts(true);
-    setStatus("Reloading location share counts...");
+    setStatus(statusPrefix ? `${statusPrefix} Reloading location share counts...` : "Reloading location share counts...");
 
     try {
       const nextSnapshotCount = await getSnapshotCount(ownerUserId);
@@ -103,16 +117,42 @@ export function LocationShell({
       if (currentShareId) {
         const nextAudienceCount = await getAudienceCount(currentShareId);
         setAudienceCount(nextAudienceCount);
-        setStatus(`Reloaded counts: ${nextAudienceCount} audience member(s), ${nextSnapshotCount} snapshot(s).`);
+        const summaryStatus = `Reloaded counts: ${nextAudienceCount} audience member(s), ${nextSnapshotCount} snapshot(s).`;
+        setStatus(statusPrefix ? `${statusPrefix} ${summaryStatus}` : summaryStatus);
       } else {
         setAudienceCount(0);
-        setStatus(`Reloaded counts: 0 audience member(s), ${nextSnapshotCount} snapshot(s).`);
+        const summaryStatus = `Reloaded counts: 0 audience member(s), ${nextSnapshotCount} snapshot(s).`;
+        setStatus(statusPrefix ? `${statusPrefix} ${summaryStatus}` : summaryStatus);
       }
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "location_counts_reload_failed");
+      const failureStatus = error instanceof Error ? error.message : "location_counts_reload_failed";
+      setStatus(statusPrefix ? `${statusPrefix} ${failureStatus}` : failureStatus);
     }
 
     setIsReloadingCounts(false);
+  }
+
+  async function applyCurrentSessionUserAsOwnerAndReloadCounts() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_owner_missing_for_quick_apply");
+      return;
+    }
+
+    const ownerStatus =
+      form.ownerUserId.trim() === sessionUserId
+        ? "Owner already matches current session user (owner_source=session_user)."
+        : "Applied current session user as owner (owner_source=session_user).";
+
+    setForm((current) => ({
+      ...current,
+      ownerUserId: sessionUserId,
+    }));
+
+    await reloadCounts({
+      ownerUserIdOverride: sessionUserId,
+      statusPrefix: ownerStatus,
+    });
   }
 
   async function handleCreateShare() {
@@ -127,7 +167,7 @@ export function LocationShell({
       });
       setShare(created);
       setAudienceCount(0);
-      await reloadCounts(created.id);
+      await reloadCounts({ shareIdOverride: created.id });
       setStatus(`Created location share ${created.id} in ${created.sharing_mode} mode.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "location_share_create_failed");
@@ -258,10 +298,19 @@ export function LocationShell({
         <button type="button" onClick={() => void handleCreateShare()} disabled={isCreatingShare}>
           {isCreatingShare ? "Creating..." : "Create location share"}
         </button>
+        <button
+          type="button"
+          onClick={() => void applyCurrentSessionUserAsOwnerAndReloadCounts()}
+          disabled={isReloadingCounts || currentSessionUserId.trim().length === 0}
+        >
+          {isReloadingCounts
+            ? "Applying session owner + reloading..."
+            : "Use current session user as owner + reload counts"}
+        </button>
         <button type="button" onClick={() => void handleToggleShare()} disabled={isTogglingShare || !share}>
           {isTogglingShare ? "Saving..." : share?.is_active ? "Disable sharing" : "Enable sharing"}
         </button>
-        <button type="button" onClick={() => void reloadCounts(share?.id)} disabled={isReloadingCounts}>
+        <button type="button" onClick={() => void reloadCounts()} disabled={isReloadingCounts}>
           {isReloadingCounts ? "Reloading..." : "Reload counts"}
         </button>
       </div>
