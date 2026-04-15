@@ -164,11 +164,19 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       ? "mismatched"
       : "missing";
 
+  const lifecyclePairSubject =
+    quickLifecyclePairState === "missing"
+      ? "none"
+      : quickLifecyclePairState === "matched"
+        ? "same_notification"
+        : "cross_notification";
+
   const lifecycleCreateResult = lastLifecyclePair?.createResult ?? lastCreateResultDelta;
   const lifecycleMutationDelta = lastLifecyclePair?.mutationDelta ?? lastMutationDelta;
 
   const quickLifecyclePairLine =
     `lifecycle_pair_state=${quickLifecyclePairState}` +
+    ` / lifecycle_pair_subject=${lifecyclePairSubject}` +
     ` / create_result(notification_id=${lifecycleCreateResult?.notificationId ?? "(none)"},read_state=${lifecycleCreateResult?.readState ?? "(none)"},current_page_unread=${lifecycleCreateResult?.currentPageUnread ?? "(none)"},total_unread_count=${lifecycleCreateResult?.totalUnreadCount ?? "(none)"})` +
     ` / mutation_delta(notification_id=${lifecycleMutationDelta?.notificationId ?? "(none)"},read_state=${lifecycleMutationDelta?.readState ?? "(none)"},current_page_unread=${lifecycleMutationDelta?.currentPageUnread ?? "(none)"},total_unread_count=${lifecycleMutationDelta?.totalUnreadCount ?? "(none)"})`;
 
@@ -415,6 +423,9 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       </p>
       <p>
         Quick lifecycle pair state: <code>lifecycle_pair_state={quickLifecyclePairState}</code>
+      </p>
+      <p>
+        Quick lifecycle pair subject: <code>lifecycle_pair_subject={lifecyclePairSubject}</code>
       </p>
       <p>
         Quick lifecycle pair: <code>{quickLifecyclePairLine}</code>
