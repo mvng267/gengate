@@ -12,9 +12,33 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 360
-- Trục công việc: friend-graph shell (web) — add quick-copy last-action request summary bundle (`create + decision + counts`) for deterministic report after mutate flow.
-- Trạng thái: batch360_complete_web_friend_graph_last_action_request_summary_bundle_quick_copy.
+- Batch workflow chính thức hiện tại: 366
+- Trục công việc: notifications shell (web) — add quick-copy lifecycle snapshot audit line for deterministic parity report (`pair markers + create/mutation IDs + unread summary + paging window`).
+- Trạng thái: batch366_complete_web_notification_lifecycle_snapshot_audit_quick_copy.
+
+## Batch 366 handoff (closed)
+- Batch vừa xong: **366**
+- Commit đã chốt:
+  - `3dbcc22` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **367**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS notifications shell: thêm quick-copy `lifecycle snapshot audit` line để one-tap payload parity với web batch366.
+
+## Batch 365 handoff (closed)
+- Batch vừa xong: **365**
+- Commit đã chốt:
+  - `81d7832` — `batch365: add unread lifecycle mutation bundle quick copy in ios notification shell`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **366**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notifications/backend parity: thêm one-tap notification lifecycle snapshot audit line để human report deterministic across backend + web + iOS.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**

@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 360
+- Batch: 366
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 360 friend-graph shell (web) — add one-tap quick-copy last-action request summary bundle (`create + decision + counts`) for deterministic report after mutate flow.
+- Scope: batch 366 notifications shell (web) — add one-tap quick-copy `lifecycle snapshot audit` line để report deterministic notification lifecycle state (`pair markers + create/mutation IDs + unread summary + paging window`) cho parity đối chiếu backend + web + iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,15 +16,21 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`.
 - Files:
-  - apps/web-nextjs/components/friend-graph-shell.tsx
+  - apps/web-nextjs/components/notification-shell.tsx
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
 - Git:
-  - latest feature commit: `709ea10` — `batch360: add friend-request last-action summary bundle quick copy in web friend graph shell`
-  - previous feature commit: `8170945` — `batch359: add last-create feed-gate bundle quick copy in ios feed shell`
-  - working tree: docs dirty (`WORKFLOW_STATUS.md`, `WORKFLOW_CHECKLIST.md`, `TEAM_DISPATCH.md`)
+  - latest feature commit: `3dbcc22` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
+  - previous feature commit: `81d7832` — `batch365: add unread lifecycle mutation bundle quick copy in ios notification shell`
+  - working tree: clean
 - Blocker: none
-- Next: mở batch361 với 1 slice hẹp iOS friend-graph shell — thêm quick-copy last-action request summary bundle (`create + decision + counts`) để parity one-tap deterministic report với web batch360.
+- Next: mở batch367 với 1 slice hẹp notifications parity (iOS) — thêm quick-copy lifecycle snapshot audit line để one-tap parity payload với web batch366.
+- Batch 366 handoff:
+  - `3dbcc22` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
+  - web notifications shell thêm line + action copy `Quick lifecycle snapshot audit`.
+  - payload format: `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`.
+- Batch 365 handoff:
+  - `81d7832` — `batch365: add unread lifecycle mutation bundle quick copy in ios notification shell`
 - Batch 360 handoff:
   - `709ea10` — `batch360: add friend-request last-action summary bundle quick copy in web friend graph shell`
   - web Friend Graph shell thêm line + action copy cho `friend-request last-action summary bundle` để one-tap report deterministic payload sau mutate flow, gom `create marker + decision marker + counts` trong cùng payload.
