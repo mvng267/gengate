@@ -110,3 +110,14 @@ export async function markNotificationUnread(notificationId: string): Promise<No
 
   return (await response.json()) as NotificationItem;
 }
+
+export async function deleteNotification(notificationId: string): Promise<NotificationItem> {
+  const response = await apiRequest(`/notifications/${encodeURIComponent(notificationId)}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error(`notification_delete_failed:${response.status}`);
+  }
+
+  return (await response.json()) as NotificationItem;
+}

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { readPersistedAuthSession } from "@/lib/auth/client";
 import {
   createNotification,
+  deleteNotification,
   listNotifications,
   markNotificationRead,
   markNotificationUnread,
@@ -43,6 +44,15 @@ type NotificationCreateResultDelta = {
   totalUnreadCount: number | null;
 };
 
+type NotificationDeleteResultDelta = {
+  notificationId: string;
+  previousReadState: "read" | "unread";
+  currentPageCount: number | null;
+  currentPageUnread: number | null;
+  totalUnreadCount: number | null;
+  window: NotificationLoadWindow;
+};
+
 type NotificationLifecyclePair = {
   createResult: NotificationCreateResultDelta;
   mutationDelta: NotificationMutationDelta;
@@ -67,9 +77,11 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [lastLoadedWindow, setLastLoadedWindow] = useState<NotificationLoadWindow | null>(null);
   const [lastMutationDelta, setLastMutationDelta] = useState<NotificationMutationDelta | null>(null);
   const [lastCreateResultDelta, setLastCreateResultDelta] = useState<NotificationCreateResultDelta | null>(null);
+  const [lastDeleteResultDelta, setLastDeleteResultDelta] = useState<NotificationDeleteResultDelta | null>(null);
   const [lastLifecyclePair, setLastLifecyclePair] = useState<NotificationLifecyclePair | null>(null);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
 
@@ -81,9 +93,11 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     setItems([]);
     setListMeta(null);
     setPagination({ limit: 20, offset: 0, unreadOnly: false });
+    setDeletingId(null);
     setLastLoadedWindow(null);
     setLastMutationDelta(null);
     setLastCreateResultDelta(null);
+    setLastDeleteResultDelta(null);
     setLastLifecyclePair(null);
   }, [initialUserId]);
 
@@ -174,6 +188,10 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   const quickCreateResultDeltaLine = lastCreateResultDelta
     ? `notification_id=${lastCreateResultDelta.notificationId} / read_state=${lastCreateResultDelta.readState} / current_page_unread=${lastCreateResultDelta.currentPageUnread ?? "(none)"} / total_unread_count=${lastCreateResultDelta.totalUnreadCount ?? "(none)"}`
     : "notification_id=(none) / read_state=(none) / current_page_unread=(none) / total_unread_count=(none)";
+
+  const quickDeleteResultSummaryLine = lastDeleteResultDelta
+    ? `delete_result=deleted / notification_id=${lastDeleteResultDelta.notificationId} / previous_read_state=${lastDeleteResultDelta.previousReadState} / current_page_count=${lastDeleteResultDelta.currentPageCount ?? "(none)"} / current_page_unread=${lastDeleteResultDelta.currentPageUnread ?? "(none)"} / total_unread_count=${lastDeleteResultDelta.totalUnreadCount ?? "(none)"} / window(limit=${lastDeleteResultDelta.window.limit},offset=${lastDeleteResultDelta.window.offset},filter_mode=${lastDeleteResultDelta.window.unreadOnly ? "unread_only" : "all"})`
+    : "delete_result=(none) / notification_id=(none) / previous_read_state=(none) / current_page_count=(none) / current_page_unread=(none) / total_unread_count=(none) / window(limit=(none),offset=(none),filter_mode=(none))";
 
   const quickLifecyclePairState = lastLifecyclePair
     ? "matched"
@@ -285,6 +303,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
         totalUnreadCount: nextMeta ? nextMeta.total_unread_count : null,
       };
       setLastCreateResultDelta(createResultDelta);
+      setLastDeleteResultDelta(null);
       setLastLifecyclePair(null);
 
       setForm((current) => ({
@@ -406,6 +425,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
 
       setItems((current) => current.map((entry) => (entry.id === updated.id ? updated : entry)));
       setLastLoadedWindow(null);
+      setLastDeleteResultDelta(null);
 
       const mutationDelta: NotificationMutationDelta = {
         notificationId: updated.id,
@@ -435,6 +455,57 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     }
 
     setBusyId(null);
+  }
+
+  async function handleDelete(item: NotificationItem) {
+    setDeletingId(item.id);
+    setStatus("Deleting notification...");
+
+    try {
+      const deleted = await deleteNotification(item.id);
+      const currentWindow = lastLoadedWindow ?? currentLoadWindow();
+      const wasRead = item.read_at !== null;
+
+      let nextMeta = listMeta;
+      if (listMeta) {
+        const unreadDelta = wasRead ? 0 : -1;
+        nextMeta = {
+          ...listMeta,
+          count: Math.max(0, listMeta.count - 1),
+          unread_count: Math.max(0, listMeta.unread_count + unreadDelta),
+          total_unread_count: Math.max(0, listMeta.total_unread_count + unreadDelta),
+        };
+        setListMeta(nextMeta);
+      }
+
+      setItems((current) => current.filter((entry) => entry.id !== deleted.id));
+      setLastLoadedWindow(null);
+      setLastMutationDelta(null);
+      setLastCreateResultDelta((current) => (current && current.notificationId === deleted.id ? null : current));
+      setLastLifecyclePair(null);
+
+      const deleteResultDelta: NotificationDeleteResultDelta = {
+        notificationId: deleted.id,
+        previousReadState: wasRead ? "read" : "unread",
+        currentPageCount: nextMeta ? nextMeta.count : null,
+        currentPageUnread: nextMeta ? nextMeta.unread_count : null,
+        totalUnreadCount: nextMeta ? nextMeta.total_unread_count : null,
+        window: currentWindow,
+      };
+      setLastDeleteResultDelta(deleteResultDelta);
+
+      const deleteResultSummaryLine =
+        `delete_result=deleted / notification_id=${deleteResultDelta.notificationId} / previous_read_state=${deleteResultDelta.previousReadState} / ` +
+        `current_page_count=${deleteResultDelta.currentPageCount ?? "(none)"} / current_page_unread=${deleteResultDelta.currentPageUnread ?? "(none)"} / ` +
+        `total_unread_count=${deleteResultDelta.totalUnreadCount ?? "(none)"} / ` +
+        `window(limit=${deleteResultDelta.window.limit},offset=${deleteResultDelta.window.offset},filter_mode=${deleteResultDelta.window.unreadOnly ? "unread_only" : "all"})`;
+
+      setStatus(`Deleted notification ${deleted.id}. Quick delete result summary: ${deleteResultSummaryLine}.`);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "notification_delete_failed");
+    }
+
+    setDeletingId(null);
   }
 
   async function copyToClipboard(text: string, statusPrefix: string, emptyCode: string, failedCode: string) {
@@ -568,6 +639,20 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     );
   }
 
+  async function handleCopyQuickDeleteResultSummary() {
+    if (!lastDeleteResultDelta) {
+      setStatus("quick_delete_result_summary_missing");
+      return;
+    }
+
+    await copyToClipboard(
+      quickDeleteResultSummaryLine,
+      "Copied quick delete result summary to clipboard",
+      "quick_delete_result_summary_missing",
+      "quick_delete_result_summary_copy_failed",
+    );
+  }
+
   return (
     <section>
       <p>
@@ -660,6 +745,14 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       <p>
         <button type="button" onClick={() => void handleCopyQuickLifecycleSnapshotAudit()}>
           Copy quick lifecycle snapshot audit
+        </button>
+      </p>
+      <p>
+        Quick delete result summary: <code>{quickDeleteResultSummaryLine}</code>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickDeleteResultSummary()}>
+          Copy quick delete result summary
         </button>
       </p>
       <p>Filter mode: {pagination.unreadOnly ? "Unread only" : "All notifications"}</p>
@@ -862,8 +955,12 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
               {item.read_at ? "read" : "unread"}
               {" · payload: "}
               {JSON.stringify(item.payload_json)} {" "}
-              <button type="button" onClick={() => void toggleRead(item)} disabled={busyId === item.id}>
+              <button type="button" onClick={() => void toggleRead(item)} disabled={busyId === item.id || deletingId === item.id}>
                 {busyId === item.id ? "Saving..." : `${item.read_at ? "●" : "○"} ${item.read_at ? "Mark unread" : "Mark read"}`}
+              </button>
+              {" "}
+              <button type="button" onClick={() => void handleDelete(item)} disabled={busyId === item.id || deletingId === item.id}>
+                {deletingId === item.id ? "Deleting..." : "Delete"}
               </button>
             </li>
           ))}
