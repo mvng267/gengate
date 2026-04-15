@@ -40,6 +40,8 @@ struct NotificationsPlaceholderView: View {
     @State private var lastQuickLifecyclePairCopiedText: String = ""
     @State private var quickLifecyclePairMutationCopiedAt: Date?
     @State private var lastQuickLifecyclePairMutationCopiedText: String = ""
+    @State private var quickUnreadLifecycleMutationBundleCopiedAt: Date?
+    @State private var lastQuickUnreadLifecycleMutationBundleCopiedText: String = ""
     @State private var lastLifecyclePair: NotificationLifecyclePair?
 
     private struct NotificationCreateFlowInput {
@@ -67,7 +69,7 @@ struct NotificationsPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Notifications",
                     summary: "iOS native notification center shell now supports create + read/unread mutation so notification flow can be exercised end-to-end from native UI.",
-                    status: "Status: native notification center now supports create + read/unread toggles + quick unread summary + quick page cursor summary + quick mutation delta + quick create-result delta + quick lifecycle pair lines + quick lifecycle pair mutation line; delete remains intentionally out of scope for this slice.",
+                    status: "Status: native notification center now supports create + read/unread toggles + quick unread summary + quick page cursor summary + quick mutation delta + quick create-result delta + quick lifecycle pair lines + quick lifecycle pair mutation line + quick unread lifecycle mutation bundle line; delete remains intentionally out of scope for this slice.",
                     bullets: [
                         "Paste a backend user UUID to create and load notifications for that user.",
                         "This shell can create via `POST /notifications`, then read `/notifications/{user_id}` and toggle each row via `/notifications/{id}/read` + `/notifications/{id}/unread`.",
@@ -77,6 +79,7 @@ struct NotificationsPlaceholderView: View {
                         "Quick create-result delta line (`notification_id/read_state/current_page_unread/total_unread_count`) lets testers report create outcome quickly trước khi chuyển qua toggle.",
                         "Quick lifecycle pair line (`lifecycle_pair_state + lifecycle_pair_subject + lifecycle_pair_transition + lifecycle_pair_transition_context + create_result + mutation_delta`) lets testers report a full create->toggle chain with root-cause + transition marker in one payload.",
                         "Quick lifecycle pair mutation line (`lifecycle_pair_state + lifecycle_pair_subject + lifecycle_pair_transition + lifecycle_pair_transition_context + mutation_delta`) gives one-tap mutation-focused parity payload aligned with web notifications shell.",
+                        "Quick unread lifecycle mutation bundle line (`unread_summary + lifecycle markers + mutation_delta`) gives deterministic one-tap payload to report unread counters and mutation transition together (parity with web batch364).",
                         "Use this tab to run minimal notification lifecycle checks from iOS without relying on web seeding first."
                     ]
                 )
@@ -413,6 +416,21 @@ struct NotificationsPlaceholderView: View {
                             .foregroundStyle(.secondary)
                     }
 
+                    Text("Quick unread lifecycle mutation bundle: \(quickUnreadLifecycleMutationBundleLine)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
+                    Button("Copy quick unread lifecycle mutation bundle") {
+                        copyQuickUnreadLifecycleMutationBundleLine()
+                    }
+                    .buttonStyle(.bordered)
+
+                    if let quickUnreadLifecycleMutationBundleCopiedFeedbackText {
+                        Text(quickUnreadLifecycleMutationBundleCopiedFeedbackText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     if let listMeta {
                         Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount) · Limit: \(listMeta.limit) · Offset: \(listMeta.offset) · Filter mode: \(listMeta.unreadOnly ? "Unread only" : "All notifications")")
                             .font(.footnote.monospaced())
@@ -730,6 +748,16 @@ struct NotificationsPlaceholderView: View {
         return "lifecycle_pair_state=\(lifecyclePairState) / lifecycle_pair_subject=\(lifecyclePairSubject) / lifecycle_pair_transition=\(lifecyclePairTransition) / lifecycle_pair_transition_context=\(lifecyclePairTransitionContext) / mutation_delta(notification_id=\(mutationDeltaID),read_state=\(mutationDeltaReadState),current_page_unread=\(mutationDeltaCurrentPageUnread),total_unread_count=\(mutationDeltaTotalUnreadCount))"
     }
 
+    private var quickUnreadLifecycleMutationBundleLine: String {
+        let mutationDelta = lastLifecyclePair?.mutationDelta ?? lastMutationDelta
+        let mutationDeltaID = mutationDelta?.notificationID ?? "(none)"
+        let mutationDeltaReadState = mutationDelta?.readState ?? "(none)"
+        let mutationDeltaCurrentPageUnread = mutationDelta?.currentPageUnreadText ?? "(none)"
+        let mutationDeltaTotalUnreadCount = mutationDelta?.totalUnreadCountText ?? "(none)"
+
+        return "unread_summary(\(quickUnreadSummaryLine)) / lifecycle_pair_state=\(lifecyclePairState) / lifecycle_pair_subject=\(lifecyclePairSubject) / lifecycle_pair_transition=\(lifecyclePairTransition) / lifecycle_pair_transition_context=\(lifecyclePairTransitionContext) / mutation_delta(notification_id=\(mutationDeltaID),read_state=\(mutationDeltaReadState),current_page_unread=\(mutationDeltaCurrentPageUnread),total_unread_count=\(mutationDeltaTotalUnreadCount))"
+    }
+
     private var quickLifecyclePairCopiedFeedbackText: String? {
         guard let quickLifecyclePairCopiedAt else {
             return nil
@@ -754,6 +782,19 @@ struct NotificationsPlaceholderView: View {
         }
 
         return "Copied quick lifecycle pair mutation (\(Int(elapsed))s ago): \(lastQuickLifecyclePairMutationCopiedText)"
+    }
+
+    private var quickUnreadLifecycleMutationBundleCopiedFeedbackText: String? {
+        guard let quickUnreadLifecycleMutationBundleCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(quickUnreadLifecycleMutationBundleCopiedAt)
+        guard elapsed >= 0, elapsed < 6 else {
+            return nil
+        }
+
+        return "Copied quick unread lifecycle mutation bundle (\(Int(elapsed))s ago): \(lastQuickUnreadLifecycleMutationBundleCopiedText)"
     }
 
     private func prefillFromCurrentSessionUserIfNeeded() {
@@ -1242,6 +1283,24 @@ struct NotificationsPlaceholderView: View {
         lastQuickLifecyclePairMutationCopiedText = normalizedText
         quickLifecyclePairMutationCopiedAt = Date()
         statusMessage = "Copied quick lifecycle pair mutation to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyQuickUnreadLifecycleMutationBundleLine() {
+        guard (lastLifecyclePair?.mutationDelta ?? lastMutationDelta) != nil else {
+            statusMessage = "quick_unread_lifecycle_mutation_bundle_missing"
+            return
+        }
+
+        let normalizedText = quickUnreadLifecycleMutationBundleLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        lastQuickUnreadLifecycleMutationBundleCopiedText = normalizedText
+        quickUnreadLifecycleMutationBundleCopiedAt = Date()
+        statusMessage = "Copied quick unread lifecycle mutation bundle to clipboard (\(normalizedText))."
         fetchError = nil
     }
 
