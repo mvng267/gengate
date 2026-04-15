@@ -53,6 +53,18 @@ export function LocationShell({
   const [isAddingAudience, setIsAddingAudience] = useState(false);
   const [isCreatingSnapshot, setIsCreatingSnapshot] = useState(false);
   const [isReloadingCounts, setIsReloadingCounts] = useState(false);
+  const [lastCopiedLocationStateSummary, setLastCopiedLocationStateSummary] = useState<string | null>(null);
+
+  const draftSharingMode = form.sharingMode.trim();
+  const resolvedSharingMode = share?.sharing_mode ?? (draftSharingMode || "(unknown)");
+
+  const quickLocationStateSummary =
+    `owner=${form.ownerUserId.trim() || "(empty)"} / ` +
+    `share_id=${share?.id ?? "(none)"} / ` +
+    `is_active=${share ? String(share.is_active) : "(unknown)"} / ` +
+    `sharing_mode=${resolvedSharingMode} / ` +
+    `audience_count=${share ? audienceCount : 0} / ` +
+    `snapshot_count=${snapshotCount}`;
 
   useEffect(() => {
     setForm((current) => ({
@@ -165,6 +177,27 @@ export function LocationShell({
     setIsAddingAudience(false);
   }
 
+  async function handleCopyQuickLocationStateSummary() {
+    const normalizedSummary = quickLocationStateSummary.trim();
+    if (!normalizedSummary) {
+      setStatus("quick_location_state_summary_empty");
+      return;
+    }
+
+    if (typeof navigator === "undefined" || typeof navigator.clipboard?.writeText !== "function") {
+      setStatus("quick_copy_clipboard_unavailable");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(normalizedSummary);
+      setLastCopiedLocationStateSummary(normalizedSummary);
+      setStatus(`Copied quick location state summary to clipboard (${normalizedSummary}).`);
+    } catch {
+      setStatus("quick_location_state_summary_copy_failed");
+    }
+  }
+
   async function handleCreateSnapshot() {
     setIsCreatingSnapshot(true);
     setStatus("Creating location snapshot...");
@@ -192,6 +225,19 @@ export function LocationShell({
         <strong>Status:</strong> location sharing state shell now wires share activation, audience count, and snapshot count to backend contracts.
       </p>
       <p>{status}</p>
+      <p>
+        Quick location state summary: <code>{quickLocationStateSummary}</code>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickLocationStateSummary()}>
+          Copy quick location state summary
+        </button>
+      </p>
+      {lastCopiedLocationStateSummary ? (
+        <p>
+          Last copied location state summary: <code>{lastCopiedLocationStateSummary}</code>
+        </p>
+      ) : null}
 
       <div>
         <label>

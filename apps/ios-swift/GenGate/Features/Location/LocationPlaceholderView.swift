@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 struct LocationPlaceholderView: View {
     @Environment(AppSessionStore.self) private var sessionStore
@@ -14,6 +17,8 @@ struct LocationPlaceholderView: View {
     @State private var createdAudienceID: String?
     @State private var fetchError: String?
     @State private var statusMessage: String?
+    @State private var lastCopiedLocationStateSummary: String = ""
+    @State private var quickLocationStateCopiedAt: Date?
     @State private var isLoading = false
     @State private var isCreatingShare = false
     @State private var isCreatingAudience = false
@@ -151,6 +156,22 @@ struct LocationPlaceholderView: View {
                             .foregroundStyle(.secondary)
                     }
 
+                    Text("Quick location state summary: \(quickLocationStateSummaryLine)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+
+                    Button("Copy quick location state summary") {
+                        copyQuickLocationStateSummaryToClipboard()
+                    }
+                    .buttonStyle(.bordered)
+
+                    if let quickLocationStateCopiedFeedbackText {
+                        Text(quickLocationStateCopiedFeedbackText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     if let fetchError {
                         Text("Fetch error: \(fetchError)")
                             .font(.footnote)
@@ -203,6 +224,55 @@ struct LocationPlaceholderView: View {
         }
 
         return createdAudienceID ?? ""
+    }
+
+    private var quickLocationStateSummaryLine: String {
+        let normalizedOwner = ownerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedShareID = effectiveShareID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedAudienceCount = audienceCount.map(String.init) ?? "(not_loaded)"
+        let normalizedSnapshotCount = snapshotCount.map(String.init) ?? "(not_loaded)"
+        let normalizedSharingMode = "custom_list"
+        let normalizedIsActive = normalizedShareID.isEmpty ? "(unknown)" : "true"
+
+        return "owner=\(normalizedOwner.isEmpty ? "(empty)" : normalizedOwner) / " +
+            "share_id=\(normalizedShareID.isEmpty ? "(none)" : normalizedShareID) / " +
+            "is_active=\(normalizedIsActive) / " +
+            "sharing_mode=\(normalizedSharingMode) / " +
+            "audience_count=\(normalizedAudienceCount) / " +
+            "snapshot_count=\(normalizedSnapshotCount)"
+    }
+
+    private var quickLocationStateCopiedFeedbackText: String? {
+        guard let quickLocationStateCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(quickLocationStateCopiedAt)
+        guard elapsed < 8 else {
+            return nil
+        }
+
+        return "Copied location state summary (\(Int(elapsed))s ago): \(lastCopiedLocationStateSummary)"
+    }
+
+    private func copyQuickLocationStateSummaryToClipboard() {
+        let summaryLine = quickLocationStateSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !summaryLine.isEmpty else {
+            statusMessage = nil
+            fetchError = "quick_location_state_summary_empty"
+            return
+        }
+
+#if canImport(UIKit)
+        UIPasteboard.general.string = summaryLine
+        lastCopiedLocationStateSummary = summaryLine
+        quickLocationStateCopiedAt = Date()
+        statusMessage = "Copied quick location state summary to clipboard."
+        fetchError = nil
+#else
+        statusMessage = "quick_copy_clipboard_unavailable"
+        fetchError = nil
+#endif
     }
 
     private func prefillFromCurrentSessionUserIfNeeded() {
