@@ -403,6 +403,16 @@ struct FeedPlaceholderView: View {
                         .buttonStyle(.bordered)
                     }
 
+                    Text("Delete copy audit source-state: \(deleteCopyAuditSourceStateLine)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+
+                    Button("Copy delete copy audit source-state line") {
+                        copyDeleteCopyAuditSourceStateLine()
+                    }
+                    .buttonStyle(.bordered)
+
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Delete copy audit source")
                             .font(.caption)
@@ -1027,6 +1037,16 @@ struct FeedPlaceholderView: View {
         ["quick_delete_parity", "last_delete_result", "copied_feedback"]
     }
 
+    private var deleteCopyAuditSourceStateLine: String {
+        let segments = deleteCopyAuditSourceOptions.map { source in
+            let hasValue = !deleteCopyAuditSourceValue(for: source)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .isEmpty
+            return "\(source):\(hasValue ? "ready" : "missing")"
+        }
+        return "delete_copy_audit_source_state=\(segments.joined(separator: "/"))"
+    }
+
     private func deleteCopyAuditSourceValue(for source: String) -> String {
         switch source {
         case "quick_delete_parity":
@@ -1488,6 +1508,24 @@ struct FeedPlaceholderView: View {
         }
 
         statusMessage = "Copied delete copy audit line to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyDeleteCopyAuditSourceStateLine() {
+        let normalizedText = deleteCopyAuditSourceStateLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "delete_copy_audit_source_state_missing"
+            return
+        }
+
+        guard copyToClipboard(normalizedText) else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        statusMessage = "Copied delete copy audit source-state line to clipboard (\(normalizedText))."
         fetchError = nil
     }
 

@@ -119,6 +119,11 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         return "";
     }
   };
+  const deleteCopyAuditSourceStateLine =
+    "delete_copy_audit_source_state=" +
+    deleteSummaryCopySources
+      .map((source) => `${source}:${resolveDeleteCopyAuditSourceValue(source).trim().length > 0 ? "ready" : "missing"}`)
+      .join("/");
 
   useEffect(() => {
     setForm((current) => ({
@@ -294,6 +299,15 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       "Copied delete copy audit line to clipboard",
       "delete_copy_audit_missing",
       "delete_copy_audit_copy_failed",
+    );
+  }
+
+  async function handleCopyDeleteCopyAuditSourceStateLine() {
+    await copyToClipboard(
+      deleteCopyAuditSourceStateLine,
+      "Copied delete copy audit source-state line to clipboard",
+      "delete_copy_audit_source_state_missing",
+      "delete_copy_audit_source_state_copy_failed",
     );
   }
 
@@ -527,6 +541,14 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
           </p>
         </>
       ) : null}
+      <p>
+        Delete copy audit source-state: <code>{deleteCopyAuditSourceStateLine}</code>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyDeleteCopyAuditSourceStateLine()}>
+          Copy delete copy audit source-state line
+        </button>
+      </p>
       <p>
         Delete copy audit source:
         {" "}
