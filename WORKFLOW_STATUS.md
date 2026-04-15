@@ -1,15 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 285
+- Batch: 286
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 285 direct-message shell — add previous-cursor baseline note (`previous_cursor_message`) into read-cursor apply quick-copy so noop apply-state can be explained deterministically on web+iOS.
+- Scope: batch 286 direct-message shell — add current cursor snapshot token (`current_member_cursor`) into read-cursor apply quick-copy so previous/applied/current can be compared in one line on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
-  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor apply result` và verify có thêm `previous_cursor_message=...` cùng `read_cursor_apply_state=...` để giải thích rõ vì sao noop/updated.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor apply result` và verify có thêm `previous_cursor_message=...` cùng `read_cursor_apply_state=...`.
+  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor apply result` và verify có thêm cụm `previous_cursor_message=... | applied_message=... | current_member_cursor=... | read_cursor_apply_state=...`.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor apply result` và verify có thêm `current_member_cursor=...` cạnh `previous_cursor_message=...`.
 - Files:
   - apps/web-nextjs/components/direct-message-shell.tsx
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -17,10 +17,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `8d61ece` — `batch285: add previous-cursor baseline to read-cursor apply quick copy`
-  - working tree: clean after batch285 commit
+  - latest feature commit: `(pending in this run)` — `batch286: add current-member cursor snapshot to apply quick copy`
+  - working tree: clean after batch286 commit
 - Blocker: none
-- Next: mở batch286 với 1 slice hẹp direct-message shell: thêm quick-copy token cho current member cursor snapshot (`current_member_cursor`) để đối chiếu trực tiếp với previous/applied trong cùng dòng trên web+iOS.
+- Next: mở batch287 với 1 slice hẹp direct-message shell: thêm one-tap `copy read-cursor triage line` (tokenized previous/applied/current/apply_state) để report parity nhanh hơn trên web+iOS.
+- Batch 286 handoff:
+  - `(pending in this run)` — `batch286: add current-member cursor snapshot to apply quick copy`
+  - web/iOS read-cursor apply quick-copy line thêm `current_member_cursor`, giúp đối chiếu one-line previous/applied/current mà không cần mở member list.
 - Batch 285 handoff:
   - `8d61ece` — `batch285: add previous-cursor baseline to read-cursor apply quick copy`
   - web/iOS read-cursor apply quick-copy line thêm `previous_cursor_message`, giúp explain chính xác case `read_cursor_apply_state=noop`.

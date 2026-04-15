@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 285
-- Trục công việc: direct-message shell — web+iOS add read-cursor previous baseline note (`previous_cursor_message`) in apply quick-copy for deterministic noop explanation.
-- Trạng thái: batch285_complete_dm_previous_cursor_baseline_quick_copy_web_ios.
+- Batch workflow chính thức hiện tại: 286
+- Trục công việc: direct-message shell — web+iOS add `current_member_cursor` token in read-cursor apply quick-copy to compare previous/applied/current in one line.
+- Trạng thái: batch286_complete_dm_current_member_cursor_quick_copy_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 286 handoff (closed)
+- Batch vừa xong: **286**
+- Commit đã chốt:
+  - `(pending in this run)` — `batch286: add current-member cursor snapshot to apply quick copy`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **287**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - direct-message shell: thêm one-tap `copy read-cursor triage line` (tokenized previous/applied/current/apply_state) để report parity nhanh hơn trên web+iOS.
 
 ## Batch 285 handoff (closed)
 - Batch vừa xong: **285**

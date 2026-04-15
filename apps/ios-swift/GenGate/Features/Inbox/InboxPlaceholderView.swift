@@ -38,7 +38,7 @@ struct InboxPlaceholderView: View {
     @State private var isSendingMessage = false
     @State private var sendStatusHint: String?
     @State private var lastSendQuickCopy: String = "sender=(none) | message_id=(none)"
-    @State private var lastReadCursorApplyQuickCopy: String = "target_user=(none) | previous_cursor_message=(none) | applied_message=(none) | focus_user=(none) | read_state=unknown | read_cursor_apply_state=unknown"
+    @State private var lastReadCursorApplyQuickCopy: String = "target_user=(none) | previous_cursor_message=(none) | applied_message=(none) | current_member_cursor=(none) | focus_user=(none) | read_state=unknown | read_cursor_apply_state=unknown"
     @State private var lastFirstUnreadJumpQuickCopy: String = "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown"
     @State private var lastFirstUnreadGuardQuickCopy: String = "focus_user=(none) | first_unread_guard_state=unknown | candidate=(none)"
     @State private var isCreatingAttachment = false
@@ -3841,7 +3841,7 @@ use_when=\(useWhenText)
         do {
             let previousMemberCursorMessageID = conversationMembers.first(where: { $0.userID == targetUserID })?.lastReadMessageID
 
-            _ = try await InboxAPIClient().updateConversationReadCursor(
+            let updatedMemberRow = try await InboxAPIClient().updateConversationReadCursor(
                 conversationID: conversationID,
                 userID: targetUserID,
                 lastReadMessageID: targetMessageID
@@ -3862,7 +3862,8 @@ use_when=\(useWhenText)
             let readCursorApplyState = previousMemberCursorMessageID == targetMessageID ? "noop" : "updated"
 
             let normalizedPreviousCursorMessageID = previousMemberCursorMessageID ?? "(none)"
-            lastReadCursorApplyQuickCopy = "target_user=\(targetUserID) | previous_cursor_message=\(normalizedPreviousCursorMessageID) | applied_message=\(targetMessageID) | focus_user=\(normalizedFocusUserID) | read_state=\(appliedReadState) | read_cursor_apply_state=\(readCursorApplyState)"
+            let normalizedCurrentMemberCursorMessageID = updatedMemberRow.lastReadMessageID ?? "(none)"
+            lastReadCursorApplyQuickCopy = "target_user=\(targetUserID) | previous_cursor_message=\(normalizedPreviousCursorMessageID) | applied_message=\(targetMessageID) | current_member_cursor=\(normalizedCurrentMemberCursorMessageID) | focus_user=\(normalizedFocusUserID) | read_state=\(appliedReadState) | read_cursor_apply_state=\(readCursorApplyState)"
 
             if sendStatusHint?.contains("read_cursor_first_unread_focus_auto_source=member_row") == true ||
                 sendStatusHint?.contains("read_cursor_first_unread_focus_source=focus_user") == true {
