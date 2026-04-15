@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 348
-- Trục công việc: DM shell (iOS) — add one-tap quick-copy bundle action for sender keep-pair marker + send result for faster parity report.
-- Trạng thái: batch348_complete_dm_ios_sender_keep_pair_send_result_bundle_quick_copy.
+- Batch workflow chính thức hiện tại: 349
+- Trục công việc: DM shell (web) — add one-tap quick-copy bundle action for sender keep-pair marker + send result for parity with iOS bundle path.
+- Trạng thái: batch349_complete_dm_web_sender_keep_pair_send_result_bundle_quick_copy.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 349 handoff (closed)
+- Batch vừa xong: **349**
+- Commit đã chốt:
+  - `5afe2ce` — `batch349: add sender keep-pair plus send-result bundle quick copy in web dm shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **350**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - friend graph shell (web): thêm one-tap quick copy bundle cho friend-request create/reject parity line để tiếp tục ưu tiên seam friend graph theo objective.
 
 ## Batch 348 handoff (closed)
 - Batch vừa xong: **348**
