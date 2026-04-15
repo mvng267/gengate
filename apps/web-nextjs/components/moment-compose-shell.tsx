@@ -35,14 +35,36 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
   const [lastCreateFeedVisibilityDeltaLine, setLastCreateFeedVisibilityDeltaLine] = useState<string | null>(null);
   const [lastCopiedFeedVisibilityDeltaLine, setLastCopiedFeedVisibilityDeltaLine] = useState<string | null>(null);
+
+  const buildFeedVisibilityGateSummary = (viewerRawId: string, nextFeedItems: MomentListItem[]) => {
+    const normalizedViewerId = viewerRawId.trim();
+    const viewerAccessReason = !normalizedViewerId
+      ? "viewer_missing"
+      : nextFeedItems.length > 0
+        ? "granted"
+        : "empty_or_blocked";
+    const viewerAccess = viewerAccessReason === "granted" ? "granted" : "not_granted";
+    const visibleCount = nextFeedItems.length;
+    const firstMomentId = nextFeedItems[0]?.id ?? "(none)";
+
+    return {
+      viewerAccess,
+      viewerAccessReason,
+      visibleCount,
+      firstMomentId,
+      summaryLine:
+        `viewer_access=${viewerAccess}` +
+        ` / viewer_access_reason=${viewerAccessReason}` +
+        ` / visible_count=${visibleCount}` +
+        ` / first_moment_id=${firstMomentId}`,
+    };
+  };
+
   const momentPayloadQuickCopy = `author=${form.authorUserId.trim() || "(empty)"} | image_url=${form.imageStorageKey.trim() || "(empty)"} | caption=${form.captionText.trim() || "(empty)"}`;
   const viewerUserId = form.viewerUserId.trim();
-  const viewerAccess = viewerUserId ? (feedItems.length > 0 ? "granted" : "empty_or_blocked") : "viewer_missing";
+  const quickFeedVisibilityGate = buildFeedVisibilityGateSummary(viewerUserId, feedItems);
   const quickFeedVisibilityDeltaLine = `viewer=${viewerUserId || "(empty)"} / feed_count=${feedItems.length} / first_moment_id=${feedItems[0]?.id ?? "(none)"}`;
-  const quickFeedVisibilityGateSummaryLine =
-    `viewer_access=${viewerAccess}` +
-    ` / visible_count=${feedItems.length}` +
-    ` / first_moment_id=${feedItems[0]?.id ?? "(none)"}`;
+  const quickFeedVisibilityGateSummaryLine = quickFeedVisibilityGate.summaryLine;
 
   useEffect(() => {
     setForm((current) => ({
@@ -103,7 +125,8 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     try {
       const nextItems = await listPrivateFeed(sessionUserId);
       setFeedItems(nextItems);
-      setStatus(`${viewerStatus} Loaded ${nextItems.length} private feed moment(s) for viewer ${sessionUserId}.`);
+      const gateSummary = buildFeedVisibilityGateSummary(sessionUserId, nextItems).summaryLine;
+      setStatus(`${viewerStatus} Loaded ${nextItems.length} private feed moment(s) for viewer ${sessionUserId}. Gate summary: ${gateSummary}.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "private_feed_failed");
     }
@@ -179,9 +202,11 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       if (!viewerUserId) {
         const deltaLine = `created_moment_id=${created.id} / viewer=(empty) / feed_count=(not_loaded) / first_moment_id=(not_loaded)`;
         setLastCreateFeedVisibilityDeltaLine(deltaLine);
+        const gateSummary = buildFeedVisibilityGateSummary("", []);
         setStatus(
           `Created moment ${created.id} with ${created.media_items.length} image item(s). ` +
-            "Set feed viewer UUID, then reload private friend feed to verify visibility delta.",
+            "Set feed viewer UUID, then reload private friend feed to verify visibility delta. " +
+            `Gate summary: ${gateSummary.summaryLine}.`,
         );
       } else {
         try {
@@ -194,9 +219,11 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
             `feed_count=${nextFeedItems.length} / first_moment_id=${firstMomentId}`;
           setLastCreateFeedVisibilityDeltaLine(deltaLine);
 
+          const gateSummary = buildFeedVisibilityGateSummary(viewerUserId, nextFeedItems).summaryLine;
           setStatus(
             `Created moment ${created.id} with ${created.media_items.length} image item(s). ` +
-              `Feed visibility delta: viewer=${viewerUserId} / feed_count=${nextFeedItems.length} / first_moment_id=${firstMomentId}.`,
+              `Feed visibility delta: viewer=${viewerUserId} / feed_count=${nextFeedItems.length} / first_moment_id=${firstMomentId}. ` +
+              `Feed visibility gate summary: ${gateSummary}.`,
           );
         } catch (error) {
           const deltaLine =
@@ -233,9 +260,11 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     setStatus("Reloading private friend feed...");
 
     try {
-      const nextItems = await listPrivateFeed(form.viewerUserId.trim());
+      const normalizedViewerUserId = form.viewerUserId.trim();
+      const nextItems = await listPrivateFeed(normalizedViewerUserId);
       setFeedItems(nextItems);
-      setStatus(`Loaded ${nextItems.length} private feed moment(s) for viewer ${form.viewerUserId.trim() || "unknown-user"}.`);
+      const gateSummary = buildFeedVisibilityGateSummary(normalizedViewerUserId, nextItems).summaryLine;
+      setStatus(`Loaded ${nextItems.length} private feed moment(s) for viewer ${normalizedViewerUserId || "unknown-user"}. Gate summary: ${gateSummary}.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "private_feed_failed");
     }
