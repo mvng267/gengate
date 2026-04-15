@@ -195,6 +195,31 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
     window.location.assign(`/profile?user=${encodeURIComponent(sessionUserId)}&autoload=1`);
   }
 
+  async function submitSessionBoundFriendRequestCreateFlow(input: {
+    requesterUserId: string;
+    receiverUserId: string;
+    statusPrefix: string;
+    reloadedStatusMessage: string;
+    fallbackErrorCode: string;
+  }) {
+    setIsCreatingRequest(true);
+    setStatus(`${input.statusPrefix} Sending friend request...`);
+
+    try {
+      const created = await createFriendRequest({
+        requesterUserId: input.requesterUserId,
+        receiverUserId: input.receiverUserId,
+      });
+      setStatus(`${input.statusPrefix} Created friend request ${created.id}. Reloading friend graph snapshot...`);
+      await loadSnapshot(input.reloadedStatusMessage);
+      setLastFriendGraphDeltaLine(null);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : input.fallbackErrorCode);
+    }
+
+    setIsCreatingRequest(false);
+  }
+
   async function handleApplyCurrentSessionUserAsReceiverAndSendFriendRequest() {
     const sessionUserId = currentSessionUserId.trim();
     if (!sessionUserId) {
@@ -214,24 +239,40 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
     }
 
     setTargetUserId(sessionUserId);
-    setIsCreatingRequest(true);
-    setStatus("Applied current session user as receiver (receiver_source=session_user). Sending friend request...");
+    await submitSessionBoundFriendRequestCreateFlow({
+      requesterUserId,
+      receiverUserId: sessionUserId,
+      statusPrefix: "Applied current session user as receiver (receiver_source=session_user).",
+      reloadedStatusMessage: "Reloading friend graph after session-receiver quick send...",
+      fallbackErrorCode: "friend_request_quick_session_receiver_send_failed",
+    });
+  }
 
-    try {
-      const created = await createFriendRequest({
-        requesterUserId,
-        receiverUserId: sessionUserId,
-      });
-      setStatus(
-        `Applied current session user as receiver (receiver_source=session_user). Created friend request ${created.id}. Reloading friend graph snapshot...`,
-      );
-      await loadSnapshot("Reloading friend graph after session-receiver quick send...");
-      setLastFriendGraphDeltaLine(null);
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "friend_request_quick_session_receiver_send_failed");
+  async function handleApplyCurrentSessionUserAsRequesterKeepReceiverAndSendFriendRequest() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_requester_missing_for_quick_apply");
+      return;
     }
 
-    setIsCreatingRequest(false);
+    const receiverUserId = targetUserId.trim();
+    if (!receiverUserId) {
+      setStatus("friend_request_receiver_missing_for_quick_send");
+      return;
+    }
+
+    if (sessionUserId === receiverUserId) {
+      setStatus("friend_request_invalid_request code=invalid_request detail=requester và receiver phải khác nhau");
+      return;
+    }
+
+    await submitSessionBoundFriendRequestCreateFlow({
+      requesterUserId: sessionUserId,
+      receiverUserId,
+      statusPrefix: "Applied current session user as requester (requester_source=session_user) + kept receiver.",
+      reloadedStatusMessage: "Reloading friend graph after session-requester quick send...",
+      fallbackErrorCode: "friend_request_quick_session_requester_send_failed",
+    });
   }
 
   async function handleCreateRequest(event: React.FormEvent<HTMLFormElement>) {
@@ -410,6 +451,13 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
           disabled={!currentSessionUserId || isLoadingSnapshot || isCreatingRequest}
         >
           Use current session user as receiver + send friend request
+        </button>
+        <button
+          type="button"
+          onClick={() => void handleApplyCurrentSessionUserAsRequesterKeepReceiverAndSendFriendRequest()}
+          disabled={!currentSessionUserId || isLoadingSnapshot || isCreatingRequest}
+        >
+          Use current session user as requester + keep receiver + send friend request
         </button>
       </div>
 
