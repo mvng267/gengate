@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 352
-- Trục công việc: notifications shell (web) — add quick-copy last lifecycle pair mutation line for one-tap parity report create+mark-read/unread transition.
-- Trạng thái: batch352_in_progress_web_notifications_lifecycle_pair_mutation_quick_copy.
+- Batch workflow chính thức hiện tại: 353
+- Trục công việc: notifications shell (iOS) — add quick-copy lifecycle pair mutation line for one-tap parity report create+mark-read/unread transition parity with web batch352.
+- Trạng thái: batch353_in_progress_ios_notifications_lifecycle_pair_mutation_quick_copy.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -53,6 +53,18 @@
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
 
+## Batch 352 handoff (closed)
+- Batch vừa xong: **352**
+- Commit đã chốt:
+  - `5df8099` — `batch352: add lifecycle pair mutation quick copy in web notification shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **353**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notifications shell (iOS): thêm quick-copy lifecycle pair mutation line để parity one-tap report create+mark-read/unread transition với web batch352.
+
 ## Batch 351 handoff (closed)
 - Batch vừa xong: **351**
 - Commit đã chốt:
@@ -68,7 +80,7 @@
 ## Batch 350 handoff (closed)
 - Batch vừa xong: **350**
 - Commit đã chốt:
-  - `d5e08f5` — `batch350: add friend-request create-reject bundle quick copy in web friend graph shell`
+  - `bd7fe3e` — `batch350: add friend-request create-reject bundle quick copy in web friend graph shell`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
 - Blocker/rủi ro còn lại:

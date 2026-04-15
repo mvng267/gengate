@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 351
+- Batch: 352
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 351 friend graph shell (iOS) — add one-tap quick-copy marker + bundle action for friend-request create/reject parity with web.
+- Scope: batch 352 notifications shell (web) — add one-tap quick-copy lifecycle pair mutation line for create+mark-read/unread parity report.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -13,18 +13,22 @@
   - iOS Location: nhập owner/share -> `Load location status` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - Web Inbox (`/inbox`): nhập user A/B (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread`, hoặc bấm `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> `Open direct thread` -> nhập message text -> bấm `Use current session user as sender + keep user_a/user_b pair + send` và verify status có marker `user_pair_source=kept_user_a+user_b` + `sender_source=session_user` -> bấm `Copy quick sender keep-pair marker` để verify payload marker riêng -> bấm `Copy quick sender keep-pair + send result bundle` để verify payload bundle dạng `sender_keep_pair_marker={...} | send_result={sender=... | message_id=...}` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
   - iOS Inbox: nhập User A/B (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread`, hoặc bấm `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> `Load inbox thread` -> nhập message text -> bấm `Use current session user as sender + keep user_a/user_b pair + send` và verify status có marker `user_pair_source=kept_user_a+user_b` + `sender_source=session_user` -> bấm `Copy quick sender keep-pair marker` để verify payload marker riêng -> bấm `Copy quick sender keep-pair + send result bundle` để verify payload bundle dạng `sender_keep_pair_marker={...} | send_result={sender=... | message_id=...}` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
-  - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
+  - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
-  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
+  - apps/web-nextjs/components/notification-shell.tsx
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
 - Git:
-  - latest feature commit: `bc95c98` — `batch351: add friend-request create-reject bundle quick copy in ios friend graph shell`
-  - previous feature commit: `bd7fe3e` — `batch350: add friend-request create-reject bundle quick copy in web friend graph shell`
-  - working tree: dirty (workflow docs updates pending commit)
+  - latest feature commit: `5df8099` — `batch352: add lifecycle pair mutation quick copy in web notification shell`
+  - previous feature commit: `bc95c98` — `batch351: add friend-request create-reject bundle quick copy in ios friend graph shell`
+  - working tree: clean
 - Blocker: none
-- Next: mở batch352 với 1 slice hẹp notifications shell (web): thêm quick-copy last lifecycle pair mutation line để one-tap parity report create+mark-read/unread transition.
+- Next: mở batch353 với 1 slice hẹp notifications shell (iOS): thêm quick-copy lifecycle pair mutation line để parity one-tap report create+mark-read/unread transition với web batch352.
+- Batch 352 handoff:
+  - `5df8099` — `batch352: add lifecycle pair mutation quick copy in web notification shell`
+  - web Notification shell thêm line + action copy cho `quick lifecycle pair mutation` để one-tap report trạng thái cặp create->mutation mà tập trung vào mutation payload trong cùng marker lifecycle (`state/subject/transition/context`).
+  - mutation payload format: `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / mutation_delta(notification_id=...,read_state=...,current_page_unread=...,total_unread_count=...)`.
 - Batch 351 handoff:
   - `bc95c98` — `batch351: add friend-request create-reject bundle quick copy in ios friend graph shell`
   - iOS Friend Graph shell thêm line + action copy cho `friend-request create marker`, `friend-request reject marker`, và `friend-request create + reject bundle` để one-tap report parity create/reject trong cùng payload.
