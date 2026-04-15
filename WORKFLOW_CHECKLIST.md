@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **297 — location shell (web+iOS quick-copy location state summary) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **298 — notification shell (web+iOS quick-copy notification page cursor summary) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **297**
-- Scope hiện tại: location shell (web+iOS) — thêm quick-copy location state summary `owner/share_id/is_active/sharing_mode/audience_count/snapshot_count` + copy actions.
+- Batch workflow chính thức hiện tại: **298**
+- Scope hiện tại: notification shell (web+iOS) — thêm quick-copy notification page cursor summary `user_id/limit/offset/filter_mode/count/unread_count/total_unread_count` + copy actions.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/components/location-shell.tsx`
-  - `apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift`
+  - `apps/web-nextjs/components/notification-shell.tsx`
+  - `apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `985de64` — `batch297: add quick location state summary copy actions on web and ios`
-  - commit liền trước: `cf07bdc` — `batch296: add feed-visibility delta copy actions after moment create`
+  - commit gần nhất đã chốt: `b4d9981` — `batch298: add notification page-cursor summary copy actions on web and ios`
+  - commit liền trước: `985de64` — `batch297: add quick location state summary copy actions on web and ios`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch298 với 1 slice hẹp notification shell (web+iOS): thêm quick-copy notification page cursor summary `user_id/limit/offset/filter_mode/count/unread_count/total_unread_count` để tăng khả năng test seam #6 theo priority.
+  - mở batch299 với 1 slice hẹp notification shell (web+iOS): thêm quick-copy mutation delta sau mark read/unread `notification_id/read_state/current_page_unread/total_unread_count` để report kết quả toggle nhanh không cần suy tay.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> verify line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` -> bấm `Copy last create feed-visibility delta` và paste kiểm tra payload đúng format.
@@ -118,6 +118,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **298**
+- Commit cuối đã chốt:
+  - `b4d9981` — `batch298: add notification page-cursor summary copy actions on web and ios`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **299**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell (web+iOS): thêm quick-copy mutation delta sau mark read/unread `notification_id/read_state/current_page_unread/total_unread_count` để report toggle outcome nhanh hơn.
+
+---
 
 - Batch vừa xong: **297**
 - Commit cuối đã chốt:

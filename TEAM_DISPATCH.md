@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 297
-- Trục công việc: location shell — web+iOS add quick-copy location state summary `owner/share_id/is_active/sharing_mode/audience_count/snapshot_count` + clipboard actions.
-- Trạng thái: batch297_complete_location_state_summary_copy_actions_web_ios.
+- Batch workflow chính thức hiện tại: 298
+- Trục công việc: notification shell — web+iOS add quick-copy notification page cursor summary `user_id/limit/offset/filter_mode/count/unread_count/total_unread_count` + clipboard actions.
+- Trạng thái: batch298_complete_notification_page_cursor_summary_copy_actions_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 298 handoff (closed)
+- Batch vừa xong: **298**
+- Commit đã chốt:
+  - `b4d9981` — `batch298: add notification page-cursor summary copy actions on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **299**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell (web+iOS): thêm quick-copy mutation delta sau mark read/unread `notification_id/read_state/current_page_unread/total_unread_count` để report toggle outcome nhanh hơn.
 
 ## Batch 297 handoff (closed)
 - Batch vừa xong: **297**
