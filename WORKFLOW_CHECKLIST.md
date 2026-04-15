@@ -97,7 +97,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `3dbcc22` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
+  - commit gần nhất đã chốt: `2260dea` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
   - commit liền trước: `81d7832` — `batch365: add unread lifecycle mutation bundle quick copy in ios notification shell`
   - working tree hiện tại: clean
 - Blocker nếu có:
@@ -119,7 +119,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch vừa xong: **366**
 - Commit cuối đã chốt:
-  - `3dbcc22` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
+  - `2260dea` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
 - Blocker/rủi ro còn lại:

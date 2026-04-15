@@ -20,13 +20,13 @@
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
 - Git:
-  - latest feature commit: `3dbcc22` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
+  - latest feature commit: `2260dea` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
   - previous feature commit: `81d7832` — `batch365: add unread lifecycle mutation bundle quick copy in ios notification shell`
   - working tree: clean
 - Blocker: none
 - Next: mở batch367 với 1 slice hẹp notifications parity (iOS) — thêm quick-copy lifecycle snapshot audit line để one-tap parity payload với web batch366.
 - Batch 366 handoff:
-  - `3dbcc22` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
+  - `2260dea` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
   - web notifications shell thêm line + action copy `Quick lifecycle snapshot audit`.
   - payload format: `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`.
 - Batch 365 handoff:

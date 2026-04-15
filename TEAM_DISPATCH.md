@@ -19,7 +19,7 @@
 ## Batch 366 handoff (closed)
 - Batch vừa xong: **366**
 - Commit đã chốt:
-  - `3dbcc22` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
+  - `2260dea` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
 - Blocker/rủi ro còn lại:
