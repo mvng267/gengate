@@ -36,6 +36,7 @@ struct FeedPlaceholderView: View {
     @State private var lastDeleteCopyAuditLine: String?
     @State private var lastDeleteCopyAuditFirstReadySourceLine: String?
     @State private var lastDeleteCopyAuditSourceStateSnapshotLine: String?
+    @State private var lastDeleteCopyAuditSourceStateSnapshotSourceLine: String?
     @State private var isLoading = false
     @State private var isLoadingAuthoredMoments = false
     @State private var isCreatingMoment = false
@@ -416,6 +417,11 @@ struct FeedPlaceholderView: View {
                         .textSelection(.enabled)
 
                     Text("Last source-state snapshot: \(lastDeleteCopyAuditSourceStateSnapshotLine ?? "last_source_state_snapshot=(not_run)")")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+
+                    Text("Last source-state snapshot source: \(lastDeleteCopyAuditSourceStateSnapshotSourceLine ?? "last_source_state_snapshot_source=(not_run)")")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
@@ -1601,6 +1607,7 @@ struct FeedPlaceholderView: View {
         }
 
         lastDeleteCopyAuditSourceStateSnapshotLine = "last_source_state_snapshot=\(normalizedText)"
+        lastDeleteCopyAuditSourceStateSnapshotSourceLine = "last_source_state_snapshot_source=source_state_snapshot_copy"
         statusMessage = "Copied delete copy audit source-state snapshot line to clipboard (\(normalizedText))."
         fetchError = nil
     }
@@ -1618,6 +1625,7 @@ struct FeedPlaceholderView: View {
             return
         }
 
+        lastDeleteCopyAuditSourceStateSnapshotSourceLine = "last_source_state_snapshot_source=manual_recopy"
         statusMessage = "Copied last source-state snapshot line to clipboard (\(snapshotLine))."
         fetchError = nil
     }

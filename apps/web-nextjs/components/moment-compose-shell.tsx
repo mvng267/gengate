@@ -59,6 +59,8 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [lastDeleteCopyAuditFirstReadySourceLine, setLastDeleteCopyAuditFirstReadySourceLine] = useState<string | null>(null);
   const [lastDeleteCopyAuditSourceStateSnapshotLine, setLastDeleteCopyAuditSourceStateSnapshotLine] =
     useState<string | null>(null);
+  const [lastDeleteCopyAuditSourceStateSnapshotSourceLine, setLastDeleteCopyAuditSourceStateSnapshotSourceLine] =
+    useState<string | null>(null);
   const [deleteCopyAuditSourceDraft, setDeleteCopyAuditSourceDraft] = useState<DeleteSummaryCopySource>("quick_delete_parity");
   const [feedVisibilityGateSnapshotSource, setFeedVisibilityGateSnapshotSource] =
     useState<FeedGateSnapshotSource>("reload_flow");
@@ -339,6 +341,9 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       "delete_copy_audit_source_state_snapshot_copy_failed",
       (normalizedText) => {
         setLastDeleteCopyAuditSourceStateSnapshotLine(`last_source_state_snapshot=${normalizedText}`);
+        setLastDeleteCopyAuditSourceStateSnapshotSourceLine(
+          "last_source_state_snapshot_source=source_state_snapshot_copy",
+        );
       },
     );
   }
@@ -349,6 +354,9 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       "Copied last source-state snapshot line to clipboard",
       "delete_copy_audit_source_state_snapshot_line_missing",
       "delete_copy_audit_source_state_snapshot_line_copy_failed",
+      () => {
+        setLastDeleteCopyAuditSourceStateSnapshotSourceLine("last_source_state_snapshot_source=manual_recopy");
+      },
     );
   }
 
@@ -609,6 +617,10 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       <p>
         Last source-state snapshot:{" "}
         <code>{lastDeleteCopyAuditSourceStateSnapshotLine ?? "last_source_state_snapshot=(not_run)"}</code>
+      </p>
+      <p>
+        Last source-state snapshot source:{" "}
+        <code>{lastDeleteCopyAuditSourceStateSnapshotSourceLine ?? "last_source_state_snapshot_source=(not_run)"}</code>
       </p>
       <p>
         <button type="button" onClick={() => void handleCopyDeleteCopyAuditSourceStateLine()}>
