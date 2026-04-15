@@ -56,7 +56,7 @@
 ## Batch 286 handoff (closed)
 - Batch vừa xong: **286**
 - Commit đã chốt:
-  - `(pending in this run)` — `batch286: add current-member cursor snapshot to apply quick copy`
+  - `d6bb3a4` — `batch286: add current-member cursor snapshot to apply quick copy`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅

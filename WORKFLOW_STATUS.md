@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(pending in this run)` — `batch286: add current-member cursor snapshot to apply quick copy`
+  - latest feature commit: `d6bb3a4` — `batch286: add current-member cursor snapshot to apply quick copy`
   - working tree: clean after batch286 commit
 - Blocker: none
 - Next: mở batch287 với 1 slice hẹp direct-message shell: thêm one-tap `copy read-cursor triage line` (tokenized previous/applied/current/apply_state) để report parity nhanh hơn trên web+iOS.
 - Batch 286 handoff:
-  - `(pending in this run)` — `batch286: add current-member cursor snapshot to apply quick copy`
+  - `d6bb3a4` — `batch286: add current-member cursor snapshot to apply quick copy`
   - web/iOS read-cursor apply quick-copy line thêm `current_member_cursor`, giúp đối chiếu one-line previous/applied/current mà không cần mở member list.
 - Batch 285 handoff:
   - `8d61ece` — `batch285: add previous-cursor baseline to read-cursor apply quick copy`
