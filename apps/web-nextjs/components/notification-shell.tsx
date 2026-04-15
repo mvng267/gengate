@@ -111,6 +111,10 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     ? `current_page_unread=${listMeta.unread_count} / total_unread_count=${listMeta.total_unread_count}`
     : "current_page_unread=(none) / total_unread_count=(none)";
 
+  const quickPageMetaLine = listMeta
+    ? `count=${listMeta.count} / unread_count=${listMeta.unread_count} / total_unread_count=${listMeta.total_unread_count} / limit=${pagination.limit} / offset=${pagination.offset} / filter_mode=${pagination.unreadOnly ? "unread_only" : "all"}`
+    : "count=(none) / unread_count=(none) / total_unread_count=(none) / limit=(none) / offset=(none) / filter_mode=(none)";
+
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsCreating(true);
@@ -180,6 +184,15 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     );
   }
 
+  async function handleCopyQuickPageMeta() {
+    await copyToClipboard(
+      quickPageMetaLine,
+      "Copied quick page meta to clipboard",
+      "quick_page_meta_empty",
+      "quick_page_meta_copy_failed",
+    );
+  }
+
   return (
     <section>
       <p>
@@ -193,6 +206,14 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       <p>
         <button type="button" onClick={() => void handleCopyQuickUnreadSummary()}>
           Copy quick unread summary
+        </button>
+      </p>
+      <p>
+        Quick page meta: <code>{quickPageMetaLine}</code>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickPageMeta()}>
+          Copy quick page meta
         </button>
       </p>
       <p>Filter mode: {pagination.unreadOnly ? "Unread only" : "All notifications"}</p>
