@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { readPersistedAuthSession } from "@/lib/auth/client";
 import {
   createNotification,
   listNotifications,
@@ -47,6 +48,13 @@ type NotificationLifecyclePair = {
   mutationDelta: NotificationMutationDelta;
 };
 
+type NotificationCreateFlowInput = {
+  userIdOverride?: string;
+  statusPrefix?: string;
+  reloadAfterCreate?: boolean;
+  loadWindowOverride?: Partial<NotificationLoadWindow>;
+};
+
 export function NotificationShell({ initialUserId = "" }: NotificationShellProps) {
   const [form, setForm] = useState({
     ...initialForm,
@@ -63,6 +71,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   const [lastMutationDelta, setLastMutationDelta] = useState<NotificationMutationDelta | null>(null);
   const [lastCreateResultDelta, setLastCreateResultDelta] = useState<NotificationCreateResultDelta | null>(null);
   const [lastLifecyclePair, setLastLifecyclePair] = useState<NotificationLifecyclePair | null>(null);
+  const [currentSessionUserId, setCurrentSessionUserId] = useState("");
 
   useEffect(() => {
     setForm((current) => ({
@@ -78,6 +87,11 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     setLastLifecyclePair(null);
   }, [initialUserId]);
 
+  useEffect(() => {
+    const persistedSession = readPersistedAuthSession();
+    setCurrentSessionUserId(persistedSession?.session.user_id?.trim() ?? "");
+  }, []);
+
   function currentLoadWindow(overrides?: Partial<NotificationLoadWindow>): NotificationLoadWindow {
     return {
       userId: overrides?.userId ?? form.userId.trim(),
@@ -87,11 +101,12 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     };
   }
 
-  async function handleLoad(windowOverride?: Partial<NotificationLoadWindow>) {
+  async function handleLoad(windowOverride?: Partial<NotificationLoadWindow>, statusPrefix?: string) {
     const window = currentLoadWindow(windowOverride);
+    const normalizedStatusPrefix = statusPrefix?.trim();
 
     setIsLoading(true);
-    setStatus("Loading notifications...");
+    setStatus(normalizedStatusPrefix ? `${normalizedStatusPrefix} Loading notifications...` : "Loading notifications...");
 
     try {
       const payload = await listNotifications(window.userId, {
@@ -106,13 +121,15 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
         total_unread_count: payload.total_unread_count,
       });
       setLastLoadedWindow(window);
-      setStatus(
+
+      const loadedStatus =
         `Loaded ${payload.count} notification(s) for ${window.userId || "unknown-user"}. ` +
-          `Page unread: ${payload.unread_count}. Total unread: ${payload.total_unread_count}. ` +
-          `Page window limit=${window.limit}, offset=${window.offset}, unread_only=${window.unreadOnly}.`,
-      );
+        `Page unread: ${payload.unread_count}. Total unread: ${payload.total_unread_count}. ` +
+        `Page window limit=${window.limit}, offset=${window.offset}, unread_only=${window.unreadOnly}.`;
+      setStatus(normalizedStatusPrefix ? `${normalizedStatusPrefix} ${loadedStatus}` : loadedStatus);
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "notifications_list_failed");
+      const errorMessage = error instanceof Error ? error.message : "notifications_list_failed";
+      setStatus(normalizedStatusPrefix ? `${normalizedStatusPrefix} ${errorMessage}` : errorMessage);
     }
 
     setIsLoading(false);
@@ -197,16 +214,31 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     ` / create_result(notification_id=${lifecycleCreateResult?.notificationId ?? "(none)"},read_state=${lifecycleCreateResult?.readState ?? "(none)"},current_page_unread=${lifecycleCreateResult?.currentPageUnread ?? "(none)"},total_unread_count=${lifecycleCreateResult?.totalUnreadCount ?? "(none)"})` +
     ` / mutation_delta(notification_id=${lifecycleMutationDelta?.notificationId ?? "(none)"},read_state=${lifecycleMutationDelta?.readState ?? "(none)"},current_page_unread=${lifecycleMutationDelta?.currentPageUnread ?? "(none)"},total_unread_count=${lifecycleMutationDelta?.totalUnreadCount ?? "(none)"})`;
 
-  async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function submitNotificationCreateFlow(input?: NotificationCreateFlowInput) {
+    const userId = (input?.userIdOverride ?? form.userId).trim();
+    const normalizedStatusPrefix = input?.statusPrefix?.trim();
+
+    if (!userId) {
+      setStatus("notification_user_id_required");
+      return;
+    }
+
+    let payloadJson: Record<string, unknown>;
+    try {
+      payloadJson = JSON.parse(form.payloadJson) as Record<string, unknown>;
+    } catch {
+      setStatus("notification_payload_json_invalid");
+      return;
+    }
+
     setIsCreating(true);
-    setStatus("Creating notification shell item...");
+    setStatus(normalizedStatusPrefix ? `${normalizedStatusPrefix} Creating notification shell item...` : "Creating notification shell item...");
 
     try {
       const created = await createNotification({
-        userId: form.userId.trim(),
+        userId,
         notificationType: form.notificationType.trim(),
-        payloadJson: JSON.parse(form.payloadJson) as Record<string, unknown>,
+        payloadJson,
       });
 
       const createdIsRead = created.read_at !== null;
@@ -230,20 +262,98 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       setLastCreateResultDelta(createResultDelta);
       setLastLifecyclePair(null);
 
+      setForm((current) => ({
+        ...current,
+        userId,
+      }));
       setItems((current) => [created, ...current.filter((item) => item.id !== created.id)]);
       setLastLoadedWindow(null);
-      setStatus(
+
+      const createdStatus =
         `Created notification ${created.id}. ` +
-          `Quick create-result delta: notification_id=${createResultDelta.notificationId} / ` +
-          `read_state=${createResultDelta.readState} / ` +
-          `current_page_unread=${createResultDelta.currentPageUnread ?? "(none)"} / ` +
-          `total_unread_count=${createResultDelta.totalUnreadCount ?? "(none)"}.`,
-      );
+        `Quick create-result delta: notification_id=${createResultDelta.notificationId} / ` +
+        `read_state=${createResultDelta.readState} / ` +
+        `current_page_unread=${createResultDelta.currentPageUnread ?? "(none)"} / ` +
+        `total_unread_count=${createResultDelta.totalUnreadCount ?? "(none)"}.`;
+
+      if (input?.reloadAfterCreate) {
+        await handleLoad(input.loadWindowOverride ?? { userId, offset: 0 }, normalizedStatusPrefix ? `${normalizedStatusPrefix} ${createdStatus}` : createdStatus);
+      } else {
+        setStatus(normalizedStatusPrefix ? `${normalizedStatusPrefix} ${createdStatus}` : createdStatus);
+      }
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "notification_create_failed");
+      const errorMessage = error instanceof Error ? error.message : "notification_create_failed";
+      setStatus(normalizedStatusPrefix ? `${normalizedStatusPrefix} ${errorMessage}` : errorMessage);
     }
 
     setIsCreating(false);
+  }
+
+  async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await submitNotificationCreateFlow();
+  }
+
+  async function applyCurrentSessionUserAndLoad() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_user_missing_for_quick_apply");
+      return;
+    }
+
+    const userSourceStatus =
+      form.userId.trim() === sessionUserId
+        ? "User already matches current session user (user_source=session_user)."
+        : "Applied current session user (user_source=session_user).";
+
+    setForm((current) => ({
+      ...current,
+      userId: sessionUserId,
+    }));
+    setPagination((current) => ({
+      ...current,
+      offset: 0,
+    }));
+
+    await handleLoad(
+      {
+        userId: sessionUserId,
+        offset: 0,
+      },
+      userSourceStatus,
+    );
+  }
+
+  async function applyCurrentSessionUserCreateAndLoad() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_user_missing_for_quick_apply");
+      return;
+    }
+
+    const userSourceStatus =
+      form.userId.trim() === sessionUserId
+        ? "User already matches current session user (user_source=session_user)."
+        : "Applied current session user (user_source=session_user).";
+
+    setForm((current) => ({
+      ...current,
+      userId: sessionUserId,
+    }));
+    setPagination((current) => ({
+      ...current,
+      offset: 0,
+    }));
+
+    await submitNotificationCreateFlow({
+      userIdOverride: sessionUserId,
+      statusPrefix: userSourceStatus,
+      reloadAfterCreate: true,
+      loadWindowOverride: {
+        userId: sessionUserId,
+        offset: 0,
+      },
+    });
   }
 
   async function toggleRead(item: NotificationItem) {
@@ -398,6 +508,9 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       </p>
       <p>{status}</p>
       <p>{pendingWindowHint}</p>
+      <p>
+        Current session user_id: <code>{currentSessionUserId || "(missing)"}</code>
+      </p>
       <p>
         Quick unread summary: <code>{quickUnreadSummaryLine}</code>
       </p>
@@ -621,34 +734,15 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
         </button>
         <button
           type="button"
-          onClick={() => {
-            const sessionUserId = initialUserId.trim();
-            if (!sessionUserId) {
-              setStatus("session_user_missing_for_quick_apply");
-              return;
-            }
-
-            const draftUserId = form.userId.trim();
-            if (draftUserId === sessionUserId) {
-              setStatus("Session user already selected. Reloading first page for current user.");
-            } else {
-              setStatus("Applied current session user. Reloading first page.");
-            }
-
-            setForm((current) => ({
-              ...current,
-              userId: sessionUserId,
-            }));
-            setPagination((current) => ({
-              ...current,
-              offset: 0,
-            }));
-            void handleLoad({
-              userId: sessionUserId,
-              offset: 0,
-            });
-          }}
-          disabled={isLoading || initialUserId.trim().length === 0}
+          onClick={() => void applyCurrentSessionUserCreateAndLoad()}
+          disabled={isLoading || isCreating || currentSessionUserId.trim().length === 0}
+        >
+          Use current session user + create notification + load
+        </button>
+        <button
+          type="button"
+          onClick={() => void applyCurrentSessionUserAndLoad()}
+          disabled={isLoading || isCreating || currentSessionUserId.trim().length === 0}
         >
           Use current session user + load
         </button>
