@@ -413,6 +413,11 @@ struct FeedPlaceholderView: View {
                     }
                     .buttonStyle(.bordered)
 
+                    Button("Copy delete copy audit for first ready source") {
+                        copyDeleteCopyAuditForFirstReadySource()
+                    }
+                    .buttonStyle(.bordered)
+
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Delete copy audit source")
                             .font(.caption)
@@ -1527,6 +1532,20 @@ struct FeedPlaceholderView: View {
 
         statusMessage = "Copied delete copy audit source-state line to clipboard (\(normalizedText))."
         fetchError = nil
+    }
+
+    private func copyDeleteCopyAuditForFirstReadySource() {
+        guard let firstReadySource = deleteCopyAuditSourceOptions.first(where: { source in
+            !deleteCopyAuditSourceValue(for: source)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .isEmpty
+        }) else {
+            statusMessage = nil
+            fetchError = "delete_copy_audit_first_ready_source_missing"
+            return
+        }
+
+        copyDeleteCopyAuditLineForSource(firstReadySource)
     }
 
     private func copyDeleteCopyAuditLineForSource(_ source: String) {
