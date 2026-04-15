@@ -65,6 +65,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [readCursorTargetUserIdDraft, setReadCursorTargetUserIdDraft] = useState("");
   const [readCursorTargetMessageIdDraft, setReadCursorTargetMessageIdDraft] = useState("");
   const [lastSendQuickCopy, setLastSendQuickCopy] = useState("sender=(none) | message_id=(none)");
+  const [lastSenderKeepPairQuickCopy, setLastSenderKeepPairQuickCopy] = useState(
+    "user_pair_source=(none) | sender_source=(none) | sender=(none) | user_a=(none) | user_b=(none) | message_id=(none)",
+  );
   const [lastReadCursorQuickCopy, setLastReadCursorQuickCopy] = useState(
     "focus_user=(none) | resolved_message=(none) | read_state=unknown",
   );
@@ -148,6 +151,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setReadCursorTargetUserIdDraft("");
     setReadCursorTargetMessageIdDraft("");
     setLastSendQuickCopy("sender=(none) | message_id=(none)");
+    setLastSenderKeepPairQuickCopy(
+      "user_pair_source=(none) | sender_source=(none) | sender=(none) | user_a=(none) | user_b=(none) | message_id=(none)",
+    );
     setLastReadCursorQuickCopy("focus_user=(none) | resolved_message=(none) | read_state=unknown");
     setLastReadCursorApplyQuickCopy(
       "target_user=(none) | previous_cursor_message=(none) | applied_message=(none) | current_member_cursor=(none) | focus_user=(none) | read_state=unknown | read_cursor_apply_state=unknown",
@@ -352,6 +358,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     const senderStatus = pairIncludesSessionUser
       ? "Current pair already includes current session user; kept User A + User B as-is (user_pair_source=kept_user_a+user_b). Using session sender (sender_source=session_user)."
       : "Kept User A + User B as-is (user_pair_source=kept_user_a+user_b). Applied current session user as sender (sender_source=session_user).";
+    const normalizedUserAForQuickCopy = userAId || "(empty)";
+    const normalizedUserBForQuickCopy = userBId || "(empty)";
+    const senderKeepPairQuickCopyPrefix = `user_pair_source=kept_user_a+user_b | sender_source=session_user | sender=${sessionUserId} | user_a=${normalizedUserAForQuickCopy} | user_b=${normalizedUserBForQuickCopy}`;
 
     setForm((current) => ({
       ...current,
@@ -359,10 +368,18 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     }));
 
     setStatus(`${senderStatus} Sending direct message shell...`);
-    await sendMessageWithCurrentSender({ senderUserIdOverride: sessionUserId, statusPrefix: senderStatus });
+    await sendMessageWithCurrentSender({
+      senderUserIdOverride: sessionUserId,
+      statusPrefix: senderStatus,
+      senderKeepPairQuickCopyPrefix,
+    });
   }
 
-  async function sendMessageWithCurrentSender(input?: { senderUserIdOverride?: string; statusPrefix?: string }) {
+  async function sendMessageWithCurrentSender(input?: {
+    senderUserIdOverride?: string;
+    statusPrefix?: string;
+    senderKeepPairQuickCopyPrefix?: string;
+  }) {
     if (!conversation) {
       setStatus("open_thread_first");
       return;
@@ -370,6 +387,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
 
     const senderUserId = input?.senderUserIdOverride ?? form.senderUserId.trim();
     const statusPrefix = input?.statusPrefix?.trim();
+    const senderKeepPairQuickCopyPrefix = input?.senderKeepPairQuickCopyPrefix?.trim();
 
     setIsSending(true);
     setStatus(statusPrefix ? `${statusPrefix} Sending direct message shell...` : "Sending direct message shell...");
@@ -385,6 +403,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       setForm((current) => ({ ...current, payloadText: "" }));
       const sentStatus = `Sent message ${created.id} into direct thread ${conversation.id}.`;
       setLastSendQuickCopy(`sender=${senderUserId || "(empty)"} | message_id=${created.id}`);
+      if (senderKeepPairQuickCopyPrefix) {
+        setLastSenderKeepPairQuickCopy(`${senderKeepPairQuickCopyPrefix} | message_id=${created.id}`);
+      }
       setStatus(statusPrefix ? `${statusPrefix} ${sentStatus}` : sentStatus);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "message_create_failed");
@@ -477,6 +498,15 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       "Copied send-result quick copy to clipboard",
       "send_result_quick_copy_empty",
       "send_result_quick_copy_failed",
+    );
+  }
+
+  async function handleCopySenderKeepPairQuickCopy() {
+    await copyToClipboard(
+      lastSenderKeepPairQuickCopy,
+      "Copied sender keep-pair quick copy to clipboard",
+      "sender_keep_pair_quick_copy_empty",
+      "sender_keep_pair_quick_copy_failed",
     );
   }
 
@@ -943,6 +973,12 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       </p>
       <button type="button" onClick={() => void handleCopySendResultQuickCopy()}>
         Copy quick send result
+      </button>
+      <p>
+        Quick copy sender keep-pair marker: <code>{lastSenderKeepPairQuickCopy}</code>
+      </p>
+      <button type="button" onClick={() => void handleCopySenderKeepPairQuickCopy()}>
+        Copy quick sender keep-pair marker
       </button>
       <p>
         Quick copy read cursor: <code>{lastReadCursorQuickCopy}</code>
