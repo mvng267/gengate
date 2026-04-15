@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 337
-- Trục công việc: notification shell (iOS) — add payload JSON input + validation marker `notification_payload_json_invalid` for create-flow parity with web notification shell.
-- Trạng thái: batch337_complete_notification_ios_payload_json_validation_status.
+- Batch workflow chính thức hiện tại: 338
+- Trục công việc: friend graph shell (iOS) — add quick action `Use current session user as requester + keep receiver + send friend request` for one-tap session requester send parity.
+- Trạng thái: batch338_complete_friend_graph_ios_session_requester_keep_receiver_send_status.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 338 handoff (closed)
+- Batch vừa xong: **338**
+- Commit đã chốt:
+  - `eedda47` — `batch338: add session-requester keep-receiver quick send in ios friend graph shell`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **339**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - friend graph shell (web): thêm quick action `Use current session user as requester + keep receiver + send friend request` để giữ one-tap parity web/iOS cho session requester send path.
 
 ## Batch 337 handoff (closed)
 - Batch vừa xong: **337**

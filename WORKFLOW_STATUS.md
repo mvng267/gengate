@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 337
+- Batch: 338
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 337 notification shell (iOS) — add payload JSON input + validation marker `notification_payload_json_invalid` for create-flow parity với web notification shell.
+- Scope: batch 338 friend graph shell (iOS) — add quick action `Use current session user as requester + keep receiver + send friend request` for one-tap session requester send parity.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,15 +16,20 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
-  - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
 - Test:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `20cdb3f` — `batch337: add payload-json validation marker in ios notification shell`
-  - previous feature commit: `5c925e2` — `batch336: add session-user create-and-load quick action in ios notification shell`
+  - latest feature commit: `eedda47` — `batch338: add session-requester keep-receiver quick send in ios friend graph shell`
+  - previous feature commit: `20cdb3f` — `batch337: add payload-json validation marker in ios notification shell`
   - working tree: clean
 - Blocker: none
-- Next: mở batch338 với 1 slice hẹp friend graph shell (iOS): thêm quick action `Use current session user as requester + keep receiver + send friend request` để one-tap send path parity với các session-user quick action khác.
+- Next: mở batch339 với 1 slice hẹp friend graph shell (web): thêm quick action `Use current session user as requester + keep receiver + send friend request` để giữ one-tap parity web/iOS cho session requester send path.
+- Batch 338 handoff:
+  - `eedda47` — `batch338: add session-requester keep-receiver quick send in ios friend graph shell`
+  - iOS friend graph shell thêm one-tap action `Use current session user as requester + keep receiver + send friend request`.
+  - action giữ nguyên `receiver` đang nhập, apply `requester` từ current session user và gửi request ngay trong một flow; guard marker rõ ràng: `session_requester_missing_for_quick_apply`, `friend_request_receiver_missing_for_quick_send`, và invalid self-pair marker chuẩn `friend_request_invalid_request code=invalid_request detail=requester và receiver phải khác nhau`.
+  - flow quick send được refactor qua helper `submitSessionBoundFriendRequestCreateFlow(...)` để dùng chung cho both requester-source/session và receiver-source/session paths, giữ status prefix markers `requester_source=session_user`/`receiver_source=session_user` nhất quán.
 - Batch 337 handoff:
   - `20cdb3f` — `batch337: add payload-json validation marker in ios notification shell`
   - iOS notification shell thêm input `Payload JSON` cho create flow; parse JSON object trước khi create để parity với web payload_json contract.
