@@ -17,6 +17,7 @@ type MomentComposeShellProps = {
 };
 
 type FeedGateSnapshotSource = "create_flow" | "reload_flow";
+type DeleteSnapshotSource = "manual_input" | "preset_row" | "first_authored_quick_pick";
 
 const initialForm = {
   authorUserId: "",
@@ -49,6 +50,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [lastCopiedDeleteSummaryLine, setLastCopiedDeleteSummaryLine] = useState<string | null>(null);
   const [feedVisibilityGateSnapshotSource, setFeedVisibilityGateSnapshotSource] =
     useState<FeedGateSnapshotSource>("reload_flow");
+  const [deleteSnapshotSource, setDeleteSnapshotSource] = useState<DeleteSnapshotSource>("manual_input");
   const buildFeedVisibilityGateSummary = (
     viewerRawId: string,
     nextFeedItems: MomentListItem[],
@@ -88,7 +90,8 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     `delete_moment_id=${deleteMomentId || "(empty)"}` +
     ` / authored_count=${items.length}` +
     ` / feed_count=${feedItems.length}` +
-    ` / gate_snapshot_source=${feedVisibilityGateSnapshotSource}`;
+    ` / gate_snapshot_source=${feedVisibilityGateSnapshotSource}` +
+    ` / delete_snapshot_source=${deleteSnapshotSource}`;
 
   useEffect(() => {
     setForm((current) => ({
@@ -342,6 +345,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       const deletedSummary = buildDeleteMomentSummary(deleted);
 
       setDeleteMomentIdDraft(deleted.id);
+      setDeleteSnapshotSource("manual_input");
       setLastDeletedMomentSummaryLine(deletedSummary);
       setItems((current) => current.filter((item) => item.id !== deleted.id));
       setFeedItems((current) => current.filter((item) => item.id !== deleted.id));
@@ -516,7 +520,10 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
           Moment ID to delete
           <input
             value={deleteMomentIdDraft}
-            onChange={(event) => setDeleteMomentIdDraft(event.target.value)}
+            onChange={(event) => {
+              setDeleteMomentIdDraft(event.target.value);
+              setDeleteSnapshotSource("manual_input");
+            }}
             placeholder="paste moment id for DELETE /moments/{id}"
           />
         </label>
@@ -533,7 +540,10 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
           <p>
             <button
               type="button"
-              onClick={() => setDeleteMomentIdDraft(items[0]?.id ?? "")}
+              onClick={() => {
+                setDeleteMomentIdDraft(items[0]?.id ?? "");
+                setDeleteSnapshotSource("first_authored_quick_pick");
+              }}
               disabled={!items[0] || isDeleting}
             >
               Use first authored moment as delete target

@@ -31,6 +31,7 @@ struct FeedPlaceholderView: View {
     @State private var lastCreateFeedVisibilityDeltaCopiedText: String = ""
     @State private var lastDeleteSummaryCopiedAt: Date?
     @State private var lastDeleteSummaryCopiedText: String = ""
+    @State private var deleteSnapshotSource: String = "manual_input"
     @State private var isLoading = false
     @State private var isLoadingAuthoredMoments = false
     @State private var isCreatingMoment = false
@@ -224,6 +225,16 @@ struct FeedPlaceholderView: View {
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
 #endif
+                            .onChange(of: deleteMomentIDDraft, initial: false) { _, newValue in
+                                let normalizedValue = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                                if deleteSnapshotSource == "preset_row",
+                                   normalizedValue == normalizedDeleteMomentIDDraft,
+                                   !normalizedValue.isEmpty {
+                                    return
+                                }
+
+                                deleteSnapshotSource = "manual_input"
+                            }
                             .padding(12)
                             .background(Color.secondary.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -239,6 +250,7 @@ struct FeedPlaceholderView: View {
                                         let isSelected = normalizedDeleteMomentIDDraft == preset
                                         Button {
                                             deleteMomentIDDraft = preset
+                                            deleteSnapshotSource = "preset_row"
                                             statusMessage = "Delete target set from loaded moment."
                                             fetchError = nil
                                         } label: {
@@ -958,7 +970,7 @@ struct FeedPlaceholderView: View {
 
     private var quickDeleteParitySummaryLine: String {
         let normalizedDeleteMomentID = normalizedDeleteMomentIDDraft.isEmpty ? "(empty)" : normalizedDeleteMomentIDDraft
-        return "delete_moment_id=\(normalizedDeleteMomentID) / authored_count=\(authoredMomentRows.count) / feed_count=\(momentRows.count) / gate_snapshot_source=\(feedVisibilityGateSnapshotSource)"
+        return "delete_moment_id=\(normalizedDeleteMomentID) / authored_count=\(authoredMomentRows.count) / feed_count=\(momentRows.count) / gate_snapshot_source=\(feedVisibilityGateSnapshotSource) / delete_snapshot_source=\(deleteSnapshotSource)"
     }
 
     private var lastCreateFeedVisibilityDeltaCopiedFeedbackText: String? {
@@ -1146,6 +1158,7 @@ struct FeedPlaceholderView: View {
         }
 
         deleteMomentIDDraft = trimmedMomentID
+        deleteSnapshotSource = "preset_row"
         fetchError = nil
     }
 
@@ -1590,6 +1603,7 @@ struct FeedPlaceholderView: View {
         }
 
         deleteMomentIDDraft = trimmedMomentID
+        deleteSnapshotSource = "preset_row"
         await performDeleteMoment(momentID: trimmedMomentID, origin: .row)
     }
 
@@ -1619,6 +1633,7 @@ struct FeedPlaceholderView: View {
             statusMessage = origin == .row
                 ? "Deleted moment \(momentID) from row action. Reloading lists..."
                 : "Deleted moment \(momentID). Reloading lists..."
+            deleteSnapshotSource = "manual_input"
             lastDeletedMomentSummaryLine = deletedSummary
 
             if reactionTargetMomentIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == momentID {
