@@ -56,6 +56,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [lastCopiedFeedVisibilityDeltaLine, setLastCopiedFeedVisibilityDeltaLine] = useState<string | null>(null);
   const [lastCopiedDeleteSummaryLine, setLastCopiedDeleteSummaryLine] = useState<string | null>(null);
   const [lastDeleteCopyAuditLine, setLastDeleteCopyAuditLine] = useState<string | null>(null);
+  const [lastDeleteCopyAuditFirstReadySourceLine, setLastDeleteCopyAuditFirstReadySourceLine] = useState<string | null>(null);
   const [deleteCopyAuditSourceDraft, setDeleteCopyAuditSourceDraft] = useState<DeleteSummaryCopySource>("quick_delete_parity");
   const [feedVisibilityGateSnapshotSource, setFeedVisibilityGateSnapshotSource] =
     useState<FeedGateSnapshotSource>("reload_flow");
@@ -107,6 +108,8 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     const normalizedValue = value.trim();
     return `delete_copy_audit=source:${source}/value:${normalizedValue}`;
   };
+  const buildDeleteCopyAuditFirstReadySourceLine = (source: DeleteSummaryCopySource | "none") =>
+    `delete_copy_audit_first_ready_source=${source}`;
   const resolveDeleteCopyAuditSourceValue = (source: DeleteSummaryCopySource) => {
     switch (source) {
       case "quick_delete_parity":
@@ -316,11 +319,16 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       (source) => resolveDeleteCopyAuditSourceValue(source).trim().length > 0,
     );
     if (!firstReadySource) {
-      setStatus("delete_copy_audit_first_ready_source_missing");
+      const sourceLine = buildDeleteCopyAuditFirstReadySourceLine("none");
+      setLastDeleteCopyAuditFirstReadySourceLine(sourceLine);
+      setStatus(`${sourceLine} / delete_copy_audit_first_ready_source_missing`);
       return;
     }
 
+    const sourceLine = buildDeleteCopyAuditFirstReadySourceLine(firstReadySource);
+    setLastDeleteCopyAuditFirstReadySourceLine(sourceLine);
     await handleCopyDeleteCopyAuditSourceValue(firstReadySource);
+    setStatus((currentStatus) => `${currentStatus} / ${sourceLine}`);
   }
 
   async function handleCopyDeleteCopyAuditSourceValue(source: DeleteSummaryCopySource) {
@@ -555,6 +563,10 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       ) : null}
       <p>
         Delete copy audit source-state: <code>{deleteCopyAuditSourceStateLine}</code>
+      </p>
+      <p>
+        Delete copy audit first-ready source:{" "}
+        <code>{lastDeleteCopyAuditFirstReadySourceLine ?? "delete_copy_audit_first_ready_source=(not_run)"}</code>
       </p>
       <p>
         <button type="button" onClick={() => void handleCopyDeleteCopyAuditSourceStateLine()}>

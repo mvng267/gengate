@@ -34,6 +34,7 @@ struct FeedPlaceholderView: View {
     @State private var deleteSnapshotSource: String = "manual_input"
     @State private var deleteCopyAuditSourceDraft: String = "quick_delete_parity"
     @State private var lastDeleteCopyAuditLine: String?
+    @State private var lastDeleteCopyAuditFirstReadySourceLine: String?
     @State private var isLoading = false
     @State private var isLoadingAuthoredMoments = false
     @State private var isCreatingMoment = false
@@ -404,6 +405,11 @@ struct FeedPlaceholderView: View {
                     }
 
                     Text("Delete copy audit source-state: \(deleteCopyAuditSourceStateLine)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+
+                    Text("Delete copy audit first-ready source: \(lastDeleteCopyAuditFirstReadySourceLine ?? "delete_copy_audit_first_ready_source=(not_run)")")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
@@ -1096,6 +1102,10 @@ struct FeedPlaceholderView: View {
         return "delete_copy_audit=source:\(source)/value:\(normalizedValue)"
     }
 
+    private func buildDeleteCopyAuditFirstReadySourceLine(source: String) -> String {
+        "delete_copy_audit_first_ready_source=\(source)"
+    }
+
     private var resolvedQuickReactionUserID: String? {
         if let currentSessionUserID {
             return currentSessionUserID
@@ -1540,12 +1550,19 @@ struct FeedPlaceholderView: View {
                 .trimmingCharacters(in: .whitespacesAndNewlines)
                 .isEmpty
         }) else {
+            let firstReadySourceLine = buildDeleteCopyAuditFirstReadySourceLine(source: "none")
+            lastDeleteCopyAuditFirstReadySourceLine = firstReadySourceLine
             statusMessage = nil
-            fetchError = "delete_copy_audit_first_ready_source_missing"
+            fetchError = "\(firstReadySourceLine) / delete_copy_audit_first_ready_source_missing"
             return
         }
 
+        let firstReadySourceLine = buildDeleteCopyAuditFirstReadySourceLine(source: firstReadySource)
+        lastDeleteCopyAuditFirstReadySourceLine = firstReadySourceLine
         copyDeleteCopyAuditLineForSource(firstReadySource)
+        if let statusMessage {
+            self.statusMessage = "\(statusMessage) / \(firstReadySourceLine)"
+        }
     }
 
     private func copyDeleteCopyAuditLineForSource(_ source: String) {
