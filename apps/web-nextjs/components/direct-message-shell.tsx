@@ -211,6 +211,46 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     });
   }
 
+  async function applyCurrentSessionUserAsUserBKeepUserAAndOpenThread() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_user_missing_for_quick_apply");
+      return;
+    }
+
+    const resolvedPeerUserId = [form.userAId, form.userBId, form.senderUserId, ...(conversation?.member_user_ids ?? [])]
+      .map((value) => value.trim())
+      .find((value) => value.length > 0 && value !== sessionUserId);
+
+    if (!resolvedPeerUserId) {
+      setForm((current) => ({
+        ...current,
+        userBId: sessionUserId,
+      }));
+      setStatus("session_peer_user_missing_for_quick_apply");
+      return;
+    }
+
+    const alreadyMatched = form.userAId.trim() === resolvedPeerUserId && form.userBId.trim() === sessionUserId;
+    const pairStatus = alreadyMatched
+      ? "User A + User B already match peer context + current session (user_pair_source=peer_context+session_user)."
+      : "Applied resolved peer as User A + current session user as User B (user_pair_source=peer_context+session_user).";
+
+    setForm((current) => ({
+      ...current,
+      userAId: resolvedPeerUserId,
+      userBId: sessionUserId,
+      senderUserId: resolvedPeerUserId,
+    }));
+
+    await openDirectThreadFlow({
+      userAIdOverride: resolvedPeerUserId,
+      userBIdOverride: sessionUserId,
+      senderUserIdOverride: resolvedPeerUserId,
+      statusPrefix: pairStatus,
+    });
+  }
+
   async function openDirectThreadFlow(input?: {
     userAIdOverride?: string;
     userBIdOverride?: string;
@@ -1031,6 +1071,15 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
           {isOpening
             ? "Applying session user + opening..."
             : "Use current session user as user_a + keep peer as user_b + open direct thread"}
+        </button>
+        <button
+          type="button"
+          onClick={() => void applyCurrentSessionUserAsUserBKeepUserAAndOpenThread()}
+          disabled={isOpening || currentSessionUserId.trim().length === 0}
+        >
+          {isOpening
+            ? "Applying session peer + opening..."
+            : "Use current session user as user_b (peer) + keep user_a + open direct thread"}
         </button>
         <button type="button" onClick={() => void handleOpenThread()} disabled={isOpening}>
           {isOpening ? "Opening..." : "Open direct thread"}
