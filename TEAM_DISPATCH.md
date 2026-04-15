@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 332
-- Trục công việc: direct messaging shell — web+iOS add quick action `Use current session user as user_a + keep peer as user_b + open direct thread` with peer-context guard `session_peer_user_missing_for_quick_apply` to keep direct-member contract valid (`user_a != user_b`).
-- Trạng thái: batch332_complete_dm_session_user_a_peer_user_b_open_thread_web_ios.
+- Batch workflow chính thức hiện tại: 333
+- Trục công việc: location shell (web) — add quick action `Use current session user as owner + reload counts` for one-tap owner apply + count refresh parity with iOS location shell.
+- Trạng thái: batch333_complete_location_web_session_owner_reload_counts.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 333 handoff (closed)
+- Batch vừa xong: **333**
+- Commit đã chốt:
+  - `902470c` — `batch333: add session-owner reload quick action in web location shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **334**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - location shell (iOS): thêm quick action `Use current session user as owner + load location status` để one-tap parity hoàn chỉnh với web quick action.
 
 ## Batch 332 handoff (closed)
 - Batch vừa xong: **332**

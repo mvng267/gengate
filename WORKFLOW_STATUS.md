@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 332
+- Batch: 333
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 332 direct messaging shell (web+iOS) — add quick action `Use current session user as user_a + keep peer as user_b + open direct thread` with peer-context guard to keep direct-member contract valid (`user_a != user_b`) while preserving one-tap DM open/load smoke path.
+- Scope: batch 333 location shell (web) — add quick action `Use current session user as owner + reload counts` for one-tap owner apply + count refresh parity with iOS location shell.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,17 +16,19 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
-  - apps/web-nextjs/components/direct-message-shell.tsx
-  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
+  - apps/web-nextjs/components/location-shell.tsx
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `0e5b109` — `batch332: keep session quick-open on valid direct peer pair`
-  - previous feature commit: `71ea956` — `batch332: add session user_a+user_b open-thread quick action`
-  - working tree: clean after batch332 feature + doc-sync commits
+  - latest feature commit: `902470c` — `batch333: add session-owner reload quick action in web location shell`
+  - previous feature commit: `0e5b109` — `batch332: keep session quick-open on valid direct peer pair`
+  - working tree: dirty (doc updates pending commit)
 - Blocker: none
-- Next: mở batch333 với 1 slice hẹp location shell (web) — thêm quick action `Use current session user as owner + reload counts` để parity nhanh với iOS location shell.
+- Next: sync workflow docs for batch333 rồi commit doc-sync; sau đó mở batch334 với 1 slice hẹp tiếp theo theo ưu tiên MVP.
+- Batch 333 handoff:
+  - `902470c` — `batch333: add session-owner reload quick action in web location shell`
+  - web location shell thêm one-tap action `Use current session user as owner + reload counts`; action auto-apply owner từ persisted auth session rồi reload snapshot/audience counts ngay trong một thao tác.
+  - action có guard marker `session_owner_missing_for_quick_apply` khi chưa có current session user; reload flow reuse status prefix `owner_source=session_user` để parity debug nhanh với iOS.
 - Batch 332 handoff:
   - `0e5b109` — `batch332: keep session quick-open on valid direct peer pair`
   - web/iOS inbox shell thêm one-tap action `Use current session user as user_a + keep peer as user_b + open direct thread`; action resolve peer từ current form/member context để tránh self-pair invalid (`invalid_direct_members`) và mở/load direct thread trong một thao tác.
