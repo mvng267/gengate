@@ -68,6 +68,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [lastSenderKeepPairQuickCopy, setLastSenderKeepPairQuickCopy] = useState(
     "user_pair_source=(none) | sender_source=(none) | sender=(none) | user_a=(none) | user_b=(none) | message_id=(none)",
   );
+  const [lastSenderKeepPairAndSendResultBundleQuickCopy, setLastSenderKeepPairAndSendResultBundleQuickCopy] = useState(
+    "sender_keep_pair_marker={(none)} | send_result={(none)}",
+  );
   const [lastReadCursorQuickCopy, setLastReadCursorQuickCopy] = useState(
     "focus_user=(none) | resolved_message=(none) | read_state=unknown",
   );
@@ -154,6 +157,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setLastSenderKeepPairQuickCopy(
       "user_pair_source=(none) | sender_source=(none) | sender=(none) | user_a=(none) | user_b=(none) | message_id=(none)",
     );
+    setLastSenderKeepPairAndSendResultBundleQuickCopy("sender_keep_pair_marker={(none)} | send_result={(none)}");
     setLastReadCursorQuickCopy("focus_user=(none) | resolved_message=(none) | read_state=unknown");
     setLastReadCursorApplyQuickCopy(
       "target_user=(none) | previous_cursor_message=(none) | applied_message=(none) | current_member_cursor=(none) | focus_user=(none) | read_state=unknown | read_cursor_apply_state=unknown",
@@ -402,9 +406,14 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       setAttachmentForm((current) => ({ ...current, targetMessageId: current.targetMessageId || created.id }));
       setForm((current) => ({ ...current, payloadText: "" }));
       const sentStatus = `Sent message ${created.id} into direct thread ${conversation.id}.`;
-      setLastSendQuickCopy(`sender=${senderUserId || "(empty)"} | message_id=${created.id}`);
+      const sendResultQuickCopy = `sender=${senderUserId || "(empty)"} | message_id=${created.id}`;
+      setLastSendQuickCopy(sendResultQuickCopy);
       if (senderKeepPairQuickCopyPrefix) {
-        setLastSenderKeepPairQuickCopy(`${senderKeepPairQuickCopyPrefix} | message_id=${created.id}`);
+        const keepPairQuickCopy = `${senderKeepPairQuickCopyPrefix} | message_id=${created.id}`;
+        setLastSenderKeepPairQuickCopy(keepPairQuickCopy);
+        setLastSenderKeepPairAndSendResultBundleQuickCopy(
+          `sender_keep_pair_marker={${keepPairQuickCopy}} | send_result={${sendResultQuickCopy}}`,
+        );
       }
       setStatus(statusPrefix ? `${statusPrefix} ${sentStatus}` : sentStatus);
     } catch (error) {
@@ -507,6 +516,15 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       "Copied sender keep-pair quick copy to clipboard",
       "sender_keep_pair_quick_copy_empty",
       "sender_keep_pair_quick_copy_failed",
+    );
+  }
+
+  async function handleCopySenderKeepPairAndSendResultBundleQuickCopy() {
+    await copyToClipboard(
+      lastSenderKeepPairAndSendResultBundleQuickCopy,
+      "Copied sender keep-pair + send result bundle quick copy to clipboard",
+      "sender_keep_pair_send_bundle_quick_copy_empty",
+      "sender_keep_pair_send_bundle_quick_copy_failed",
     );
   }
 
@@ -979,6 +997,12 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       </p>
       <button type="button" onClick={() => void handleCopySenderKeepPairQuickCopy()}>
         Copy quick sender keep-pair marker
+      </button>
+      <p>
+        Quick copy sender keep-pair + send result bundle: <code>{lastSenderKeepPairAndSendResultBundleQuickCopy}</code>
+      </p>
+      <button type="button" onClick={() => void handleCopySenderKeepPairAndSendResultBundleQuickCopy()}>
+        Copy quick sender keep-pair + send result bundle
       </button>
       <p>
         Quick copy read cursor: <code>{lastReadCursorQuickCopy}</code>
