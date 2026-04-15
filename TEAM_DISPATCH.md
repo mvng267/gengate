@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 335
-- Trục công việc: notification shell (web) — add quick action `Use current session user + create notification + load` for one-tap create→load lifecycle smoke path parity.
-- Trạng thái: batch335_complete_notification_web_session_user_create_load_status.
+- Batch workflow chính thức hiện tại: 336
+- Trục công việc: notification shell (iOS) — add quick action `Use current session user + create notification + load` for one-tap create→load lifecycle smoke path parity.
+- Trạng thái: batch336_complete_notification_ios_session_user_create_load_status.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 336 handoff (closed)
+- Batch vừa xong: **336**
+- Commit đã chốt:
+  - `5c925e2` — `batch336: add session-user create-and-load quick action in ios notification shell`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **337**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell (iOS): thêm payload JSON input + validation marker `notification_payload_json_invalid` để parity guard với web create flow.
 
 ## Batch 335 handoff (closed)
 - Batch vừa xong: **335**
