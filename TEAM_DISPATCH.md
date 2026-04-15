@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 329
-- Trục công việc: friend graph shell — web+iOS add quick action `Use current session user as receiver + send friend request` for one-tap outbound request flow.
-- Trạng thái: batch329_complete_friend_graph_session_receiver_quick_send_web_ios.
+- Batch workflow chính thức hiện tại: 330
+- Trục công việc: moment posting shell — web+iOS add quick action `Use current session user as author + create moment + reload feed` for one-tap post→feed flow.
+- Trạng thái: batch330_complete_moment_session_author_create_reload_feed_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 330 handoff (closed)
+- Batch vừa xong: **330**
+- Commit đã chốt:
+  - `3e2c17d` — `batch330: add session-author create-and-reload quick action`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **331**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - moment posting shell (web+iOS): thêm quick action `Use current session user as viewer + author + create moment + reload feed` để one-tap giảm dependency nhập tay viewer trong post→feed retest.
 
 ## Batch 329 handoff (closed)
 - Batch vừa xong: **329**

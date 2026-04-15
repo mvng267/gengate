@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 329
+- Batch: 330
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 329 friend graph shell (web+iOS) — add quick action `Use current session user as receiver + send friend request` for one-tap outbound request test from requester=session user.
+- Scope: batch 330 moment posting shell (web+iOS) — add quick action `Use current session user as author + create moment + reload feed` for one-tap post→feed verification.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,17 +16,21 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
-  - apps/web-nextjs/components/friend-graph-shell.tsx
-  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
+  - apps/web-nextjs/components/moment-compose-shell.tsx
+  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `3dd4fc9` — `batch329: add session-receiver quick-send actions in friend graph shells`
-  - previous feature commit: `6be60e8` — `batch328: add session-requester auto-load friend graph actions`
-  - working tree: clean after batch329 feature commit
+  - latest feature commit: `3e2c17d` — `batch330: add session-author create-and-reload quick action`
+  - previous feature commit: `3dd4fc9` — `batch329: add session-receiver quick-send actions in friend graph shells`
+  - working tree: clean after batch330 feature commit
 - Blocker: none
-- Next: mở batch330 với 1 slice hẹp moment posting shell (web+iOS) — thêm quick action `Use current session user as author + create moment + reload feed` để one-tap verify seam post→feed.
+- Next: mở batch331 với 1 slice hẹp moment posting shell (web+iOS) — thêm quick action `Use current session user as viewer + author + create moment + reload feed` để one-tap giảm dependency nhập tay viewer trong post→feed retest.
+- Batch 330 handoff:
+  - `3e2c17d` — `batch330: add session-author create-and-reload quick action`
+  - web moment shell thêm action `Use current session user as author + create moment + reload feed`; reuse create flow để tạo moment ngay với author=session user và reload private feed nếu viewer đang có.
+  - iOS Feed shell thêm action cùng tên, gọi flow create moment + reload authored/feed trong một thao tác, status giữ marker `author_source=session_user`.
 - Batch 329 handoff:
   - `3dd4fc9` — `batch329: add session-receiver quick-send actions in friend graph shells`
   - web friend graph shell thêm action `Use current session user as receiver + send friend request`, auto-fill receiver theo session user + gọi create request ngay + reload snapshot; có guard marker `session_receiver_missing_for_quick_apply` và invalid self-pair marker.

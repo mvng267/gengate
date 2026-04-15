@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **329 — friend graph shell (web+iOS session-receiver quick-send action) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **330 — moment posting shell (web+iOS session-author create-and-reload quick action) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,23 +89,23 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **329**
-- Scope hiện tại: friend graph shell (web+iOS) — thêm quick action `Use current session user as receiver + send friend request` để one-tap test chiều outbound request từ requester=session user.
+- Batch workflow chính thức hiện tại: **330**
+- Scope hiện tại: moment posting shell (web+iOS) — thêm quick action `Use current session user as author + create moment + reload feed` để one-tap verify seam post→feed.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/components/friend-graph-shell.tsx`
-  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
+  - `apps/web-nextjs/components/moment-compose-shell.tsx`
+  - `apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift`
 - Test-verify:
   - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `3dd4fc9` — `batch329: add session-receiver quick-send actions in friend graph shells`
-  - commit liền trước: `6be60e8` — `batch328: add session-requester auto-load friend graph actions`
+  - commit gần nhất đã chốt: `3e2c17d` — `batch330: add session-author create-and-reload quick action`
+  - commit liền trước: `3dd4fc9` — `batch329: add session-receiver quick-send actions in friend graph shells`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch330 với 1 slice hẹp moment posting shell (web+iOS): thêm quick action `Use current session user as author + create moment + reload feed` để one-tap verify seam post→feed.
+  - mở batch331 với 1 slice hẹp moment posting shell (web+iOS): thêm quick action `Use current session user as viewer + author + create moment + reload feed` để one-tap giảm dependency nhập tay viewer trong post→feed retest.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`; bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy last copied delete summary feedback`, verify line source-state rồi bấm `Copy delete copy audit for first ready source` để one-shot copy `delete_copy_audit=source:.../value:...`; đối chiếu source được pick với line source-state.
@@ -118,6 +118,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
 
 ## Batch handoff note
+
+- Batch vừa xong: **330**
+- Commit cuối đã chốt:
+  - `3e2c17d` — `batch330: add session-author create-and-reload quick action`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **331**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - moment posting shell (web+iOS): thêm quick action `Use current session user as viewer + author + create moment + reload feed` để one-tap giảm dependency nhập tay viewer trong post→feed retest.
+
+---
 
 - Batch vừa xong: **329**
 - Commit cuối đã chốt:
