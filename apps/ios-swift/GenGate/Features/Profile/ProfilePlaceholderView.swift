@@ -52,8 +52,8 @@ struct ProfilePlaceholderView: View {
                         .background(Color.secondary.opacity(0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                    Button("Use current session user") {
-                        fillFromCurrentSessionUser()
+                    Button("Use current session user as requester") {
+                        applyCurrentSessionUserAsRequester()
                     }
                     .buttonStyle(.bordered)
                     .disabled(currentSessionUserID == nil)
@@ -444,11 +444,25 @@ struct ProfilePlaceholderView: View {
         userIDDraft = currentSessionUserID
     }
 
-    private func fillFromCurrentSessionUser() {
+    private func applyCurrentSessionUserAsRequester() {
         guard let currentSessionUserID else {
+            statusMessage = nil
+            fetchError = "session_requester_missing_for_quick_apply"
             return
         }
-        userIDDraft = currentSessionUserID
+
+        let trimmedSessionUserID = currentSessionUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedRequester = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if trimmedRequester == trimmedSessionUserID {
+            statusMessage = "Requester already matches current session user (requester_source=session_user)."
+            fetchError = nil
+            return
+        }
+
+        userIDDraft = trimmedSessionUserID
+        statusMessage = "Applied current session user as requester (requester_source=session_user)."
+        fetchError = nil
     }
 
     private func applyFriendGraphDeltaLine(requestID: String, action: String, snapshot: FriendGraphSnapshot) {

@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { readPersistedAuthSession } from "@/lib/auth/client";
 import {
   acceptFriendRequest,
   createFriendRequest,
@@ -24,6 +25,7 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
   const [busyRequestId, setBusyRequestId] = useState<string | null>(null);
   const [lastFriendGraphDeltaLine, setLastFriendGraphDeltaLine] = useState<string | null>(null);
   const [lastFriendGraphDeltaCopiedLine, setLastFriendGraphDeltaCopiedLine] = useState<string | null>(null);
+  const [currentSessionUserId, setCurrentSessionUserId] = useState("");
 
   const feedHref = `/feed?author=${encodeURIComponent(userId)}&viewer=${encodeURIComponent(userId)}`;
   const inboxHref = `/inbox?userA=${encodeURIComponent(userId)}&sender=${encodeURIComponent(userId)}`;
@@ -56,6 +58,11 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
   const quickDeltaSummary = pendingDirectionSummary
     ? `accepted_count=${snapshot?.friendshipCount ?? 0} / pending_inbound=${pendingDirectionSummary.inbound} / pending_outbound=${pendingDirectionSummary.outbound}`
     : "accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)";
+
+  useEffect(() => {
+    const persistedSession = readPersistedAuthSession();
+    setCurrentSessionUserId(persistedSession?.session.user_id?.trim() ?? "");
+  }, []);
 
   async function loadSnapshot(message?: string) {
     setIsLoadingSnapshot(true);
@@ -157,6 +164,22 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
       "friend_graph_action_delta_missing",
       "friend_graph_action_delta_copy_failed",
     );
+  }
+
+  async function handleApplyCurrentSessionUserAsRequester() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_requester_missing_for_quick_apply");
+      return;
+    }
+
+    if (sessionUserId === userId) {
+      await loadSnapshot("Requester already matches current session user (requester_source=session_user). Reloading friend graph snapshot...");
+      return;
+    }
+
+    setStatus("Applied current session user as requester (requester_source=session_user). Redirecting profile context...");
+    window.location.assign(`/profile?user=${encodeURIComponent(sessionUserId)}`);
   }
 
   async function handleCreateRequest(event: React.FormEvent<HTMLFormElement>) {
@@ -270,6 +293,11 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
       <p>
         <strong>User:</strong> {userId}
       </p>
+      {currentSessionUserId ? (
+        <p>
+          <strong>Current session user_id:</strong> <code>{currentSessionUserId}</code>
+        </p>
+      ) : null}
       {pendingDirectionSummary ? (
         <>
           <p>
@@ -313,9 +341,16 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
         <Link href={notificationsHref}>Notifications</Link> · <Link href={locationHref}>Location</Link>
       </p>
 
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 16, display: "grid", gap: 8 }}>
         <button type="button" onClick={() => void loadSnapshot()} disabled={isLoadingSnapshot}>
           {isLoadingSnapshot ? "Loading..." : "Load friend graph snapshot"}
+        </button>
+        <button
+          type="button"
+          onClick={() => void handleApplyCurrentSessionUserAsRequester()}
+          disabled={!currentSessionUserId || isLoadingSnapshot || isCreatingRequest}
+        >
+          Use current session user as requester
         </button>
       </div>
 
