@@ -107,3 +107,15 @@ export async function acceptFriendRequest(requestId: string): Promise<Friendship
 
   return (await response.json()) as FriendshipRecord;
 }
+
+export async function rejectFriendRequest(requestId: string): Promise<FriendRequestRecord> {
+  const response = await apiRequest(`/friends/requests/${encodeURIComponent(requestId)}/reject`, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error(`friend_request_reject_failed:${response.status}`);
+  }
+
+  return (await response.json()) as FriendRequestRecord;
+}

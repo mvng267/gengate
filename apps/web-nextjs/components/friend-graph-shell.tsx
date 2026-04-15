@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { acceptFriendRequest, createFriendRequest, fetchFriendGraphSnapshot, type FriendGraphSnapshot } from "@/lib/friends/client";
+import {
+  acceptFriendRequest,
+  createFriendRequest,
+  fetchFriendGraphSnapshot,
+  rejectFriendRequest,
+  type FriendGraphSnapshot,
+} from "@/lib/friends/client";
 
 type FriendGraphShellProps = {
   userId: string;
@@ -16,6 +22,8 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
   const [isLoadingSnapshot, setIsLoadingSnapshot] = useState(false);
   const [isCreatingRequest, setIsCreatingRequest] = useState(false);
   const [busyRequestId, setBusyRequestId] = useState<string | null>(null);
+  const [lastFriendGraphDeltaLine, setLastFriendGraphDeltaLine] = useState<string | null>(null);
+  const [lastFriendGraphDeltaCopiedLine, setLastFriendGraphDeltaCopiedLine] = useState<string | null>(null);
 
   const feedHref = `/feed?author=${encodeURIComponent(userId)}&viewer=${encodeURIComponent(userId)}`;
   const inboxHref = `/inbox?userA=${encodeURIComponent(userId)}&sender=${encodeURIComponent(userId)}`;
@@ -45,6 +53,9 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
   const quickCopySummary = pendingDirectionSummary
     ? `user=${userId} | pending_inbound=${pendingDirectionSummary.inbound} | pending_outbound=${pendingDirectionSummary.outbound} | pending_total=${pendingDirectionSummary.total} | accepted=${snapshot?.friendshipCount ?? 0}`
     : null;
+  const quickDeltaSummary = pendingDirectionSummary
+    ? `accepted_count=${snapshot?.friendshipCount ?? 0} / pending_inbound=${pendingDirectionSummary.inbound} / pending_outbound=${pendingDirectionSummary.outbound}`
+    : "accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)";
 
   async function loadSnapshot(message?: string) {
     setIsLoadingSnapshot(true);
@@ -83,6 +94,71 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
     setIsLoadingSnapshot(false);
   }
 
+  async function copyToClipboard(text: string, statusPrefix: string, emptyCode: string, failedCode: string) {
+    const normalizedText = text.trim();
+    if (!normalizedText) {
+      setStatus(emptyCode);
+      return;
+    }
+
+    if (typeof navigator === "undefined" || typeof navigator.clipboard?.writeText !== "function") {
+      setStatus("quick_copy_clipboard_unavailable");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(normalizedText);
+      setLastFriendGraphDeltaCopiedLine(normalizedText);
+      setStatus(`${statusPrefix} (${normalizedText}).`);
+    } catch {
+      setStatus(failedCode);
+    }
+  }
+
+  function applyDeltaFromSnapshot(nextSnapshot: FriendGraphSnapshot, actingRequestId: string, action: "accepted" | "rejected") {
+    const pendingBreakdown = nextSnapshot.pendingRequests.reduce(
+      (acc, request) => {
+        if (request.status !== "pending") {
+          return acc;
+        }
+
+        if (request.receiver.id === userId) {
+          acc.inbound += 1;
+        }
+
+        if (request.requester.id === userId) {
+          acc.outbound += 1;
+        }
+
+        return acc;
+      },
+      { inbound: 0, outbound: 0 },
+    );
+
+    const deltaLine =
+      `request_id=${actingRequestId} / action=${action} / accepted_count=${nextSnapshot.friendshipCount} / ` +
+      `pending_inbound=${pendingBreakdown.inbound} / pending_outbound=${pendingBreakdown.outbound}`;
+    setLastFriendGraphDeltaLine(deltaLine);
+  }
+
+  async function handleCopyQuickDeltaSummary() {
+    await copyToClipboard(
+      quickDeltaSummary,
+      "Copied friend graph quick delta summary to clipboard",
+      "friend_graph_quick_delta_summary_empty",
+      "friend_graph_quick_delta_summary_copy_failed",
+    );
+  }
+
+  async function handleCopyLastFriendGraphDeltaLine() {
+    await copyToClipboard(
+      lastFriendGraphDeltaLine ?? "",
+      "Copied friend graph action delta line to clipboard",
+      "friend_graph_action_delta_missing",
+      "friend_graph_action_delta_copy_failed",
+    );
+  }
+
   async function handleCreateRequest(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -97,6 +173,7 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
       setStatus(`Created friend request ${created.id}. Reloading friend graph snapshot...`);
       await loadSnapshot("Reloading friend graph after friend-request creation...");
       setTargetUserId("");
+      setLastFriendGraphDeltaLine(null);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "friend_request_create_failed");
     }
@@ -110,10 +187,75 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
 
     try {
       await acceptFriendRequest(requestId);
-      setStatus(`Accepted friend request ${requestId}. Reloading friend graph snapshot...`);
-      await loadSnapshot("Reloading friend graph after request accept...");
+      const nextSnapshot = await fetchFriendGraphSnapshot(userId);
+      setSnapshot(nextSnapshot);
+      applyDeltaFromSnapshot(nextSnapshot, requestId, "accepted");
+
+      const pendingBreakdown = nextSnapshot.pendingRequests.reduce(
+        (acc, request) => {
+          if (request.status !== "pending") {
+            return acc;
+          }
+
+          if (request.receiver.id === userId) {
+            acc.inbound += 1;
+          }
+
+          if (request.requester.id === userId) {
+            acc.outbound += 1;
+          }
+
+          return acc;
+        },
+        { inbound: 0, outbound: 0 },
+      );
+
+      setStatus(
+        `Accepted friend request ${requestId}. ` +
+          `accepted_count=${nextSnapshot.friendshipCount} / pending_inbound=${pendingBreakdown.inbound} / pending_outbound=${pendingBreakdown.outbound}.`,
+      );
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "friend_request_accept_failed");
+    }
+
+    setBusyRequestId(null);
+  }
+
+  async function handleRejectRequest(requestId: string) {
+    setBusyRequestId(requestId);
+    setStatus(`Rejecting friend request ${requestId}...`);
+
+    try {
+      await rejectFriendRequest(requestId);
+      const nextSnapshot = await fetchFriendGraphSnapshot(userId);
+      setSnapshot(nextSnapshot);
+      applyDeltaFromSnapshot(nextSnapshot, requestId, "rejected");
+
+      const pendingBreakdown = nextSnapshot.pendingRequests.reduce(
+        (acc, request) => {
+          if (request.status !== "pending") {
+            return acc;
+          }
+
+          if (request.receiver.id === userId) {
+            acc.inbound += 1;
+          }
+
+          if (request.requester.id === userId) {
+            acc.outbound += 1;
+          }
+
+          return acc;
+        },
+        { inbound: 0, outbound: 0 },
+      );
+
+      setStatus(
+        `Rejected friend request ${requestId}. ` +
+          `accepted_count=${nextSnapshot.friendshipCount} / pending_inbound=${pendingBreakdown.inbound} / pending_outbound=${pendingBreakdown.outbound}.`,
+      );
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "friend_request_reject_failed");
     }
 
     setBusyRequestId(null);
@@ -137,6 +279,31 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
           <p>
             Quick copy: <code>{quickCopySummary}</code>
           </p>
+          <p>
+            Quick delta summary: <code>{quickDeltaSummary}</code>
+          </p>
+          <p>
+            <button type="button" onClick={() => void handleCopyQuickDeltaSummary()}>
+              Copy quick delta summary
+            </button>
+          </p>
+          {lastFriendGraphDeltaLine ? (
+            <>
+              <p>
+                Last action delta: <code>{lastFriendGraphDeltaLine}</code>
+              </p>
+              <p>
+                <button type="button" onClick={() => void handleCopyLastFriendGraphDeltaLine()}>
+                  Copy last action delta
+                </button>
+              </p>
+            </>
+          ) : null}
+          {lastFriendGraphDeltaCopiedLine ? (
+            <p>
+              Last copied delta: <code>{lastFriendGraphDeltaCopiedLine}</code>
+            </p>
+          ) : null}
         </>
       ) : (
         <p>Pending summary: load snapshot to view inbound/outbound pending counts.</p>
@@ -190,7 +357,15 @@ export function FriendGraphShell({ userId }: FriendGraphShellProps) {
                       onClick={() => void handleAcceptRequest(request.id)}
                       disabled={busyRequestId === request.id}
                     >
-                      {busyRequestId === request.id ? "Accepting..." : "Accept"}
+                      {busyRequestId === request.id ? "Processing..." : "Accept"}
+                    </button>
+                    {" "}
+                    <button
+                      type="button"
+                      onClick={() => void handleRejectRequest(request.id)}
+                      disabled={busyRequestId === request.id}
+                    >
+                      {busyRequestId === request.id ? "Processing..." : "Reject"}
                     </button>
                   </>
                 ) : null}

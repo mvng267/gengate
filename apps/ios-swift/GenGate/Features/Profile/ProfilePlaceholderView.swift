@@ -1,4 +1,10 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
+#if canImport(AppKit)
+import AppKit
+#endif
 
 struct ProfilePlaceholderView: View {
     @Environment(AppSessionStore.self) private var sessionStore
@@ -15,6 +21,9 @@ struct ProfilePlaceholderView: View {
     @State private var isCreatingRequest = false
     @State private var busyAcceptRequestID: String?
     @State private var busyRejectRequestID: String?
+    @State private var lastFriendGraphActionDeltaLine: String?
+    @State private var lastFriendGraphActionDeltaCopiedAt: Date?
+    @State private var lastFriendGraphActionDeltaCopiedText: String = ""
 
     var body: some View {
         ScrollView {
@@ -163,6 +172,34 @@ struct ProfilePlaceholderView: View {
                                 .font(.footnote.monospaced())
                                 .foregroundStyle(.secondary)
                                 .textSelection(.enabled)
+                        }
+
+                        Text("Quick delta summary: \(quickFriendGraphDeltaSummaryLine)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+
+                        Button("Copy quick delta summary") {
+                            copyQuickFriendGraphDeltaSummary()
+                        }
+                        .buttonStyle(.bordered)
+
+                        if let lastFriendGraphActionDeltaLine {
+                            Text("Last action delta: \(lastFriendGraphActionDeltaLine)")
+                                .font(.footnote.monospaced())
+                                .foregroundStyle(.secondary)
+                                .textSelection(.enabled)
+
+                            Button("Copy last action delta") {
+                                copyLastFriendGraphActionDeltaLine()
+                            }
+                            .buttonStyle(.bordered)
+                        }
+
+                        if let lastFriendGraphActionDeltaCopiedFeedbackText {
+                            Text(lastFriendGraphActionDeltaCopiedFeedbackText)
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
                         }
                     } else {
                         Text("No friend graph snapshot loaded yet.")
@@ -377,6 +414,28 @@ struct ProfilePlaceholderView: View {
         return "user=\(requestedUserID) | pending_inbound=\(pendingDirectionSummary.inbound) | pending_outbound=\(pendingDirectionSummary.outbound) | pending_total=\(pendingDirectionSummary.total) | accepted=\(friendshipCount)"
     }
 
+    private var quickFriendGraphDeltaSummaryLine: String {
+        guard let pendingDirectionSummary,
+              let friendshipCount else {
+            return "accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)"
+        }
+
+        return "accepted_count=\(friendshipCount) / pending_inbound=\(pendingDirectionSummary.inbound) / pending_outbound=\(pendingDirectionSummary.outbound)"
+    }
+
+    private var lastFriendGraphActionDeltaCopiedFeedbackText: String? {
+        guard let lastFriendGraphActionDeltaCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(lastFriendGraphActionDeltaCopiedAt)
+        guard elapsed < 8 else {
+            return nil
+        }
+
+        return "Copied friend graph action delta (\(Int(elapsed))s ago): \(lastFriendGraphActionDeltaCopiedText)"
+    }
+
     private func prefillFromCurrentSessionUserIfNeeded() {
         guard userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let currentSessionUserID else {
@@ -390,6 +449,64 @@ struct ProfilePlaceholderView: View {
             return
         }
         userIDDraft = currentSessionUserID
+    }
+
+    private func applyFriendGraphDeltaLine(requestID: String, action: String, snapshot: FriendGraphSnapshot) {
+        let requestedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let pendingInboundCount = snapshot.pendingRequests.filter {
+            $0.status == "pending" && $0.receiverUserID == requestedUserID
+        }.count
+        let pendingOutboundCount = snapshot.pendingRequests.filter {
+            $0.status == "pending" && $0.requesterUserID == requestedUserID
+        }.count
+
+        lastFriendGraphActionDeltaLine = "request_id=\(requestID) / action=\(action) / accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(pendingInboundCount) / pending_outbound=\(pendingOutboundCount)"
+    }
+
+    private func copyQuickFriendGraphDeltaSummary() {
+        let normalizedText = quickFriendGraphDeltaSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "friend_graph_quick_delta_summary_empty"
+            return
+        }
+
+        copyToClipboard(normalizedText)
+        lastFriendGraphActionDeltaCopiedText = normalizedText
+        lastFriendGraphActionDeltaCopiedAt = Date()
+        statusMessage = "Copied friend graph quick delta summary to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyLastFriendGraphActionDeltaLine() {
+        guard let lastFriendGraphActionDeltaLine else {
+            statusMessage = nil
+            fetchError = "friend_graph_action_delta_missing"
+            return
+        }
+
+        let normalizedText = lastFriendGraphActionDeltaLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "friend_graph_action_delta_missing"
+            return
+        }
+
+        copyToClipboard(normalizedText)
+        lastFriendGraphActionDeltaCopiedText = normalizedText
+        lastFriendGraphActionDeltaCopiedAt = Date()
+        statusMessage = "Copied friend graph action delta line to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyToClipboard(_ text: String) {
+#if canImport(UIKit)
+        UIPasteboard.general.string = text
+#elseif canImport(AppKit)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+#endif
     }
 
     private func loadFriendGraph(statusMessage: String? = nil) async {
@@ -473,6 +590,7 @@ struct ProfilePlaceholderView: View {
                 receiverUserID: receiverUserID
             )
             await loadFriendGraph(statusMessage: "Friend request created. Receiver kept for quick dedupe re-test. Reloading friend graph...")
+            lastFriendGraphActionDeltaLine = nil
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
@@ -516,7 +634,23 @@ struct ProfilePlaceholderView: View {
 
         do {
             try await FriendGraphAPIClient().acceptFriendRequest(requestID: requestID)
-            await loadFriendGraph(statusMessage: "Friend request accepted. Reloading friend graph...")
+            let snapshot = try await FriendGraphAPIClient().fetchSnapshot(userID: userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines))
+
+            pendingRequestCount = snapshot.requestCount
+            friendshipCount = snapshot.friendshipCount
+            pendingRequestRows = snapshot.pendingRequests
+            friendshipRows = snapshot.friendships
+            applyFriendGraphDeltaLine(requestID: requestID, action: "accepted", snapshot: snapshot)
+
+            let requestedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+            let pendingInboundCount = snapshot.pendingRequests.filter {
+                $0.status == "pending" && $0.receiverUserID == requestedUserID
+            }.count
+            let pendingOutboundCount = snapshot.pendingRequests.filter {
+                $0.status == "pending" && $0.requesterUserID == requestedUserID
+            }.count
+
+            statusMessage = "Friend request accepted. accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(pendingInboundCount) / pending_outbound=\(pendingOutboundCount)."
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
@@ -536,7 +670,23 @@ struct ProfilePlaceholderView: View {
 
         do {
             try await FriendGraphAPIClient().rejectFriendRequest(requestID: requestID)
-            await loadFriendGraph(statusMessage: "Friend request rejected. Reloading friend graph...")
+            let snapshot = try await FriendGraphAPIClient().fetchSnapshot(userID: userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines))
+
+            pendingRequestCount = snapshot.requestCount
+            friendshipCount = snapshot.friendshipCount
+            pendingRequestRows = snapshot.pendingRequests
+            friendshipRows = snapshot.friendships
+            applyFriendGraphDeltaLine(requestID: requestID, action: "rejected", snapshot: snapshot)
+
+            let requestedUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+            let pendingInboundCount = snapshot.pendingRequests.filter {
+                $0.status == "pending" && $0.receiverUserID == requestedUserID
+            }.count
+            let pendingOutboundCount = snapshot.pendingRequests.filter {
+                $0.status == "pending" && $0.requesterUserID == requestedUserID
+            }.count
+
+            statusMessage = "Friend request rejected. accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(pendingInboundCount) / pending_outbound=\(pendingOutboundCount)."
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
