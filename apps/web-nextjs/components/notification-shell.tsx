@@ -28,6 +28,13 @@ type NotificationLoadWindow = {
   unreadOnly: boolean;
 };
 
+type NotificationMutationDelta = {
+  notificationId: string;
+  readState: "read" | "unread";
+  currentPageUnread: number | null;
+  totalUnreadCount: number | null;
+};
+
 export function NotificationShell({ initialUserId = "" }: NotificationShellProps) {
   const [form, setForm] = useState({
     ...initialForm,
@@ -41,6 +48,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   const [isCreating, setIsCreating] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [lastLoadedWindow, setLastLoadedWindow] = useState<NotificationLoadWindow | null>(null);
+  const [lastMutationDelta, setLastMutationDelta] = useState<NotificationMutationDelta | null>(null);
 
   useEffect(() => {
     setForm((current) => ({
@@ -51,6 +59,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     setListMeta(null);
     setPagination({ limit: 20, offset: 0, unreadOnly: false });
     setLastLoadedWindow(null);
+    setLastMutationDelta(null);
   }, [initialUserId]);
 
   function currentLoadWindow(overrides?: Partial<NotificationLoadWindow>): NotificationLoadWindow {
@@ -125,6 +134,10 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     ` / unread_count=${listMeta ? listMeta.unread_count : "(none)"}` +
     ` / total_unread_count=${listMeta ? listMeta.total_unread_count : "(none)"}`;
 
+  const quickMutationDeltaLine = lastMutationDelta
+    ? `notification_id=${lastMutationDelta.notificationId} / read_state=${lastMutationDelta.readState} / current_page_unread=${lastMutationDelta.currentPageUnread ?? "(none)"} / total_unread_count=${lastMutationDelta.totalUnreadCount ?? "(none)"}`
+    : "notification_id=(none) / read_state=(none) / current_page_unread=(none) / total_unread_count=(none)";
+
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsCreating(true);
@@ -152,11 +165,40 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
 
     try {
       const updated = item.read_at ? await markNotificationUnread(item.id) : await markNotificationRead(item.id);
+
+      let nextMeta = listMeta;
+      if (listMeta) {
+        const wasRead = item.read_at !== null;
+        const isRead = updated.read_at !== null;
+        const unreadDelta = wasRead === isRead ? 0 : isRead ? -1 : 1;
+
+        if (unreadDelta !== 0) {
+          nextMeta = {
+            ...listMeta,
+            unread_count: Math.max(0, listMeta.unread_count + unreadDelta),
+            total_unread_count: Math.max(0, listMeta.total_unread_count + unreadDelta),
+          };
+          setListMeta(nextMeta);
+        }
+      }
+
       setItems((current) => current.map((entry) => (entry.id === updated.id ? updated : entry)));
       setLastLoadedWindow(null);
+
+      const mutationDelta: NotificationMutationDelta = {
+        notificationId: updated.id,
+        readState: updated.read_at ? "read" : "unread",
+        currentPageUnread: nextMeta ? nextMeta.unread_count : null,
+        totalUnreadCount: nextMeta ? nextMeta.total_unread_count : null,
+      };
+      setLastMutationDelta(mutationDelta);
+
+      const mutationDeltaLine =
+        `notification_id=${mutationDelta.notificationId} / read_state=${mutationDelta.readState} / ` +
+        `current_page_unread=${mutationDelta.currentPageUnread ?? "(none)"} / total_unread_count=${mutationDelta.totalUnreadCount ?? "(none)"}`;
       setStatus(
         `Updated notification ${updated.id} to ${updated.read_at ? "read (●)" : "unread (○)"}. ` +
-          "Reload to refresh unread summary.",
+          `Quick mutation delta: ${mutationDeltaLine}.`,
       );
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "notification_toggle_failed");
@@ -212,6 +254,15 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     );
   }
 
+  async function handleCopyQuickMutationDelta() {
+    await copyToClipboard(
+      quickMutationDeltaLine,
+      "Copied quick mutation delta to clipboard",
+      "quick_mutation_delta_missing",
+      "quick_mutation_delta_copy_failed",
+    );
+  }
+
   return (
     <section>
       <p>
@@ -241,6 +292,14 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       <p>
         <button type="button" onClick={() => void handleCopyQuickPageCursorSummary()}>
           Copy quick page cursor summary
+        </button>
+      </p>
+      <p>
+        Quick mutation delta: <code>{quickMutationDeltaLine}</code>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickMutationDelta()}>
+          Copy quick mutation delta
         </button>
       </p>
       <p>Filter mode: {pagination.unreadOnly ? "Unread only" : "All notifications"}</p>

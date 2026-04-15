@@ -29,6 +29,9 @@ struct NotificationsPlaceholderView: View {
     @State private var lastQuickPageMetaCopiedText: String = ""
     @State private var quickPageCursorSummaryCopiedAt: Date?
     @State private var lastQuickPageCursorSummaryCopiedText: String = ""
+    @State private var quickMutationDeltaCopiedAt: Date?
+    @State private var lastQuickMutationDeltaCopiedText: String = ""
+    @State private var lastMutationDelta: NotificationMutationDelta?
 
     var body: some View {
         ScrollView {
@@ -36,12 +39,13 @@ struct NotificationsPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Notifications",
                     summary: "iOS native notification center shell now supports create + read/unread mutation so notification flow can be exercised end-to-end from native UI.",
-                    status: "Status: native notification center now supports create + read/unread toggles + quick unread summary + quick page cursor summary lines; delete remains intentionally out of scope for this slice.",
+                    status: "Status: native notification center now supports create + read/unread toggles + quick unread summary + quick page cursor summary + quick mutation delta lines; delete remains intentionally out of scope for this slice.",
                     bullets: [
                         "Paste a backend user UUID to create and load notifications for that user.",
                         "This shell can create via `POST /notifications`, then read `/notifications/{user_id}` and toggle each row via `/notifications/{id}/read` + `/notifications/{id}/unread`.",
                         "Quick unread summary line (`current_page_unread / total_unread_count`) helps parity scan quickly with backend/web payloads.",
                         "Quick page cursor summary line (`user_id/limit/offset/filter_mode/count/unread_count/total_unread_count`) helps verify paging/filter window quickly.",
+                        "Quick mutation delta line (`notification_id/read_state/current_page_unread/total_unread_count`) lets testers report mark read/unread outcome without manual counting.",
                         "Use this tab to run minimal notification lifecycle checks from iOS without relying on web seeding first."
                     ]
                 )
@@ -276,6 +280,21 @@ struct NotificationsPlaceholderView: View {
                             .foregroundStyle(.secondary)
                     }
 
+                    Text("Quick mutation delta: \(quickMutationDeltaLine)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
+                    Button("Copy quick mutation delta") {
+                        copyQuickMutationDeltaLine()
+                    }
+                    .buttonStyle(.bordered)
+
+                    if let quickMutationDeltaCopiedFeedbackText {
+                        Text(quickMutationDeltaCopiedFeedbackText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     if let listMeta {
                         Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount) · Limit: \(listMeta.limit) · Offset: \(listMeta.offset) · Filter mode: \(listMeta.unreadOnly ? "Unread only" : "All notifications")")
                             .font(.footnote.monospaced())
@@ -477,6 +496,27 @@ struct NotificationsPlaceholderView: View {
         return "Copied quick page cursor summary (\(Int(elapsed))s ago): \(lastQuickPageCursorSummaryCopiedText)"
     }
 
+    private var quickMutationDeltaLine: String {
+        guard let lastMutationDelta else {
+            return "notification_id=(none) / read_state=(none) / current_page_unread=(none) / total_unread_count=(none)"
+        }
+
+        return "notification_id=\(lastMutationDelta.notificationID) / read_state=\(lastMutationDelta.readState) / current_page_unread=\(lastMutationDelta.currentPageUnreadText) / total_unread_count=\(lastMutationDelta.totalUnreadCountText)"
+    }
+
+    private var quickMutationDeltaCopiedFeedbackText: String? {
+        guard let quickMutationDeltaCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(quickMutationDeltaCopiedAt)
+        guard elapsed >= 0, elapsed < 6 else {
+            return nil
+        }
+
+        return "Copied quick mutation delta (\(Int(elapsed))s ago): \(lastQuickMutationDeltaCopiedText)"
+    }
+
     private func prefillFromCurrentSessionUserIfNeeded() {
         guard userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let currentSessionUserID else {
@@ -615,9 +655,42 @@ struct NotificationsPlaceholderView: View {
             if let index = notificationRows.firstIndex(where: { $0.id == updated.id }) {
                 notificationRows[index] = updated
             }
+
+            var nextMeta = listMeta
+            if var currentMeta = listMeta {
+                let unreadDelta: Int
+                if row.isRead == updated.isRead {
+                    unreadDelta = 0
+                } else {
+                    unreadDelta = updated.isRead ? -1 : 1
+                }
+
+                if unreadDelta != 0 {
+                    currentMeta = NotificationListMeta(
+                        count: currentMeta.count,
+                        unreadCount: max(0, currentMeta.unreadCount + unreadDelta),
+                        totalUnreadCount: max(0, currentMeta.totalUnreadCount + unreadDelta),
+                        limit: currentMeta.limit,
+                        offset: currentMeta.offset,
+                        unreadOnly: currentMeta.unreadOnly
+                    )
+                    listMeta = currentMeta
+                }
+                nextMeta = currentMeta
+            }
+
+            let mutationDelta = NotificationMutationDelta(
+                notificationID: updated.id,
+                readState: updated.isRead ? "read" : "unread",
+                currentPageUnread: nextMeta?.unreadCount,
+                totalUnreadCount: nextMeta?.totalUnreadCount
+            )
+            lastMutationDelta = mutationDelta
+
+            let mutationDeltaLine = "notification_id=\(mutationDelta.notificationID) / read_state=\(mutationDelta.readState) / current_page_unread=\(mutationDelta.currentPageUnreadText) / total_unread_count=\(mutationDelta.totalUnreadCountText)"
             statusMessage = updated.isRead
-                ? "Marked notification \(updated.id) as read (●)."
-                : "Marked notification \(updated.id) as unread (○)."
+                ? "Marked notification \(updated.id) as read (●). Quick mutation delta: \(mutationDeltaLine)."
+                : "Marked notification \(updated.id) as unread (○). Quick mutation delta: \(mutationDeltaLine)."
             lastLoadedWindow = nil
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
@@ -663,6 +736,19 @@ struct NotificationsPlaceholderView: View {
         fetchError = nil
     }
 
+    private func copyQuickMutationDeltaLine() {
+        let normalizedText = quickMutationDeltaLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        lastQuickMutationDeltaCopiedText = normalizedText
+        quickMutationDeltaCopiedAt = Date()
+        statusMessage = "Copied quick mutation delta to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
     private func writeToClipboard(_ text: String) {
 #if canImport(UIKit)
         UIPasteboard.general.string = text
@@ -698,6 +784,21 @@ private struct NotificationLoadWindow {
     let limit: Int
     let offset: Int
     let unreadOnly: Bool
+}
+
+private struct NotificationMutationDelta {
+    let notificationID: String
+    let readState: String
+    let currentPageUnread: Int?
+    let totalUnreadCount: Int?
+
+    var currentPageUnreadText: String {
+        currentPageUnread.map(String.init) ?? "(none)"
+    }
+
+    var totalUnreadCountText: String {
+        totalUnreadCount.map(String.init) ?? "(none)"
+    }
 }
 
 private struct NotificationListPayload {
