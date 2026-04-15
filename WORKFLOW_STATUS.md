@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 299
+- Batch: 300
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 299 notification shell — add web+iOS quick-copy mutation delta after mark read/unread (`notification_id/read_state/current_page_unread/total_unread_count`) for faster seam #6 verification.
+- Scope: batch 300 notification shell — add web+iOS quick-copy create-result delta after create (`notification_id/read_state/current_page_unread/total_unread_count`) for faster seam #6 lifecycle verification.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -13,8 +13,8 @@
   - iOS Location: nhập owner/share -> `Load location status` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
-  - Web Notifications (`/notifications`): nhập user hợp lệ -> `Load notifications` -> bấm `Mark read` hoặc `Mark unread` ở 1 row -> verify line `Quick mutation delta: notification_id=... / read_state=... / current_page_unread=... / total_unread_count=...`, rồi bấm `Copy quick mutation delta` và paste kiểm tra payload đúng format.
-  - iOS Notifications: nhập user hợp lệ -> `Load notifications` -> bấm `Mark read` hoặc `Mark unread` ở 1 row -> verify line `Quick mutation delta: notification_id=... / read_state=... / current_page_unread=... / total_unread_count=...`, rồi bấm `Copy quick mutation delta` và paste kiểm tra payload đúng format.
+  - Web Notifications (`/notifications`): nhập user hợp lệ -> điền type/payload -> `Create notification` -> verify line `Quick create-result delta: notification_id=... / read_state=... / current_page_unread=... / total_unread_count=...`, rồi bấm `Copy quick create-result delta` và paste kiểm tra payload đúng format.
+  - iOS Notifications: nhập user hợp lệ -> điền type/payload -> `Create notification` -> verify line `Quick create-result delta: notification_id=... / read_state=... / current_page_unread=... / total_unread_count=...`, rồi bấm `Copy quick create-result delta` và paste kiểm tra payload đúng format.
 - Files:
   - apps/web-nextjs/components/notification-shell.tsx
   - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
@@ -22,11 +22,11 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `707c8e2` — `batch299: add notification mutation-delta quick copy on web and ios`
-  - previous feature commit: `b4d9981` — `batch298: add notification page-cursor summary copy actions on web and ios`
-  - working tree: clean after batch299 feature + workflow sync commits
+  - latest feature commit: `47deb98` — `batch300: add notification create-result delta quick copy on web and ios`
+  - previous feature commit: `707c8e2` — `batch299: add notification mutation-delta quick copy on web and ios`
+  - working tree: clean after batch300 feature + workflow sync commits
 - Blocker: none
-- Next: mở batch300 với 1 slice hẹp notification shell (web+iOS) — thêm quick-copy create-result delta (`notification_id/read_state/current_page_unread/total_unread_count`) ngay sau create để test lifecycle create->toggle nhanh hơn.
+- Next: mở batch301 với 1 slice hẹp notification shell (web+iOS) — thêm quick-copy lifecycle pair line gộp `create_result + mutation_delta` để report liền mạch create->toggle trong 1 payload.
 - Batch 295 handoff:
   - `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
   - web friend graph shell thêm reject action parity + quick delta summary line + last action delta (`request_id/action/accepted_count/pending_inbound/pending_outbound`) và nút copy.
