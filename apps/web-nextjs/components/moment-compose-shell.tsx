@@ -360,6 +360,15 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     );
   }
 
+  async function handleCopyLastDeleteCopyAuditSourceStateSnapshotSourceLine() {
+    await copyToClipboard(
+      lastDeleteCopyAuditSourceStateSnapshotSourceLine ?? "",
+      "Copied last source-state snapshot source line to clipboard",
+      "delete_copy_audit_source_state_snapshot_source_line_missing",
+      "delete_copy_audit_source_state_snapshot_source_line_copy_failed",
+    );
+  }
+
   async function handleCopyDeleteCopyAuditFirstReadySource() {
     const firstReadySource = deleteSummaryCopySources.find(
       (source) => resolveDeleteCopyAuditSourceValue(source).trim().length > 0,
@@ -635,6 +644,11 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       <p>
         <button type="button" onClick={() => void handleCopyLastDeleteCopyAuditSourceStateSnapshotLine()}>
           Copy last source-state snapshot line
+        </button>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyLastDeleteCopyAuditSourceStateSnapshotSourceLine()}>
+          Copy last source-state snapshot source line
         </button>
       </p>
       <p>
