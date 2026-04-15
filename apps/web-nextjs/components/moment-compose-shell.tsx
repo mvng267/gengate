@@ -54,6 +54,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [lastDeletedMomentSummaryLine, setLastDeletedMomentSummaryLine] = useState<string | null>(null);
   const [deleteMomentIdDraft, setDeleteMomentIdDraft] = useState("");
   const [lastCopiedFeedVisibilityDeltaLine, setLastCopiedFeedVisibilityDeltaLine] = useState<string | null>(null);
+  const [lastCopiedCreateFeedGateBundleLine, setLastCopiedCreateFeedGateBundleLine] = useState<string | null>(null);
   const [lastCopiedDeleteSummaryLine, setLastCopiedDeleteSummaryLine] = useState<string | null>(null);
   const [lastDeleteCopyAuditLine, setLastDeleteCopyAuditLine] = useState<string | null>(null);
   const [lastDeleteCopyAuditFirstReadySourceLine, setLastDeleteCopyAuditFirstReadySourceLine] = useState<string | null>(null);
@@ -100,6 +101,9 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const quickFeedVisibilityGate = buildFeedVisibilityGateSummary(viewerUserId, feedItems, feedVisibilityGateSnapshotSource);
   const quickFeedVisibilityDeltaLine = `viewer=${viewerUserId || "(empty)"} / feed_count=${feedItems.length} / first_moment_id=${feedItems[0]?.id ?? "(none)"}`;
   const quickFeedVisibilityGateSummaryLine = quickFeedVisibilityGate.summaryLine;
+  const quickCreateFeedGateBundleLine =
+    `moment_create_marker={${momentPayloadQuickCopy}} | ` +
+    `feed_gate_summary={${quickFeedVisibilityGateSummaryLine}}`;
   const deleteMomentQuickCopyLine =
     `delete_moment_id=${deleteMomentId || "(empty)"}` +
     ` / authored_count=${items.length}` +
@@ -311,6 +315,16 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       "quick_feed_visibility_gate_summary_empty",
       "quick_feed_visibility_gate_summary_copy_failed",
       setLastCopiedFeedVisibilityDeltaLine,
+    );
+  }
+
+  async function handleCopyQuickCreateFeedGateBundle() {
+    await copyToClipboard(
+      quickCreateFeedGateBundleLine,
+      "Copied quick create + feed-gate bundle to clipboard",
+      "quick_create_feed_gate_bundle_empty",
+      "quick_create_feed_gate_bundle_copy_failed",
+      setLastCopiedCreateFeedGateBundleLine,
     );
   }
 
@@ -626,6 +640,9 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         Quick feed visibility gate summary: <code>{quickFeedVisibilityGateSummaryLine}</code>
       </p>
       <p>
+        Quick create + feed-gate bundle: <code>{quickCreateFeedGateBundleLine}</code>
+      </p>
+      <p>
         <button type="button" onClick={() => void handleCopyQuickFeedVisibilityDelta()}>
           Copy quick feed-visibility delta
         </button>
@@ -633,6 +650,11 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       <p>
         <button type="button" onClick={() => void handleCopyQuickFeedVisibilityGateSummary()}>
           Copy quick feed visibility gate summary
+        </button>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickCreateFeedGateBundle()}>
+          Copy quick create + feed-gate bundle
         </button>
       </p>
       {lastCreateFeedVisibilityDeltaLine ? (
@@ -670,6 +692,11 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       {lastCopiedFeedVisibilityDeltaLine ? (
         <p>
           Last copied feed delta: <code>{lastCopiedFeedVisibilityDeltaLine}</code>
+        </p>
+      ) : null}
+      {lastCopiedCreateFeedGateBundleLine ? (
+        <p>
+          Last copied create + feed-gate bundle: <code>{lastCopiedCreateFeedGateBundleLine}</code>
         </p>
       ) : null}
       {lastCopiedDeleteSummaryLine ? (
