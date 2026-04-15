@@ -56,7 +56,7 @@
 ## Batch 287 handoff (closed)
 - Batch vừa xong: **287**
 - Commit đã chốt:
-  - `(pending in this run)` — `batch287: add read-cursor triage quick-copy line on web and ios`
+  - `6593ba2` — `batch287: add read-cursor triage quick-copy line on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅

@@ -17,12 +17,12 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `(pending in this run)` — `batch287: add read-cursor triage quick-copy line on web and ios`
+  - latest feature commit: `6593ba2` — `batch287: add read-cursor triage quick-copy line on web and ios`
   - working tree: clean after batch287 commit
 - Blocker: none
 - Next: mở batch288 với 1 slice hẹp direct-message shell: thêm one-tap preset `apply focus user + first unread candidate` trên iOS parity với web jump action status-copy flow.
 - Batch 287 handoff:
-  - `(pending in this run)` — `batch287: add read-cursor triage quick-copy line on web and ios`
+  - `6593ba2` — `batch287: add read-cursor triage quick-copy line on web and ios`
   - web/iOS thêm quick-copy triage line `read_cursor_triage=...` và nút copy riêng để report parity ngắn gọn.
 - Batch 286 handoff:
   - `d6bb3a4` — `batch286: add current-member cursor snapshot to apply quick copy`
