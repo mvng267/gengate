@@ -56,7 +56,7 @@
 ## Batch 313 handoff (closed)
 - Batch vừa xong: **313**
 - Commit đã chốt:
-  - `f68046d` — `batch313: add delete summary copy-source markers on web and ios`
+  - `4bccf18` — `batch313: add delete summary copy-source markers on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
