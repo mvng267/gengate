@@ -107,6 +107,10 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
         ? "Window hint: current user/page/filter differs from the last loaded window. Reload to sync the list and summary."
         : "Window hint: current user/page/filter is in sync with the last loaded window.";
 
+  const quickUnreadSummaryLine = listMeta
+    ? `current_page_unread=${listMeta.unread_count} / total_unread_count=${listMeta.total_unread_count}`
+    : "current_page_unread=(none) / total_unread_count=(none)";
+
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsCreating(true);
@@ -154,6 +158,9 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       </p>
       <p>{status}</p>
       <p>{pendingWindowHint}</p>
+      <p>
+        Quick unread summary: <code>{quickUnreadSummaryLine}</code>
+      </p>
       <p>Filter mode: {pagination.unreadOnly ? "Unread only" : "All notifications"}</p>
 
       <form onSubmit={(event) => void handleCreate(event)}>
