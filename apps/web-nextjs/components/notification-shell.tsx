@@ -221,6 +221,14 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     ` / ${lifecyclePairTransitionContextText}` +
     ` / mutation_delta(notification_id=${lifecycleMutationDelta?.notificationId ?? "(none)"},read_state=${lifecycleMutationDelta?.readState ?? "(none)"},current_page_unread=${lifecycleMutationDelta?.currentPageUnread ?? "(none)"},total_unread_count=${lifecycleMutationDelta?.totalUnreadCount ?? "(none)"})`;
 
+  const quickUnreadLifecycleMutationBundleLine =
+    `unread_summary(${quickUnreadSummaryLine})` +
+    ` / lifecycle_pair_state=${quickLifecyclePairState}` +
+    ` / lifecycle_pair_subject=${lifecyclePairSubject}` +
+    ` / ${lifecyclePairTransitionText}` +
+    ` / ${lifecyclePairTransitionContextText}` +
+    ` / mutation_delta(notification_id=${lifecycleMutationDelta?.notificationId ?? "(none)"},read_state=${lifecycleMutationDelta?.readState ?? "(none)"},current_page_unread=${lifecycleMutationDelta?.currentPageUnread ?? "(none)"},total_unread_count=${lifecycleMutationDelta?.totalUnreadCount ?? "(none)"})`;
+
   async function submitNotificationCreateFlow(input?: NotificationCreateFlowInput) {
     const userId = (input?.userIdOverride ?? form.userId).trim();
     const normalizedStatusPrefix = input?.statusPrefix?.trim();
@@ -522,6 +530,20 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     );
   }
 
+  async function handleCopyQuickUnreadLifecycleMutationBundle() {
+    if (!lifecycleMutationDelta) {
+      setStatus("quick_unread_lifecycle_mutation_bundle_missing");
+      return;
+    }
+
+    await copyToClipboard(
+      quickUnreadLifecycleMutationBundleLine,
+      "Copied quick unread lifecycle mutation bundle to clipboard",
+      "quick_unread_lifecycle_mutation_bundle_missing",
+      "quick_unread_lifecycle_mutation_bundle_copy_failed",
+    );
+  }
+
   return (
     <section>
       <p>
@@ -598,6 +620,14 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       <p>
         <button type="button" onClick={() => void handleCopyQuickLifecyclePairMutation()}>
           Copy quick lifecycle pair mutation
+        </button>
+      </p>
+      <p>
+        Quick unread lifecycle mutation bundle: <code>{quickUnreadLifecycleMutationBundleLine}</code>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickUnreadLifecycleMutationBundle()}>
+          Copy quick unread lifecycle mutation bundle
         </button>
       </p>
       <p>Filter mode: {pagination.unreadOnly ? "Unread only" : "All notifications"}</p>
