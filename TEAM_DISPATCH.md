@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 298
-- Trục công việc: notification shell — web+iOS add quick-copy notification page cursor summary `user_id/limit/offset/filter_mode/count/unread_count/total_unread_count` + clipboard actions.
-- Trạng thái: batch298_complete_notification_page_cursor_summary_copy_actions_web_ios.
+- Batch workflow chính thức hiện tại: 299
+- Trục công việc: notification shell — web+iOS add quick-copy mutation delta after mark read/unread `notification_id/read_state/current_page_unread/total_unread_count` + clipboard action.
+- Trạng thái: batch299_complete_notification_mutation_delta_copy_actions_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 299 handoff (closed)
+- Batch vừa xong: **299**
+- Commit đã chốt:
+  - `707c8e2` — `batch299: add notification mutation-delta quick copy on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **300**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell (web+iOS): thêm quick-copy create-result delta `notification_id/read_state/current_page_unread/total_unread_count` ngay sau create để verify lifecycle create->toggle nhanh hơn.
 
 ## Batch 298 handoff (closed)
 - Batch vừa xong: **298**

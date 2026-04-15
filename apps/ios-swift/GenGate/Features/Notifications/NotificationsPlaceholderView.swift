@@ -552,6 +552,7 @@ struct NotificationsPlaceholderView: View {
     }
 
     private func loadNotifications(forcedUserID: String? = nil, forcedOffset: Int? = nil) async {
+        lastMutationDelta = nil
         let trimmedUserID = (forcedUserID ?? userIDDraft).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedUserID.isEmpty else {
             fetchError = "User UUID là bắt buộc để load notifications."
@@ -737,6 +738,11 @@ struct NotificationsPlaceholderView: View {
     }
 
     private func copyQuickMutationDeltaLine() {
+        guard lastMutationDelta != nil else {
+            statusMessage = "quick_mutation_delta_missing"
+            return
+        }
+
         let normalizedText = quickMutationDeltaLine.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
             return

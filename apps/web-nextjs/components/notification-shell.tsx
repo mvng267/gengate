@@ -255,6 +255,11 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   }
 
   async function handleCopyQuickMutationDelta() {
+    if (!lastMutationDelta) {
+      setStatus("quick_mutation_delta_missing");
+      return;
+    }
+
     await copyToClipboard(
       quickMutationDeltaLine,
       "Copied quick mutation delta to clipboard",
