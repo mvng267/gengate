@@ -1,15 +1,15 @@
 # GenGate Workflow Status
 
-- Batch: 283
+- Batch: 284
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 283 direct-message shell — add quick-copy snapshot marker for first-unread no-op guard (`first_unread_guard_state`) so testers can copy one-line guard parity status on web+iOS.
+- Scope: batch 284 direct-message shell — add read-cursor apply-state marker (`read_cursor_apply_state=noop|updated`) in quick-copy + status text so testers can distinguish no-op vs updated apply outcomes on web+iOS.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
   - Web Feed (`/feed`): bấm `Use current session user as viewer + load` -> verify status có `viewer_source=session_user` và feed reload thành công.
-  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> bấm `Jump focus user to first unread candidate` (hoặc `Use member focus + first unread + mark read`) -> bấm `Copy quick first-unread guard state` để lấy line `focus_user=... | first_unread_guard_state=... | candidate=...` cho report parity no-op/update.
-  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Jump focus user to first unread candidate` (hoặc `Use member focus + first unread + mark read`) -> bấm `Copy quick first-unread guard state` để lấy line `focus_user=... | first_unread_guard_state=... | candidate=...` cho report parity no-op/update.
+  - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor apply result` và verify có thêm `read_cursor_apply_state=noop|updated`; status update read-cursor cũng có suffix apply-state.
+  - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor apply result` và verify có thêm `read_cursor_apply_state=noop|updated`; `sendStatusHint` cũng append `Read-cursor apply state: ...`.
 - Files:
   - apps/web-nextjs/components/direct-message-shell.tsx
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
@@ -17,10 +17,13 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `0578cae` — `batch283: add first-unread guard quick-copy markers on web and ios`
-  - working tree: clean after batch283 commit
+  - latest feature commit: `(pending in this run)` — `batch284: add read-cursor apply-state markers on web and ios`
+  - working tree: clean after batch284 commit
 - Blocker: none
-- Next: mở batch284 với 1 slice hẹp direct-message shell: thêm read-cursor no-op apply marker (`read_cursor_apply_state=noop|updated`) để tách rõ no-op guard và apply result trên web+iOS.
+- Next: mở batch285 với 1 slice hẹp direct-message shell: thêm quick-copy note cho last-read baseline (`previous_cursor_message`) để explain tại sao apply_state=noop trên web+iOS.
+- Batch 284 handoff:
+  - `(pending in this run)` — `batch284: add read-cursor apply-state markers on web and ios`
+  - web/iOS read-cursor apply quick-copy line thêm `read_cursor_apply_state`, và status text có marker apply-state để tách rõ outcome noop vs updated.
 - Batch 283 handoff:
   - `0578cae` — `batch283: add first-unread guard quick-copy markers on web and ios`
   - web/iOS thêm quick-copy line + clipboard action `first_unread_guard_state`, cập nhật theo cả jump-focus flow và member-row first-unread auto-mark flow.

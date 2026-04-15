@@ -69,7 +69,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     "focus_user=(none) | resolved_message=(none) | read_state=unknown",
   );
   const [lastReadCursorApplyQuickCopy, setLastReadCursorApplyQuickCopy] = useState(
-    "target_user=(none) | applied_message=(none) | focus_user=(none) | read_state=unknown",
+    "target_user=(none) | applied_message=(none) | focus_user=(none) | read_state=unknown | read_cursor_apply_state=unknown",
   );
   const [lastFirstUnreadJumpQuickCopy, setLastFirstUnreadJumpQuickCopy] = useState(
     "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown",
@@ -146,7 +146,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setReadCursorTargetMessageIdDraft("");
     setLastSendQuickCopy("sender=(none) | message_id=(none)");
     setLastReadCursorQuickCopy("focus_user=(none) | resolved_message=(none) | read_state=unknown");
-    setLastReadCursorApplyQuickCopy("target_user=(none) | applied_message=(none) | focus_user=(none) | read_state=unknown");
+    setLastReadCursorApplyQuickCopy(
+      "target_user=(none) | applied_message=(none) | focus_user=(none) | read_state=unknown | read_cursor_apply_state=unknown",
+    );
     setLastFirstUnreadJumpQuickCopy(
       "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown",
     );
@@ -698,11 +700,15 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
         appliedReadState = isRead ? "read" : "unread";
       }
 
+      const priorMemberCursorMessageId =
+        conversationMembers.find((member) => member.user_id === updated.user_id)?.last_read_message_id ?? null;
+      const readCursorApplyState = priorMemberCursorMessageId === updated.last_read_message_id ? "noop" : "updated";
+
       setLastReadCursorApplyQuickCopy(
-        `target_user=${updated.user_id} | applied_message=${normalizedAppliedMessageId} | focus_user=${normalizedFocusUserId || "(none)"} | read_state=${appliedReadState}`,
+        `target_user=${updated.user_id} | applied_message=${normalizedAppliedMessageId} | focus_user=${normalizedFocusUserId || "(none)"} | read_state=${appliedReadState} | read_cursor_apply_state=${readCursorApplyState}`,
       );
 
-      const successStatus = `Updated read cursor for ${updated.user_id} to ${updated.last_read_message_id ?? "(none)"} in thread ${conversation.id}.`;
+      const successStatus = `Updated read cursor for ${updated.user_id} to ${updated.last_read_message_id ?? "(none)"} in thread ${conversation.id} (read_cursor_apply_state=${readCursorApplyState}).`;
       const composedStatus = statusPrefix ? `${statusPrefix} ${successStatus}` : successStatus;
       setStatus(composedStatus);
 

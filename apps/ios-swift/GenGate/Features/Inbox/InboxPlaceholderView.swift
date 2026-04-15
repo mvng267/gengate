@@ -38,7 +38,7 @@ struct InboxPlaceholderView: View {
     @State private var isSendingMessage = false
     @State private var sendStatusHint: String?
     @State private var lastSendQuickCopy: String = "sender=(none) | message_id=(none)"
-    @State private var lastReadCursorApplyQuickCopy: String = "target_user=(none) | applied_message=(none) | focus_user=(none) | read_state=unknown"
+    @State private var lastReadCursorApplyQuickCopy: String = "target_user=(none) | applied_message=(none) | focus_user=(none) | read_state=unknown | read_cursor_apply_state=unknown"
     @State private var lastFirstUnreadJumpQuickCopy: String = "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown"
     @State private var lastFirstUnreadGuardQuickCopy: String = "focus_user=(none) | first_unread_guard_state=unknown | candidate=(none)"
     @State private var isCreatingAttachment = false
@@ -3839,6 +3839,8 @@ use_when=\(useWhenText)
         fetchError = nil
 
         do {
+            let previousMemberCursorMessageID = conversationMembers.first(where: { $0.userID == targetUserID })?.lastReadMessageID
+
             _ = try await InboxAPIClient().updateConversationReadCursor(
                 conversationID: conversationID,
                 userID: targetUserID,
@@ -3857,12 +3859,16 @@ use_when=\(useWhenText)
                 appliedReadState = "unknown"
             }
 
-            lastReadCursorApplyQuickCopy = "target_user=\(targetUserID) | applied_message=\(targetMessageID) | focus_user=\(normalizedFocusUserID) | read_state=\(appliedReadState)"
+            let readCursorApplyState = previousMemberCursorMessageID == targetMessageID ? "noop" : "updated"
+
+            lastReadCursorApplyQuickCopy = "target_user=\(targetUserID) | applied_message=\(targetMessageID) | focus_user=\(normalizedFocusUserID) | read_state=\(appliedReadState) | read_cursor_apply_state=\(readCursorApplyState)"
 
             if sendStatusHint?.contains("read_cursor_first_unread_focus_auto_source=member_row") == true ||
                 sendStatusHint?.contains("read_cursor_first_unread_focus_source=focus_user") == true {
                 lastFirstUnreadJumpQuickCopy = "focus_user=\(normalizedFocusUserID) | first_unread_candidate=\(targetMessageID) | applied_message=\(targetMessageID) | read_state=\(appliedReadState)"
             }
+
+            sendStatusHint = (sendStatusHint.map { "\($0) " } ?? "") + "Read-cursor apply state: \(readCursorApplyState)."
 
             await loadInboxThread()
         } catch {
