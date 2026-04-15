@@ -318,8 +318,18 @@ struct FeedPlaceholderView: View {
                             .foregroundStyle(.secondary)
                             .textSelection(.enabled)
 
+                        Text("Quick feed visibility gate summary: \(quickFeedVisibilityGateSummaryLine)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+
                         Button("Copy quick feed visibility delta") {
                             copyQuickFeedVisibilityDeltaSummary()
+                        }
+                        .buttonStyle(.bordered)
+
+                        Button("Copy quick feed visibility gate summary") {
+                            copyQuickFeedVisibilityGateSummary()
                         }
                         .buttonStyle(.bordered)
                     }
@@ -886,6 +896,23 @@ struct FeedPlaceholderView: View {
         return "viewer=\(normalizedViewer) / feed_count=\(feedCount) / first_moment_id=\(firstMomentID)"
     }
 
+    private var quickFeedVisibilityGateSummaryLine: String {
+        let viewer = viewerUserIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let viewerAccess: String
+
+        if viewer.isEmpty {
+            viewerAccess = "viewer_missing"
+        } else if !momentRows.isEmpty {
+            viewerAccess = "granted"
+        } else {
+            viewerAccess = "empty_or_blocked"
+        }
+
+        let visibleCount = momentRows.count
+        let firstMomentID = momentRows.first?.id ?? "(none)"
+        return "viewer_access=\(viewerAccess) / visible_count=\(visibleCount) / first_moment_id=\(firstMomentID)"
+    }
+
     private var lastCreateFeedVisibilityDeltaCopiedFeedbackText: String? {
         guard let lastCreateFeedVisibilityDeltaCopiedAt else {
             return nil
@@ -1169,6 +1196,26 @@ struct FeedPlaceholderView: View {
         lastCreateFeedVisibilityDeltaCopiedText = normalizedText
         lastCreateFeedVisibilityDeltaCopiedAt = Date()
         statusMessage = "Copied quick feed visibility delta to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyQuickFeedVisibilityGateSummary() {
+        let normalizedText = quickFeedVisibilityGateSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "quick_feed_visibility_gate_summary_empty"
+            return
+        }
+
+        guard copyToClipboard(normalizedText) else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        lastCreateFeedVisibilityDeltaCopiedText = normalizedText
+        lastCreateFeedVisibilityDeltaCopiedAt = Date()
+        statusMessage = "Copied quick feed visibility gate summary to clipboard (\(normalizedText))."
         fetchError = nil
     }
 

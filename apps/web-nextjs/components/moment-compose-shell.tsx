@@ -36,7 +36,13 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [lastCreateFeedVisibilityDeltaLine, setLastCreateFeedVisibilityDeltaLine] = useState<string | null>(null);
   const [lastCopiedFeedVisibilityDeltaLine, setLastCopiedFeedVisibilityDeltaLine] = useState<string | null>(null);
   const momentPayloadQuickCopy = `author=${form.authorUserId.trim() || "(empty)"} | image_url=${form.imageStorageKey.trim() || "(empty)"} | caption=${form.captionText.trim() || "(empty)"}`;
-  const quickFeedVisibilityDeltaLine = `viewer=${form.viewerUserId.trim() || "(empty)"} / feed_count=${feedItems.length} / first_moment_id=${feedItems[0]?.id ?? "(none)"}`;
+  const viewerUserId = form.viewerUserId.trim();
+  const viewerAccess = viewerUserId ? (feedItems.length > 0 ? "granted" : "empty_or_blocked") : "viewer_missing";
+  const quickFeedVisibilityDeltaLine = `viewer=${viewerUserId || "(empty)"} / feed_count=${feedItems.length} / first_moment_id=${feedItems[0]?.id ?? "(none)"}`;
+  const quickFeedVisibilityGateSummaryLine =
+    `viewer_access=${viewerAccess}` +
+    ` / visible_count=${feedItems.length}` +
+    ` / first_moment_id=${feedItems[0]?.id ?? "(none)"}`;
 
   useEffect(() => {
     setForm((current) => ({
@@ -132,6 +138,15 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       "Copied quick feed-visibility delta to clipboard",
       "quick_feed_visibility_delta_empty",
       "quick_feed_visibility_delta_copy_failed",
+    );
+  }
+
+  async function handleCopyQuickFeedVisibilityGateSummary() {
+    await copyToClipboard(
+      quickFeedVisibilityGateSummaryLine,
+      "Copied quick feed-visibility gate summary to clipboard",
+      "quick_feed_visibility_gate_summary_empty",
+      "quick_feed_visibility_gate_summary_copy_failed",
     );
   }
 
@@ -241,8 +256,16 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         Quick feed-visibility delta: <code>{quickFeedVisibilityDeltaLine}</code>
       </p>
       <p>
+        Quick feed visibility gate summary: <code>{quickFeedVisibilityGateSummaryLine}</code>
+      </p>
+      <p>
         <button type="button" onClick={() => void handleCopyQuickFeedVisibilityDelta()}>
           Copy quick feed-visibility delta
+        </button>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickFeedVisibilityGateSummary()}>
+          Copy quick feed visibility gate summary
         </button>
       </p>
       {lastCreateFeedVisibilityDeltaLine ? (
