@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 334
-- Trục công việc: location shell (iOS) — add quick action `Use current session user as owner + load location status` for one-tap owner apply + load parity with web location shell.
-- Trạng thái: batch334_complete_location_ios_session_owner_load_status.
+- Batch workflow chính thức hiện tại: 335
+- Trục công việc: notification shell (web) — add quick action `Use current session user + create notification + load` for one-tap create→load lifecycle smoke path parity.
+- Trạng thái: batch335_complete_notification_web_session_user_create_load_status.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 335 handoff (closed)
+- Batch vừa xong: **335**
+- Commit đã chốt:
+  - `012ebe9` — `batch335: add session-user create-and-load quick action in web notification shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **336**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell (iOS): thêm quick action `Use current session user + create notification + load` để one-tap lifecycle smoke path parity với web.
 
 ## Batch 334 handoff (closed)
 - Batch vừa xong: **334**

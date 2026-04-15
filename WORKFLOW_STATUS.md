@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 334
+- Batch: 335
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 334 location shell (iOS) — add quick action `Use current session user as owner + load location status` for one-tap owner apply + load parity with web location shell.
+- Scope: batch 335 notification shell (web) — add quick action `Use current session user + create notification + load` for one-tap create→load lifecycle smoke path parity.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,15 +16,19 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có đủ state + subject + transition markers.
 - Files:
-  - apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift
+  - apps/web-nextjs/components/notification-shell.tsx
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
 - Git:
-  - latest feature commit: `8c1ee46` — `batch334: add session-owner load quick action in ios location shell`
-  - previous feature commit: `902470c` — `batch333: add session-owner reload quick action in web location shell`
-  - working tree: dirty (doc updates pending commit)
+  - latest feature commit: `012ebe9` — `batch335: add session-user create-and-load quick action in web notification shell`
+  - previous feature commit: `8c1ee46` — `batch334: add session-owner load quick action in ios location shell`
+  - working tree: clean
 - Blocker: none
-- Next: sync workflow docs for batch334 rồi commit doc-sync; sau đó mở batch335 với 1 slice hẹp tiếp theo theo ưu tiên MVP.
+- Next: mở batch336 với 1 slice hẹp notification shell (iOS): thêm quick action `Use current session user + create notification + load` để one-tap lifecycle smoke path parity với web.
+- Batch 335 handoff:
+  - `012ebe9` — `batch335: add session-user create-and-load quick action in web notification shell`
+  - web notification shell thêm one-tap action `Use current session user + create notification + load`; action auto-apply user từ persisted session, create notification, rồi reload page đầu trong cùng thao tác.
+  - giữ guard/status marker rõ ràng cho smoke flow: `session_user_missing_for_quick_apply`, `notification_user_id_required`, `notification_payload_json_invalid`, cùng prefix `user_source=session_user` cho path apply/unchanged.
 - Batch 334 handoff:
   - `8c1ee46` — `batch334: add session-owner load quick action in ios location shell`
   - iOS location shell thêm one-tap action `Use current session user as owner + load location status`; action auto-apply owner theo current session user rồi load snapshot/share/audience counts trong cùng thao tác.

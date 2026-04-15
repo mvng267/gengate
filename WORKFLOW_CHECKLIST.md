@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **334 — location shell (iOS session-owner load quick action) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **335 — notification shell (web session-user create+load quick action) đã complete**.
 
 ## Reporting hard rule
 
@@ -89,21 +89,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **334**
-- Scope hiện tại: location shell (iOS) — thêm quick action `Use current session user as owner + load location status` để one-tap apply owner theo session + load parity với web location shell.
+- Batch workflow chính thức hiện tại: **335**
+- Scope hiện tại: notification shell (web) — thêm quick action `Use current session user + create notification + load` để one-tap create→load lifecycle smoke path parity.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift`
+  - `apps/web-nextjs/components/notification-shell.tsx`
 - Test-verify:
-  - `cd apps/ios-swift && swift build` → ✅
+  - `cd apps/web-nextjs && npm run -s typecheck` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `8c1ee46` — `batch334: add session-owner load quick action in ios location shell`
-  - commit liền trước: `902470c` — `batch333: add session-owner reload quick action in web location shell`
+  - commit gần nhất đã chốt: `012ebe9` — `batch335: add session-user create-and-load quick action in web notification shell`
+  - commit liền trước: `8c1ee46` — `batch334: add session-owner load quick action in ios location shell`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch335 với 1 slice hẹp notification shell (web): thêm quick action `Use current session user + create notification + load` để one-tap lifecycle smoke path.
+  - mở batch336 với 1 slice hẹp notification shell (iOS): thêm quick action `Use current session user + create notification + load` để one-tap lifecycle smoke path parity với web.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`; bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy last copied delete summary feedback`, verify line source-state rồi bấm `Copy delete copy audit for first ready source` để one-shot copy `delete_copy_audit=source:.../value:...`; đối chiếu source được pick với line source-state.
@@ -116,6 +116,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
 
 ## Batch handoff note
+
+- Batch vừa xong: **335**
+- Commit cuối đã chốt:
+  - `012ebe9` — `batch335: add session-user create-and-load quick action in web notification shell`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **336**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell (iOS): thêm quick action `Use current session user + create notification + load` để one-tap lifecycle smoke path parity với web.
+
+---
 
 - Batch vừa xong: **334**
 - Commit cuối đã chốt:
