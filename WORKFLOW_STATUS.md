@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 302
+- Batch: 303
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 302 notification shell — add web+iOS lifecycle-pair state marker (`lifecycle_pair_state=matched|mismatched|missing`) on quick-copy lifecycle line for clearer seam #6 create->toggle chain verification.
+- Scope: batch 303 notification shell — add web+iOS lifecycle-pair subject marker (`lifecycle_pair_subject=same_notification|cross_notification|none`) on quick-copy lifecycle line for clearer seam #6 create->toggle root-cause verification.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -13,8 +13,8 @@
   - iOS Location: nhập owner/share -> `Load location status` -> verify line `Quick location state summary: owner=... / share_id=... / is_active=... / sharing_mode=... / audience_count=... / snapshot_count=...` -> bấm `Copy quick location state summary` và paste kiểm tra payload đúng format.
   - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
-  - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify line có `lifecycle_pair_state=matched`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched`; khi chưa có cặp thì state `missing`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có marker state.
-  - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify line có `lifecycle_pair_state=matched`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched`; khi chưa có cặp thì state `missing`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có marker state.
+  - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có cả state + subject marker.
+  - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none`. Bấm `Copy quick lifecycle pair` và paste kiểm tra payload có cả state + subject marker.
 - Files:
   - apps/web-nextjs/components/notification-shell.tsx
   - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
@@ -22,11 +22,11 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `729d3f4` — `batch302: add lifecycle-pair state markers in notification shell`
-  - previous feature commit: `0db7546` — `batch301: add notification lifecycle-pair quick copy on web and ios`
-  - working tree: clean after batch302 feature + workflow sync commits
+  - latest feature commit: `0d74159` — `batch303: add lifecycle-pair subject markers in notification shell`
+  - previous feature commit: `729d3f4` — `batch302: add lifecycle-pair state markers in notification shell`
+  - working tree: clean after batch303 feature + workflow sync commits
 - Blocker: none
-- Next: mở batch303 với 1 slice hẹp notification shell (web+iOS) — thêm quick-copy lifecycle pair guard marker `lifecycle_pair_subject=same_notification|cross_notification` để tách rõ matched/mismatched root cause.
+- Next: mở batch304 với 1 slice hẹp notification shell (web+iOS) — thêm quick-copy lifecycle pair transition marker `lifecycle_pair_transition=create_read_state->mutation_read_state` để human tester đọc outcome nhanh hơn.
 - Batch 295 handoff:
   - `4e1b033` — `batch295: add friend-graph quick delta copy actions on web and ios`
   - web friend graph shell thêm reject action parity + quick delta summary line + last action delta (`request_id/action/accepted_count/pending_inbound/pending_outbound`) và nút copy.

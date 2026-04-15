@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 302
-- Trục công việc: notification shell — web+iOS add lifecycle-pair state marker `lifecycle_pair_state=matched|mismatched|missing` on quick-copy lifecycle line.
-- Trạng thái: batch302_complete_notification_lifecycle_pair_state_markers_web_ios.
+- Batch workflow chính thức hiện tại: 303
+- Trục công việc: notification shell — web+iOS add lifecycle-pair subject marker `lifecycle_pair_subject=same_notification|cross_notification|none` on quick-copy lifecycle line.
+- Trạng thái: batch303_complete_notification_lifecycle_pair_subject_markers_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,19 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 303 handoff (closed)
+- Batch vừa xong: **303**
+- Commit đã chốt:
+  - `0d74159` — `batch303: add lifecycle-pair subject markers in notification shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **304**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell (web+iOS): thêm transition marker `lifecycle_pair_transition=create_read_state->mutation_read_state` để đọc outcome nhanh hơn.
 
 ## Batch 302 handoff (closed)
 - Batch vừa xong: **302**
