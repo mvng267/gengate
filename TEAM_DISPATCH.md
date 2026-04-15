@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 316
-- Trục công việc: feed shell — web+iOS add source-state readiness line `delete_copy_audit_source_state=...` + copy action cho delete copy audit.
-- Trạng thái: batch316_complete_feed_delete_copy_audit_source_state_web_ios.
+- Batch workflow chính thức hiện tại: 319
+- Trục công việc: feed shell — web+iOS add dedicated quick-copy action for `delete_copy_audit_first_ready_source=...` marker.
+- Trạng thái: batch319_complete_feed_first_ready_source_line_quick_copy_web_ios.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,45 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 319 handoff (closed)
+- Batch vừa xong: **319**
+- Commit đã chốt:
+  - `f876528` — `batch319: add first-ready source-line quick copy on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **320**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell (web+iOS): thêm source-state aggregate `ready_count=<n>/total=<n>` để QA scan nhanh mức readiness trước one-shot copy.
+
+## Batch 318 handoff (closed)
+- Batch vừa xong: **318**
+- Commit đã chốt:
+  - `84ab5b2` — `batch318: add first-ready source marker for delete copy audit on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **319**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell (web+iOS): thêm quick-copy action riêng cho line `delete_copy_audit_first_ready_source=...` để QA copy marker trực tiếp khi report.
+
+## Batch 317 handoff (closed)
+- Batch vừa xong: **317**
+- Commit đã chốt:
+  - `74162dd` — `batch317: add first-ready delete copy audit quick action on web and ios`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **318**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - feed shell (web+iOS): thêm status marker `delete_copy_audit_first_ready_source=<source|none>` khi chạy one-shot action để QA thấy rõ source đã auto-pick.
 
 ## Batch 316 handoff (closed)
 - Batch vừa xong: **316**
