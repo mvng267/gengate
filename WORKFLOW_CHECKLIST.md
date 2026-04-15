@@ -89,22 +89,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **287**
-- Scope hiện tại: direct-message shell — thêm one-tap quick-copy triage line `read_cursor_triage=...` để report compact previous/applied/current/apply_state trên web+iOS.
+- Batch workflow chính thức hiện tại: **288**
+- Scope hiện tại: direct-message shell — thêm one-tap preset `Use focus user + first unread candidate` trên iOS để auto-fill target user/message theo focus context trước jump/mark flow.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/components/direct-message-shell.tsx`
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run -s typecheck` → ✅
   - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `6593ba2` — `batch287: add read-cursor triage quick-copy line on web and ios`
+  - commit gần nhất đã chốt: `1de4e8d` — `batch288: add ios focus-user first-unread preset action`
   - working tree hiện tại: sạch
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch288 với 1 slice hẹp direct-message shell: thêm one-tap preset `apply focus user + first unread candidate` trên iOS parity với web jump action status-copy flow.
+  - mở batch289 với 1 slice hẹp notification shell: hiển thị quick unread summary line (`current_page_unread / total_unread_count`) trên iOS để parity scan nhanh với web/backend payload.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed: bấm quick action `Use current session user as viewer + load` -> verify status `viewer_source=session_user` + feed reload.
@@ -112,6 +110,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> bấm `Use current session user as read-cursor target + read focus` -> bấm `Mark latest message as read (focus user)` -> verify status hint có `read_cursor_user_source=session_user` -> bấm `Copy quick read-cursor apply result` -> paste và verify `target_user=... | applied_message=... | focus_user=... | read_state=...`.
 
 ## Batch handoff note
+
+- Batch vừa xong: **288**
+- Commit cuối đã chốt:
+  - `1de4e8d` — `batch288: add ios focus-user first-unread preset action`
+- Test-verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **289**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: hiển thị quick unread summary line (`current_page_unread / total_unread_count`) trên iOS để parity scan nhanh với web/backend payload.
+
+---
 
 - Batch vừa xong: **287**
 - Commit cuối đã chốt:

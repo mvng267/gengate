@@ -12,9 +12,9 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 287
-- Trục công việc: direct-message shell — web+iOS add one-tap read-cursor triage quick-copy (`read_cursor_triage=...`) for compact parity reporting.
-- Trạng thái: batch287_complete_dm_read_cursor_triage_quick_copy_web_ios.
+- Batch workflow chính thức hiện tại: 288
+- Trục công việc: direct-message shell — iOS add one-tap preset `Use focus user + first unread candidate` to auto-fill read-cursor target user/message before jump/mark flow.
+- Trạng thái: batch288_complete_ios_focus_user_first_unread_preset.
 
 ## Batch 235 handoff (closed)
 - Batch vừa xong: **235**
@@ -52,6 +52,18 @@
 - Batch kế tiếp: **238**
 - Scope hẹp đầu tiên của batch kế tiếp:
   - notification shell: unread summary/count parity để client có tổng unread trực tiếp từ backend.
+
+## Batch 288 handoff (closed)
+- Batch vừa xong: **288**
+- Commit đã chốt:
+  - `1de4e8d` — `batch288: add ios focus-user first-unread preset action`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **289**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notification shell: hiển thị quick unread summary line (`current_page_unread / total_unread_count`) trên iOS để parity scan nhanh với web/backend payload.
 
 ## Batch 287 handoff (closed)
 - Batch vừa xong: **287**

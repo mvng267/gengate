@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 287
+- Batch: 288
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 287 direct-message shell — add one-tap read-cursor triage line quick-copy (`read_cursor_triage=...`) so previous/applied/current/apply_state can be pasted in one compact tokenized line on web+iOS.
+- Scope: batch 288 direct-message shell — add iOS one-tap preset to apply focus user + first unread candidate into read-cursor target fields before jump/mark flow.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -11,16 +11,17 @@
   - Web Inbox (`/inbox`): nhập user A/B -> `Open direct thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload dạng `read_cursor_triage=target_user:...,previous:...,applied:...,current:...,apply_state:...`.
   - iOS Inbox: nhập User A/B -> `Load inbox thread` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
 - Files:
-  - apps/web-nextjs/components/direct-message-shell.tsx
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `6593ba2` — `batch287: add read-cursor triage quick-copy line on web and ios`
-  - working tree: clean after batch287 commit
+  - latest feature commit: `1de4e8d` — `batch288: add ios focus-user first-unread preset action`
+  - working tree: clean after batch288 commit
 - Blocker: none
-- Next: mở batch288 với 1 slice hẹp direct-message shell: thêm one-tap preset `apply focus user + first unread candidate` trên iOS parity với web jump action status-copy flow.
+- Next: mở batch289 với 1 slice hẹp notification shell: hiển thị quick unread summary line (`current_page_unread / total_unread_count`) trên iOS để parity scan nhanh với web/backend payload.
+- Batch 288 handoff:
+  - `1de4e8d` — `batch288: add ios focus-user first-unread preset action`
+  - iOS read-cursor form thêm one-tap preset `Use focus user + first unread candidate` để auto-fill target user/message theo focus context trước khi jump/mark flow.
 - Batch 287 handoff:
   - `6593ba2` — `batch287: add read-cursor triage quick-copy line on web and ios`
   - web/iOS thêm quick-copy triage line `read_cursor_triage=...` và nút copy riêng để report parity ngắn gọn.
