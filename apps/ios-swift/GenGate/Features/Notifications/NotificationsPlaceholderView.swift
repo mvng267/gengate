@@ -25,6 +25,8 @@ struct NotificationsPlaceholderView: View {
     @State private var lastLoadedWindow: NotificationLoadWindow?
     @State private var quickUnreadSummaryCopiedAt: Date?
     @State private var lastQuickUnreadSummaryCopiedText: String = ""
+    @State private var quickPageMetaCopiedAt: Date?
+    @State private var lastQuickPageMetaCopiedText: String = ""
 
     var body: some View {
         ScrollView {
@@ -260,6 +262,21 @@ struct NotificationsPlaceholderView: View {
                         Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount) · Limit: \(listMeta.limit) · Offset: \(listMeta.offset) · Filter mode: \(listMeta.unreadOnly ? "Unread only" : "All notifications")")
                             .font(.footnote.monospaced())
                             .foregroundStyle(.secondary)
+
+                        Text("Quick page meta: \(quickPageMetaLine)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+
+                        Button("Copy quick page meta") {
+                            copyQuickPageMetaLine()
+                        }
+                        .buttonStyle(.bordered)
+
+                        if let quickPageMetaCopiedFeedbackText {
+                            Text(quickPageMetaCopiedFeedbackText)
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
 
@@ -391,6 +408,27 @@ struct NotificationsPlaceholderView: View {
         }
 
         return "Copied quick unread summary (\(Int(elapsed))s ago): \(lastQuickUnreadSummaryCopiedText)"
+    }
+
+    private var quickPageMetaLine: String {
+        guard let listMeta else {
+            return "count=(none) / unread_count=(none) / total_unread_count=(none) / limit=(none) / offset=(none) / filter_mode=(none)"
+        }
+
+        return "count=\(listMeta.count) / unread_count=\(listMeta.unreadCount) / total_unread_count=\(listMeta.totalUnreadCount) / limit=\(listMeta.limit) / offset=\(listMeta.offset) / filter_mode=\(listMeta.unreadOnly ? "unread_only" : "all")"
+    }
+
+    private var quickPageMetaCopiedFeedbackText: String? {
+        guard let quickPageMetaCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(quickPageMetaCopiedAt)
+        guard elapsed >= 0, elapsed < 6 else {
+            return nil
+        }
+
+        return "Copied quick page meta (\(Int(elapsed))s ago): \(lastQuickPageMetaCopiedText)"
     }
 
     private func prefillFromCurrentSessionUserIfNeeded() {
@@ -550,6 +588,19 @@ struct NotificationsPlaceholderView: View {
         lastQuickUnreadSummaryCopiedText = normalizedText
         quickUnreadSummaryCopiedAt = Date()
         statusMessage = "Copied quick unread summary to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyQuickPageMetaLine() {
+        let normalizedText = quickPageMetaLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        lastQuickPageMetaCopiedText = normalizedText
+        quickPageMetaCopiedAt = Date()
+        statusMessage = "Copied quick page meta to clipboard (\(normalizedText))."
         fetchError = nil
     }
 
