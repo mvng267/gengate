@@ -56,7 +56,7 @@
 ## Batch 312 handoff (closed)
 - Batch vừa xong: **312**
 - Commit đã chốt:
-  - `4f2b50c` — `batch312: add copied-delete-summary feedback quick copy on web and ios`
+  - `29edaca` — `batch312: add copied-delete-summary feedback quick copy on web and ios`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅

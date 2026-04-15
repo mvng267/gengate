@@ -22,7 +22,7 @@
   - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `4f2b50c` — `batch312: add copied-delete-summary feedback quick copy on web and ios`
+  - latest feature commit: `29edaca` — `batch312: add copied-delete-summary feedback quick copy on web and ios`
   - previous feature commit: `ea67e22` — `batch311: add delete snapshot source markers on web and ios`
   - working tree: clean after batch312 feature + workflow sync commits
 - Blocker: none
