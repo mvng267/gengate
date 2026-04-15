@@ -60,6 +60,14 @@ struct ProfilePlaceholderView: View {
                     .buttonStyle(.bordered)
                     .disabled(currentSessionUserID == nil)
 
+                    Button("Use current session user as receiver + send friend request") {
+                        Task {
+                            await applyCurrentSessionUserAsReceiverAndSendFriendRequest()
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(currentSessionUserID == nil || isLoading || isCreatingRequest)
+
                     Button {
                         Task {
                             await loadFriendGraph()
@@ -467,6 +475,50 @@ struct ProfilePlaceholderView: View {
         await loadFriendGraph(
             statusMessage: "Applied current session user as requester (requester_source=session_user). Reloading friend graph snapshot..."
         )
+    }
+
+    private func applyCurrentSessionUserAsReceiverAndSendFriendRequest() async {
+        guard let currentSessionUserID else {
+            statusMessage = nil
+            fetchError = "session_receiver_missing_for_quick_apply"
+            return
+        }
+
+        let trimmedSessionUserID = currentSessionUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let requesterUserID = userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !requesterUserID.isEmpty else {
+            statusMessage = nil
+            fetchError = "friend_request_requester_missing_for_quick_send"
+            return
+        }
+
+        guard requesterUserID != trimmedSessionUserID else {
+            statusMessage = nil
+            fetchError = "friend_request_invalid_request code=invalid_request detail=requester và receiver phải khác nhau"
+            return
+        }
+
+        receiverUserIDDraft = trimmedSessionUserID
+
+        isCreatingRequest = true
+        statusMessage = "Applied current session user as receiver (receiver_source=session_user). Sending friend request..."
+        fetchError = nil
+
+        do {
+            try await FriendGraphAPIClient().createFriendRequest(
+                requesterUserID: requesterUserID,
+                receiverUserID: trimmedSessionUserID
+            )
+            await loadFriendGraph(
+                statusMessage: "Applied current session user as receiver (receiver_source=session_user). Friend request created. Reloading friend graph..."
+            )
+            lastFriendGraphActionDeltaLine = nil
+        } catch {
+            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+
+        isCreatingRequest = false
     }
 
     private func applyFriendGraphDeltaLine(requestID: String, action: String, snapshot: FriendGraphSnapshot) {
