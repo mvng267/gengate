@@ -35,6 +35,7 @@ struct FeedPlaceholderView: View {
     @State private var deleteCopyAuditSourceDraft: String = "quick_delete_parity"
     @State private var lastDeleteCopyAuditLine: String?
     @State private var lastDeleteCopyAuditFirstReadySourceLine: String?
+    @State private var lastDeleteCopyAuditSourceStateSnapshotLine: String?
     @State private var isLoading = false
     @State private var isLoadingAuthoredMoments = false
     @State private var isCreatingMoment = false
@@ -410,6 +411,11 @@ struct FeedPlaceholderView: View {
                         .textSelection(.enabled)
 
                     Text("Delete copy audit first-ready source: \(lastDeleteCopyAuditFirstReadySourceLine ?? "delete_copy_audit_first_ready_source=(not_run)")")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+
+                    Text("Last source-state snapshot: \(lastDeleteCopyAuditSourceStateSnapshotLine ?? "last_source_state_snapshot=(not_run)")")
                         .font(.footnote.monospaced())
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
@@ -1589,6 +1595,7 @@ struct FeedPlaceholderView: View {
             return
         }
 
+        lastDeleteCopyAuditSourceStateSnapshotLine = "last_source_state_snapshot=\(normalizedText)"
         statusMessage = "Copied delete copy audit source-state snapshot line to clipboard (\(normalizedText))."
         fetchError = nil
     }

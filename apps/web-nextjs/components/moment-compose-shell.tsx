@@ -57,6 +57,8 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [lastCopiedDeleteSummaryLine, setLastCopiedDeleteSummaryLine] = useState<string | null>(null);
   const [lastDeleteCopyAuditLine, setLastDeleteCopyAuditLine] = useState<string | null>(null);
   const [lastDeleteCopyAuditFirstReadySourceLine, setLastDeleteCopyAuditFirstReadySourceLine] = useState<string | null>(null);
+  const [lastDeleteCopyAuditSourceStateSnapshotLine, setLastDeleteCopyAuditSourceStateSnapshotLine] =
+    useState<string | null>(null);
   const [deleteCopyAuditSourceDraft, setDeleteCopyAuditSourceDraft] = useState<DeleteSummaryCopySource>("quick_delete_parity");
   const [feedVisibilityGateSnapshotSource, setFeedVisibilityGateSnapshotSource] =
     useState<FeedGateSnapshotSource>("reload_flow");
@@ -335,6 +337,9 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       "Copied delete copy audit source-state snapshot line to clipboard",
       "delete_copy_audit_source_state_missing",
       "delete_copy_audit_source_state_snapshot_copy_failed",
+      (normalizedText) => {
+        setLastDeleteCopyAuditSourceStateSnapshotLine(`last_source_state_snapshot=${normalizedText}`);
+      },
     );
   }
 
@@ -591,6 +596,10 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       <p>
         Delete copy audit first-ready source:{" "}
         <code>{lastDeleteCopyAuditFirstReadySourceLine ?? "delete_copy_audit_first_ready_source=(not_run)"}</code>
+      </p>
+      <p>
+        Last source-state snapshot:{" "}
+        <code>{lastDeleteCopyAuditSourceStateSnapshotLine ?? "last_source_state_snapshot=(not_run)"}</code>
       </p>
       <p>
         <button type="button" onClick={() => void handleCopyDeleteCopyAuditSourceStateLine()}>
