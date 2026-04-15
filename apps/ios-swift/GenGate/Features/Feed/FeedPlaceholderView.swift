@@ -1340,7 +1340,7 @@ struct FeedPlaceholderView: View {
 
         lastDeleteSummaryCopiedText = normalizedText
         lastDeleteSummaryCopiedAt = Date()
-        statusMessage = "Copied quick delete parity summary to clipboard (\(normalizedText))."
+        statusMessage = "Copied quick delete parity summary to clipboard (delete_summary_copy_source=quick_delete_parity / \(normalizedText))."
         fetchError = nil
     }
 
@@ -1366,7 +1366,7 @@ struct FeedPlaceholderView: View {
 
         lastDeleteSummaryCopiedText = normalizedText
         lastDeleteSummaryCopiedAt = Date()
-        statusMessage = "Copied last delete result summary to clipboard (\(normalizedText))."
+        statusMessage = "Copied last delete result summary to clipboard (delete_summary_copy_source=last_delete_result / \(normalizedText))."
         fetchError = nil
     }
 
@@ -1390,7 +1390,7 @@ struct FeedPlaceholderView: View {
             return
         }
 
-        statusMessage = "Copied copied delete summary feedback to clipboard (\(normalizedText))."
+        statusMessage = "Copied copied delete summary feedback to clipboard (delete_summary_copy_source=copied_feedback / \(normalizedText))."
         fetchError = nil
     }
 

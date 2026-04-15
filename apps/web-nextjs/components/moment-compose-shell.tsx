@@ -18,6 +18,7 @@ type MomentComposeShellProps = {
 
 type FeedGateSnapshotSource = "create_flow" | "reload_flow";
 type DeleteSnapshotSource = "manual_input" | "preset_row" | "first_authored_quick_pick";
+type DeleteSummaryCopySource = "quick_delete_parity" | "last_delete_result" | "copied_feedback";
 
 const initialForm = {
   authorUserId: "",
@@ -171,6 +172,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     emptyCode: string,
     failedCode: string,
     onCopied?: (normalizedText: string) => void,
+    successSource?: DeleteSummaryCopySource,
   ) {
     const normalizedText = text.trim();
     if (!normalizedText) {
@@ -186,7 +188,11 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     try {
       await navigator.clipboard.writeText(normalizedText);
       onCopied?.(normalizedText);
-      setStatus(`${statusPrefix} (${normalizedText}).`);
+      setStatus(
+        successSource
+          ? `${statusPrefix} (delete_summary_copy_source=${successSource} / ${normalizedText}).`
+          : `${statusPrefix} (${normalizedText}).`,
+      );
     } catch {
       setStatus(failedCode);
     }
@@ -229,6 +235,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       "quick_delete_parity_summary_empty",
       "quick_delete_parity_summary_copy_failed",
       setLastCopiedDeleteSummaryLine,
+      "quick_delete_parity",
     );
   }
 
@@ -239,6 +246,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       "last_delete_result_summary_missing",
       "last_delete_result_summary_copy_failed",
       setLastCopiedDeleteSummaryLine,
+      "last_delete_result",
     );
   }
 
@@ -248,6 +256,8 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       "Copied last copied delete summary feedback to clipboard",
       "last_copied_delete_summary_missing",
       "last_copied_delete_summary_copy_failed",
+      undefined,
+      "copied_feedback",
     );
   }
 
