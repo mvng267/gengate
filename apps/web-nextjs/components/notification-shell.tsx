@@ -115,6 +115,16 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     ? `count=${listMeta.count} / unread_count=${listMeta.unread_count} / total_unread_count=${listMeta.total_unread_count} / limit=${pagination.limit} / offset=${pagination.offset} / filter_mode=${pagination.unreadOnly ? "unread_only" : "all"}`
     : "count=(none) / unread_count=(none) / total_unread_count=(none) / limit=(none) / offset=(none) / filter_mode=(none)";
 
+  const cursorWindow = lastLoadedWindow ?? currentLoadWindow();
+  const quickPageCursorSummaryLine =
+    `user_id=${cursorWindow.userId || "(empty)"}` +
+    ` / limit=${cursorWindow.limit}` +
+    ` / offset=${cursorWindow.offset}` +
+    ` / filter_mode=${cursorWindow.unreadOnly ? "unread_only" : "all"}` +
+    ` / count=${listMeta ? listMeta.count : "(none)"}` +
+    ` / unread_count=${listMeta ? listMeta.unread_count : "(none)"}` +
+    ` / total_unread_count=${listMeta ? listMeta.total_unread_count : "(none)"}`;
+
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsCreating(true);
@@ -193,6 +203,15 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     );
   }
 
+  async function handleCopyQuickPageCursorSummary() {
+    await copyToClipboard(
+      quickPageCursorSummaryLine,
+      "Copied quick page cursor summary to clipboard",
+      "quick_page_cursor_summary_empty",
+      "quick_page_cursor_summary_copy_failed",
+    );
+  }
+
   return (
     <section>
       <p>
@@ -214,6 +233,14 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       <p>
         <button type="button" onClick={() => void handleCopyQuickPageMeta()}>
           Copy quick page meta
+        </button>
+      </p>
+      <p>
+        Quick page cursor summary: <code>{quickPageCursorSummaryLine}</code>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickPageCursorSummary()}>
+          Copy quick page cursor summary
         </button>
       </p>
       <p>Filter mode: {pagination.unreadOnly ? "Unread only" : "All notifications"}</p>

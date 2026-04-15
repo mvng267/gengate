@@ -27,6 +27,8 @@ struct NotificationsPlaceholderView: View {
     @State private var lastQuickUnreadSummaryCopiedText: String = ""
     @State private var quickPageMetaCopiedAt: Date?
     @State private var lastQuickPageMetaCopiedText: String = ""
+    @State private var quickPageCursorSummaryCopiedAt: Date?
+    @State private var lastQuickPageCursorSummaryCopiedText: String = ""
 
     var body: some View {
         ScrollView {
@@ -34,11 +36,12 @@ struct NotificationsPlaceholderView: View {
                 FeaturePlaceholderView(
                     title: "Notifications",
                     summary: "iOS native notification center shell now supports create + read/unread mutation so notification flow can be exercised end-to-end from native UI.",
-                    status: "Status: native notification center now supports create + read/unread toggles + quick unread summary line; delete remains intentionally out of scope for this slice.",
+                    status: "Status: native notification center now supports create + read/unread toggles + quick unread summary + quick page cursor summary lines; delete remains intentionally out of scope for this slice.",
                     bullets: [
                         "Paste a backend user UUID to create and load notifications for that user.",
                         "This shell can create via `POST /notifications`, then read `/notifications/{user_id}` and toggle each row via `/notifications/{id}/read` + `/notifications/{id}/unread`.",
                         "Quick unread summary line (`current_page_unread / total_unread_count`) helps parity scan quickly with backend/web payloads.",
+                        "Quick page cursor summary line (`user_id/limit/offset/filter_mode/count/unread_count/total_unread_count`) helps verify paging/filter window quickly.",
                         "Use this tab to run minimal notification lifecycle checks from iOS without relying on web seeding first."
                     ]
                 )
@@ -258,6 +261,21 @@ struct NotificationsPlaceholderView: View {
                             .foregroundStyle(.secondary)
                     }
 
+                    Text("Quick page cursor summary: \(quickPageCursorSummaryLine)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+
+                    Button("Copy quick page cursor summary") {
+                        copyQuickPageCursorSummaryLine()
+                    }
+                    .buttonStyle(.bordered)
+
+                    if let quickPageCursorSummaryCopiedFeedbackText {
+                        Text(quickPageCursorSummaryCopiedFeedbackText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     if let listMeta {
                         Text("Page count: \(listMeta.count) · Page unread: \(listMeta.unreadCount) · Total unread: \(listMeta.totalUnreadCount) · Limit: \(listMeta.limit) · Offset: \(listMeta.offset) · Filter mode: \(listMeta.unreadOnly ? "Unread only" : "All notifications")")
                             .font(.footnote.monospaced())
@@ -431,6 +449,34 @@ struct NotificationsPlaceholderView: View {
         return "Copied quick page meta (\(Int(elapsed))s ago): \(lastQuickPageMetaCopiedText)"
     }
 
+    private var quickPageCursorSummaryLine: String {
+        let cursorWindow = lastLoadedWindow ?? NotificationLoadWindow(
+            userID: userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines),
+            limit: normalizedLimit,
+            offset: normalizedOffset,
+            unreadOnly: pageUnreadOnly
+        )
+
+        let countText = listMeta.map { String($0.count) } ?? "(none)"
+        let unreadCountText = listMeta.map { String($0.unreadCount) } ?? "(none)"
+        let totalUnreadCountText = listMeta.map { String($0.totalUnreadCount) } ?? "(none)"
+
+        return "user_id=\(cursorWindow.userID.isEmpty ? "(empty)" : cursorWindow.userID) / limit=\(cursorWindow.limit) / offset=\(cursorWindow.offset) / filter_mode=\(cursorWindow.unreadOnly ? "unread_only" : "all") / count=\(countText) / unread_count=\(unreadCountText) / total_unread_count=\(totalUnreadCountText)"
+    }
+
+    private var quickPageCursorSummaryCopiedFeedbackText: String? {
+        guard let quickPageCursorSummaryCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(quickPageCursorSummaryCopiedAt)
+        guard elapsed >= 0, elapsed < 6 else {
+            return nil
+        }
+
+        return "Copied quick page cursor summary (\(Int(elapsed))s ago): \(lastQuickPageCursorSummaryCopiedText)"
+    }
+
     private func prefillFromCurrentSessionUserIfNeeded() {
         guard userIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let currentSessionUserID else {
@@ -601,6 +647,19 @@ struct NotificationsPlaceholderView: View {
         lastQuickPageMetaCopiedText = normalizedText
         quickPageMetaCopiedAt = Date()
         statusMessage = "Copied quick page meta to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyQuickPageCursorSummaryLine() {
+        let normalizedText = quickPageCursorSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        lastQuickPageCursorSummaryCopiedText = normalizedText
+        quickPageCursorSummaryCopiedAt = Date()
+        statusMessage = "Copied quick page cursor summary to clipboard (\(normalizedText))."
         fetchError = nil
     }
 
