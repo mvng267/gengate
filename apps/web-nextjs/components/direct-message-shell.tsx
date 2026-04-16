@@ -1299,6 +1299,10 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
             const fallbackUserId = directConversation.member_user_ids[0]?.trim() ?? "";
             const listContextUserId = form.userAId.trim() || currentSessionUserId.trim() || fallbackUserId;
             const peerUserId = derivePeerUserIdFromConversation(directConversation.member_user_ids, listContextUserId);
+            const latestMessageSummary =
+              directConversation.latest_message_id && directConversation.latest_message_sender_user_id
+                ? `${directConversation.latest_message_sender_user_id}: ${directConversation.latest_message_preview ?? ""}`
+                : "(no messages yet)";
 
             return (
               <li key={directConversation.id}>
@@ -1306,6 +1310,14 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
                 {" · members: "}
                 {directConversation.member_user_ids.join(", ")}
                 {listContextUserId && peerUserId ? <span>{` · pair_hint: ${listContextUserId} ↔ ${peerUserId}`}</span> : null}
+                <div>
+                  latest_message_id: <code>{directConversation.latest_message_id ?? "(none)"}</code>
+                  {" · "}
+                  latest_activity_at: <code>{directConversation.latest_message_created_at ?? "(none)"}</code>
+                </div>
+                <div>
+                  latest_message_preview: <code>{latestMessageSummary || "(empty)"}</code>
+                </div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <button
                     type="button"

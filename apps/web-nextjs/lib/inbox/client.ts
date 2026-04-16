@@ -4,6 +4,10 @@ export type DirectConversation = {
   id: string;
   conversation_type: string;
   member_user_ids: string[];
+  latest_message_id: string | null;
+  latest_message_sender_user_id: string | null;
+  latest_message_preview: string | null;
+  latest_message_created_at: string | null;
 };
 
 export type MessageItem = {
