@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 378
+- Batch: 382
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 378 backend moments/private-feed seam — include viewer’s own moments in `GET /moments/feed?viewer_user_id=...` alongside accepted-friend moments to match real private feed expectation.
+- Scope: batch 382 iOS DM inbox list triage polish — harden latest-message sender/preview fallback markers for direct thread list rows.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,21 +16,31 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/backend-python/app/services/moments.py
-  - apps/backend-python/tests/test_moments_api.py
+  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py -k "private_friend_feed"` ✅ (1 passed, 3 deselected)
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` ✅ (4 passed)
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `6198903` — `batch377: sync workflow docs after ios pending filter slice`
-  - working tree: dirty (apps/backend-python/app/services/moments.py, apps/backend-python/tests/test_moments_api.py)
+  - latest feature commit: `4ba402b` — `batch382: harden ios inbox latest-message preview fallback`
+  - working tree: dirty (WORKFLOW_STATUS.md, WORKFLOW_CHECKLIST.md, TEAM_DISPATCH.md)
 - Blocker: none
-- Next: mở batch379 với 1 slice hẹp kế tiếp theo seam ưu tiên còn lại (moments/feed/DM/location/notifications), tránh metadata-only churn.
-- Batch 378 handoff:
-  - commit: pending (current run, not committed yet)
-  - Added viewer-self inclusion in backend private feed service: `list_private_feed(...)` now returns moments authored by viewer + accepted friends, while still excluding non-friend authors.
-  - Updated backend regression test to assert feed returns exactly viewer-own + accepted-friend moments and excludes stranger moments.
-  - Verify pass: backend focused + full moments API test file.
+- Next: open batch383 with one narrow seam outside DM polish (prefer location/notifications parity hardening) to keep MVP breadth moving.
+- Batch 382 handoff:
+  - commit: `4ba402b` — `batch382: harden ios inbox latest-message preview fallback`
+  - Updated iOS inbox direct-list latest-message summary renderer to use explicit fallback markers when sender/preview data is empty (`(sender_missing)` / `(preview_empty)`) while still preserving `(no messages yet)` when no latest message exists.
+  - Verify pass: iOS `swift build`.
+- Batch 381 handoff:
+  - commit: `9d4170c` — `batch381: show latest-message summary in ios inbox direct list`
+  - Extended iOS inbox direct-conversation contract decode + summary model with latest-message fields, and rendered row-level latest id/activity/preview marker in user direct thread list.
+  - Verify pass: iOS `swift build`.
+- Batch 380 handoff:
+  - commit: `2b5e7ff` — `batch380: show latest-message summary in web inbox direct list`
+  - Extended web inbox direct-conversation contract type and UI list row to render `latest_message_id`, `latest_message_created_at`, and `latest_message_preview` summary from backend list endpoint.
+  - Verify pass: web typecheck.
+- Batch 379 handoff:
+  - commit: `cc9fc8a` — `batch379: include latest-message summary in direct conversation list`
+  - Added latest message summary fields (`latest_message_id`, `latest_message_sender_user_id`, `latest_message_preview`, `latest_message_created_at`) into `GET /conversations/direct?user_id=...` response.
+  - Updated regression test to assert direct-conversation list returns message summary for active thread and null summary for no-message thread.
+  - Verify pass: backend focused + full conversations API test file.
 - Batch 377 handoff:
   - `3038b81` — `batch377: use backend pending-status filter in ios friend graph snapshot`
   - Updated iOS friend graph snapshot fetch to call `GET /friends/requests?user_id=...&status=pending` instead of loading all statuses.

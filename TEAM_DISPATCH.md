@@ -12,14 +12,50 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 378
-- Trục công việc: backend moments/private-feed seam — include viewer-owned moments trong `GET /moments/feed?viewer_user_id=...` cùng accepted-friend moments để feed shell khớp behavior product.
-- Trạng thái: batch378_complete_backend_private_feed_include_viewer_own_moments.
+- Batch workflow chính thức hiện tại: 382
+- Trục công việc: iOS DM inbox list triage polish — harden latest-message sender/preview fallback markers from direct thread list (`GET /conversations/direct?user_id=...`).
+- Trạng thái: batch382_complete_ios_inbox_latest_message_fallback_markers.
+
+## Batch 382 handoff (closed)
+- Batch vừa xong: **382**
+- Commit đã chốt:
+  - `4ba402b` — `batch382: harden ios inbox latest-message preview fallback`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **383**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chọn 1 slice hẹp ngoài DM polish để tăng MVP breadth (ưu tiên location/notifications parity hardening).
+
+## Batch 381 handoff (closed)
+- Batch vừa xong: **381**
+- Commit đã chốt:
+  - `9d4170c` — `batch381: show latest-message summary in ios inbox direct list`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **382**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - giữ 1 seam DM hẹp để parity polish (timestamp/preview guard parity web+iOS trong inbox direct list) trước khi quay sang seam MVP tiếp theo.
+
+## Batch 380 handoff (closed)
+- Batch vừa xong: **380**
+- Commit đã chốt:
+  - `2b5e7ff` — `batch380: show latest-message summary in web inbox direct list`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` ✅ (`TYPECHECK_OK`)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **381**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS inbox shell hiển thị latest-message summary fields (`id/created_at/preview`) từ `GET /conversations/direct?user_id=...` để parity với web batch380.
 
 ## Batch 378 handoff (closed)
 - Batch vừa xong: **378**
 - Commit đã chốt:
-  - pending (current run, chưa commit)
+  - `70ca5e9` — `batch378: include viewer-owned moments in private feed`
 - Test/verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py -k "private_friend_feed"` ✅ (1 passed, 3 deselected)
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` ✅ (4 passed)
@@ -27,7 +63,7 @@
   - none
 - Batch kế tiếp: **379**
 - Scope hẹp đầu tiên của batch kế tiếp:
-  - chọn 1 slice hẹp theo seam ưu tiên còn lại (moments/feed/DM/location/notifications), tránh metadata-only churn.
+  - backend DM conversation-list parity: include latest-message summary fields để inbox list không cần fetch phụ từng row.
 
 ## Batch 377 handoff (closed)
 - Batch vừa xong: **377**

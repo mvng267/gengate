@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **378 — backend private feed now includes viewer-owned moments alongside accepted-friend moments (`GET /moments/feed?viewer_user_id=...`)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **382 — iOS inbox shell now hardens latest-message sender/preview fallback markers in direct-thread list triage.**
 
 ## Reporting hard rule
 
@@ -89,22 +89,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **378**
-- Scope hiện tại: backend moments/private-feed seam — include viewer-owned moments in `GET /moments/feed?viewer_user_id=...` cùng accepted-friend moments để feed shell khớp kỳ vọng product.
+- Batch workflow chính thức hiện tại: **382**
+- Scope hiện tại: iOS DM inbox list triage polish — chuẩn hoá fallback marker cho latest-message sender/preview (`(sender_missing)` / `(preview_empty)` / `(no messages yet)`).
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/backend-python/app/services/moments.py`
-  - `apps/backend-python/tests/test_moments_api.py`
+  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
 - Test-verify:
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py -k "private_friend_feed"` → ✅ (1 passed, 3 deselected)
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` → ✅ (4 passed)
+  - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `6198903` — `batch377: sync workflow docs after ios pending filter slice`
-  - working tree hiện tại: dirty (apps/backend-python/app/services/moments.py, apps/backend-python/tests/test_moments_api.py)
+  - commit gần nhất đã chốt: `4ba402b` — `batch382: harden ios inbox latest-message preview fallback`
+  - working tree hiện tại: dirty (workflow docs đang sync trong run hiện tại)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch379 với đúng 1 slice hẹp theo seam ưu tiên còn lại (moments/feed/DM/location/notifications), tránh metadata-only churn.
+  - mở batch383 với đúng 1 slice hẹp ngoài DM polish (ưu tiên location/notifications parity hardening) để mở rộng MVP seam breadth.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Quick create + feed-gate bundle: moment_create_marker={author=... | image_url=... | caption=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` + line `Last create + feed-gate bundle: last_create_feed_visibility_delta={created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Bấm `Copy quick create + feed-gate bundle` để verify one-tap create bundle payload và bấm thêm `Copy last create + feed-gate bundle` để verify deterministic payload bundle cho lần create gần nhất; sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`; bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy last copied delete summary feedback`, verify line source-state rồi bấm `Copy delete copy audit for first ready source` để one-shot copy `delete_copy_audit=source:.../value:...`; đối chiếu source được pick với line source-state.
@@ -118,18 +116,60 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Batch handoff note
 
-- Batch vừa xong: **378**
+- Batch vừa xong: **382**
 - Commit cuối đã chốt:
-  - pending (current run, chưa commit)
+  - `4ba402b` — `batch382: harden ios inbox latest-message preview fallback`
 - Test-verify cuối:
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py -k "private_friend_feed"` → pass
-  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
   - none
 - Batch kế tiếp:
-  - **379**
+  - **383**
 - Scope hẹp đầu tiên của batch kế tiếp:
-  - chọn 1 slice hẹp theo seam ưu tiên còn lại (moments/feed/DM/location/notifications), tránh metadata-only churn.
+  - chọn 1 slice hẹp ngoài DM polish để tăng MVP breadth (ưu tiên location/notifications parity hardening).
+
+---
+
+- Batch vừa xong: **381**
+- Commit cuối đã chốt:
+  - `9d4170c` — `batch381: show latest-message summary in ios inbox direct list`
+- Test-verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **382**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - giữ 1 seam DM hẹp để parity polish (timestamp/preview guard parity web+iOS trong inbox direct list) trước khi quay sang seam MVP tiếp theo.
+
+---
+
+- Batch vừa xong: **380**
+- Commit cuối đã chốt:
+  - `2b5e7ff` — `batch380: show latest-message summary in web inbox direct list`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **381**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS inbox shell hiển thị latest-message summary fields (`id/created_at/preview`) từ `GET /conversations/direct?user_id=...` để parity với web batch380.
+
+---
+
+- Batch vừa xong: **379**
+- Commit cuối đã chốt:
+  - `cc9fc8a` — `batch379: include latest-message summary in direct conversation list`
+- Test-verify cuối:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py -k "batch58_list_direct_conversations_for_user"` → pass
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **380**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - web inbox shell consume + render latest-message summary fields từ direct conversation list backend.
 
 ---
 
