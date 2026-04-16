@@ -24,13 +24,13 @@
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py -k direct_conversations_for_user` ✅ (`1 passed, 3 deselected`)
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` ✅ (`4 passed`)
 - Git:
-  - latest feature commit: *(pending in current run; will commit batch371 after workflow sync)*
+  - latest feature commit: `8d1c1af` — `batch371: add direct conversation list endpoint for user inbox seam`
   - previous feature commit: `8d5cc34` — `batch370: allow requester-side reject action in web friend graph shell`
-  - working tree: dirty (batch371 backend + workflow docs pending commit)
+  - working tree: clean
 - Blocker: none
 - Next: mở batch372 với 1 slice hẹp tiếp theo theo dispatch lane: web inbox shell load direct thread list qua `GET /conversations/direct?user_id=...` để parity với backend mới.
 - Batch 371 handoff:
-  - (pending commit in current run) — `batch371: add direct conversation list endpoint for user inbox seam`
+  - `8d1c1af` — `batch371: add direct conversation list endpoint for user inbox seam`
   - Added backend direct conversation list endpoint `GET /conversations/direct?user_id=...` for inbox thread listing by user.
   - Added schema `DirectConversationListResponse`, service `list_direct_conversations_for_user(...)`, router mapping + 404 `user_not_found` parity.
   - Added test `test_batch58_list_direct_conversations_for_user` covering happy path + missing user.

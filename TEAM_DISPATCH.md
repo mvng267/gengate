@@ -19,7 +19,7 @@
 ## Batch 371 handoff (closed)
 - Batch vừa xong: **371**
 - Commit đã chốt:
-  - `batch371: add direct conversation list endpoint for user inbox seam`
+  - `8d1c1af` — `batch371: add direct conversation list endpoint for user inbox seam`
 - Test/verify cuối:
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py -k direct_conversations_for_user` ✅ (1 passed, 3 deselected)
   - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` ✅ (4 passed)

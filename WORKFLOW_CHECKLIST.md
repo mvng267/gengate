@@ -101,9 +101,9 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py -k direct_conversations_for_user` → ✅ (1 passed, 3 deselected)
   - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` → ✅ (4 passed)
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: *(pending trong run này; sẽ chốt ngay sau khi sync workflow docs)*
+  - commit gần nhất đã chốt: `8d1c1af` — `batch371: add direct conversation list endpoint for user inbox seam`
   - commit liền trước: `8d5cc34` — `batch370: allow requester-side reject action in web friend graph shell`
-  - working tree hiện tại: dirty (backend batch371 + workflow docs chưa commit)
+  - working tree hiện tại: clean
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
