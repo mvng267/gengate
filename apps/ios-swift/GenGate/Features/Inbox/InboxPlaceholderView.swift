@@ -331,13 +331,25 @@ struct InboxPlaceholderView: View {
                                         .font(.caption.monospaced())
                                         .foregroundStyle(.secondary)
 
+                                    let hasLatestMessageID = {
+                                        if let messageID = directConversation.latestMessageID {
+                                            return !messageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                                        }
+                                        return false
+                                    }()
+
+                                    let normalizedLatestPreview = (directConversation.latestMessagePreview ?? "")
+                                        .trimmingCharacters(in: .whitespacesAndNewlines)
+
                                     let latestMessageSummary: String = {
-                                        if let messageID = directConversation.latestMessageID,
-                                           !messageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-                                           let senderUserID = directConversation.latestMessageSenderUserID,
-                                           !senderUserID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                            let preview = directConversation.latestMessagePreview ?? ""
-                                            return "\(senderUserID): \(preview)"
+                                        if hasLatestMessageID {
+                                            let senderToken = {
+                                                let normalizedSender = (directConversation.latestMessageSenderUserID ?? "")
+                                                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                                                return normalizedSender.isEmpty ? "(sender_missing)" : normalizedSender
+                                            }()
+                                            let previewToken = normalizedLatestPreview.isEmpty ? "(preview_empty)" : normalizedLatestPreview
+                                            return "\(senderToken): \(previewToken)"
                                         }
                                         return "(no messages yet)"
                                     }()
