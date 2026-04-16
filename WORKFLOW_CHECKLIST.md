@@ -99,7 +99,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Git mốc gần nhất:
   - commit gần nhất đã chốt: `aa9380f` — `batch376: use backend pending-status filter in web friend graph snapshot`
   - commit liền trước: `bec8032` — `batch375: correct workflow tree-state after metadata sync`
-  - working tree hiện tại: dirty (`M WORKFLOW_STATUS.md` while syncing metadata)
+  - working tree hiện tại: clean
 - Blocker nếu có:
   - none
 - Bước kế tiếp:

@@ -22,11 +22,11 @@
 - Git:
   - latest feature commit: `aa9380f` — `batch376: use backend pending-status filter in web friend graph snapshot`
   - previous feature commit: `bec8032` — `batch375: correct workflow tree-state after metadata sync`
-  - working tree: dirty (`M WORKFLOW_STATUS.md` while syncing metadata)
+  - working tree: clean
 - Blocker: none
 - Next: mở batch377 với 1 slice hẹp ưu tiên iOS friend graph shell dùng backend-filtered pending query `status=pending` để parity với web/backend và giảm mismatch pending/rejected.
 - Batch 376 handoff:
-  - `32f90fc` — `batch376: use backend pending-status filter in web friend graph snapshot`
+  - `aa9380f` — `batch376: use backend pending-status filter in web friend graph snapshot`
   - Updated web friend graph snapshot fetch to call `GET /friends/requests?user_id=...&status=pending` instead of client-side filtering all statuses.
   - No backend contract change; this is a web consumer parity slice on top of batch375 backend filter.
   - Verify pass: web typecheck.
