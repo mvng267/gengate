@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 373
+- Batch: 375
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 373 iOS inbox shell — load direct thread list by user qua `GET /conversations/direct?user_id=...` + open listed row bằng shared hydrate flow.
+- Scope: batch 375 backend friend graph seam — thêm status filter cho `GET /friends/requests?user_id=...&status=pending|accepted|rejected` để tách snapshot pending/rejected rõ ràng cho human triage.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,17 +16,31 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
+  - apps/backend-python/app/modules/friendships/router.py
+  - apps/backend-python/app/repositories/friendships.py
+  - apps/backend-python/app/services/friendships.py
+  - apps/backend-python/tests/test_friendships_api.py
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_friendships_api.py -k "status_filter or reject_friend_request_updates_status"` ✅ (2 passed, 6 deselected)
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_friendships_api.py` ✅ (8 passed)
 - Git:
-  - latest feature commit: `0b0f0df` — `batch373: add direct conversation list by user flow in ios inbox shell`
-  - previous feature commit: `368dd4a` — `batch372: load direct thread list by user in web inbox shell`
-  - working tree: clean
+  - latest feature commit: `bcdae27` — `batch375: add status filter for friend request listing`
+  - previous feature commit: `5318c16` — `batch374: sort direct conversation list by latest message activity`
+  - working tree: dirty (`M WORKFLOW_STATUS.md` while syncing workflow metadata)
 - Blocker: none
-- Next: mở batch374 với 1 slice hẹp tiếp theo theo dispatch lane ưu tiên MVP parity (friend graph / moments / private feed / direct messaging / location / notifications), tránh metadata churn.
+- Next: mở batch376 với 1 slice hẹp ưu tiên web friend graph shell dùng trực tiếp `status=pending` cho pending snapshot để giảm post-filter client-side và bám backend parity mới.
+- Batch 375 handoff:
+  - `bcdae27` — `batch375: add status filter for friend request listing`
+  - Added optional query `status` to `GET /friends/requests?user_id=...` (accepted values: `pending|accepted|rejected`) and returned `400 invalid_request_status` for unsupported status values.
+  - Added regression coverage for pending/rejected filtered snapshots after reject flow and invalid status filter contract.
+  - Verify pass: backend friendships focused file + full file.
+- Batch 374 handoff:
+  - `5318c16` — `batch374: sort direct conversation list by latest message activity`
+  - Updated backend conversation listing order for `GET /conversations/direct?user_id=...` to use latest message timestamp per direct conversation; falls back to conversation creation time when thread has no messages.
+  - Added coverage in `test_batch58_list_direct_conversations_for_user` to assert recency ordering after creating a message in one thread.
+  - Verify pass: backend focused + full conversation API test file.
 - Batch 373 handoff:
-  - `0b0f0df` — `batch373: add direct conversation list by user flow in ios inbox shell`
+  - `b58542c` — `batch373: add direct conversation list by user flow in ios inbox shell`
   - Added iOS inbox API client helper `listDirectConversationsForUser(...)` wired to `GET /conversations/direct?user_id=...`.
   - iOS inbox shell now supports loading direct thread list by user, applying current session user as `user_a` + load list, and opening listed row via shared `hydrateDirectThread(...)` flow.
   - Verify pass: iOS `swift build`.

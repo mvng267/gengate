@@ -12,14 +12,40 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 373
-- Trục công việc: iOS inbox shell — load direct thread list theo user bằng `GET /conversations/direct?user_id=...` và dùng lại hydrate flow khi chọn listed thread.
-- Trạng thái: batch373_complete_ios_inbox_direct_thread_list_by_user.
+- Batch workflow chính thức hiện tại: 375
+- Trục công việc: backend friend graph seam — thêm status filter cho `GET /friends/requests?user_id=...&status=pending|accepted|rejected` + validate unsupported status.
+- Trạng thái: batch375_complete_backend_friend_requests_status_filter.
+
+## Batch 375 handoff (closed)
+- Batch vừa xong: **375**
+- Commit đã chốt:
+  - `bcdae27` — `batch375: add status filter for friend request listing`
+- Test/verify cuối:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_friendships_api.py -k "status_filter or reject_friend_request_updates_status"` ✅ (2 passed, 6 deselected)
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_friendships_api.py` ✅ (8 passed)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **376**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - web friend graph shell dùng backend-filtered pending query `GET /friends/requests?user_id=...&status=pending` để giữ pending snapshot nhất quán sau reject.
+
+## Batch 374 handoff (closed)
+- Batch vừa xong: **374**
+- Commit đã chốt:
+  - `5318c16` — `batch374: sort direct conversation list by latest message activity`
+- Test/verify cuối:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py -k direct_conversations_for_user` ✅ (1 passed, 3 deselected)
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` ✅ (4 passed)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **375**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - backend friend graph: bổ sung status-filtered friend request listing để shell có thể triage pending/rejected rõ ràng.
 
 ## Batch 373 handoff (closed)
 - Batch vừa xong: **373**
 - Commit đã chốt:
-  - `0b0f0df` — `batch373: add direct conversation list by user flow in ios inbox shell`
+  - `b58542c` — `batch373: add direct conversation list by user flow in ios inbox shell`
 - Test/verify cuối:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Blocker/rủi ro còn lại:
