@@ -47,6 +47,20 @@ export async function getOrCreateDirectConversation(userAId: string, userBId: st
   return (await response.json()) as DirectConversation;
 }
 
+export async function listDirectConversationsForUser(userId: string): Promise<DirectConversation[]> {
+  const response = await apiRequest(`/conversations/direct?user_id=${encodeURIComponent(userId)}`);
+  if (!response.ok) {
+    throw new Error(`direct_conversation_list_failed:${response.status}`);
+  }
+
+  const payload = (await response.json()) as {
+    count: number;
+    items: DirectConversation[];
+  };
+
+  return payload.items;
+}
+
 export async function listMessages(conversationId: string): Promise<MessageItem[]> {
   const response = await apiRequest(`/messages?conversation_id=${encodeURIComponent(conversationId)}`);
   if (!response.ok) {

@@ -7,6 +7,7 @@ import {
   createMessageAttachment,
   getOrCreateDirectConversation,
   listConversationMembers,
+  listDirectConversationsForUser,
   listMessageAttachments,
   listMessages,
   sendMessage,
@@ -36,6 +37,10 @@ const initialAttachmentForm = {
   encryptedAttachmentBlob: "demo-encrypted-image-blob",
   storageKey: "attachments/web-shell/demo-image.enc",
 };
+
+function derivePeerUserIdFromConversation(memberUserIds: string[], userId: string): string {
+  return memberUserIds.find((memberUserId) => memberUserId.trim() && memberUserId !== userId) ?? "";
+}
 
 export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", initialSenderUserId = "" }: DirectMessageShellProps) {
   const [form, setForm] = useState({
@@ -86,6 +91,8 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [lastFirstUnreadGuardQuickCopy, setLastFirstUnreadGuardQuickCopy] = useState(
     "focus_user=(none) | first_unread_guard_state=unknown | candidate=(none)",
   );
+  const [isLoadingUserDirectConversations, setIsLoadingUserDirectConversations] = useState(false);
+  const [loadedUserDirectConversations, setLoadedUserDirectConversations] = useState<DirectConversation[]>([]);
   const conversationQuickCopy = `user_a=${form.userAId.trim() || "(empty)"} | user_b=${form.userBId.trim() || "(empty)"} | message_count=${messages.length} | last_message_id=${messages[messages.length - 1]?.id ?? "(none)"}`;
 
   const resolvedReadCursorFocusUserId =
@@ -169,6 +176,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown",
     );
     setLastFirstUnreadGuardQuickCopy("focus_user=(none) | first_unread_guard_state=unknown | candidate=(none)");
+    setLoadedUserDirectConversations([]);
   }, [initialSenderUserId, initialUserAId, initialUserBId]);
 
   useEffect(() => {
@@ -178,6 +186,99 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
 
   async function handleOpenThread() {
     await openDirectThreadFlow();
+  }
+
+  async function handleLoadDirectConversationsForUser() {
+    await loadDirectConversationsForUserFlow();
+  }
+
+  async function applyCurrentSessionUserAsUserAAndLoadDirectConversations() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_user_missing_for_quick_apply");
+      return;
+    }
+
+    const alreadyMatched = form.userAId.trim() === sessionUserId;
+    const statusPrefix = alreadyMatched
+      ? "User A already matches current session user (user_source=session_user)."
+      : "Applied current session user as User A (user_source=session_user).";
+
+    setForm((current) => ({
+      ...current,
+      userAId: sessionUserId,
+      senderUserId: current.senderUserId.trim() || sessionUserId,
+    }));
+
+    await loadDirectConversationsForUserFlow({
+      userIdOverride: sessionUserId,
+      statusPrefix,
+    });
+  }
+
+  async function loadDirectConversationsForUserFlow(input?: { userIdOverride?: string; statusPrefix?: string }) {
+    const userId = (input?.userIdOverride ?? form.userAId).trim();
+    const statusPrefix = input?.statusPrefix?.trim();
+
+    if (!userId) {
+      setStatus("direct_conversation_list_user_required");
+      return;
+    }
+
+    setIsLoadingUserDirectConversations(true);
+    setStatus(statusPrefix ? `${statusPrefix} Loading direct thread list...` : "Loading direct thread list...");
+
+    try {
+      const nextConversations = await listDirectConversationsForUser(userId);
+      setLoadedUserDirectConversations(nextConversations);
+      setForm((current) => ({
+        ...current,
+        userAId: userId,
+        senderUserId: current.senderUserId.trim() || userId,
+      }));
+
+      const loadedStatus = `Loaded ${nextConversations.length} direct thread(s) for ${userId}.`;
+      setStatus(statusPrefix ? `${statusPrefix} ${loadedStatus}` : loadedStatus);
+    } catch (error) {
+      const failureStatus = error instanceof Error ? error.message : "direct_conversation_list_failed";
+      setStatus(statusPrefix ? `${statusPrefix} ${failureStatus}` : failureStatus);
+    }
+
+    setIsLoadingUserDirectConversations(false);
+  }
+
+  async function handleUseListedDirectConversation(directConversation: DirectConversation) {
+    const fallbackUserId = directConversation.member_user_ids[0]?.trim() ?? "";
+    const listContextUserId = form.userAId.trim() || currentSessionUserId.trim() || fallbackUserId;
+    const peerUserId = derivePeerUserIdFromConversation(directConversation.member_user_ids, listContextUserId);
+
+    if (!listContextUserId || !peerUserId) {
+      setStatus("direct_conversation_row_pair_incomplete");
+      return;
+    }
+
+    const sessionUserId = currentSessionUserId.trim();
+    const senderUserId =
+      sessionUserId && directConversation.member_user_ids.includes(sessionUserId) ? sessionUserId : listContextUserId;
+
+    setIsOpening(true);
+    setLastSendQuickCopy("sender=(none) | message_id=(none)");
+    setStatus("Applied listed direct thread row context. Loading direct thread shell...");
+
+    try {
+      await hydrateDirectThread({
+        conversation: directConversation,
+        userAId: listContextUserId,
+        userBId: peerUserId,
+        senderUserId,
+        statusPrefix: "Applied listed direct thread row context.",
+      });
+    } catch (error) {
+      const failureStatus = error instanceof Error ? error.message : "direct_conversation_failed";
+      setStatus(`Applied listed direct thread row context. ${failureStatus}`);
+    }
+
+    setIsOpening(false);
   }
 
   async function applyCurrentSessionUserAsUserAUserBAndOpenThread() {
@@ -261,6 +362,45 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     });
   }
 
+  async function hydrateDirectThread(input: {
+    conversation: DirectConversation;
+    userAId: string;
+    userBId: string;
+    senderUserId: string;
+    statusPrefix?: string;
+  }) {
+    const statusPrefix = input.statusPrefix?.trim();
+    const normalizedSenderUserId = input.senderUserId.trim() || input.userAId.trim();
+
+    setConversation(input.conversation);
+    setForm((current) => ({
+      ...current,
+      userAId: input.userAId,
+      userBId: input.userBId,
+      senderUserId: normalizedSenderUserId,
+    }));
+
+    const [nextMessages, nextMembers] = await Promise.all([
+      listMessages(input.conversation.id),
+      listConversationMembers(input.conversation.id),
+    ]);
+    setMessages(nextMessages);
+    setConversationMembers(nextMembers);
+
+    const firstMessageId = nextMessages[0]?.id ?? "";
+    if (firstMessageId) {
+      const nextAttachments = await listMessageAttachments(firstMessageId);
+      setAttachmentItems(nextAttachments);
+      setAttachmentForm((current) => ({ ...current, targetMessageId: firstMessageId }));
+    } else {
+      setAttachmentItems([]);
+      setAttachmentForm((current) => ({ ...current, targetMessageId: "" }));
+    }
+
+    const loadedStatus = `Loaded direct thread ${input.conversation.id} with ${nextMessages.length} message(s).`;
+    setStatus(statusPrefix ? `${statusPrefix} ${loadedStatus}` : loadedStatus);
+  }
+
   async function openDirectThreadFlow(input?: {
     userAIdOverride?: string;
     userBIdOverride?: string;
@@ -270,7 +410,6 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     const userAId = (input?.userAIdOverride ?? form.userAId).trim();
     const userBId = (input?.userBIdOverride ?? form.userBId).trim();
     const senderUserId = (input?.senderUserIdOverride ?? form.senderUserId).trim();
-    const normalizedSenderUserId = senderUserId || userAId;
     const statusPrefix = input?.statusPrefix?.trim();
 
     setIsOpening(true);
@@ -279,32 +418,13 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
 
     try {
       const nextConversation = await getOrCreateDirectConversation(userAId, userBId);
-      setConversation(nextConversation);
-      setForm((current) => ({
-        ...current,
+      await hydrateDirectThread({
+        conversation: nextConversation,
         userAId,
         userBId,
-        senderUserId: normalizedSenderUserId,
-      }));
-      const [nextMessages, nextMembers] = await Promise.all([
-        listMessages(nextConversation.id),
-        listConversationMembers(nextConversation.id),
-      ]);
-      setMessages(nextMessages);
-      setConversationMembers(nextMembers);
-
-      const firstMessageId = nextMessages[0]?.id ?? "";
-      if (firstMessageId) {
-        const nextAttachments = await listMessageAttachments(firstMessageId);
-        setAttachmentItems(nextAttachments);
-        setAttachmentForm((current) => ({ ...current, targetMessageId: firstMessageId }));
-      } else {
-        setAttachmentItems([]);
-        setAttachmentForm((current) => ({ ...current, targetMessageId: "" }));
-      }
-
-      const loadedStatus = `Loaded direct thread ${nextConversation.id} with ${nextMessages.length} message(s).`;
-      setStatus(statusPrefix ? `${statusPrefix} ${loadedStatus}` : loadedStatus);
+        senderUserId,
+        statusPrefix,
+      });
     } catch (error) {
       const failureStatus = error instanceof Error ? error.message : "direct_conversation_failed";
       setStatus(statusPrefix ? `${statusPrefix} ${failureStatus}` : failureStatus);
@@ -1127,6 +1247,22 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
         </label>
         <button
           type="button"
+          onClick={() => void handleLoadDirectConversationsForUser()}
+          disabled={isLoadingUserDirectConversations}
+        >
+          {isLoadingUserDirectConversations ? "Loading direct list..." : "Load direct thread list for user_a"}
+        </button>
+        <button
+          type="button"
+          onClick={() => void applyCurrentSessionUserAsUserAAndLoadDirectConversations()}
+          disabled={isLoadingUserDirectConversations || currentSessionUserId.trim().length === 0}
+        >
+          {isLoadingUserDirectConversations
+            ? "Applying session user + loading..."
+            : "Use current session user as user_a + load direct thread list"}
+        </button>
+        <button
+          type="button"
           onClick={() => void applyCurrentSessionUserAsUserAUserBAndOpenThread()}
           disabled={isOpening || currentSessionUserId.trim().length === 0}
         >
@@ -1150,6 +1286,40 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
           {isReloading ? "Reloading..." : "Reload thread messages"}
         </button>
       </div>
+
+      <h2>Direct thread list by user</h2>
+      <p>
+        Endpoint: <code>GET /conversations/direct?user_id=...</code>
+      </p>
+      {loadedUserDirectConversations.length === 0 ? (
+        <p>No direct thread list loaded yet.</p>
+      ) : (
+        <ul>
+          {loadedUserDirectConversations.map((directConversation) => {
+            const fallbackUserId = directConversation.member_user_ids[0]?.trim() ?? "";
+            const listContextUserId = form.userAId.trim() || currentSessionUserId.trim() || fallbackUserId;
+            const peerUserId = derivePeerUserIdFromConversation(directConversation.member_user_ids, listContextUserId);
+
+            return (
+              <li key={directConversation.id}>
+                <strong>{directConversation.id}</strong>
+                {" · members: "}
+                {directConversation.member_user_ids.join(", ")}
+                {listContextUserId && peerUserId ? <span>{` · pair_hint: ${listContextUserId} ↔ ${peerUserId}`}</span> : null}
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    onClick={() => void handleUseListedDirectConversation(directConversation)}
+                    disabled={isOpening}
+                  >
+                    {isOpening ? "Opening selected thread..." : "Use this listed thread"}
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
       <form onSubmit={(event) => void handleSendMessage(event)}>
         <label>
