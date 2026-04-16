@@ -44,7 +44,7 @@ export type FriendshipRecord = {
 
 export async function fetchFriendGraphSnapshot(userId: string): Promise<FriendGraphSnapshot> {
   const [requestsResponse, friendshipsResponse] = await Promise.all([
-    apiRequest(`/friends/requests?user_id=${encodeURIComponent(userId)}`),
+    apiRequest(`/friends/requests?user_id=${encodeURIComponent(userId)}&status=pending`),
     apiRequest(`/friends?user_id=${encodeURIComponent(userId)}`),
   ]);
 
