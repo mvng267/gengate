@@ -106,11 +106,26 @@ class FriendshipService:
             return friendship_repository.list(db, limit=1000, offset=0)
         return friendship_repository.list_for_user(db, user_id=user_id, limit=100, offset=0)
 
-    def list_friend_requests(self, db: Session, user_id: uuid.UUID) -> list[FriendRequest]:
+    def list_friend_requests(
+        self,
+        db: Session,
+        user_id: uuid.UUID,
+        request_status: str | None = None,
+    ) -> list[FriendRequest]:
         user = user_repository.get(db, user_id)
         if user is None:
             raise ValueError("user_not_found")
-        return friend_request_repository.list_for_user(db, user_id=user_id, limit=100, offset=0)
+
+        if request_status is not None and request_status not in {"pending", "accepted", "rejected"}:
+            raise ValueError("invalid_request_status")
+
+        return friend_request_repository.list_for_user(
+            db,
+            user_id=user_id,
+            status=request_status,
+            limit=100,
+            offset=0,
+        )
 
 
 friendship_service = FriendshipService()

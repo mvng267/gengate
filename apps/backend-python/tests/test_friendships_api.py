@@ -165,7 +165,7 @@ def test_list_friend_requests_missing_user_returns_not_found() -> None:
     clear_overrides()
 
 
-def test_reject_friend_request_updates_status_and_removes_from_pending_snapshot() -> None:
+def test_reject_friend_request_updates_status_and_supports_status_filter() -> None:
     client = create_test_client()
 
     requester = client.post("/auth/register", json={"email": "reject-a@example.com", "username": "reject_a"})
@@ -180,6 +180,11 @@ def test_reject_friend_request_updates_status_and_removes_from_pending_snapshot(
     assert create_response.status_code == 201
     request_id = create_response.json()["id"]
 
+    pending_snapshot_before_reject = client.get(f"/friends/requests?user_id={requester_id}&status=pending")
+    assert pending_snapshot_before_reject.status_code == 200
+    assert pending_snapshot_before_reject.json()["count"] == 1
+    assert pending_snapshot_before_reject.json()["items"][0]["id"] == request_id
+
     reject_response = client.post(f"/friends/requests/{request_id}/reject")
     assert reject_response.status_code == 200
     assert reject_response.json()["status"] == "rejected"
@@ -193,6 +198,16 @@ def test_reject_friend_request_updates_status_and_removes_from_pending_snapshot(
     assert receiver_snapshot.status_code == 200
     assert receiver_snapshot.json()["count"] == 1
     assert receiver_snapshot.json()["items"][0]["status"] == "rejected"
+
+    pending_snapshot_after_reject = client.get(f"/friends/requests?user_id={requester_id}&status=pending")
+    assert pending_snapshot_after_reject.status_code == 200
+    assert pending_snapshot_after_reject.json()["count"] == 0
+
+    rejected_snapshot = client.get(f"/friends/requests?user_id={requester_id}&status=rejected")
+    assert rejected_snapshot.status_code == 200
+    assert rejected_snapshot.json()["count"] == 1
+    assert rejected_snapshot.json()["items"][0]["id"] == request_id
+    assert rejected_snapshot.json()["items"][0]["status"] == "rejected"
 
     clear_overrides()
 
@@ -243,6 +258,23 @@ def test_accept_friend_request_after_reject_returns_request_not_pending() -> Non
         "error": {
             "code": "request_not_pending",
             "message": "request_not_pending",
+        }
+    }
+
+    clear_overrides()
+
+
+def test_list_friend_requests_invalid_status_filter_returns_bad_request() -> None:
+    client = create_test_client()
+
+    requester = client.post("/auth/register", json={"email": "status-filter-a@example.com", "username": "status_filter_a"})
+
+    response = client.get(f"/friends/requests?user_id={requester.json()['id']}&status=archived")
+    assert response.status_code == 400
+    assert response.json() == {
+        "error": {
+            "code": "invalid_request_status",
+            "message": "invalid_request_status",
         }
     }
 

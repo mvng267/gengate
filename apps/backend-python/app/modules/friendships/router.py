@@ -49,11 +49,22 @@ def create_friend_request(
 
 
 @router.get("/requests", response_model=FriendRequestListResponse)
-def list_friend_requests(user_id: uuid.UUID = Query(...), db: Session = Depends(get_db_session)) -> FriendRequestListResponse:
+def list_friend_requests(
+    user_id: uuid.UUID = Query(...),
+    status_filter: str | None = Query(default=None, alias="status"),
+    db: Session = Depends(get_db_session),
+) -> FriendRequestListResponse:
     try:
-        requests = friendship_service.list_friend_requests(db, user_id=user_id)
+        requests = friendship_service.list_friend_requests(
+            db,
+            user_id=user_id,
+            request_status=status_filter,
+        )
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+        code = str(exc)
+        if code == "invalid_request_status":
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=code)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=code)
 
     items = [
         FriendRequestItem(

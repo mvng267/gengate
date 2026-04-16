@@ -12,14 +12,22 @@ class FriendRequestRepository(BaseRepository[FriendRequest]):
     def __init__(self) -> None:
         super().__init__(FriendRequest)
 
-    def list_for_user(self, db: Session, user_id: uuid.UUID, limit: int = 100, offset: int = 0) -> list[FriendRequest]:
-        statement = (
-            select(FriendRequest)
-            .where(or_(FriendRequest.requester_user_id == user_id, FriendRequest.receiver_user_id == user_id))
-            .order_by(FriendRequest.created_at.desc())
-            .offset(offset)
-            .limit(limit)
+    def list_for_user(
+        self,
+        db: Session,
+        user_id: uuid.UUID,
+        status: str | None = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[FriendRequest]:
+        statement = select(FriendRequest).where(
+            or_(FriendRequest.requester_user_id == user_id, FriendRequest.receiver_user_id == user_id)
         )
+
+        if status is not None:
+            statement = statement.where(FriendRequest.status == status)
+
+        statement = statement.order_by(FriendRequest.created_at.desc()).offset(offset).limit(limit)
         return list(db.scalars(statement).all())
 
     def get_pending_between_users(
