@@ -161,10 +161,21 @@ def test_batch58_list_direct_conversations_for_user() -> None:
     assert open_thread_ac.status_code == 201
     conversation_ac_id = open_thread_ac.json()["id"]
 
+    send_message_ab = client.post(
+        "/messages",
+        json={
+            "sender_user_id": user_a_id,
+            "payload_text": "batch58-ab-latest-message",
+            "conversation_id": conversation_ab_id,
+        },
+    )
+    assert send_message_ab.status_code == 201
+
     list_for_user_a = client.get(f"/conversations/direct?user_id={user_a_id}")
     assert list_for_user_a.status_code == 200
     assert list_for_user_a.json()["count"] == 2
     listed_ids_for_a = [item["id"] for item in list_for_user_a.json()["items"]]
+    assert listed_ids_for_a[0] == conversation_ab_id
     assert set(listed_ids_for_a) == {conversation_ab_id, conversation_ac_id}
     for item in list_for_user_a.json()["items"]:
         assert item["conversation_type"] == "direct"

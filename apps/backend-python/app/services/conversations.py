@@ -108,7 +108,17 @@ class ConversationService:
             seen_conversation_ids.add(conversation_id)
             results.append((conversation, members))
 
-        results.sort(key=lambda row: row[0].created_at, reverse=True)
+        latest_activity_by_conversation_id: dict[uuid.UUID, object] = {}
+        for conversation, _ in results:
+            messages = message_repository.list_by_conversation(db, conversation.id)
+            latest_activity_by_conversation_id[conversation.id] = (
+                messages[-1].created_at if messages else conversation.created_at
+            )
+
+        results.sort(
+            key=lambda row: latest_activity_by_conversation_id[row[0].id],
+            reverse=True,
+        )
         return results
 
     def update_direct_member_read_cursor(
