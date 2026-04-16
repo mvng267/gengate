@@ -170,6 +170,7 @@ def test_batch58_list_direct_conversations_for_user() -> None:
         },
     )
     assert send_message_ab.status_code == 201
+    message_ab_id = send_message_ab.json()["id"]
 
     list_for_user_a = client.get(f"/conversations/direct?user_id={user_a_id}")
     assert list_for_user_a.status_code == 200
@@ -177,15 +178,33 @@ def test_batch58_list_direct_conversations_for_user() -> None:
     listed_ids_for_a = [item["id"] for item in list_for_user_a.json()["items"]]
     assert listed_ids_for_a[0] == conversation_ab_id
     assert set(listed_ids_for_a) == {conversation_ab_id, conversation_ac_id}
-    for item in list_for_user_a.json()["items"]:
+
+    item_by_id_for_a = {item["id"]: item for item in list_for_user_a.json()["items"]}
+    for item in item_by_id_for_a.values():
         assert item["conversation_type"] == "direct"
         assert len(item["member_user_ids"]) == 2
         assert user_a_id in item["member_user_ids"]
+
+    conversation_ab_for_a = item_by_id_for_a[conversation_ab_id]
+    assert conversation_ab_for_a["latest_message_id"] == message_ab_id
+    assert conversation_ab_for_a["latest_message_sender_user_id"] == user_a_id
+    assert conversation_ab_for_a["latest_message_preview"] == "batch58-ab-latest-message"
+    assert conversation_ab_for_a["latest_message_created_at"] is not None
+
+    conversation_ac_for_a = item_by_id_for_a[conversation_ac_id]
+    assert conversation_ac_for_a["latest_message_id"] is None
+    assert conversation_ac_for_a["latest_message_sender_user_id"] is None
+    assert conversation_ac_for_a["latest_message_preview"] is None
+    assert conversation_ac_for_a["latest_message_created_at"] is None
 
     list_for_user_b = client.get(f"/conversations/direct?user_id={user_b_id}")
     assert list_for_user_b.status_code == 200
     assert list_for_user_b.json()["count"] == 1
     assert list_for_user_b.json()["items"][0]["id"] == conversation_ab_id
+    assert list_for_user_b.json()["items"][0]["latest_message_id"] == message_ab_id
+    assert list_for_user_b.json()["items"][0]["latest_message_sender_user_id"] == user_a_id
+    assert list_for_user_b.json()["items"][0]["latest_message_preview"] == "batch58-ab-latest-message"
+    assert list_for_user_b.json()["items"][0]["latest_message_created_at"] is not None
 
     missing_user_response = client.get(f"/conversations/direct?user_id={uuid.uuid4()}")
     assert missing_user_response.status_code == 404

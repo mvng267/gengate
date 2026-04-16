@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from pydantic import BaseModel
 
@@ -21,6 +22,10 @@ class DirectConversationResponse(BaseModel):
     id: uuid.UUID
     conversation_type: str
     member_user_ids: list[uuid.UUID]
+    latest_message_id: uuid.UUID | None = None
+    latest_message_sender_user_id: uuid.UUID | None = None
+    latest_message_preview: str | None = None
+    latest_message_created_at: datetime | None = None
 
 
 class DirectConversationListResponse(BaseModel):

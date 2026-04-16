@@ -37,11 +37,17 @@ def to_member_response(member) -> ConversationMemberResponse:
     )
 
 
-def to_direct_conversation_response(conversation, members) -> DirectConversationResponse:
+def to_direct_conversation_response(conversation, members, latest_message=None) -> DirectConversationResponse:
     return DirectConversationResponse(
         id=conversation.id,
         conversation_type=conversation.conversation_type,
         member_user_ids=[member.user_id for member in members],
+        latest_message_id=latest_message.id if latest_message is not None else None,
+        latest_message_sender_user_id=latest_message.sender_user_id if latest_message is not None else None,
+        latest_message_preview=(
+            latest_message.encrypted_payload_blob.decode("utf-8") if latest_message is not None else None
+        ),
+        latest_message_created_at=latest_message.created_at if latest_message is not None else None,
     )
 
 
@@ -89,7 +95,10 @@ def list_direct_conversations_for_user(
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 
-    items = [to_direct_conversation_response(conversation, members) for conversation, members in rows]
+    items = [
+        to_direct_conversation_response(conversation, members, latest_message)
+        for conversation, members, latest_message in rows
+    ]
     return DirectConversationListResponse(count=len(items), items=items)
 
 

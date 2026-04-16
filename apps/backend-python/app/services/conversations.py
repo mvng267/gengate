@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models.conversation_members import ConversationMember
 from app.models.conversations import Conversation
+from app.models.messages import Message
 from app.repositories.conversations import conversation_member_repository, conversation_repository
 from app.repositories.messages import message_repository
 from app.repositories.users import user_repository
@@ -81,7 +82,7 @@ class ConversationService:
         self,
         db: Session,
         user_id: uuid.UUID,
-    ) -> list[tuple[Conversation, list[ConversationMember]]]:
+    ) -> list[tuple[Conversation, list[ConversationMember], Message | None]]:
         user = user_repository.get(db, user_id)
         if user is None:
             raise ValueError("user_not_found")
@@ -90,7 +91,7 @@ class ConversationService:
         if not memberships:
             return []
 
-        results: list[tuple[Conversation, list[ConversationMember]]] = []
+        results: list[tuple[Conversation, list[ConversationMember], Message | None]] = []
         seen_conversation_ids: set[uuid.UUID] = set()
         for membership in memberships:
             conversation_id = membership.conversation_id
@@ -105,18 +106,14 @@ class ConversationService:
             if len(members) != 2:
                 continue
 
-            seen_conversation_ids.add(conversation_id)
-            results.append((conversation, members))
+            messages = message_repository.list_by_conversation(db, conversation_id)
+            latest_message = messages[-1] if messages else None
 
-        latest_activity_by_conversation_id: dict[uuid.UUID, object] = {}
-        for conversation, _ in results:
-            messages = message_repository.list_by_conversation(db, conversation.id)
-            latest_activity_by_conversation_id[conversation.id] = (
-                messages[-1].created_at if messages else conversation.created_at
-            )
+            seen_conversation_ids.add(conversation_id)
+            results.append((conversation, members, latest_message))
 
         results.sort(
-            key=lambda row: latest_activity_by_conversation_id[row[0].id],
+            key=lambda row: row[2].created_at if row[2] is not None else row[0].created_at,
             reverse=True,
         )
         return results
