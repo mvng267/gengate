@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **371 — backend direct conversation list by user đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **372 — web inbox direct conversation list by user đã complete**.
 
 ## Reporting hard rule
 
@@ -89,25 +89,22 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **371**
-- Scope hiện tại: direct messaging backend (conversations) — add `GET /conversations/direct?user_id=...` để list direct threads theo user cho inbox parity shell wiring.
+- Batch workflow chính thức hiện tại: **372**
+- Scope hiện tại: web inbox shell — load direct thread list by user qua `GET /conversations/direct?user_id=...`, và reuse thread hydrate flow khi chọn listed conversation.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/backend-python/app/modules/conversations/router.py`
-  - `apps/backend-python/app/schemas/conversations.py`
-  - `apps/backend-python/app/services/conversations.py`
-  - `apps/backend-python/tests/test_batch7_conversations_api.py`
+  - `apps/web-nextjs/lib/inbox/client.ts`
+  - `apps/web-nextjs/components/direct-message-shell.tsx`
 - Test-verify:
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py -k direct_conversations_for_user` → ✅ (1 passed, 3 deselected)
-  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` → ✅ (4 passed)
+  - `cd apps/web-nextjs && npm run -s typecheck` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `8d1c1af` — `batch371: add direct conversation list endpoint for user inbox seam`
-  - commit liền trước: `8d5cc34` — `batch370: allow requester-side reject action in web friend graph shell`
+  - commit gần nhất đã chốt: `368dd4a` — `batch372: load direct thread list by user in web inbox shell`
+  - commit liền trước: `8d1c1af` — `batch371: add direct conversation list endpoint for user inbox seam`
   - working tree hiện tại: clean
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch372 với đúng 1 slice hẹp: web inbox shell dùng `GET /conversations/direct?user_id=...` để load direct thread list parity.
+  - mở batch373 với đúng 1 slice hẹp: iOS inbox shell dùng `GET /conversations/direct?user_id=...` để load direct thread list parity với backend/web.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Quick create + feed-gate bundle: moment_create_marker={author=... | image_url=... | caption=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` + line `Last create + feed-gate bundle: last_create_feed_visibility_delta={created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Bấm `Copy quick create + feed-gate bundle` để verify one-tap create bundle payload và bấm thêm `Copy last create + feed-gate bundle` để verify deterministic payload bundle cho lần create gần nhất; sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`; bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy last copied delete summary feedback`, verify line source-state rồi bấm `Copy delete copy audit for first ready source` để one-shot copy `delete_copy_audit=source:.../value:...`; đối chiếu source được pick với line source-state.

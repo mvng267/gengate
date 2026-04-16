@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 371
-- Trục công việc: direct messaging backend (conversations) — add `GET /conversations/direct?user_id=...` để list direct threads theo user cho inbox parity shell wiring.
-- Trạng thái: batch371_complete_backend_direct_conversation_list_by_user.
+- Batch workflow chính thức hiện tại: 372
+- Trục công việc: web inbox shell — load direct thread list theo user bằng `GET /conversations/direct?user_id=...` và dùng lại hydrate flow khi chọn listed thread.
+- Trạng thái: batch372_complete_web_inbox_direct_thread_list_by_user.
+
+## Batch 372 handoff (closed)
+- Batch vừa xong: **372**
+- Commit đã chốt:
+  - `368dd4a` — `batch372: load direct thread list by user in web inbox shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **373**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS inbox shell: dùng `GET /conversations/direct?user_id=...` để load direct thread list parity với backend/web.
 
 ## Batch 371 handoff (closed)
 - Batch vừa xong: **371**
