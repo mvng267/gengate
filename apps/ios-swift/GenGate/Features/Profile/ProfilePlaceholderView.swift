@@ -1310,7 +1310,7 @@ private struct FriendGraphAPIClient {
     }
 
     private func fetchFriendRequests(userID: String) async throws -> FriendRequestListResponse {
-        let url = try makeURL(path: "/friends/requests", userID: userID)
+        let url = try makeURL(path: "/friends/requests", userID: userID, status: "pending")
         let (data, response) = try await URLSession.shared.data(from: url)
         let httpResponse = try requireHTTPResponse(response)
 
@@ -1341,13 +1341,19 @@ private struct FriendGraphAPIClient {
         }
     }
 
-    private func makeURL(path: String, userID: String) throws -> URL {
+    private func makeURL(path: String, userID: String, status: String? = nil) throws -> URL {
         guard let baseURL else {
             throw APIError.invalidBaseURL
         }
 
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: false)
-        components?.queryItems = [URLQueryItem(name: "user_id", value: userID)]
+        var queryItems = [URLQueryItem(name: "user_id", value: userID)]
+
+        if let status, !status.isEmpty {
+            queryItems.append(URLQueryItem(name: "status", value: status))
+        }
+
+        components?.queryItems = queryItems
 
         guard let url = components?.url else {
             throw APIError.invalidBaseURL
