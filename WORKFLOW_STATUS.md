@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 376
+- Batch: 377
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 376 web friend graph seam — chuyển pending snapshot sang backend-filtered query `GET /friends/requests?user_id=...&status=pending` để giữ pending list nhất quán sau reject.
+- Scope: batch 377 iOS friend graph seam — chuyển pending snapshot sang backend-filtered query `GET /friends/requests?user_id=...&status=pending` để parity với web/backend.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,15 +16,20 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/web-nextjs/lib/friends/client.ts
+  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
 - Test:
-  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `aa9380f` — `batch376: use backend pending-status filter in web friend graph snapshot`
-  - previous feature commit: `bec8032` — `batch375: correct workflow tree-state after metadata sync`
+  - latest feature commit: `3038b81` — `batch377: use backend pending-status filter in ios friend graph snapshot`
+  - previous feature commit: `aa9380f` — `batch376: use backend pending-status filter in web friend graph snapshot`
   - working tree: clean
 - Blocker: none
-- Next: mở batch377 với 1 slice hẹp ưu tiên iOS friend graph shell dùng backend-filtered pending query `status=pending` để parity với web/backend và giảm mismatch pending/rejected.
+- Next: mở batch378 với 1 slice hẹp theo seam ưu tiên (moments/feed/DM/location/notifications), tránh metadata-only churn.
+- Batch 377 handoff:
+  - `3038b81` — `batch377: use backend pending-status filter in ios friend graph snapshot`
+  - Updated iOS friend graph snapshot fetch to call `GET /friends/requests?user_id=...&status=pending` instead of loading all statuses.
+  - No backend contract change; this is iOS consumer parity on top of batch375 backend filter and batch376 web parity.
+  - Verify pass: iOS `swift build`.
 - Batch 376 handoff:
   - `aa9380f` — `batch376: use backend pending-status filter in web friend graph snapshot`
   - Updated web friend graph snapshot fetch to call `GET /friends/requests?user_id=...&status=pending` instead of client-side filtering all statuses.

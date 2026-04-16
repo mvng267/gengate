@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 376
-- Trục công việc: web friend graph seam — chuyển pending snapshot sang backend-filtered query `GET /friends/requests?user_id=...&status=pending` để giảm mismatch pending/rejected sau mutate.
-- Trạng thái: batch376_complete_web_friend_graph_pending_status_filter.
+- Batch workflow chính thức hiện tại: 377
+- Trục công việc: iOS friend graph seam — chuyển pending snapshot sang backend-filtered query `GET /friends/requests?user_id=...&status=pending` để parity với web/backend.
+- Trạng thái: batch377_complete_ios_friend_graph_pending_status_filter.
+
+## Batch 377 handoff (closed)
+- Batch vừa xong: **377**
+- Commit đã chốt:
+  - `3038b81` — `batch377: use backend pending-status filter in ios friend graph snapshot`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **378**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chọn 1 slice hẹp theo seam ưu tiên còn lại (moments/feed/DM/location/notifications), tránh metadata-only churn.
 
 ## Batch 376 handoff (closed)
 - Batch vừa xong: **376**

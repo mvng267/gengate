@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **376 — web friend graph snapshot now uses backend pending-status filter (`GET /friends/requests?user_id=...&status=pending`)**.
+- Batch workflow chính thức mới nhất trong checklist/status: **377 — iOS friend graph snapshot now uses backend pending-status filter (`GET /friends/requests?user_id=...&status=pending`)**.
 
 ## Reporting hard rule
 
@@ -89,21 +89,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **376**
-- Scope hiện tại: web friend graph seam — chuyển pending snapshot sang backend-filtered query `GET /friends/requests?user_id=...&status=pending` để giữ pending list nhất quán sau reject.
+- Batch workflow chính thức hiện tại: **377**
+- Scope hiện tại: iOS friend graph seam — chuyển pending snapshot sang backend-filtered query `GET /friends/requests?user_id=...&status=pending` để parity với web/backend.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/lib/friends/client.ts`
+  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run -s typecheck` → ✅
+  - `cd apps/ios-swift && swift build` → ✅
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `aa9380f` — `batch376: use backend pending-status filter in web friend graph snapshot`
-  - commit liền trước: `bec8032` — `batch375: correct workflow tree-state after metadata sync`
+  - commit gần nhất đã chốt: `3038b81` — `batch377: use backend pending-status filter in ios friend graph snapshot`
+  - commit liền trước: `aa9380f` — `batch376: use backend pending-status filter in web friend graph snapshot`
   - working tree hiện tại: clean
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch377 với đúng 1 slice hẹp: iOS friend graph shell gọi `GET /friends/requests?user_id=...&status=pending` để parity với web/backend.
+  - mở batch378 với đúng 1 slice hẹp theo seam ưu tiên (moments/feed/DM/location/notifications), tránh metadata-only churn.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Quick create + feed-gate bundle: moment_create_marker={author=... | image_url=... | caption=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` + line `Last create + feed-gate bundle: last_create_feed_visibility_delta={created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Bấm `Copy quick create + feed-gate bundle` để verify one-tap create bundle payload và bấm thêm `Copy last create + feed-gate bundle` để verify deterministic payload bundle cho lần create gần nhất; sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`; bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy last copied delete summary feedback`, verify line source-state rồi bấm `Copy delete copy audit for first ready source` để one-shot copy `delete_copy_audit=source:.../value:...`; đối chiếu source được pick với line source-state.
@@ -116,6 +116,20 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread` / `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> nhập message text rồi bấm `Use current session user as sender + keep user_a/user_b pair + send` và verify status có marker `user_pair_source=kept_user_a+user_b` + `sender_source=session_user` -> bấm `Copy quick sender keep-pair marker` và verify payload marker -> bấm `Copy quick sender keep-pair + send result bundle` và verify payload bundle `sender_keep_pair_marker={...} | send_result={sender=... | message_id=...}` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
 
 ## Batch handoff note
+
+- Batch vừa xong: **377**
+- Commit cuối đã chốt:
+  - `3038b81` — `batch377: use backend pending-status filter in ios friend graph snapshot`
+- Test-verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **378**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chọn 1 slice hẹp theo seam ưu tiên còn lại (moments/feed/DM/location/notifications), tránh metadata-only churn.
+
+---
 
 - Batch vừa xong: **376**
 - Commit cuối đã chốt:
