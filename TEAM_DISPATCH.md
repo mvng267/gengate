@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 372
-- Trục công việc: web inbox shell — load direct thread list theo user bằng `GET /conversations/direct?user_id=...` và dùng lại hydrate flow khi chọn listed thread.
-- Trạng thái: batch372_complete_web_inbox_direct_thread_list_by_user.
+- Batch workflow chính thức hiện tại: 373
+- Trục công việc: iOS inbox shell — load direct thread list theo user bằng `GET /conversations/direct?user_id=...` và dùng lại hydrate flow khi chọn listed thread.
+- Trạng thái: batch373_complete_ios_inbox_direct_thread_list_by_user.
+
+## Batch 373 handoff (closed)
+- Batch vừa xong: **373**
+- Commit đã chốt:
+  - `0b0f0df` — `batch373: add direct conversation list by user flow in ios inbox shell`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **374**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chọn 1 slice hẹp theo dispatch lane ưu tiên MVP parity còn lệch (friend graph / moments / private feed / direct messaging / location / notifications), tránh metadata churn.
 
 ## Batch 372 handoff (closed)
 - Batch vừa xong: **372**

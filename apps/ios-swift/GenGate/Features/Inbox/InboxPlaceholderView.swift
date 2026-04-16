@@ -35,6 +35,7 @@ struct InboxPlaceholderView: View {
     @State private var attachmentBlobDraft: String = "ios-demo-attachment-blob"
     @State private var fetchError: String?
     @State private var isLoading = false
+    @State private var isOpening = false
     @State private var isSendingMessage = false
     @State private var sendStatusHint: String?
     @State private var lastSendQuickCopy: String = "sender=(none) | message_id=(none)"
@@ -43,6 +44,8 @@ struct InboxPlaceholderView: View {
     @State private var lastReadCursorTriageQuickCopy: String = "read_cursor_triage=target_user:(none),previous:(none),applied:(none),current:(none),apply_state:unknown"
     @State private var lastFirstUnreadJumpQuickCopy: String = "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown"
     @State private var lastFirstUnreadGuardQuickCopy: String = "focus_user=(none) | first_unread_guard_state=unknown | candidate=(none)"
+    @State private var isLoadingUserDirectConversations = false
+    @State private var loadedUserDirectConversations: [DirectConversationSummary] = []
     @State private var isCreatingAttachment = false
     @State private var isCreatingDeviceKey = false
     @State private var isUpdatingReadCursor = false
@@ -120,7 +123,7 @@ struct InboxPlaceholderView: View {
                     status: "Status: native inbox now supports text send + attachment create/list + device-key create/list + recipient-device fetch + read-cursor updates + focused read/unread indicator + member cursor summary + quick latest-read action + read-cursor presets + cursor ordering hints + first-unread jump action + row-tap cursor form picker + member-cursor message target picker + cursor-form sync hint with stale-target guards + recipient-device fallback/auto-reload/rate-limit guards + skip-hint reset + bounded event timestamps + clear-input/thread-switch/load-failure/non-member recipient-device context reset + explicit reset-reason helper note + input-change helper-note reset + empty-context-only helper-note visibility + short recipient-id mismatch hint + compact helper-note reason + readable short-caption mapping + recipient quick-member presets + dynamic first-valid-device apply/re-apply action + first-option inline subtitle (full + short id) + emphasized short-id line + source-hint short-id consistency across first-option/in-sync/manual/fallback states + same-as-first skip helper-note + empty-options reapply guidance + source-hint verify matrix + branch-key legend + matrix snapshot quick-copy + triage-line quick-copy + triage-line body quick-copy + triage preview line-vs-body block + compact diff hint + usage guidance note + usage-note quick-copy + triage-kit quick-copy + triage-kit compact preview + triage-kit preview quick-copy + preview delta marker + preview-delta quick-copy + preview-pair quick-copy + preview-pair use marker + preview-pair use-marker quick-copy + preview-pair-lite quick-copy + preview-pair-lite preview-line quick-copy + preview-pair-lite tag-header quick-copy + preview-pair-lite use-when-line quick-copy + preview-pair-lite condensed-line quick-copy + branch-preview token quick-copy + branch-use-when-preview quick-copy + branch-use-when-preview tagged-block quick-copy + branch-summary tag-header quick-copy + branch-summary compact-bundle quick-copy + branch-use-when-preview-lite quick-copy + preview-pair-lite inline scan block + selection-source hint + one-tap device UUID clear action; realtime delivery remains pending.",
                     bullets: [
                         "Enter two distinct backend user UUIDs that already participate in a direct conversation or can be resolved into one.",
-                        "This shell calls `/conversations/direct`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
+                        "This shell calls `/conversations/direct`, `/conversations/direct?user_id=<uuid>`, `/conversations/{id}/members`, `/messages?conversation_id=<uuid>`, `/messages/{id}/attachments`, `/messages/{id}/device-keys`, and `/auth/devices/{user_id}`.",
                         "You can now call `PATCH /conversations/{id}/members/{user_id}/read-cursor` directly from iOS to move read cursor and observe `last_read_by` + focused `read_status(user)` + member cursor summary in-shell.",
                         "Quick action `Mark latest message as read (focus user)` helps testers advance read cursor to newest loaded row with one tap.",
                         "Quick action `Use current session user as read-cursor target + read focus` đồng bộ cả `Member user UUID` và `Read-status focus user UUID` để retest read parity không cần nhập tay.",
@@ -278,6 +281,76 @@ struct InboxPlaceholderView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(isLoading || userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || userBIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+                    Button {
+                        Task {
+                            await handleLoadDirectConversationsForUser()
+                        }
+                    } label: {
+                        Text(isLoadingUserDirectConversations ? "Loading direct thread list..." : "Load direct thread list by user_a")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(isLoading || isLoadingUserDirectConversations || userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+                    Button {
+                        Task {
+                            await applyCurrentSessionUserAsUserAAndLoadDirectConversations()
+                        }
+                    } label: {
+                        Text(isLoadingUserDirectConversations ? "Applying session user + loading list..." : "Use current session user as user_a + load direct thread list")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(isLoading || isLoadingUserDirectConversations || currentSessionUserID == nil)
+
+                    if isLoadingUserDirectConversations {
+                        Text("Loading direct thread list from /conversations/direct?user_id=...")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if !loadedUserDirectConversations.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Direct thread list for user_a")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+
+                            ForEach(loadedUserDirectConversations) { directConversation in
+                                let rowPair = directConversationPair(for: directConversation)
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text("conversation_id: \(directConversation.id)")
+                                        .font(.caption.monospaced())
+                                        .foregroundStyle(.secondary)
+
+                                    Text("type: \(directConversation.conversationType) · members: \(directConversation.memberUserIDs.joined(separator: ", "))")
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+
+                                    if rowPair.isComplete {
+                                        Button {
+                                            Task {
+                                                await handleUseListedDirectConversation(directConversation)
+                                            }
+                                        } label: {
+                                            Text("Use listed direct thread")
+                                                .frame(maxWidth: .infinity)
+                                        }
+                                        .buttonStyle(.bordered)
+                                        .disabled(isLoading || isOpening || isLoadingUserDirectConversations)
+                                    } else {
+                                        Text("Pair resolution missing for this row (direct_conversation_row_pair_incomplete)")
+                                            .font(.footnote)
+                                            .foregroundStyle(.orange)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(12)
+                                .background(Color.secondary.opacity(0.08))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+                        }
+                    }
 
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Send text message as User A")
@@ -3300,6 +3373,157 @@ use_when=\(useWhenText)
         userAIDDraft = currentSessionUserID
     }
 
+    private func handleLoadDirectConversationsForUser() async {
+        await loadDirectConversationsForUserFlow()
+    }
+
+    private func applyCurrentSessionUserAsUserAAndLoadDirectConversations() async {
+        guard let currentSessionUserID else {
+            sendStatusHint = "session_user_missing_for_quick_apply"
+            return
+        }
+
+        let trimmedCurrentSessionUserID = currentSessionUserID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let alreadyMatched = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == trimmedCurrentSessionUserID
+        let statusPrefix: String
+        if alreadyMatched {
+            statusPrefix = "User A already matches current session user (user_source=session_user)."
+        } else {
+            statusPrefix = "Applied current session user as User A (user_source=session_user)."
+        }
+
+        userAIDDraft = trimmedCurrentSessionUserID
+        await loadDirectConversationsForUserFlow(
+            userIDOverride: trimmedCurrentSessionUserID,
+            statusPrefix: statusPrefix
+        )
+    }
+
+    private func loadDirectConversationsForUserFlow(
+        userIDOverride: String? = nil,
+        statusPrefix: String? = nil
+    ) async {
+        let targetUserID = (userIDOverride ?? userAIDDraft).trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedStatusPrefix = statusPrefix?.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !targetUserID.isEmpty else {
+            sendStatusHint = "direct_conversation_list_user_required"
+            return
+        }
+
+        isLoadingUserDirectConversations = true
+        fetchError = nil
+        if let normalizedStatusPrefix, !normalizedStatusPrefix.isEmpty {
+            sendStatusHint = "\(normalizedStatusPrefix) Loading direct thread list..."
+        } else {
+            sendStatusHint = "Loading direct thread list..."
+        }
+
+        do {
+            let conversations = try await InboxAPIClient().listDirectConversationsForUser(userID: targetUserID)
+            loadedUserDirectConversations = conversations
+            userAIDDraft = targetUserID
+
+            let loadedStatus = "Loaded \(conversations.count) direct thread(s) for \(targetUserID)."
+            if let normalizedStatusPrefix, !normalizedStatusPrefix.isEmpty {
+                sendStatusHint = "\(normalizedStatusPrefix) \(loadedStatus)"
+            } else {
+                sendStatusHint = loadedStatus
+            }
+        } catch {
+            let errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            fetchError = errorMessage
+            if let normalizedStatusPrefix, !normalizedStatusPrefix.isEmpty {
+                sendStatusHint = "\(normalizedStatusPrefix) \(errorMessage)"
+            } else {
+                sendStatusHint = errorMessage
+            }
+        }
+
+        isLoadingUserDirectConversations = false
+    }
+
+    private func directConversationPair(for directConversation: DirectConversationSummary) -> (userAID: String, userBID: String, isComplete: Bool) {
+        let normalizedMembers = directConversation.memberUserIDs
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+
+        guard normalizedMembers.count >= 2 else {
+            return ("", "", false)
+        }
+
+        let currentUserAID = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let sessionUserID = currentSessionUserID?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let fallbackUserID = normalizedMembers[0]
+
+        let resolvedUserAID: String
+        if normalizedMembers.contains(currentUserAID), !currentUserAID.isEmpty {
+            resolvedUserAID = currentUserAID
+        } else if normalizedMembers.contains(sessionUserID), !sessionUserID.isEmpty {
+            resolvedUserAID = sessionUserID
+        } else {
+            resolvedUserAID = fallbackUserID
+        }
+
+        let resolvedUserBID = normalizedMembers.first(where: { $0 != resolvedUserAID }) ?? ""
+        return (resolvedUserAID, resolvedUserBID, !resolvedUserAID.isEmpty && !resolvedUserBID.isEmpty)
+    }
+
+    private func handleUseListedDirectConversation(_ directConversation: DirectConversationSummary) async {
+        let rowPair = directConversationPair(for: directConversation)
+
+        guard rowPair.isComplete else {
+            sendStatusHint = "direct_conversation_row_pair_incomplete"
+            return
+        }
+
+        isOpening = true
+        fetchError = nil
+        lastSendQuickCopy = "sender=(none) | message_id=(none)"
+        sendStatusHint = "Applied listed direct thread row context. Loading direct thread shell..."
+
+        await hydrateDirectThread(
+            directConversation: directConversation,
+            userAID: rowPair.userAID,
+            userBID: rowPair.userBID,
+            statusPrefix: "Applied listed direct thread row context."
+        )
+
+        isOpening = false
+    }
+
+    private func hydrateDirectThread(
+        directConversation: DirectConversationSummary,
+        userAID: String,
+        userBID: String,
+        statusPrefix: String? = nil
+    ) async {
+        let trimmedUserA = userAID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedUserB = userBID.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedUserA.isEmpty, !trimmedUserB.isEmpty else {
+            sendStatusHint = "direct_conversation_row_pair_incomplete"
+            return
+        }
+
+        userAIDDraft = trimmedUserA
+        userBIDDraft = trimmedUserB
+
+        let normalizedStatusPrefix = statusPrefix?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hydrationStatusPrefix: String
+        if let normalizedStatusPrefix, !normalizedStatusPrefix.isEmpty {
+            hydrationStatusPrefix = "\(normalizedStatusPrefix) conversation_id=\(directConversation.id)."
+        } else {
+            hydrationStatusPrefix = "Selected listed direct thread conversation_id=\(directConversation.id)."
+        }
+
+        await loadInboxThread(
+            userAIDOverride: trimmedUserA,
+            userBIDOverride: trimmedUserB,
+            statusPrefix: hydrationStatusPrefix
+        )
+    }
+
     private func applyCurrentSessionUserAsUserAUserBAndOpenDirectThread() async {
         guard let currentSessionUserID else {
             sendStatusHint = "session_user_missing_for_quick_apply"
@@ -4216,7 +4440,7 @@ use_when=\(useWhenText)
     }
 }
 
-private struct DirectConversationSummary {
+private struct DirectConversationSummary: Identifiable {
     let id: String
     let conversationType: String
     let memberUserIDs: [String]
@@ -4260,6 +4484,11 @@ private struct InboxAPIClient {
         let id: String
         let conversation_type: String
         let member_user_ids: [String]
+    }
+
+    private struct DirectConversationListResponse: Decodable {
+        let count: Int
+        let items: [DirectConversationResponse]
     }
 
     private struct ConversationMemberListResponse: Decodable {
@@ -4394,6 +4623,32 @@ private struct InboxAPIClient {
                 conversationType: payload.conversation_type,
                 memberUserIDs: payload.member_user_ids
             )
+        } catch {
+            throw APIError.invalidResponse
+        }
+    }
+
+    func listDirectConversationsForUser(userID: String) async throws -> [DirectConversationSummary] {
+        let url = try makeURL(
+            path: "/conversations/direct",
+            queryItems: [URLQueryItem(name: "user_id", value: userID)]
+        )
+        let (data, response) = try await URLSession.shared.data(from: url)
+        let httpResponse = try requireHTTPResponse(response)
+
+        guard httpResponse.statusCode == 200 else {
+            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Direct conversation list failed"))
+        }
+
+        do {
+            let payload = try JSONDecoder().decode(DirectConversationListResponse.self, from: data)
+            return payload.items.map {
+                DirectConversationSummary(
+                    id: $0.id,
+                    conversationType: $0.conversation_type,
+                    memberUserIDs: $0.member_user_ids
+                )
+            }
         } catch {
             throw APIError.invalidResponse
         }

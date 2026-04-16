@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 372
+- Batch: 373
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 372 web inbox shell — load direct thread list theo user bằng `GET /conversations/direct?user_id=...` và reuse direct-thread hydrate flow cho listed thread selection.
+- Scope: batch 373 iOS inbox shell — load direct thread list by user qua `GET /conversations/direct?user_id=...` + open listed row bằng shared hydrate flow.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,16 +16,20 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/web-nextjs/lib/inbox/client.ts
-  - apps/web-nextjs/components/direct-message-shell.tsx
+  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+  - iOS: `cd apps/ios-swift && swift build` ✅
 - Git:
-  - latest feature commit: `368dd4a` — `batch372: load direct thread list by user in web inbox shell`
-  - previous feature commit: `8d1c1af` — `batch371: add direct conversation list endpoint for user inbox seam`
+  - latest feature commit: `0b0f0df` — `batch373: add direct conversation list by user flow in ios inbox shell`
+  - previous feature commit: `368dd4a` — `batch372: load direct thread list by user in web inbox shell`
   - working tree: clean
 - Blocker: none
-- Next: mở batch373 với 1 slice hẹp tiếp theo theo dispatch lane: iOS inbox shell load direct thread list qua `GET /conversations/direct?user_id=...` để parity với web/backend mới.
+- Next: mở batch374 với 1 slice hẹp tiếp theo theo dispatch lane ưu tiên MVP parity (friend graph / moments / private feed / direct messaging / location / notifications), tránh metadata churn.
+- Batch 373 handoff:
+  - `0b0f0df` — `batch373: add direct conversation list by user flow in ios inbox shell`
+  - Added iOS inbox API client helper `listDirectConversationsForUser(...)` wired to `GET /conversations/direct?user_id=...`.
+  - iOS inbox shell now supports loading direct thread list by user, applying current session user as `user_a` + load list, and opening listed row via shared `hydrateDirectThread(...)` flow.
+  - Verify pass: iOS `swift build`.
 - Batch 372 handoff:
   - `368dd4a` — `batch372: load direct thread list by user in web inbox shell`
   - Added web inbox client helper `listDirectConversationsForUser(...)` wired to `GET /conversations/direct?user_id=...`.
