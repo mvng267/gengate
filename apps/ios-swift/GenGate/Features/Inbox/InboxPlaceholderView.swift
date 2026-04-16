@@ -327,6 +327,25 @@ struct InboxPlaceholderView: View {
                                         .font(.footnote)
                                         .foregroundStyle(.secondary)
 
+                                    Text("latest_message_id: \(directConversation.latestMessageID ?? "(none)") · latest_activity_at: \(directConversation.latestMessageCreatedAt ?? "(none)")")
+                                        .font(.caption.monospaced())
+                                        .foregroundStyle(.secondary)
+
+                                    let latestMessageSummary: String = {
+                                        if let messageID = directConversation.latestMessageID,
+                                           !messageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                                           let senderUserID = directConversation.latestMessageSenderUserID,
+                                           !senderUserID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                            let preview = directConversation.latestMessagePreview ?? ""
+                                            return "\(senderUserID): \(preview)"
+                                        }
+                                        return "(no messages yet)"
+                                    }()
+
+                                    Text("latest_message_preview: \(latestMessageSummary)")
+                                        .font(.caption.monospaced())
+                                        .foregroundStyle(.secondary)
+
                                     if rowPair.isComplete {
                                         Button {
                                             Task {
@@ -4444,6 +4463,10 @@ private struct DirectConversationSummary: Identifiable {
     let id: String
     let conversationType: String
     let memberUserIDs: [String]
+    let latestMessageID: String?
+    let latestMessageSenderUserID: String?
+    let latestMessagePreview: String?
+    let latestMessageCreatedAt: String?
 }
 
 private struct InboxMessageRow: Identifiable {
@@ -4484,6 +4507,10 @@ private struct InboxAPIClient {
         let id: String
         let conversation_type: String
         let member_user_ids: [String]
+        let latest_message_id: String?
+        let latest_message_sender_user_id: String?
+        let latest_message_preview: String?
+        let latest_message_created_at: String?
     }
 
     private struct DirectConversationListResponse: Decodable {
@@ -4621,7 +4648,11 @@ private struct InboxAPIClient {
             return DirectConversationSummary(
                 id: payload.id,
                 conversationType: payload.conversation_type,
-                memberUserIDs: payload.member_user_ids
+                memberUserIDs: payload.member_user_ids,
+                latestMessageID: payload.latest_message_id,
+                latestMessageSenderUserID: payload.latest_message_sender_user_id,
+                latestMessagePreview: payload.latest_message_preview,
+                latestMessageCreatedAt: payload.latest_message_created_at
             )
         } catch {
             throw APIError.invalidResponse
@@ -4646,7 +4677,11 @@ private struct InboxAPIClient {
                 DirectConversationSummary(
                     id: $0.id,
                     conversationType: $0.conversation_type,
-                    memberUserIDs: $0.member_user_ids
+                    memberUserIDs: $0.member_user_ids,
+                    latestMessageID: $0.latest_message_id,
+                    latestMessageSenderUserID: $0.latest_message_sender_user_id,
+                    latestMessagePreview: $0.latest_message_preview,
+                    latestMessageCreatedAt: $0.latest_message_created_at
                 )
             }
         } catch {
