@@ -49,7 +49,7 @@ struct ProfilePlaceholderView: View {
                     bullets: [
                         "Use the Session tab first to create or restore a session if you want the protected iOS shell context.",
                         "Paste a backend user UUID below, then fetch pending requests and friendships for that user.",
-                        "You can now create friend requests via `/friends/requests`, accept pending inbound requests via `/friends/requests/{id}/accept`, and reject pending inbound requests via `/friends/requests/{id}/reject` directly from this tab."
+                        "You can now create friend requests via `/friends/requests`, accept pending inbound requests via `/friends/requests/{id}/accept`, and reject pending requests (inbound/outbound) via `/friends/requests/{id}/reject` directly from this tab."
                     ]
                 )
 
@@ -341,37 +341,41 @@ struct ProfilePlaceholderView: View {
                                         .disabled(isLoading || isCreatingRequest || isReversePairSelected)
                                     }
 
-                                    if row.canAccept {
+                                    if row.canAccept || row.canReject {
                                         HStack(spacing: 8) {
-                                            Button {
-                                                Task {
-                                                    await acceptFriendRequest(requestID: row.id)
+                                            if row.canAccept {
+                                                Button {
+                                                    Task {
+                                                        await acceptFriendRequest(requestID: row.id)
+                                                    }
+                                                } label: {
+                                                    Text(busyAcceptRequestID == row.id ? "Accepting..." : "Accept request")
+                                                        .frame(maxWidth: .infinity)
                                                 }
-                                            } label: {
-                                                Text(busyAcceptRequestID == row.id ? "Accepting..." : "Accept request")
-                                                    .frame(maxWidth: .infinity)
+                                                .buttonStyle(.bordered)
+                                                .disabled(
+                                                    isLoading ||
+                                                    busyAcceptRequestID == row.id ||
+                                                    busyRejectRequestID == row.id
+                                                )
                                             }
-                                            .buttonStyle(.bordered)
-                                            .disabled(
-                                                isLoading ||
-                                                busyAcceptRequestID == row.id ||
-                                                busyRejectRequestID == row.id
-                                            )
 
-                                            Button(role: .destructive) {
-                                                Task {
-                                                    await rejectFriendRequest(requestID: row.id)
+                                            if row.canReject {
+                                                Button(role: .destructive) {
+                                                    Task {
+                                                        await rejectFriendRequest(requestID: row.id)
+                                                    }
+                                                } label: {
+                                                    Text(busyRejectRequestID == row.id ? "Rejecting..." : "Reject request")
+                                                        .frame(maxWidth: .infinity)
                                                 }
-                                            } label: {
-                                                Text(busyRejectRequestID == row.id ? "Rejecting..." : "Reject request")
-                                                    .frame(maxWidth: .infinity)
+                                                .buttonStyle(.bordered)
+                                                .disabled(
+                                                    isLoading ||
+                                                    busyAcceptRequestID == row.id ||
+                                                    busyRejectRequestID == row.id
+                                                )
                                             }
-                                            .buttonStyle(.bordered)
-                                            .disabled(
-                                                isLoading ||
-                                                busyAcceptRequestID == row.id ||
-                                                busyRejectRequestID == row.id
-                                            )
                                         }
                                     }
                                 }
@@ -1124,6 +1128,7 @@ private struct FriendRequestRow: Identifiable {
     let requesterLabel: String
     let receiverLabel: String
     let canAccept: Bool
+    let canReject: Bool
 }
 
 private struct FriendshipRow: Identifiable {
@@ -1227,7 +1232,8 @@ private struct FriendGraphAPIClient {
                     receiverUserID: $0.receiver.id,
                     requesterLabel: $0.requester.username ?? $0.requester.email,
                     receiverLabel: $0.receiver.username ?? $0.receiver.email,
-                    canAccept: $0.status == "pending" && $0.receiver.id == userID
+                    canAccept: $0.status == "pending" && $0.receiver.id == userID,
+                    canReject: $0.status == "pending" && ($0.receiver.id == userID || $0.requester.id == userID)
                 )
             },
             friendships: friendshipsResponse.items.map {
