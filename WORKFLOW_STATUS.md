@@ -26,7 +26,7 @@
 - Git:
   - latest feature commit: `bcdae27` — `batch375: add status filter for friend request listing`
   - previous feature commit: `5318c16` — `batch374: sort direct conversation list by latest message activity`
-  - working tree: dirty (`M WORKFLOW_STATUS.md` while syncing workflow metadata)
+  - working tree: clean
 - Blocker: none
 - Next: mở batch376 với 1 slice hẹp ưu tiên web friend graph shell dùng trực tiếp `status=pending` cho pending snapshot để giảm post-filter client-side và bám backend parity mới.
 - Batch 375 handoff:

@@ -103,7 +103,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Git mốc gần nhất:
   - commit gần nhất đã chốt: `bcdae27` — `batch375: add status filter for friend request listing`
   - commit liền trước: `5318c16` — `batch374: sort direct conversation list by latest message activity`
-  - working tree hiện tại: dirty (`M WORKFLOW_STATUS.md` while syncing metadata)
+  - working tree hiện tại: clean
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
