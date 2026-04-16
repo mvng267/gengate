@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 382
-- Trục công việc: iOS DM inbox list triage polish — harden latest-message sender/preview fallback markers from direct thread list (`GET /conversations/direct?user_id=...`).
-- Trạng thái: batch382_complete_ios_inbox_latest_message_fallback_markers.
+- Batch workflow chính thức hiện tại: 383
+- Trục công việc: web location shell parity hardening — wire remove-audience action from existing contract (`DELETE /locations/shares/{share_id}/audience/{audience_id}`).
+- Trạng thái: batch383_complete_web_location_remove_audience_action.
+
+## Batch 383 handoff (closed)
+- Batch vừa xong: **383**
+- Commit đã chốt:
+  - `284f8ee` — `batch383: add web location audience remove action`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` ✅ (`TYPECHECK_OK`)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **384**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chọn 1 slice hẹp parity ngoài DM (ưu tiên location/notifications micro-polish) để giữ MVP breadth.
 
 ## Batch 382 handoff (closed)
 - Batch vừa xong: **382**

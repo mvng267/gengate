@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 382
+- Batch: 383
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 382 iOS DM inbox list triage polish — harden latest-message sender/preview fallback markers for direct thread list rows.
+- Scope: batch 383 web location shell parity hardening — wire audience removal action using existing backend contract.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,14 +16,19 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
+  - apps/web-nextjs/lib/location/client.ts
+  - apps/web-nextjs/components/location-shell.tsx
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` ✅ (`TYPECHECK_OK`)
 - Git:
-  - latest feature commit: `4ba402b` — `batch382: harden ios inbox latest-message preview fallback`
+  - latest feature commit: `284f8ee` — `batch383: add web location audience remove action`
   - working tree: dirty (WORKFLOW_STATUS.md, WORKFLOW_CHECKLIST.md, TEAM_DISPATCH.md)
 - Blocker: none
-- Next: open batch383 with one narrow seam outside DM polish (prefer location/notifications parity hardening) to keep MVP breadth moving.
+- Next: open batch384 with one narrow parity slice outside DM polish (prefer iOS location quick summary hardening or notifications micro-polish).
+- Batch 383 handoff:
+  - commit: `284f8ee` — `batch383: add web location audience remove action`
+  - Added web location audience remove wiring: client now calls `DELETE /locations/shares/{share_id}/audience/{audience_id}` and shell exposes `Remove audience member` action using `Allowed user UUID` as audience id input.
+  - Verify pass: web typecheck.
 - Batch 382 handoff:
   - commit: `4ba402b` — `batch382: harden ios inbox latest-message preview fallback`
   - Updated iOS inbox direct-list latest-message summary renderer to use explicit fallback markers when sender/preview data is empty (`(sender_missing)` / `(preview_empty)`) while still preserving `(no messages yet)` when no latest message exists.
