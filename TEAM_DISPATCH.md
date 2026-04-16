@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 375
-- Trục công việc: backend friend graph seam — thêm status filter cho `GET /friends/requests?user_id=...&status=pending|accepted|rejected` + validate unsupported status.
-- Trạng thái: batch375_complete_backend_friend_requests_status_filter.
+- Batch workflow chính thức hiện tại: 376
+- Trục công việc: web friend graph seam — chuyển pending snapshot sang backend-filtered query `GET /friends/requests?user_id=...&status=pending` để giảm mismatch pending/rejected sau mutate.
+- Trạng thái: batch376_complete_web_friend_graph_pending_status_filter.
+
+## Batch 376 handoff (closed)
+- Batch vừa xong: **376**
+- Commit đã chốt:
+  - `aa9380f` — `batch376: use backend pending-status filter in web friend graph snapshot`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **377**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS friend graph shell dùng backend-filtered pending query `GET /friends/requests?user_id=...&status=pending` để parity với web/backend.
 
 ## Batch 375 handoff (closed)
 - Batch vừa xong: **375**
