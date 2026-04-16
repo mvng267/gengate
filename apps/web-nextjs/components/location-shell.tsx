@@ -9,6 +9,7 @@ import {
   createSnapshot,
   getAudienceCount,
   getSnapshotCount,
+  removeAudience,
   updateShare,
   type LocationShareItem,
 } from "@/lib/location/client";
@@ -53,6 +54,7 @@ export function LocationShell({
   const [isTogglingShare, setIsTogglingShare] = useState(false);
   const [isAddingAudience, setIsAddingAudience] = useState(false);
   const [isCreatingSnapshot, setIsCreatingSnapshot] = useState(false);
+  const [isRemovingAudience, setIsRemovingAudience] = useState(false);
   const [isReloadingCounts, setIsReloadingCounts] = useState(false);
   const [lastCopiedLocationStateSummary, setLastCopiedLocationStateSummary] = useState<string | null>(null);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
@@ -217,6 +219,33 @@ export function LocationShell({
     setIsAddingAudience(false);
   }
 
+  async function handleRemoveAudience() {
+    if (!share) {
+      setStatus("create_share_first");
+      return;
+    }
+
+    const trimmedAudienceId = form.allowedUserId.trim();
+    if (!trimmedAudienceId) {
+      setStatus("location_audience_id_required_for_remove");
+      return;
+    }
+
+    setIsRemovingAudience(true);
+    setStatus("Removing location audience member...");
+
+    try {
+      await removeAudience(share.id, trimmedAudienceId);
+      const nextAudienceCount = await getAudienceCount(share.id);
+      setAudienceCount(nextAudienceCount);
+      setStatus(`Removed audience member ${trimmedAudienceId}. Share now has ${nextAudienceCount} allowed user(s).`);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "location_audience_remove_failed");
+    }
+
+    setIsRemovingAudience(false);
+  }
+
   async function handleCopyQuickLocationStateSummary() {
     const normalizedSummary = quickLocationStateSummary.trim();
     if (!normalizedSummary) {
@@ -324,8 +353,19 @@ export function LocationShell({
             placeholder="optional friend uuid for audience"
           />
         </label>
-        <button type="button" onClick={() => void handleAddAudience()} disabled={isAddingAudience || !share}>
+        <button
+          type="button"
+          onClick={() => void handleAddAudience()}
+          disabled={isAddingAudience || isRemovingAudience || !share}
+        >
           {isAddingAudience ? "Adding..." : "Add audience member"}
+        </button>
+        <button
+          type="button"
+          onClick={() => void handleRemoveAudience()}
+          disabled={isRemovingAudience || isAddingAudience || !share}
+        >
+          {isRemovingAudience ? "Removing..." : "Remove audience member"}
         </button>
       </div>
 

@@ -77,6 +77,21 @@ export async function createAudience(shareId: string, allowedUserId: string): Pr
   return (await response.json()) as AudienceItem;
 }
 
+export async function removeAudience(shareId: string, audienceId: string): Promise<{ status: string }> {
+  const response = await apiRequest(
+    `/locations/shares/${encodeURIComponent(shareId)}/audience/${encodeURIComponent(audienceId)}`,
+    {
+      method: "DELETE",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`location_audience_remove_failed:${response.status}`);
+  }
+
+  return (await response.json()) as { status: string };
+}
+
 export async function getAudienceCount(shareId: string): Promise<number> {
   const response = await apiRequest(`/locations/shares/${encodeURIComponent(shareId)}/audience`);
   if (!response.ok) {
