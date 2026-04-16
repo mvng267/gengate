@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **367 — notifications shell (iOS lifecycle snapshot audit quick-copy) đã complete**.
+- Batch workflow chính thức mới nhất trong checklist/status: **371 — backend direct conversation list by user đã complete**.
 
 ## Reporting hard rule
 
@@ -89,21 +89,25 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **367**
-- Scope hiện tại: notifications shell (iOS) — thêm one-tap quick-copy `lifecycle snapshot audit` line để report deterministic pair markers + create/mutation IDs + unread summary + paging window cho parity đối chiếu backend + web + iOS.
+- Batch workflow chính thức hiện tại: **371**
+- Scope hiện tại: direct messaging backend (conversations) — add `GET /conversations/direct?user_id=...` để list direct threads theo user cho inbox parity shell wiring.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift`
+  - `apps/backend-python/app/modules/conversations/router.py`
+  - `apps/backend-python/app/schemas/conversations.py`
+  - `apps/backend-python/app/services/conversations.py`
+  - `apps/backend-python/tests/test_batch7_conversations_api.py`
 - Test-verify:
-  - `cd apps/ios-swift && swift build` → ✅
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py -k direct_conversations_for_user` → ✅ (1 passed, 3 deselected)
+  - `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` → ✅ (4 passed)
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `fd6b95f` — `batch367: add lifecycle snapshot audit quick copy in ios notification shell`
-  - commit liền trước: `2260dea` — `batch366: add lifecycle snapshot audit quick copy in web notification shell`
-  - working tree hiện tại: clean
+  - commit gần nhất đã chốt: *(pending trong run này; sẽ chốt ngay sau khi sync workflow docs)*
+  - commit liền trước: `8d5cc34` — `batch370: allow requester-side reject action in web friend graph shell`
+  - working tree hiện tại: dirty (backend batch371 + workflow docs chưa commit)
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
-  - mở batch368 với 1 slice hẹp tiếp theo theo workflow dispatch (sau khi sync docs handoff 367).
+  - mở batch372 với đúng 1 slice hẹp: web inbox shell dùng `GET /conversations/direct?user_id=...` để load direct thread list parity.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Quick create + feed-gate bundle: moment_create_marker={author=... | image_url=... | caption=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` + line `Last create + feed-gate bundle: last_create_feed_visibility_delta={created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Bấm `Copy quick create + feed-gate bundle` để verify one-tap create bundle payload và bấm thêm `Copy last create + feed-gate bundle` để verify deterministic payload bundle cho lần create gần nhất; sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`; bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy last copied delete summary feedback`, verify line source-state rồi bấm `Copy delete copy audit for first ready source` để one-shot copy `delete_copy_audit=source:.../value:...`; đối chiếu source được pick với line source-state.
@@ -117,17 +121,45 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Batch handoff note
 
-- Batch vừa xong: **367**
+- Batch vừa xong: **370**
 - Commit cuối đã chốt:
-  - `fd6b95f` — `batch367: add lifecycle snapshot audit quick copy in ios notification shell`
+  - `8d5cc34` — `batch370: allow requester-side reject action in web friend graph shell`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **371**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chọn 1 slice hẹp tiếp theo theo dispatch lane, ưu tiên seam còn lệch parity giữa web/iOS/backend.
+
+---
+
+- Batch vừa xong: **369**
+- Commit cuối đã chốt:
+  - `6c9913f` — `batch369: add notification delete quick summary in ios notification shell`
 - Test-verify cuối:
   - iOS: `cd apps/ios-swift && swift build` → pass
 - Blocker/rủi ro còn lại:
   - none
 - Batch kế tiếp:
-  - **368**
+  - **370**
 - Scope hẹp đầu tiên của batch kế tiếp:
-  - notifications slice tiếp theo theo dispatch lane (workflow-first).
+  - notifications/friend-graph/moment/inbox/location slice tiếp theo theo dispatch lane (workflow-first), ưu tiên seam chưa parity hoàn toàn.
+
+---
+
+- Batch vừa xong: **368**
+- Commit cuối đã chốt:
+  - `c9c4f6f` — `batch368: add notification delete quick summary in web shell`
+- Test-verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` → pass
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp:
+  - **369**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS notifications shell: thêm quick-copy `delete result summary` line + delete row action để parity với web batch368.
 
 ---
 

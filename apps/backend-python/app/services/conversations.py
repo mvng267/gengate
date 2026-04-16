@@ -77,6 +77,40 @@ class ConversationService:
         ]
         return conversation, members
 
+    def list_direct_conversations_for_user(
+        self,
+        db: Session,
+        user_id: uuid.UUID,
+    ) -> list[tuple[Conversation, list[ConversationMember]]]:
+        user = user_repository.get(db, user_id)
+        if user is None:
+            raise ValueError("user_not_found")
+
+        memberships = conversation_member_repository.list_by_user(db, user_id)
+        if not memberships:
+            return []
+
+        results: list[tuple[Conversation, list[ConversationMember]]] = []
+        seen_conversation_ids: set[uuid.UUID] = set()
+        for membership in memberships:
+            conversation_id = membership.conversation_id
+            if conversation_id in seen_conversation_ids:
+                continue
+
+            conversation = conversation_repository.get(db, conversation_id)
+            if conversation is None or conversation.conversation_type != "direct":
+                continue
+
+            members = conversation_member_repository.list_by_conversation(db, conversation_id)
+            if len(members) != 2:
+                continue
+
+            seen_conversation_ids.add(conversation_id)
+            results.append((conversation, members))
+
+        results.sort(key=lambda row: row[0].created_at, reverse=True)
+        return results
+
     def update_direct_member_read_cursor(
         self,
         db: Session,

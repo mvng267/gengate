@@ -113,6 +113,78 @@ def test_batch7_conversations_members_attachments_flow() -> None:
     app.dependency_overrides.clear()
 
 
+def test_batch58_list_direct_conversations_for_user() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    user_a_response = client.post("/auth/register", json={"email": "batch58-list-a@example.com", "username": "batch58_list_a"})
+    user_b_response = client.post("/auth/register", json={"email": "batch58-list-b@example.com", "username": "batch58_list_b"})
+    user_c_response = client.post("/auth/register", json={"email": "batch58-list-c@example.com", "username": "batch58_list_c"})
+    assert user_a_response.status_code == 201
+    assert user_b_response.status_code == 201
+    assert user_c_response.status_code == 201
+
+    user_a_id = user_a_response.json()["id"]
+    user_b_id = user_b_response.json()["id"]
+    user_c_id = user_c_response.json()["id"]
+
+    open_thread_ab = client.post(
+        "/conversations/direct",
+        json={"user_a_id": user_a_id, "user_b_id": user_b_id},
+    )
+    assert open_thread_ab.status_code == 201
+    conversation_ab_id = open_thread_ab.json()["id"]
+
+    open_thread_ac = client.post(
+        "/conversations/direct",
+        json={"user_a_id": user_a_id, "user_b_id": user_c_id},
+    )
+    assert open_thread_ac.status_code == 201
+    conversation_ac_id = open_thread_ac.json()["id"]
+
+    list_for_user_a = client.get(f"/conversations/direct?user_id={user_a_id}")
+    assert list_for_user_a.status_code == 200
+    assert list_for_user_a.json()["count"] == 2
+    listed_ids_for_a = [item["id"] for item in list_for_user_a.json()["items"]]
+    assert set(listed_ids_for_a) == {conversation_ab_id, conversation_ac_id}
+    for item in list_for_user_a.json()["items"]:
+        assert item["conversation_type"] == "direct"
+        assert len(item["member_user_ids"]) == 2
+        assert user_a_id in item["member_user_ids"]
+
+    list_for_user_b = client.get(f"/conversations/direct?user_id={user_b_id}")
+    assert list_for_user_b.status_code == 200
+    assert list_for_user_b.json()["count"] == 1
+    assert list_for_user_b.json()["items"][0]["id"] == conversation_ab_id
+
+    missing_user_response = client.get(f"/conversations/direct?user_id={uuid.uuid4()}")
+    assert missing_user_response.status_code == 404
+    assert missing_user_response.json() == {
+        "error": {"code": "user_not_found", "message": "user_not_found"}
+    }
+
+    app.dependency_overrides.clear()
+
+
 def test_batch101_direct_member_read_cursor_contract_errors() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",

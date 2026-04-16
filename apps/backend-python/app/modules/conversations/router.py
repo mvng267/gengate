@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db_session
@@ -13,6 +13,7 @@ from app.schemas.conversations import (
     ConversationMemberResponse,
     ConversationResponse,
     DirectConversationGetOrCreateRequest,
+    DirectConversationListResponse,
     DirectConversationResponse,
 )
 from app.services.conversations import conversation_service
@@ -76,6 +77,20 @@ def get_or_create_direct_conversation(
         status_code = status.HTTP_400_BAD_REQUEST if code == "invalid_direct_members" else status.HTTP_404_NOT_FOUND
         raise HTTPException(status_code=status_code, detail=code)
     return to_direct_conversation_response(conversation, members)
+
+
+@router.get("/direct", response_model=DirectConversationListResponse)
+def list_direct_conversations_for_user(
+    user_id: uuid.UUID = Query(...),
+    db: Session = Depends(get_db_session),
+) -> DirectConversationListResponse:
+    try:
+        rows = conversation_service.list_direct_conversations_for_user(db, user_id=user_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    items = [to_direct_conversation_response(conversation, members) for conversation, members in rows]
+    return DirectConversationListResponse(count=len(items), items=items)
 
 
 @router.post("/{conversation_id}/members", response_model=ConversationMemberResponse, status_code=status.HTTP_201_CREATED)

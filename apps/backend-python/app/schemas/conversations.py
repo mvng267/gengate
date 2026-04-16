@@ -23,6 +23,11 @@ class DirectConversationResponse(BaseModel):
     member_user_ids: list[uuid.UUID]
 
 
+class DirectConversationListResponse(BaseModel):
+    count: int
+    items: list[DirectConversationResponse]
+
+
 class ConversationListResponse(BaseModel):
     count: int
     items: list[ConversationResponse]

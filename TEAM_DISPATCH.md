@@ -12,21 +12,58 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 367
-- Trục công việc: notifications shell (iOS) — add quick-copy lifecycle snapshot audit line for deterministic parity report (`pair markers + create/mutation IDs + unread summary + paging window`).
-- Trạng thái: batch367_complete_ios_notification_lifecycle_snapshot_audit_quick_copy.
+- Batch workflow chính thức hiện tại: 371
+- Trục công việc: direct messaging backend (conversations) — add `GET /conversations/direct?user_id=...` để list direct threads theo user cho inbox parity shell wiring.
+- Trạng thái: batch371_complete_backend_direct_conversation_list_by_user.
 
-## Batch 367 handoff (closed)
-- Batch vừa xong: **367**
+## Batch 371 handoff (closed)
+- Batch vừa xong: **371**
 - Commit đã chốt:
-  - `fd6b95f` — `batch367: add lifecycle snapshot audit quick copy in ios notification shell`
+  - `batch371: add direct conversation list endpoint for user inbox seam`
+- Test/verify cuối:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py -k direct_conversations_for_user` ✅ (1 passed, 3 deselected)
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_batch7_conversations_api.py` ✅ (4 passed)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **372**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - web inbox shell: dùng `GET /conversations/direct?user_id=...` để load direct thread list parity thay cho open-thread-only path.
+
+## Batch 370 handoff (closed)
+- Batch vừa xong: **370**
+- Commit đã chốt:
+  - `8d5cc34` — `batch370: allow requester-side reject action in web friend graph shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **371**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chọn 1 slice hẹp tiếp theo theo dispatch lane (ưu tiên seam chưa parity hoàn toàn giữa web/iOS/backend).
+
+## Batch 369 handoff (closed)
+- Batch vừa xong: **369**
+- Commit đã chốt:
+  - `6c9913f` — `batch369: add notification delete quick summary in ios notification shell`
 - Test/verify cuối:
   - iOS: `cd apps/ios-swift && swift build` ✅
 - Blocker/rủi ro còn lại:
   - none
-- Batch kế tiếp: **368**
+- Batch kế tiếp: **370**
 - Scope hẹp đầu tiên của batch kế tiếp:
-  - notifications slice tiếp theo theo workflow dispatch lane.
+  - notifications/friend-graph/moment/inbox/location slice tiếp theo theo workflow dispatch lane (ưu tiên seam chưa parity hoàn toàn).
+
+## Batch 368 handoff (closed)
+- Batch vừa xong: **368**
+- Commit đã chốt:
+  - `c9c4f6f` — `batch368: add notification delete quick summary in web shell`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **369**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS notifications shell: thêm quick-copy delete result summary line + delete row action để parity với web batch368.
 
 ## Batch 366 handoff (closed)
 - Batch vừa xong: **366**
