@@ -12,9 +12,22 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 377
-- Trục công việc: iOS friend graph seam — chuyển pending snapshot sang backend-filtered query `GET /friends/requests?user_id=...&status=pending` để parity với web/backend.
-- Trạng thái: batch377_complete_ios_friend_graph_pending_status_filter.
+- Batch workflow chính thức hiện tại: 378
+- Trục công việc: backend moments/private-feed seam — include viewer-owned moments trong `GET /moments/feed?viewer_user_id=...` cùng accepted-friend moments để feed shell khớp behavior product.
+- Trạng thái: batch378_complete_backend_private_feed_include_viewer_own_moments.
+
+## Batch 378 handoff (closed)
+- Batch vừa xong: **378**
+- Commit đã chốt:
+  - pending (current run, chưa commit)
+- Test/verify cuối:
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py -k "private_friend_feed"` ✅ (1 passed, 3 deselected)
+  - backend: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_moments_api.py` ✅ (4 passed)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **379**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chọn 1 slice hẹp theo seam ưu tiên còn lại (moments/feed/DM/location/notifications), tránh metadata-only churn.
 
 ## Batch 377 handoff (closed)
 - Batch vừa xong: **377**

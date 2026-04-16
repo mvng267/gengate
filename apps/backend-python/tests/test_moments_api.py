@@ -106,7 +106,7 @@ def test_list_moments_for_author_includes_media_items() -> None:
     clear_overrides()
 
 
-def test_private_friend_feed_lists_only_accepted_friend_moments() -> None:
+def test_private_friend_feed_lists_viewer_and_accepted_friend_moments_only() -> None:
     client = create_test_client()
 
     viewer = client.post("/auth/register", json={"email": "viewer@example.com", "username": "viewer_u"})
@@ -124,6 +124,12 @@ def test_private_friend_feed_lists_only_accepted_friend_moments() -> None:
     request_id = request_response.json()["id"]
     accept_response = client.post(f"/friends/requests/{request_id}/accept")
     assert accept_response.status_code == 201
+
+    viewer_moment = client.post(
+        "/moments",
+        json={"author_user_id": viewer_id, "caption_text": "viewer-own moment"},
+    )
+    assert viewer_moment.status_code == 201
 
     friend_moment = client.post(
         "/moments",
@@ -152,10 +158,18 @@ def test_private_friend_feed_lists_only_accepted_friend_moments() -> None:
     feed_response = client.get(f"/moments/feed?viewer_user_id={viewer_id}")
     assert feed_response.status_code == 200
     payload = feed_response.json()
-    assert payload["count"] == 1
-    assert payload["items"][0]["caption_text"] == "friend-only moment"
-    assert payload["items"][0]["author"]["id"] == friend_id
-    assert payload["items"][0]["media_items"][0]["storage_key"] == "moments/friend-feed.jpg"
+    assert payload["count"] == 2
+
+    items = payload["items"]
+    captions = {item["caption_text"] for item in items}
+    author_ids = {item["author"]["id"] for item in items}
+
+    assert captions == {"viewer-own moment", "friend-only moment"}
+    assert author_ids == {viewer_id, friend_id}
+    assert stranger_id not in author_ids
+
+    friend_item = next(item for item in items if item["author"]["id"] == friend_id)
+    assert friend_item["media_items"][0]["storage_key"] == "moments/friend-feed.jpg"
 
     clear_overrides()
 

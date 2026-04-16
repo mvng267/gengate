@@ -42,13 +42,15 @@ class MomentService:
             raise ValueError("user_not_found")
 
         friendships = friendship_repository.list_for_user(db, user_id=viewer_user_id, limit=100, offset=0)
-        friend_ids: list[uuid.UUID] = []
+        feed_author_ids: list[uuid.UUID] = [viewer_user_id]
         for friendship in friendships:
             if friendship.state != "accepted":
                 continue
-            friend_ids.append(friendship.user_b_id if friendship.user_a_id == viewer_user_id else friendship.user_a_id)
+            friend_id = friendship.user_b_id if friendship.user_a_id == viewer_user_id else friendship.user_a_id
+            if friend_id not in feed_author_ids:
+                feed_author_ids.append(friend_id)
 
-        return moment_repository.list_for_authors(db, author_user_ids=friend_ids, limit=50)
+        return moment_repository.list_for_authors(db, author_user_ids=feed_author_ids, limit=50)
 
     def update_moment(self, db: Session, moment_id: uuid.UUID, caption_text: str | None) -> Moment:
         moment = moment_repository.get(db, moment_id)
