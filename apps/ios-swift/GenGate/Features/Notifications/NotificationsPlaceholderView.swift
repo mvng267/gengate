@@ -1022,6 +1022,35 @@ struct NotificationsPlaceholderView: View {
         )
     }
 
+    private func clearQuickContextCopiedFeedbackOnWindowRefresh() {
+        lastQuickUnreadSummaryCopiedText = ""
+        quickUnreadSummaryCopiedAt = nil
+
+        lastQuickPageMetaCopiedText = ""
+        quickPageMetaCopiedAt = nil
+
+        lastQuickPageCursorSummaryCopiedText = ""
+        quickPageCursorSummaryCopiedAt = nil
+
+        lastQuickMutationDeltaCopiedText = ""
+        quickMutationDeltaCopiedAt = nil
+
+        lastQuickCreateResultDeltaCopiedText = ""
+        quickCreateResultDeltaCopiedAt = nil
+
+        lastQuickLifecyclePairCopiedText = ""
+        quickLifecyclePairCopiedAt = nil
+
+        lastQuickLifecyclePairMutationCopiedText = ""
+        quickLifecyclePairMutationCopiedAt = nil
+
+        lastQuickUnreadLifecycleMutationBundleCopiedText = ""
+        quickUnreadLifecycleMutationBundleCopiedAt = nil
+
+        clearQuickLifecycleSnapshotAuditCopiedFeedback()
+        clearQuickDeleteResultSummaryCopiedFeedback()
+    }
+
     private func loadNotifications(
         forcedUserID: String? = nil,
         forcedOffset: Int? = nil,
@@ -1031,8 +1060,7 @@ struct NotificationsPlaceholderView: View {
         lastCreateResultDelta = nil
         lastDeleteResultDelta = nil
         lastLifecyclePair = nil
-        clearQuickLifecycleSnapshotAuditCopiedFeedback()
-        clearQuickDeleteResultSummaryCopiedFeedback()
+        clearQuickContextCopiedFeedbackOnWindowRefresh()
 
         let normalizedStatusPrefix = statusPrefix?.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedUserID = (forcedUserID ?? userIDDraft).trimmingCharacters(in: .whitespacesAndNewlines)
