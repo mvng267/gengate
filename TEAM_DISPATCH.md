@@ -19,7 +19,7 @@
 ## Batch 420 handoff (closed)
 - Batch vừa xong: **420**
 - Commit đã chốt:
-  - `b7f5fdd` — `batch420: clear web location copied-state feedback on copy failure`
+  - `0663937` — `batch420: clear web location copied-state feedback on copy failure`
 - Test/verify cuối:
   - Web: `cd apps/web-nextjs && npm run typecheck` ✅
   - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.46s`)

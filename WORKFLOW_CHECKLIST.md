@@ -99,7 +99,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/backend-python && make test-friendships` → ✅ (`8 passed in 0.46s`)
 - Git mốc gần nhất:
   - commit đã chốt:
-    - `b7f5fdd` — `batch420: clear web location copied-state feedback on copy failure`
+    - `0663937` — `batch420: clear web location copied-state feedback on copy failure`
   - working tree hiện tại: dirty (workflow docs đang cập nhật trong nhịp hiện tại)
 - Blocker nếu có:
   - none.
@@ -120,7 +120,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch vừa xong: **420**
 - Commit cuối đã chốt:
-  - `b7f5fdd` — `batch420: clear web location copied-state feedback on copy failure`
+  - `0663937` — `batch420: clear web location copied-state feedback on copy failure`
 - Test-verify cuối:
   - Web: `cd apps/web-nextjs && npm run typecheck` → pass
   - Backend guardrail: `cd apps/backend-python && make test-friendships` → pass (`8 passed in 0.46s`)

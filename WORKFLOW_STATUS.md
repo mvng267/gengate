@@ -22,12 +22,12 @@
   - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.46s`)
 - Git:
   - latest feature commit:
-    - `b7f5fdd` — `batch420: clear web location copied-state feedback on copy failure`
+    - `0663937` — `batch420: clear web location copied-state feedback on copy failure`
   - working tree: dirty (workflow docs đang cập nhật trong nhịp hiện tại)
 - Blocker: none.
 - Next: mở batch421 với 1 micro-slice product seam (ưu tiên notifications/location/feed parity follow-up nhỏ) + giữ verify tối thiểu `make test-friendships`.
 - Batch 420 handoff:
-  - commit: `b7f5fdd` — `batch420: clear web location copied-state feedback on copy failure`
+  - commit: `0663937` — `batch420: clear web location copied-state feedback on copy failure`
   - scope: web location `handleCopyQuickLocationStateSummary` giờ reset copied-summary feedback state khi gặp `quick_copy_clipboard_unavailable` hoặc `quick_location_state_summary_copy_failed`, tránh giữ stale copied marker sau copy thất bại.
   - verify: web typecheck ✅, backend make test-friendships ✅.
 - Batch 419 handoff:
