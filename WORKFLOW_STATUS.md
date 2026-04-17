@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 412
+- Batch: 414
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 412 iOS inbox contract parity — prefer backend `error.code` tokens in direct-message client failures.
+- Scope: batch 414 iOS inbox UX parity — render deterministic error hints for tokenized direct-message failures.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -18,16 +18,25 @@
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (17.71s)`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (15.60s)`)
   - Web safety check: `cd apps/web-nextjs && npm run typecheck` ✅
   - Backend targeted verify blocked env:
     - `cd apps/backend-python && pytest -q tests/test_friendships_api.py` ⚠️ (`zsh:1: command not found: pytest`)
 - Git:
   - latest feature commit:
-    - `4a12b07` — `batch412: prefer backend error tokens in ios inbox client`
+    - `fa3cca3` — `batch414: add ios dm error-hint parity in inbox shell`
   - working tree: clean
 - Blocker: env (backend test runner/runtime): thiếu `pytest` trong môi trường hiện tại khi chạy backend targeted tests.
-- Next: mở batch413 với 1 micro-slice DM contract follow-up nhỏ (ưu tiên backend/web phản xạ token parity cho message device-key/attachment edge errors nếu còn lệch) và giữ semantics đồng nhất web/iOS.
+- Next: mở batch415 với 1 micro-slice DM follow-up ưu tiên notification/location seam hoặc backend/iOS token parity còn thiếu để giữ UX/web/iOS contract đồng nhất.
+- Batch 413 handoff:
+  - commit: `1e344f5` — `batch413: add dm error-hint parity in web inbox shell`
+  - scope: web inbox shell map deterministic hint lines cho tokenized direct-message failures (`user_not_found`, `conversation_not_found`, `conversation_member_not_found`, `message_not_found`, `device_not_found`, `device_user_mismatch`, `message_device_key_exists`, `validation_error`, `attachment_target_message_required`, `message_delete_target_required`, `open_thread_first`).
+  - verify: web typecheck ✅, iOS swift build ✅, backend pytest ⚠️ thiếu `pytest`.
+- Batch 412 handoff:
+  - commit: `4a12b07` — `batch412: prefer backend error tokens in ios inbox client`
+  - commit: `5114595` — `batch412: sync workflow docs after ios inbox token parity`
+  - scope: iOS inbox client ưu tiên backend error-code token thay vì fallback prefix/status khi có error payload.
+  - verify: iOS swift build ✅, web typecheck ✅, backend pytest ⚠️ thiếu `pytest`.
 - Batch 411 handoff:
   - commit: `41d7fa3` — `batch411: prefer backend error tokens in web inbox client`
   - commit: `bfddae2` — `batch411: sync workflow docs after web inbox token parity`

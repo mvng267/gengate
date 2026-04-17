@@ -1487,6 +1487,12 @@ struct InboxPlaceholderView: View {
                             .foregroundStyle(.secondary)
                     }
 
+                    if let directMessageErrorHint {
+                        Text("Hint: \(directMessageErrorHint)")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     if let fetchError {
                         Text("Fetch error: \(fetchError)")
                             .font(.footnote)
@@ -2057,6 +2063,13 @@ struct InboxPlaceholderView: View {
         let summaryLastMessageID = messageRows.last?.id ?? "(none)"
 
         return "user_a=\(summaryUserA) | user_b=\(summaryUserB) | message_count=\(summaryMessageCount) | last_message_id=\(summaryLastMessageID)"
+    }
+
+    private var directMessageErrorHint: String? {
+        resolveDirectMessageErrorHint(
+            sendStatusHint: sendStatusHint,
+            fetchError: fetchError
+        )
     }
 
     private var resolvedAttachmentTargetMessageID: String? {
@@ -2851,6 +2864,72 @@ use_when=\(useWhenText)
         }
 
         return "index \(cursorIndex + 1)/\(messageRows.count)"
+    }
+
+    private func resolveDirectMessageErrorHint(sendStatusHint: String?, fetchError: String?) -> String? {
+        let normalizedFetchError = fetchError?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let normalizedFetchError,
+           !normalizedFetchError.isEmpty,
+           let mapped = directMessageErrorHintMessage(for: normalizedFetchError) {
+            return mapped
+        }
+
+        let normalizedStatusHint = sendStatusHint?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let normalizedStatusHint,
+           !normalizedStatusHint.isEmpty,
+           let mapped = directMessageErrorHintMessage(for: normalizedStatusHint) {
+            return mapped
+        }
+
+        return nil
+    }
+
+    private func directMessageErrorHintMessage(for message: String) -> String? {
+        if message.contains("user_not_found") {
+            return "A referenced user was not found. Verify User A/User B/sender IDs and retry."
+        }
+
+        if message.contains("conversation_not_found") {
+            return "Direct thread no longer exists. Re-open the conversation to refresh thread context."
+        }
+
+        if message.contains("conversation_member_not_found") {
+            return "Sender is not a member of this direct thread. Keep sender inside the current conversation member pair."
+        }
+
+        if message.contains("message_not_found") {
+            return "Target message was not found. Reload thread messages and retry with a fresh message ID."
+        }
+
+        if message.contains("device_not_found") {
+            return "Recipient device was not found. Reload recipient devices and choose a valid device ID."
+        }
+
+        if message.contains("device_user_mismatch") {
+            return "Recipient device does not belong to the selected recipient user. Re-check recipient user/device pairing."
+        }
+
+        if message.contains("message_device_key_exists") {
+            return "A message device-key already exists for this recipient device. Reuse existing key or choose a different target."
+        }
+
+        if message.contains("validation_error") {
+            return "Request payload is invalid. Re-check UUID fields and required inputs."
+        }
+
+        if message.contains("attachment_target_message_required") {
+            return "Select a target message ID before creating or loading attachments."
+        }
+
+        if message.contains("message_delete_target_required") {
+            return "Select a target message ID before deleting a message."
+        }
+
+        if message.contains("open_thread_first") {
+            return "Open a direct thread first, then retry this action."
+        }
+
+        return nil
     }
 
     private func shortUserID(_ userID: String?) -> String {
