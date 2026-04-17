@@ -126,6 +126,8 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   const [lastLifecyclePair, setLastLifecyclePair] = useState<NotificationLifecyclePair | null>(null);
   const [lastQuickLifecycleSnapshotAuditCopiedText, setLastQuickLifecycleSnapshotAuditCopiedText] = useState("");
   const [quickLifecycleSnapshotAuditCopiedAt, setQuickLifecycleSnapshotAuditCopiedAt] = useState<number | null>(null);
+  const [lastQuickDeleteResultSummaryCopiedText, setLastQuickDeleteResultSummaryCopiedText] = useState("");
+  const [quickDeleteResultSummaryCopiedAt, setQuickDeleteResultSummaryCopiedAt] = useState<number | null>(null);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
 
   useEffect(() => {
@@ -144,6 +146,8 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     setLastLifecyclePair(null);
     setLastQuickLifecycleSnapshotAuditCopiedText("");
     setQuickLifecycleSnapshotAuditCopiedAt(null);
+    setLastQuickDeleteResultSummaryCopiedText("");
+    setQuickDeleteResultSummaryCopiedAt(null);
   }, [initialUserId]);
 
   useEffect(() => {
@@ -317,6 +321,19 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     return `Copied quick lifecycle snapshot audit (${elapsedSeconds}s ago): ${lastQuickLifecycleSnapshotAuditCopiedText}`;
   })();
 
+  const quickDeleteResultSummaryCopiedFeedbackText = (() => {
+    if (quickDeleteResultSummaryCopiedAt === null) {
+      return null;
+    }
+
+    const elapsedSeconds = Math.floor((Date.now() - quickDeleteResultSummaryCopiedAt) / 1000);
+    if (elapsedSeconds < 0 || elapsedSeconds >= 6) {
+      return null;
+    }
+
+    return `Copied quick delete result summary (${elapsedSeconds}s ago): ${lastQuickDeleteResultSummaryCopiedText}`;
+  })();
+
   async function submitNotificationCreateFlow(input?: NotificationCreateFlowInput) {
     const userId = (input?.userIdOverride ?? form.userId).trim();
     const normalizedStatusPrefix = input?.statusPrefix?.trim();
@@ -378,6 +395,8 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       setLastLifecyclePair(null);
       setQuickLifecycleSnapshotAuditCopiedAt(null);
       setLastQuickLifecycleSnapshotAuditCopiedText("");
+      setQuickDeleteResultSummaryCopiedAt(null);
+      setLastQuickDeleteResultSummaryCopiedText("");
 
       setForm((current) => ({
         ...current,
@@ -501,6 +520,8 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       setLastDeleteResultDelta(null);
       setQuickLifecycleSnapshotAuditCopiedAt(null);
       setLastQuickLifecycleSnapshotAuditCopiedText("");
+      setQuickDeleteResultSummaryCopiedAt(null);
+      setLastQuickDeleteResultSummaryCopiedText("");
 
       const mutationDelta: NotificationMutationDelta = {
         notificationId: updated.id,
@@ -560,6 +581,8 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       setLastLifecyclePair(null);
       setQuickLifecycleSnapshotAuditCopiedAt(null);
       setLastQuickLifecycleSnapshotAuditCopiedText("");
+      setQuickDeleteResultSummaryCopiedAt(null);
+      setLastQuickDeleteResultSummaryCopiedText("");
 
       const deleteResultDelta: NotificationDeleteResultDelta = {
         notificationId: deleted.id,
@@ -729,16 +752,27 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
 
   async function handleCopyQuickDeleteResultSummary() {
     if (!lastDeleteResultDelta) {
+      setLastQuickDeleteResultSummaryCopiedText("");
+      setQuickDeleteResultSummaryCopiedAt(null);
       setStatus("quick_delete_result_summary_missing");
       return;
     }
 
-    await copyToClipboard(
+    const copied = await copyToClipboard(
       quickDeleteResultSummaryLine,
       "Copied quick delete result summary to clipboard",
       "quick_delete_result_summary_missing",
       "quick_delete_result_summary_copy_failed",
     );
+
+    if (!copied) {
+      setLastQuickDeleteResultSummaryCopiedText("");
+      setQuickDeleteResultSummaryCopiedAt(null);
+      return;
+    }
+
+    setLastQuickDeleteResultSummaryCopiedText(quickDeleteResultSummaryLine);
+    setQuickDeleteResultSummaryCopiedAt(Date.now());
   }
 
   return (
@@ -845,6 +879,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
           Copy quick delete result summary
         </button>
       </p>
+      {quickDeleteResultSummaryCopiedFeedbackText ? <p>{quickDeleteResultSummaryCopiedFeedbackText}</p> : null}
       <p>Filter mode: {pagination.unreadOnly ? "Unread only" : "All notifications"}</p>
 
       <form onSubmit={(event) => void handleCreate(event)}>
