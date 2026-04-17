@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 399
+- Batch: 400
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 399 iOS inbox send quick-copy parity — align sender keep-pair + send-bundle quick-copy failure handling with web tokens.
+- Scope: batch 400 iOS inbox read-cursor quick-copy parity — align read-cursor quick-copy failure handling with web tokens.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -18,12 +18,16 @@
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (15.18s)`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (14.97s)`)
 - Git:
-  - latest feature commit: `f9b144a` — `batch399: harden ios sender bundle quick-copy failures`
+  - latest feature commit: `477fe8f` — `batch400: harden ios read-cursor quick-copy failures`
   - working tree: clean
 - Blocker: none
-- Next: open batch400 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox read-cursor quick-copy failure token parity với web `read_cursor_quick_copy_failed`).
+- Next: open batch401 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox read-cursor-apply quick-copy failure token parity với web `read_cursor_apply_quick_copy_failed`).
+- Batch 400 handoff:
+  - commit: `477fe8f` — `batch400: harden ios read-cursor quick-copy failures`
+  - Updated iOS inbox read-cursor quick copy in `InboxPlaceholderView`: added clipboard-unavailable guard (`quick_copy_clipboard_unavailable`) and write-failure token (`read_cursor_quick_copy_failed`) before success status, matching web quick-copy failure semantics.
+  - Verify pass: iOS `swift build` (`Build complete! (14.97s)`).
 - Batch 399 handoff:
   - commit: `f9b144a` — `batch399: harden ios sender bundle quick-copy failures`
   - Updated iOS inbox sender keep-pair + send-result bundle quick copy in `InboxPlaceholderView`: added clipboard-unavailable guard (`quick_copy_clipboard_unavailable`) and write-failure token (`sender_keep_pair_send_bundle_quick_copy_failed`) before success status, matching web quick-copy failure semantics.
