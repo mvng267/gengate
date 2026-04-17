@@ -12,9 +12,33 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 383
-- Trục công việc: web location shell parity hardening — wire remove-audience action from existing contract (`DELETE /locations/shares/{share_id}/audience/{audience_id}`).
-- Trạng thái: batch383_complete_web_location_remove_audience_action.
+- Batch workflow chính thức hiện tại: 385
+- Trục công việc: iOS location shell parity hardening — add quick audience-remove parity summary copy surface for deterministic payload checks.
+- Trạng thái: batch385_complete_ios_location_remove_audience_parity_summary_copy.
+
+## Batch 385 handoff (closed)
+- Batch vừa xong: **385**
+- Commit đã chốt:
+  - `96064f9` — `batch385: add ios location audience-remove parity summary copy`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **386**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chọn 1 slice hẹp parity ngoài DM (ưu tiên notifications micro-polish) để giữ MVP breadth.
+
+## Batch 384 handoff (closed)
+- Batch vừa xong: **384**
+- Commit đã chốt:
+  - `29dd3b2` — `batch384: add web location audience-remove parity summary copy`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` ✅ (`TYPECHECK_OK`)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **385**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS location parity hardening cho remove-audience quick summary + copy action.
 
 ## Batch 383 handoff (closed)
 - Batch vừa xong: **383**
