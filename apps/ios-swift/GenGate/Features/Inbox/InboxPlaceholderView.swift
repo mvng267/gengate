@@ -4742,6 +4742,12 @@ private struct InboxAPIClient {
     }
 
     private struct BackendErrorPayload: Decodable {
+        struct ErrorDetail: Decodable {
+            let code: String?
+            let message: String?
+        }
+
+        let error: ErrorDetail?
         let detail: String?
     }
 
@@ -4778,7 +4784,13 @@ private struct InboxAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 201 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Direct conversation resolve failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Direct conversation resolve failed"
+                )
+            )
         }
 
         do {
@@ -4806,7 +4818,13 @@ private struct InboxAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 200 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Direct conversation list failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Direct conversation list failed"
+                )
+            )
         }
 
         do {
@@ -4833,7 +4851,13 @@ private struct InboxAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 200 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Conversation members fetch failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Conversation members fetch failed"
+                )
+            )
         }
 
         do {
@@ -4857,7 +4881,13 @@ private struct InboxAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 200 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Message list fetch failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Message list fetch failed"
+                )
+            )
         }
 
         do {
@@ -4891,7 +4921,13 @@ private struct InboxAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 201 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Message create failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Message create failed"
+                )
+            )
         }
 
         do {
@@ -4912,7 +4948,13 @@ private struct InboxAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 200 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Attachment list fetch failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Attachment list fetch failed"
+                )
+            )
         }
 
         do {
@@ -4935,7 +4977,13 @@ private struct InboxAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 200 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Message device-key list fetch failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Message device-key list fetch failed"
+                )
+            )
         }
 
         do {
@@ -4975,7 +5023,13 @@ private struct InboxAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 201 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Message device-key create failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Message device-key create failed"
+                )
+            )
         }
 
         do {
@@ -5008,7 +5062,13 @@ private struct InboxAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 200 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Read cursor update failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Read cursor update failed"
+                )
+            )
         }
 
         do {
@@ -5030,7 +5090,13 @@ private struct InboxAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 200 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Recipient devices fetch failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Recipient devices fetch failed"
+                )
+            )
         }
 
         do {
@@ -5057,7 +5123,13 @@ private struct InboxAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 200 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Message delete failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Message delete failed"
+                )
+            )
         }
     }
 
@@ -5083,7 +5155,13 @@ private struct InboxAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 201 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Attachment create failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Attachment create failed"
+                )
+            )
         }
 
         do {
@@ -5120,11 +5198,42 @@ private struct InboxAPIClient {
         return httpResponse
     }
 
+    private func resolveRequestFailureMessage(from data: Data, statusCode: Int, prefix: String) -> String {
+        if let errorCode = readErrorCode(from: data) {
+            return errorCode
+        }
+
+        return readErrorMessage(from: data, statusCode: statusCode, prefix: prefix)
+    }
+
+    private func readErrorCode(from data: Data) -> String? {
+        guard let payload = try? JSONDecoder().decode(BackendErrorPayload.self, from: data) else {
+            return nil
+        }
+
+        if let code = payload.error?.code?.trimmingCharacters(in: .whitespacesAndNewlines), !code.isEmpty {
+            return code
+        }
+
+        if let detail = payload.detail?.trimmingCharacters(in: .whitespacesAndNewlines), !detail.isEmpty {
+            return detail
+        }
+
+        return nil
+    }
+
     private func readErrorMessage(from data: Data, statusCode: Int, prefix: String) -> String {
-        if let payload = try? JSONDecoder().decode(BackendErrorPayload.self, from: data),
-           let detail = payload.detail,
-           !detail.isEmpty {
-            return "\(prefix): \(statusCode) (\(detail))"
+        if let payload = try? JSONDecoder().decode(BackendErrorPayload.self, from: data) {
+            if let detail = payload.detail?.trimmingCharacters(in: .whitespacesAndNewlines), !detail.isEmpty {
+                return "\(prefix): \(statusCode) (\(detail))"
+            }
+
+            if let error = payload.error {
+                let errorCode = error.code?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "http_error"
+                let errorMessage = error.message?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                let resolvedMessage = errorMessage.isEmpty ? errorCode : errorMessage
+                return "\(prefix): \(statusCode) (\(errorCode): \(resolvedMessage))"
+            }
         }
 
         return "\(prefix): \(statusCode)"
