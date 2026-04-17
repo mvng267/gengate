@@ -13,13 +13,13 @@
 
 ## Active batch
 - Batch workflow chính thức hiện tại: 386
-- Trục công việc: web notifications micro-polish parity — add copied-feedback line for `Copy quick lifecycle snapshot audit`.
-- Trạng thái: batch386_in_verify_web_notifications_lifecycle_snapshot_copied_feedback.
+- Trục công việc: web notifications micro-polish parity — added copied-feedback line for `Copy quick lifecycle snapshot audit`.
+- Trạng thái: batch386_complete_web_notifications_lifecycle_snapshot_copied_feedback.
 
 ## Batch 386 handoff (closed)
 - Batch vừa xong: **386**
 - Commit đã chốt:
-  - (pending commit in this run)
+  - `198daee` — `batch386: add web notification lifecycle snapshot copy feedback`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` ✅ (`TYPECHECK_OK`)
 - Blocker/rủi ro còn lại:

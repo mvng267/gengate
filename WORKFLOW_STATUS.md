@@ -3,7 +3,7 @@
 - Batch: 386
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
 - Scope: batch 386 web notifications micro-polish parity — add quick lifecycle snapshot audit copied-feedback line to match iOS quick-copy UX.
-- Status: verify
+- Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
@@ -20,10 +20,10 @@
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` ✅ (`TYPECHECK_OK`)
 - Git:
-  - latest feature commit: (pending this batch commit)
-  - working tree: dirty (batch386 web notifications + workflow docs)
+  - latest feature commit: `198daee` — `batch386: add web notification lifecycle snapshot copy feedback`
+  - working tree: clean
 - Blocker: none
-- Next: commit batch386 (web notifications micro-polish) and sync checklist/dispatch handoff to move to next narrow MVP seam.
+- Next: open batch387 with one narrow MVP seam slice (non-metadata), then verify + commit.
 - Batch 385 handoff:
   - commit: `96064f9` — `batch385: add ios location audience-remove parity summary copy`
   - Added iOS location shell quick parity surface for remove-audience flow: new line `Quick audience remove parity summary: share_id=... / removed_audience_id=... / audience_count=...` + one-tap copy action + guard markers when share/removed audience context is missing.
