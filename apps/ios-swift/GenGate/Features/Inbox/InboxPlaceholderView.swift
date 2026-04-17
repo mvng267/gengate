@@ -2974,7 +2974,11 @@ use_when=\(useWhenText)
             return
         }
 
-        writeToClipboard(normalizedText)
+        guard writeToClipboard(normalizedText) else {
+            sendStatusHint = "delete_result_quick_copy_failed"
+            return
+        }
+
         sendStatusHint = "Copied delete result quick copy to clipboard (\(normalizedText))."
     }
 
@@ -3350,12 +3354,16 @@ use_when=\(useWhenText)
         lastRecipientDeviceSourceHintBranchUseWhenPreviewLiteCopyAt = Date()
     }
 
-    private func writeToClipboard(_ text: String) {
+    @discardableResult
+    private func writeToClipboard(_ text: String) -> Bool {
 #if os(iOS)
         UIPasteboard.general.string = text
+        return true
 #elseif os(macOS)
         NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(text, forType: .string)
+        return NSPasteboard.general.setString(text, forType: .string)
+#else
+        return false
 #endif
     }
 
