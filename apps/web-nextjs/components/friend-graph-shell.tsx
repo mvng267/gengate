@@ -27,6 +27,18 @@ const FRIEND_REQUEST_DECISION_QUICK_COPY_EMPTY =
   "request_id=(none) / action=(none) / accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)";
 const FRIEND_REQUEST_COUNTS_QUICK_COPY_EMPTY =
   "accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)";
+const REQUEST_NOT_PENDING_FALLBACK_MESSAGE = "This request is no longer pending. Reload friend graph to continue.";
+
+function resolveFriendRequestActionError(error: unknown, fallbackCode: string): string {
+  if (error instanceof Error) {
+    if (error.message.includes("request_not_pending")) {
+      return REQUEST_NOT_PENDING_FALLBACK_MESSAGE;
+    }
+    return error.message;
+  }
+
+  return fallbackCode;
+}
 
 export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGraphShellProps) {
   const [snapshot, setSnapshot] = useState<FriendGraphSnapshot | null>(null);
@@ -550,7 +562,7 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
           `accepted_count=${nextSnapshot.friendshipCount} / pending_inbound=${pendingBreakdown.inbound} / pending_outbound=${pendingBreakdown.outbound}.`,
       );
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "friend_request_accept_failed");
+      setStatus(resolveFriendRequestActionError(error, "friend_request_accept_failed"));
     }
 
     setBusyRequestId(null);
@@ -585,7 +597,7 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
           `accepted_count=${nextSnapshot.friendshipCount} / pending_inbound=${pendingBreakdown.inbound} / pending_outbound=${pendingBreakdown.outbound}.`,
       );
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "friend_request_reject_failed");
+      setStatus(resolveFriendRequestActionError(error, "friend_request_reject_failed"));
     }
 
     setBusyRequestId(null);

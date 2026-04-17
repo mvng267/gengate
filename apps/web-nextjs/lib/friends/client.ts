@@ -1,5 +1,11 @@
 import { apiRequest } from "@/lib/api/client";
 
+type ApiErrorCodePayload = {
+  error?: {
+    code?: string;
+  };
+};
+
 type FriendUserSummary = {
   id: string;
   email: string;
@@ -74,6 +80,15 @@ export async function fetchFriendGraphSnapshot(userId: string): Promise<FriendGr
   };
 }
 
+async function readApiErrorCode(response: Response): Promise<string | null> {
+  try {
+    const payload = (await response.json()) as ApiErrorCodePayload;
+    return payload.error?.code ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function createFriendRequest(input: {
   requesterUserId: string;
   receiverUserId: string;
@@ -102,6 +117,10 @@ export async function acceptFriendRequest(requestId: string): Promise<Friendship
   });
 
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode === "request_not_pending") {
+      throw new Error(errorCode);
+    }
     throw new Error(`friend_request_accept_failed:${response.status}`);
   }
 
@@ -114,6 +133,10 @@ export async function rejectFriendRequest(requestId: string): Promise<FriendRequ
   });
 
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode === "request_not_pending") {
+      throw new Error(errorCode);
+    }
     throw new Error(`friend_request_reject_failed:${response.status}`);
   }
 
