@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **427 — web notifications parity now clears stale quick-delete copied feedback when delete-summary context changes and shows deterministic copied status line.**
+- Batch workflow chính thức mới nhất trong checklist/status: **428 — web notifications parity now resets quick-copy context bundles on load window refresh to avoid stale create/mutation/delete markers after window changes.**
 
 ## Reporting hard rule
 
@@ -89,22 +89,22 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **427**
-- Scope hiện tại: web notifications parity — clear stale quick-delete copied feedback khi delete-summary context đổi và thêm copied-feedback line deterministic.
+- Batch workflow chính thức hiện tại: **428**
+- Scope hiện tại: web notifications parity — reset quick-copy context bundles khi load window đổi để tránh stale markers sau reload.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
   - `apps/web-nextjs/components/notification-shell.tsx`
 - Test-verify:
   - `cd apps/web-nextjs && npm run typecheck` → ✅
-  - `cd apps/backend-python && make test-friendships` → ✅ (`8 passed in 0.47s`)
+  - `cd apps/backend-python && make test-friendships` → ✅ (`8 passed in 0.55s`)
 - Git mốc gần nhất:
   - commit đã chốt:
-    - `11c998f` — `batch427: harden web notifications delete summary quick-copy feedback`
-  - working tree hiện tại: dirty (workflow docs đang cập nhật để sync batch427)
+    - `e9fad8a` — `batch428: reset web notifications quick-copy context on load`
+  - working tree hiện tại: dirty (workflow docs đang cập nhật để sync batch428)
 - Blocker nếu có:
   - none.
 - Bước kế tiếp:
-  - mở batch428 với 1 micro-slice product seam (ưu tiên notifications/location/feed parity follow-up) + giữ verify tối thiểu `make test-friendships`.
+  - mở batch429 với 1 micro-slice product seam (ưu tiên notifications/location/feed parity follow-up) + giữ verify tối thiểu `make test-friendships`.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Quick create + feed-gate bundle: moment_create_marker={author=... | image_url=... | caption=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` + line `Last create + feed-gate bundle: last_create_feed_visibility_delta={created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Bấm `Copy quick create + feed-gate bundle` để verify one-tap create bundle payload và bấm thêm `Copy last create + feed-gate bundle` để verify deterministic payload bundle cho lần create gần nhất; sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`; bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy last copied delete summary feedback`, verify line source-state rồi bấm `Copy delete copy audit for first ready source` để one-shot copy `delete_copy_audit=source:.../value:...`; đối chiếu source được pick với line source-state.
@@ -117,6 +117,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread` / `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> nhập message text rồi bấm `Use current session user as sender + keep user_a/user_b pair + send` và verify status có marker `user_pair_source=kept_user_a+user_b` + `sender_source=session_user` -> bấm `Copy quick sender keep-pair marker` và verify payload marker -> bấm `Copy quick sender keep-pair + send result bundle` và verify payload bundle `sender_keep_pair_marker={...} | send_result={sender=... | message_id=...}` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
 
 ## Batch handoff note
+
+- Batch vừa xong: **428**
+- Commit cuối đã chốt:
+  - `e9fad8a` — `batch428: reset web notifications quick-copy context on load`
+- Test-verify cuối:
+  - Web: `cd apps/web-nextjs && npm run typecheck` → pass
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` → pass (`8 passed in 0.55s`)
+- Blocker/rủi ro còn lại:
+  - none.
+- Batch kế tiếp:
+  - **429**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notifications/location/feed follow-up micro-slice (ưu tiên parity gap rõ nhất còn lại) + giữ verify bằng `make test-friendships`.
+
+---
 
 - Batch vừa xong: **427**
 - Commit cuối đã chốt:

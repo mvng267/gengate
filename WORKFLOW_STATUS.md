@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 427
+- Batch: 428
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 427 web notifications parity — clear stale quick-delete copied feedback when delete-summary context changes and show deterministic copied status line.
+- Scope: batch 428 web notifications parity — reset quick-copy context bundles on load window refresh to avoid stale create/mutation/delete markers after window changes.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -19,13 +19,17 @@
   - apps/web-nextjs/components/notification-shell.tsx
 - Test:
   - Web targeted verify: `cd apps/web-nextjs && npm run typecheck` ✅
-  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.47s`)
+  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.55s`)
 - Git:
   - latest feature commit:
-    - `11c998f` — `batch427: harden web notifications delete summary quick-copy feedback`
-  - working tree: dirty (workflow docs đang cập nhật để sync batch427)
+    - `e9fad8a` — `batch428: reset web notifications quick-copy context on load`
+  - working tree: dirty (workflow docs đang cập nhật để sync batch428)
 - Blocker: none.
-- Next: mở batch428 với 1 micro-slice product seam (ưu tiên notifications/location/feed parity follow-up nhỏ) + giữ verify tối thiểu `make test-friendships`.
+- Next: mở batch429 với 1 micro-slice product seam (ưu tiên notifications/location/feed parity follow-up nhỏ) + giữ verify tối thiểu `make test-friendships`.
+- Batch 428 handoff:
+  - commit: `e9fad8a` — `batch428: reset web notifications quick-copy context on load`
+  - scope: Web notifications shell nay reset `lastMutationDelta`/`lastCreateResultDelta`/`lastDeleteResultDelta`/`lastLifecyclePair` và copied-feedback state cho lifecycle snapshot + delete summary ngay khi `Load notifications` chạy, để tránh giữ marker quick-copy cũ khi người dùng đổi load window (user/offset/filter).
+  - verify: web typecheck ✅, backend make test-friendships ✅.
 - Batch 427 handoff:
   - commit: `11c998f` — `batch427: harden web notifications delete summary quick-copy feedback`
   - scope: Web notifications shell nay có copied-feedback line cho `quick delete result summary` và reset feedback state khi delete context đổi qua create/toggle/delete/init hoặc khi quick-copy thiếu dữ liệu/clipboard unavailable/copy failed, tránh stale “Copied ...” sau khi delete parity payload đã drift.
