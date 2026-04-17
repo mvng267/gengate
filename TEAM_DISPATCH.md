@@ -12,9 +12,23 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 408
-- Trục công việc: moments/feed contract polish — normalize web moment client error-code tokens + web feed error-hint parity surface.
-- Trạng thái: batch408_complete_moments_error_code_and_hint_parity.
+- Batch workflow chính thức hiện tại: 409
+- Trục công việc: iOS moments/feed contract parity — prefer backend `error.code` tokens in Feed API client failures.
+- Trạng thái: batch409_complete_ios_moments_error_code_token_parity.
+
+## Batch 409 handoff (closed)
+- Batch vừa xong: **409**
+- Commit đã chốt:
+  - `6347274` — `batch409: align ios moments error-code token parity`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (5.34s)`)
+  - Web safety check: `cd apps/web-nextjs && npm run typecheck` ✅
+  - Backend friendships API targeted verify: `cd apps/backend-python && pytest -q tests/test_friendships_api.py` ⚠️ (`zsh:1: command not found: pytest`)
+- Blocker/rủi ro còn lại:
+  - env: thiếu `pytest` trong môi trường hiện tại khi chạy targeted backend API tests.
+- Batch kế tiếp: **410**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - moments/feed/backend contract follow-up nhỏ, tiếp tục giữ parity semantics web/iOS.
 
 ## Batch 408 handoff (closed)
 - Batch vừa xong: **408**

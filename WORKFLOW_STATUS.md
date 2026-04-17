@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 408
+- Batch: 409
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 408 moments/feed contract polish — normalize web moment client error-code tokens and surface feed hint parity in web compose shell.
+- Scope: batch 409 iOS moments/feed contract parity — prefer backend `error.code` tokens over prefixed status strings in Feed API client failures.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,18 +16,22 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/web-nextjs/lib/moments/client.ts
-  - apps/web-nextjs/components/moment-compose-shell.tsx
+  - apps/ios-swift/GenGate/Features/Feed/FeedPlaceholderView.swift
 - Test:
-  - Web: `cd apps/web-nextjs && npm run typecheck` ✅
-  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (0.18s)`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (5.34s)`)
+  - Web safety check: `cd apps/web-nextjs && npm run typecheck` ✅
   - Backend friendship API targeted verify vẫn blocked env: `cd apps/backend-python && pytest -q tests/test_friendships_api.py` ⚠️ (`zsh:1: command not found: pytest`)
 - Git:
   - latest feature commit:
-    - `9a65676` — `batch408: normalize web moments error-code fallback hints`
+    - `6347274` — `batch409: align ios moments error-code token parity`
   - working tree: clean
 - Blocker: env (backend test runner): thiếu `pytest` trong môi trường hiện tại khi chạy targeted backend API tests.
-- Next: mở batch409 với 1 micro-slice moments/feed parity kế tiếp (ưu tiên iOS error-token parity follow-up nếu còn lệch hoặc backend contract follow-up nhỏ) + verify command chạy được trong env hiện tại.
+- Next: mở batch410 với 1 micro-slice moments/feed/backend contract follow-up nhỏ (ưu tiên scope verify được trong env hiện tại) và tiếp tục giữ web/iOS parity semantics.
+- Batch 408 handoff:
+  - commit: `9a65676` — `batch408: normalize web moments error-code fallback hints`
+  - commit: `7cf2c80` — `batch408: sync workflow docs after moments error-hint parity`
+  - scope: web moments client now prefers backend error tokens + web compose shell hint parity.
+  - verify: web typecheck ✅, iOS swift build ✅, backend targeted pytest ⚠️ thiếu `pytest`.
 - Batch 407 handoff:
   - commit: `51673dc` — `batch407: polish web friend-request not-pending fallback`
   - commit: `ba79212` — `batch407: align ios friend-request not-pending fallback parity`
