@@ -1405,10 +1405,22 @@ struct NotificationsPlaceholderView: View {
     private func copyQuickUnreadSummaryLine() {
         let normalizedText = quickUnreadSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
+            statusMessage = "quick_unread_summary_empty"
             return
         }
 
-        writeToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = "quick_unread_summary_copy_failed"
+            fetchError = nil
+            return
+        }
+
         lastQuickUnreadSummaryCopiedText = normalizedText
         quickUnreadSummaryCopiedAt = Date()
         statusMessage = "Copied quick unread summary to clipboard (\(normalizedText))."
@@ -1418,10 +1430,22 @@ struct NotificationsPlaceholderView: View {
     private func copyQuickPageMetaLine() {
         let normalizedText = quickPageMetaLine.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
+            statusMessage = "quick_page_meta_empty"
             return
         }
 
-        writeToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = "quick_page_meta_copy_failed"
+            fetchError = nil
+            return
+        }
+
         lastQuickPageMetaCopiedText = normalizedText
         quickPageMetaCopiedAt = Date()
         statusMessage = "Copied quick page meta to clipboard (\(normalizedText))."
@@ -1431,10 +1455,22 @@ struct NotificationsPlaceholderView: View {
     private func copyQuickPageCursorSummaryLine() {
         let normalizedText = quickPageCursorSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
+            statusMessage = "quick_page_cursor_summary_empty"
             return
         }
 
-        writeToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = "quick_page_cursor_summary_copy_failed"
+            fetchError = nil
+            return
+        }
+
         lastQuickPageCursorSummaryCopiedText = normalizedText
         quickPageCursorSummaryCopiedAt = Date()
         statusMessage = "Copied quick page cursor summary to clipboard (\(normalizedText))."
@@ -1449,10 +1485,22 @@ struct NotificationsPlaceholderView: View {
 
         let normalizedText = quickMutationDeltaLine.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
+            statusMessage = "quick_mutation_delta_missing"
             return
         }
 
-        writeToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = "quick_mutation_delta_copy_failed"
+            fetchError = nil
+            return
+        }
+
         lastQuickMutationDeltaCopiedText = normalizedText
         quickMutationDeltaCopiedAt = Date()
         statusMessage = "Copied quick mutation delta to clipboard (\(normalizedText))."
@@ -1467,10 +1515,22 @@ struct NotificationsPlaceholderView: View {
 
         let normalizedText = quickCreateResultDeltaLine.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
+            statusMessage = "quick_create_result_delta_missing"
             return
         }
 
-        writeToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = "quick_create_result_delta_copy_failed"
+            fetchError = nil
+            return
+        }
+
         lastQuickCreateResultDeltaCopiedText = normalizedText
         quickCreateResultDeltaCopiedAt = Date()
         statusMessage = "Copied quick create-result delta to clipboard (\(normalizedText))."
@@ -1485,10 +1545,22 @@ struct NotificationsPlaceholderView: View {
 
         let normalizedText = quickLifecyclePairLine.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
+            statusMessage = "quick_lifecycle_pair_missing"
             return
         }
 
-        writeToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = "quick_lifecycle_pair_copy_failed"
+            fetchError = nil
+            return
+        }
+
         lastQuickLifecyclePairCopiedText = normalizedText
         quickLifecyclePairCopiedAt = Date()
         statusMessage = "Copied quick lifecycle pair to clipboard (\(normalizedText))."
@@ -1503,10 +1575,22 @@ struct NotificationsPlaceholderView: View {
 
         let normalizedText = quickLifecyclePairMutationLine.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
+            statusMessage = "quick_lifecycle_pair_mutation_missing"
             return
         }
 
-        writeToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = "quick_lifecycle_pair_mutation_copy_failed"
+            fetchError = nil
+            return
+        }
+
         lastQuickLifecyclePairMutationCopiedText = normalizedText
         quickLifecyclePairMutationCopiedAt = Date()
         statusMessage = "Copied quick lifecycle pair mutation to clipboard (\(normalizedText))."
@@ -1521,10 +1605,22 @@ struct NotificationsPlaceholderView: View {
 
         let normalizedText = quickUnreadLifecycleMutationBundleLine.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
+            statusMessage = "quick_unread_lifecycle_mutation_bundle_missing"
             return
         }
 
-        writeToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = "quick_unread_lifecycle_mutation_bundle_copy_failed"
+            fetchError = nil
+            return
+        }
+
         lastQuickUnreadLifecycleMutationBundleCopiedText = normalizedText
         quickUnreadLifecycleMutationBundleCopiedAt = Date()
         statusMessage = "Copied quick unread lifecycle mutation bundle to clipboard (\(normalizedText))."
@@ -1543,7 +1639,18 @@ struct NotificationsPlaceholderView: View {
             return
         }
 
-        writeToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = "quick_lifecycle_snapshot_audit_copy_failed"
+            fetchError = nil
+            return
+        }
+
         lastQuickLifecycleSnapshotAuditCopiedText = normalizedText
         quickLifecycleSnapshotAuditCopiedAt = Date()
         statusMessage = "Copied quick lifecycle snapshot audit to clipboard (\(normalizedText))."
@@ -1562,19 +1669,42 @@ struct NotificationsPlaceholderView: View {
             return
         }
 
-        writeToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = "quick_delete_result_summary_copy_failed"
+            fetchError = nil
+            return
+        }
+
         lastQuickDeleteResultSummaryCopiedText = normalizedText
         quickDeleteResultSummaryCopiedAt = Date()
         statusMessage = "Copied quick delete result summary to clipboard (\(normalizedText))."
         fetchError = nil
     }
 
-    private func writeToClipboard(_ text: String) {
+    private var isClipboardAvailableForQuickCopy: Bool {
+#if os(iOS) || os(macOS)
+        true
+#else
+        false
+#endif
+    }
+
+    @discardableResult
+    private func writeToClipboard(_ text: String) -> Bool {
 #if canImport(UIKit)
         UIPasteboard.general.string = text
+        return true
 #elseif canImport(AppKit)
         NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(text, forType: .string)
+        return NSPasteboard.general.setString(text, forType: .string)
+#else
+        return false
 #endif
     }
 }
