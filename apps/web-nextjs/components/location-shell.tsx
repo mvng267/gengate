@@ -57,6 +57,7 @@ export function LocationShell({
   const [isRemovingAudience, setIsRemovingAudience] = useState(false);
   const [isReloadingCounts, setIsReloadingCounts] = useState(false);
   const [lastCopiedLocationStateSummary, setLastCopiedLocationStateSummary] = useState<string | null>(null);
+  const [lastCopiedAudienceRemoveParitySummary, setLastCopiedAudienceRemoveParitySummary] = useState<string | null>(null);
   const [lastRemovedAudienceId, setLastRemovedAudienceId] = useState<string | null>(null);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
 
@@ -280,29 +281,35 @@ export function LocationShell({
     const normalizedSummary = quickAudienceRemoveParitySummary.trim();
     if (!normalizedSummary) {
       setStatus("quick_audience_remove_parity_summary_empty");
+      setLastCopiedAudienceRemoveParitySummary("");
       return;
     }
 
     if (typeof navigator === "undefined" || typeof navigator.clipboard?.writeText !== "function") {
       setStatus("quick_copy_clipboard_unavailable");
+      setLastCopiedAudienceRemoveParitySummary("");
       return;
     }
 
     if (!share) {
       setStatus("quick_audience_remove_parity_summary_missing_share");
+      setLastCopiedAudienceRemoveParitySummary("");
       return;
     }
 
     if (!lastRemovedAudienceId) {
       setStatus("quick_audience_remove_parity_summary_missing_removed_audience");
+      setLastCopiedAudienceRemoveParitySummary("");
       return;
     }
 
     try {
       await navigator.clipboard.writeText(normalizedSummary);
+      setLastCopiedAudienceRemoveParitySummary(normalizedSummary);
       setStatus(`Copied quick audience remove parity summary to clipboard (${normalizedSummary}).`);
     } catch {
       setStatus("quick_audience_remove_parity_summary_copy_failed");
+      setLastCopiedAudienceRemoveParitySummary("");
     }
   }
 
@@ -354,6 +361,11 @@ export function LocationShell({
           Copy quick audience remove parity summary
         </button>
       </p>
+      {lastCopiedAudienceRemoveParitySummary ? (
+        <p>
+          Last copied audience remove parity summary: <code>{lastCopiedAudienceRemoveParitySummary}</code>
+        </p>
+      ) : null}
 
       <div>
         <label>
