@@ -4465,7 +4465,8 @@ use_when=\(useWhenText)
     private func deleteMessage() async {
         guard let targetMessageID = resolvedMessageToDeleteID,
               !targetMessageID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            fetchError = "Cần message UUID hợp lệ để delete."
+            fetchError = nil
+            sendStatusHint = "message_delete_target_required"
             return
         }
 
