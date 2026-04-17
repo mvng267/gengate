@@ -23,14 +23,21 @@
   - iOS targeted verify: `cd apps/ios-swift && swift build` ✅ (`Build complete! (2.73s)`)
   - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.43s`)
 - Git:
-  - latest feature commit:
+  - latest feature commits:
+    - `cd2faf8` — `batch433: guard ios profile pending-pair peer context against session self-drift`
     - `f8d235d` — `batch433: wire ios pending-pair peer context into inbox quick-apply pivots`
-  - working tree: dirty (batch433 profile pending-pair peer-context self-drift guard + workflow docs update)
+  - working tree: clean
 - Blocker: none.
-- Next: commit batch433 follow-up fix (`batch433: guard ios profile pending-pair peer context against session self-drift`) rồi mở batch434 cho micro-slice tiếp theo.
+- Next: mở batch434 với 1 micro-slice product seam tiếp theo (ưu tiên direct messaging hoặc friend-graph parity token còn thiếu), giữ verify tối thiểu `swift build` + `make test-friendships`.
+- Batch 433 handoff:
+  - commits:
+    - `f8d235d` — `batch433: wire ios pending-pair peer context into inbox quick-apply pivots`
+    - `cd2faf8` — `batch433: guard ios profile pending-pair peer context against session self-drift`
+  - scope: iOS Profile pending-pair quick-apply nay lưu `friendGraphPeerUserID` có self-drift guard (không giữ peer trùng session user khi có candidate non-session), và iOS Inbox quick-apply ưu tiên peer context này với status token `peer_source=profile_pending_pair|thread_context`.
+  - verify: iOS swift build ✅, backend make test-friendships ✅.
 - Batch 432 handoff:
-  - commit: `145b293` — `batch432: add web friend-request pending-pair quick-apply controls`
-  - scope: Web profile/friend graph nhận `userB` từ query + friend-request list có quick-apply `Use same pair / Use reverse pair` với marker `pending_pair_mode`, giúp chọn nhanh requester/receiver pair từ pending rows và pivot inbox giữ peer context.
+  - commit: `0d6f27d` — `batch432: carry selected peer context into web friend-graph pivots`
+  - scope: Web profile/friend graph carry selected peer context qua Feed/Location pivots sau pending-pair quick-apply để giữ user pair xuyên seam.
   - verify: web typecheck ✅, backend make test-friendships ✅.
 - Batch 431 handoff:
   - commit: `d0be9e7` — `batch431: clear ios notifications quick-copy copied-feedback on mutation refresh`
