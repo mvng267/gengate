@@ -1,4 +1,4 @@
-.PHONY: test test-smoke test-fast test-core-db test-policy test-url-gate test-db-lifecycle test-contracts test-schema test-ci
+.PHONY: test test-smoke test-fast test-core-db test-policy test-url-gate test-db-lifecycle test-contracts test-friendships test-schema test-ci
 
 VENV_ACTIVATE = . .venv/bin/activate
 PYTEST = $(VENV_ACTIVATE) && pytest -q
@@ -46,6 +46,10 @@ TEST_CONTRACTS = \
 	tests/test_notifications_security_api.py \
 	tests/test_profiles_api.py
 
+# Group: targeted friend graph contract check.
+TEST_FRIENDSHIPS = \
+	tests/test_friendships_api.py
+
 # Lane: canonical smoke gate (policy + DB lifecycle + URL gate).
 TEST_FAST = \
 	$(TEST_POLICY) \
@@ -87,6 +91,10 @@ test-url-gate:
 # Run API/contract-heavy backend coverage.
 test-contracts:
 	$(PYTEST) $(TEST_CONTRACTS)
+
+# Run targeted friend graph contract check without relying on global pytest binary.
+test-friendships:
+	$(PYTEST) $(TEST_FRIENDSHIPS)
 
 # Run canonical smoke gate (policy + DB lifecycle + URL gate).
 test-fast:
