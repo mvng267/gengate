@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 391
+- Batch: 392
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 391 web inbox delete-message parity — wire `DELETE /messages/{message_id}` into web inbox client + direct message shell quick delete/copy flow.
+- Scope: batch 392 iOS inbox delete-message parity — add native quick delete result summary/copy flow for `DELETE /messages/{message_id}`.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,15 +16,18 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/web-nextjs/lib/inbox/client.ts
-  - apps/web-nextjs/components/direct-message-shell.tsx
+  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` ✅ (`TYPECHECK_OK`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (15.30s)`)
 - Git:
-  - latest feature commit: `6c28180` — `batch391: add web dm delete-message parity`
+  - latest feature commit: `f21c365` — `batch392: add ios dm delete-result quick copy parity`
   - working tree: clean
 - Blocker: none
-- Next: open batch392 với 1 slice hẹp tiếp theo ngoài moments reaction parity (ưu tiên iOS inbox delete-message parity để giữ DM cross-platform seam).
+- Next: open batch393 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox delete failure status-token parity với web `message_delete_failed`).
+- Batch 392 handoff:
+  - commit: `f21c365` — `batch392: add ios dm delete-result quick copy parity`
+  - Added iOS inbox delete-message quick parity surface in `InboxPlaceholderView`: new quick-copy line `delete_result=(none) | message_id=(none) | remaining_message_count=(none)`, copy action `Copy quick delete result summary`, and delete success summary `delete_result=deleted | message_id=... | remaining_message_count=...` after soft-delete + silent thread reload.
+  - Verify pass: iOS `swift build` (`Build complete! (15.30s)`).
 - Batch 391 handoff:
   - commit: `6c28180` — `batch391: add web dm delete-message parity`
   - Added web inbox delete-message parity wiring: `deleteMessage(messageId)` client helper calls `DELETE /messages/{message_id}` and direct-message shell now exposes `Delete message (soft-delete)` action, target message input, and quick-copy line `delete_result=deleted | message_id=... | remaining_message_count=...` for deterministic triage/reporting.
