@@ -124,6 +124,22 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   const [lastCreateResultDelta, setLastCreateResultDelta] = useState<NotificationCreateResultDelta | null>(null);
   const [lastDeleteResultDelta, setLastDeleteResultDelta] = useState<NotificationDeleteResultDelta | null>(null);
   const [lastLifecyclePair, setLastLifecyclePair] = useState<NotificationLifecyclePair | null>(null);
+  const [lastQuickUnreadSummaryCopiedText, setLastQuickUnreadSummaryCopiedText] = useState("");
+  const [quickUnreadSummaryCopiedAt, setQuickUnreadSummaryCopiedAt] = useState<number | null>(null);
+  const [lastQuickPageMetaCopiedText, setLastQuickPageMetaCopiedText] = useState("");
+  const [quickPageMetaCopiedAt, setQuickPageMetaCopiedAt] = useState<number | null>(null);
+  const [lastQuickPageCursorSummaryCopiedText, setLastQuickPageCursorSummaryCopiedText] = useState("");
+  const [quickPageCursorSummaryCopiedAt, setQuickPageCursorSummaryCopiedAt] = useState<number | null>(null);
+  const [lastQuickMutationDeltaCopiedText, setLastQuickMutationDeltaCopiedText] = useState("");
+  const [quickMutationDeltaCopiedAt, setQuickMutationDeltaCopiedAt] = useState<number | null>(null);
+  const [lastQuickCreateResultDeltaCopiedText, setLastQuickCreateResultDeltaCopiedText] = useState("");
+  const [quickCreateResultDeltaCopiedAt, setQuickCreateResultDeltaCopiedAt] = useState<number | null>(null);
+  const [lastQuickLifecyclePairCopiedText, setLastQuickLifecyclePairCopiedText] = useState("");
+  const [quickLifecyclePairCopiedAt, setQuickLifecyclePairCopiedAt] = useState<number | null>(null);
+  const [lastQuickLifecyclePairMutationCopiedText, setLastQuickLifecyclePairMutationCopiedText] = useState("");
+  const [quickLifecyclePairMutationCopiedAt, setQuickLifecyclePairMutationCopiedAt] = useState<number | null>(null);
+  const [lastQuickUnreadLifecycleMutationBundleCopiedText, setLastQuickUnreadLifecycleMutationBundleCopiedText] = useState("");
+  const [quickUnreadLifecycleMutationBundleCopiedAt, setQuickUnreadLifecycleMutationBundleCopiedAt] = useState<number | null>(null);
   const [lastQuickLifecycleSnapshotAuditCopiedText, setLastQuickLifecycleSnapshotAuditCopiedText] = useState("");
   const [quickLifecycleSnapshotAuditCopiedAt, setQuickLifecycleSnapshotAuditCopiedAt] = useState<number | null>(null);
   const [lastQuickDeleteResultSummaryCopiedText, setLastQuickDeleteResultSummaryCopiedText] = useState("");
@@ -144,6 +160,22 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     setLastCreateResultDelta(null);
     setLastDeleteResultDelta(null);
     setLastLifecyclePair(null);
+    setLastQuickUnreadSummaryCopiedText("");
+    setQuickUnreadSummaryCopiedAt(null);
+    setLastQuickPageMetaCopiedText("");
+    setQuickPageMetaCopiedAt(null);
+    setLastQuickPageCursorSummaryCopiedText("");
+    setQuickPageCursorSummaryCopiedAt(null);
+    setLastQuickMutationDeltaCopiedText("");
+    setQuickMutationDeltaCopiedAt(null);
+    setLastQuickCreateResultDeltaCopiedText("");
+    setQuickCreateResultDeltaCopiedAt(null);
+    setLastQuickLifecyclePairCopiedText("");
+    setQuickLifecyclePairCopiedAt(null);
+    setLastQuickLifecyclePairMutationCopiedText("");
+    setQuickLifecyclePairMutationCopiedAt(null);
+    setLastQuickUnreadLifecycleMutationBundleCopiedText("");
+    setQuickUnreadLifecycleMutationBundleCopiedAt(null);
     setLastQuickLifecycleSnapshotAuditCopiedText("");
     setQuickLifecycleSnapshotAuditCopiedAt(null);
     setLastQuickDeleteResultSummaryCopiedText("");
@@ -164,6 +196,38 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     };
   }
 
+  function clearQuickContextCopiedFeedbackOnWindowRefresh() {
+    setLastQuickUnreadSummaryCopiedText("");
+    setQuickUnreadSummaryCopiedAt(null);
+
+    setLastQuickPageMetaCopiedText("");
+    setQuickPageMetaCopiedAt(null);
+
+    setLastQuickPageCursorSummaryCopiedText("");
+    setQuickPageCursorSummaryCopiedAt(null);
+
+    setLastQuickMutationDeltaCopiedText("");
+    setQuickMutationDeltaCopiedAt(null);
+
+    setLastQuickCreateResultDeltaCopiedText("");
+    setQuickCreateResultDeltaCopiedAt(null);
+
+    setLastQuickLifecyclePairCopiedText("");
+    setQuickLifecyclePairCopiedAt(null);
+
+    setLastQuickLifecyclePairMutationCopiedText("");
+    setQuickLifecyclePairMutationCopiedAt(null);
+
+    setLastQuickUnreadLifecycleMutationBundleCopiedText("");
+    setQuickUnreadLifecycleMutationBundleCopiedAt(null);
+
+    setLastQuickLifecycleSnapshotAuditCopiedText("");
+    setQuickLifecycleSnapshotAuditCopiedAt(null);
+
+    setLastQuickDeleteResultSummaryCopiedText("");
+    setQuickDeleteResultSummaryCopiedAt(null);
+  }
+
   async function handleLoad(windowOverride?: Partial<NotificationLoadWindow>, statusPrefix?: string) {
     const window = currentLoadWindow(windowOverride);
     const normalizedStatusPrefix = statusPrefix?.trim();
@@ -172,10 +236,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     setLastCreateResultDelta(null);
     setLastDeleteResultDelta(null);
     setLastLifecyclePair(null);
-    setQuickLifecycleSnapshotAuditCopiedAt(null);
-    setLastQuickLifecycleSnapshotAuditCopiedText("");
-    setQuickDeleteResultSummaryCopiedAt(null);
-    setLastQuickDeleteResultSummaryCopiedText("");
+    clearQuickContextCopiedFeedbackOnWindowRefresh();
 
     setIsLoading(true);
     setStatus(normalizedStatusPrefix ? `${normalizedStatusPrefix} Loading notifications...` : "Loading notifications...");
@@ -317,6 +378,110 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     ` / unread_summary(${quickUnreadSummaryLine})` +
     ` / window(limit=${cursorWindow.limit},offset=${cursorWindow.offset},filter_mode=${cursorWindow.unreadOnly ? "unread_only" : "all"})`;
 
+  const quickUnreadSummaryCopiedFeedbackText = (() => {
+    if (quickUnreadSummaryCopiedAt === null) {
+      return null;
+    }
+
+    const elapsedSeconds = Math.floor((Date.now() - quickUnreadSummaryCopiedAt) / 1000);
+    if (elapsedSeconds < 0 || elapsedSeconds >= 6) {
+      return null;
+    }
+
+    return `Copied quick unread summary (${elapsedSeconds}s ago): ${lastQuickUnreadSummaryCopiedText}`;
+  })();
+
+  const quickPageMetaCopiedFeedbackText = (() => {
+    if (quickPageMetaCopiedAt === null) {
+      return null;
+    }
+
+    const elapsedSeconds = Math.floor((Date.now() - quickPageMetaCopiedAt) / 1000);
+    if (elapsedSeconds < 0 || elapsedSeconds >= 6) {
+      return null;
+    }
+
+    return `Copied quick page meta (${elapsedSeconds}s ago): ${lastQuickPageMetaCopiedText}`;
+  })();
+
+  const quickPageCursorSummaryCopiedFeedbackText = (() => {
+    if (quickPageCursorSummaryCopiedAt === null) {
+      return null;
+    }
+
+    const elapsedSeconds = Math.floor((Date.now() - quickPageCursorSummaryCopiedAt) / 1000);
+    if (elapsedSeconds < 0 || elapsedSeconds >= 6) {
+      return null;
+    }
+
+    return `Copied quick page cursor summary (${elapsedSeconds}s ago): ${lastQuickPageCursorSummaryCopiedText}`;
+  })();
+
+  const quickMutationDeltaCopiedFeedbackText = (() => {
+    if (quickMutationDeltaCopiedAt === null) {
+      return null;
+    }
+
+    const elapsedSeconds = Math.floor((Date.now() - quickMutationDeltaCopiedAt) / 1000);
+    if (elapsedSeconds < 0 || elapsedSeconds >= 6) {
+      return null;
+    }
+
+    return `Copied quick mutation delta (${elapsedSeconds}s ago): ${lastQuickMutationDeltaCopiedText}`;
+  })();
+
+  const quickCreateResultDeltaCopiedFeedbackText = (() => {
+    if (quickCreateResultDeltaCopiedAt === null) {
+      return null;
+    }
+
+    const elapsedSeconds = Math.floor((Date.now() - quickCreateResultDeltaCopiedAt) / 1000);
+    if (elapsedSeconds < 0 || elapsedSeconds >= 6) {
+      return null;
+    }
+
+    return `Copied quick create-result delta (${elapsedSeconds}s ago): ${lastQuickCreateResultDeltaCopiedText}`;
+  })();
+
+  const quickLifecyclePairCopiedFeedbackText = (() => {
+    if (quickLifecyclePairCopiedAt === null) {
+      return null;
+    }
+
+    const elapsedSeconds = Math.floor((Date.now() - quickLifecyclePairCopiedAt) / 1000);
+    if (elapsedSeconds < 0 || elapsedSeconds >= 6) {
+      return null;
+    }
+
+    return `Copied quick lifecycle pair (${elapsedSeconds}s ago): ${lastQuickLifecyclePairCopiedText}`;
+  })();
+
+  const quickLifecyclePairMutationCopiedFeedbackText = (() => {
+    if (quickLifecyclePairMutationCopiedAt === null) {
+      return null;
+    }
+
+    const elapsedSeconds = Math.floor((Date.now() - quickLifecyclePairMutationCopiedAt) / 1000);
+    if (elapsedSeconds < 0 || elapsedSeconds >= 6) {
+      return null;
+    }
+
+    return `Copied quick lifecycle pair mutation (${elapsedSeconds}s ago): ${lastQuickLifecyclePairMutationCopiedText}`;
+  })();
+
+  const quickUnreadLifecycleMutationBundleCopiedFeedbackText = (() => {
+    if (quickUnreadLifecycleMutationBundleCopiedAt === null) {
+      return null;
+    }
+
+    const elapsedSeconds = Math.floor((Date.now() - quickUnreadLifecycleMutationBundleCopiedAt) / 1000);
+    if (elapsedSeconds < 0 || elapsedSeconds >= 6) {
+      return null;
+    }
+
+    return `Copied quick unread lifecycle mutation bundle (${elapsedSeconds}s ago): ${lastQuickUnreadLifecycleMutationBundleCopiedText}`;
+  })();
+
   const quickLifecycleSnapshotAuditCopiedFeedbackText = (() => {
     if (quickLifecycleSnapshotAuditCopiedAt === null) {
       return null;
@@ -402,10 +567,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       setLastCreateResultDelta(createResultDelta);
       setLastDeleteResultDelta(null);
       setLastLifecyclePair(null);
-      setQuickLifecycleSnapshotAuditCopiedAt(null);
-      setLastQuickLifecycleSnapshotAuditCopiedText("");
-      setQuickDeleteResultSummaryCopiedAt(null);
-      setLastQuickDeleteResultSummaryCopiedText("");
+      clearQuickContextCopiedFeedbackOnWindowRefresh();
 
       setForm((current) => ({
         ...current,
@@ -527,10 +689,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       setItems((current) => current.map((entry) => (entry.id === updated.id ? updated : entry)));
       setLastLoadedWindow(null);
       setLastDeleteResultDelta(null);
-      setQuickLifecycleSnapshotAuditCopiedAt(null);
-      setLastQuickLifecycleSnapshotAuditCopiedText("");
-      setQuickDeleteResultSummaryCopiedAt(null);
-      setLastQuickDeleteResultSummaryCopiedText("");
+      clearQuickContextCopiedFeedbackOnWindowRefresh();
 
       const mutationDelta: NotificationMutationDelta = {
         notificationId: updated.id,
@@ -588,10 +747,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       setLastMutationDelta(null);
       setLastCreateResultDelta((current) => (current && current.notificationId === deleted.id ? null : current));
       setLastLifecyclePair(null);
-      setQuickLifecycleSnapshotAuditCopiedAt(null);
-      setLastQuickLifecycleSnapshotAuditCopiedText("");
-      setQuickDeleteResultSummaryCopiedAt(null);
-      setLastQuickDeleteResultSummaryCopiedText("");
+      clearQuickContextCopiedFeedbackOnWindowRefresh();
 
       const deleteResultDelta: NotificationDeleteResultDelta = {
         notificationId: deleted.id,
@@ -640,104 +796,188 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   }
 
   async function handleCopyQuickUnreadSummary() {
-    await copyToClipboard(
+    const copied = await copyToClipboard(
       quickUnreadSummaryLine,
       "Copied quick unread summary to clipboard",
       "quick_unread_summary_empty",
       "quick_unread_summary_copy_failed",
     );
+
+    if (!copied) {
+      setLastQuickUnreadSummaryCopiedText("");
+      setQuickUnreadSummaryCopiedAt(null);
+      return;
+    }
+
+    setLastQuickUnreadSummaryCopiedText(quickUnreadSummaryLine);
+    setQuickUnreadSummaryCopiedAt(Date.now());
   }
 
   async function handleCopyQuickPageMeta() {
-    await copyToClipboard(
+    const copied = await copyToClipboard(
       quickPageMetaLine,
       "Copied quick page meta to clipboard",
       "quick_page_meta_empty",
       "quick_page_meta_copy_failed",
     );
+
+    if (!copied) {
+      setLastQuickPageMetaCopiedText("");
+      setQuickPageMetaCopiedAt(null);
+      return;
+    }
+
+    setLastQuickPageMetaCopiedText(quickPageMetaLine);
+    setQuickPageMetaCopiedAt(Date.now());
   }
 
   async function handleCopyQuickPageCursorSummary() {
-    await copyToClipboard(
+    const copied = await copyToClipboard(
       quickPageCursorSummaryLine,
       "Copied quick page cursor summary to clipboard",
       "quick_page_cursor_summary_empty",
       "quick_page_cursor_summary_copy_failed",
     );
+
+    if (!copied) {
+      setLastQuickPageCursorSummaryCopiedText("");
+      setQuickPageCursorSummaryCopiedAt(null);
+      return;
+    }
+
+    setLastQuickPageCursorSummaryCopiedText(quickPageCursorSummaryLine);
+    setQuickPageCursorSummaryCopiedAt(Date.now());
   }
 
   async function handleCopyQuickMutationDelta() {
     if (!lastMutationDelta) {
+      setLastQuickMutationDeltaCopiedText("");
+      setQuickMutationDeltaCopiedAt(null);
       setStatus("quick_mutation_delta_missing");
       return;
     }
 
-    await copyToClipboard(
+    const copied = await copyToClipboard(
       quickMutationDeltaLine,
       "Copied quick mutation delta to clipboard",
       "quick_mutation_delta_missing",
       "quick_mutation_delta_copy_failed",
     );
+
+    if (!copied) {
+      setLastQuickMutationDeltaCopiedText("");
+      setQuickMutationDeltaCopiedAt(null);
+      return;
+    }
+
+    setLastQuickMutationDeltaCopiedText(quickMutationDeltaLine);
+    setQuickMutationDeltaCopiedAt(Date.now());
   }
 
   async function handleCopyQuickCreateResultDelta() {
     if (!lastCreateResultDelta) {
+      setLastQuickCreateResultDeltaCopiedText("");
+      setQuickCreateResultDeltaCopiedAt(null);
       setStatus("quick_create_result_delta_missing");
       return;
     }
 
-    await copyToClipboard(
+    const copied = await copyToClipboard(
       quickCreateResultDeltaLine,
       "Copied quick create-result delta to clipboard",
       "quick_create_result_delta_missing",
       "quick_create_result_delta_copy_failed",
     );
+
+    if (!copied) {
+      setLastQuickCreateResultDeltaCopiedText("");
+      setQuickCreateResultDeltaCopiedAt(null);
+      return;
+    }
+
+    setLastQuickCreateResultDeltaCopiedText(quickCreateResultDeltaLine);
+    setQuickCreateResultDeltaCopiedAt(Date.now());
   }
 
   async function handleCopyQuickLifecyclePair() {
     if (quickLifecyclePairState === "missing") {
+      setLastQuickLifecyclePairCopiedText("");
+      setQuickLifecyclePairCopiedAt(null);
       setStatus("quick_lifecycle_pair_missing");
       return;
     }
 
-    await copyToClipboard(
+    const copied = await copyToClipboard(
       quickLifecyclePairLine,
       "Copied quick lifecycle pair to clipboard",
       "quick_lifecycle_pair_missing",
       "quick_lifecycle_pair_copy_failed",
     );
+
+    if (!copied) {
+      setLastQuickLifecyclePairCopiedText("");
+      setQuickLifecyclePairCopiedAt(null);
+      return;
+    }
+
+    setLastQuickLifecyclePairCopiedText(quickLifecyclePairLine);
+    setQuickLifecyclePairCopiedAt(Date.now());
   }
 
   async function handleCopyQuickLifecyclePairMutation() {
     if (!lifecycleMutationDelta) {
+      setLastQuickLifecyclePairMutationCopiedText("");
+      setQuickLifecyclePairMutationCopiedAt(null);
       setStatus("quick_lifecycle_pair_mutation_missing");
       return;
     }
 
-    await copyToClipboard(
+    const copied = await copyToClipboard(
       quickLifecyclePairMutationLine,
       "Copied quick lifecycle pair mutation to clipboard",
       "quick_lifecycle_pair_mutation_missing",
       "quick_lifecycle_pair_mutation_copy_failed",
     );
+
+    if (!copied) {
+      setLastQuickLifecyclePairMutationCopiedText("");
+      setQuickLifecyclePairMutationCopiedAt(null);
+      return;
+    }
+
+    setLastQuickLifecyclePairMutationCopiedText(quickLifecyclePairMutationLine);
+    setQuickLifecyclePairMutationCopiedAt(Date.now());
   }
 
   async function handleCopyQuickUnreadLifecycleMutationBundle() {
     if (!lifecycleMutationDelta) {
+      setLastQuickUnreadLifecycleMutationBundleCopiedText("");
+      setQuickUnreadLifecycleMutationBundleCopiedAt(null);
       setStatus("quick_unread_lifecycle_mutation_bundle_missing");
       return;
     }
 
-    await copyToClipboard(
+    const copied = await copyToClipboard(
       quickUnreadLifecycleMutationBundleLine,
       "Copied quick unread lifecycle mutation bundle to clipboard",
       "quick_unread_lifecycle_mutation_bundle_missing",
       "quick_unread_lifecycle_mutation_bundle_copy_failed",
     );
+
+    if (!copied) {
+      setLastQuickUnreadLifecycleMutationBundleCopiedText("");
+      setQuickUnreadLifecycleMutationBundleCopiedAt(null);
+      return;
+    }
+
+    setLastQuickUnreadLifecycleMutationBundleCopiedText(quickUnreadLifecycleMutationBundleLine);
+    setQuickUnreadLifecycleMutationBundleCopiedAt(Date.now());
   }
 
   async function handleCopyQuickLifecycleSnapshotAudit() {
     if (!lastCreateResultDelta && !lifecycleMutationDelta) {
+      setLastQuickLifecycleSnapshotAuditCopiedText("");
+      setQuickLifecycleSnapshotAuditCopiedAt(null);
       setStatus("quick_lifecycle_snapshot_audit_missing");
       return;
     }
@@ -803,6 +1043,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
           Copy quick unread summary
         </button>
       </p>
+      {quickUnreadSummaryCopiedFeedbackText ? <p>{quickUnreadSummaryCopiedFeedbackText}</p> : null}
       <p>
         Quick page meta: <code>{quickPageMetaLine}</code>
       </p>
@@ -811,6 +1052,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
           Copy quick page meta
         </button>
       </p>
+      {quickPageMetaCopiedFeedbackText ? <p>{quickPageMetaCopiedFeedbackText}</p> : null}
       <p>
         Quick page cursor summary: <code>{quickPageCursorSummaryLine}</code>
       </p>
@@ -819,6 +1061,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
           Copy quick page cursor summary
         </button>
       </p>
+      {quickPageCursorSummaryCopiedFeedbackText ? <p>{quickPageCursorSummaryCopiedFeedbackText}</p> : null}
       <p>
         Quick mutation delta: <code>{quickMutationDeltaLine}</code>
       </p>
@@ -827,6 +1070,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
           Copy quick mutation delta
         </button>
       </p>
+      {quickMutationDeltaCopiedFeedbackText ? <p>{quickMutationDeltaCopiedFeedbackText}</p> : null}
       <p>
         Quick create-result delta: <code>{quickCreateResultDeltaLine}</code>
       </p>
@@ -835,6 +1079,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
           Copy quick create-result delta
         </button>
       </p>
+      {quickCreateResultDeltaCopiedFeedbackText ? <p>{quickCreateResultDeltaCopiedFeedbackText}</p> : null}
       <p>
         Quick lifecycle pair state: <code>lifecycle_pair_state={quickLifecyclePairState}</code>
       </p>
@@ -855,6 +1100,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
           Copy quick lifecycle pair
         </button>
       </p>
+      {quickLifecyclePairCopiedFeedbackText ? <p>{quickLifecyclePairCopiedFeedbackText}</p> : null}
       <p>
         Quick lifecycle pair mutation: <code>{quickLifecyclePairMutationLine}</code>
       </p>
@@ -863,6 +1109,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
           Copy quick lifecycle pair mutation
         </button>
       </p>
+      {quickLifecyclePairMutationCopiedFeedbackText ? <p>{quickLifecyclePairMutationCopiedFeedbackText}</p> : null}
       <p>
         Quick unread lifecycle mutation bundle: <code>{quickUnreadLifecycleMutationBundleLine}</code>
       </p>
@@ -871,6 +1118,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
           Copy quick unread lifecycle mutation bundle
         </button>
       </p>
+      {quickUnreadLifecycleMutationBundleCopiedFeedbackText ? <p>{quickUnreadLifecycleMutationBundleCopiedFeedbackText}</p> : null}
       <p>
         Quick lifecycle snapshot audit: <code>{quickLifecycleSnapshotAuditLine}</code>
       </p>
