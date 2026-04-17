@@ -2,6 +2,9 @@ import SwiftUI
 #if canImport(UIKit)
 import UIKit
 #endif
+#if canImport(AppKit)
+import AppKit
+#endif
 
 struct LocationPlaceholderView: View {
     @Environment(AppSessionStore.self) private var sessionStore
@@ -397,21 +400,30 @@ struct LocationPlaceholderView: View {
     private func copyQuickLocationStateSummaryToClipboard() {
         let summaryLine = quickLocationStateSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !summaryLine.isEmpty else {
+            clearQuickLocationStateCopiedFeedback()
             statusMessage = nil
             fetchError = "quick_location_state_summary_empty"
             return
         }
 
-#if canImport(UIKit)
-        UIPasteboard.general.string = summaryLine
+        guard isClipboardAvailableForQuickCopy else {
+            clearQuickLocationStateCopiedFeedback()
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        guard writeToClipboard(summaryLine) else {
+            clearQuickLocationStateCopiedFeedback()
+            statusMessage = "quick_location_state_summary_copy_failed"
+            fetchError = nil
+            return
+        }
+
         lastCopiedLocationStateSummary = summaryLine
         quickLocationStateCopiedAt = Date()
         statusMessage = "Copied quick location state summary to clipboard."
         fetchError = nil
-#else
-        statusMessage = "quick_copy_clipboard_unavailable"
-        fetchError = nil
-#endif
     }
 
     private func copyQuickAudienceRemoveParitySummaryToClipboard() {
@@ -445,6 +457,32 @@ struct LocationPlaceholderView: View {
 #else
         statusMessage = "quick_copy_clipboard_unavailable"
         fetchError = nil
+#endif
+    }
+
+    private func clearQuickLocationStateCopiedFeedback() {
+        lastCopiedLocationStateSummary = ""
+        quickLocationStateCopiedAt = nil
+    }
+
+    private var isClipboardAvailableForQuickCopy: Bool {
+#if canImport(UIKit) || canImport(AppKit)
+        true
+#else
+        false
+#endif
+    }
+
+    @discardableResult
+    private func writeToClipboard(_ text: String) -> Bool {
+#if canImport(UIKit)
+        UIPasteboard.general.string = text
+        return true
+#elseif canImport(AppKit)
+        NSPasteboard.general.clearContents()
+        return NSPasteboard.general.setString(text, forType: .string)
+#else
+        return false
 #endif
     }
 
