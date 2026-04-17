@@ -11,6 +11,7 @@ private let friendRequestAcceptQuickCopyEmpty = "request_id=(none) / action=acce
 private let friendRequestRejectQuickCopyEmpty = "request_id=(none) / action=rejected / accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)"
 private let friendRequestDecisionQuickCopyEmpty = "request_id=(none) / action=(none) / accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)"
 private let friendRequestCountsQuickCopyEmpty = "accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)"
+private let requestNotPendingFallbackMessage = "This request is no longer pending. Reload friend graph to continue."
 
 struct ProfilePlaceholderView: View {
     @Environment(AppSessionStore.self) private var sessionStore
@@ -440,8 +441,12 @@ struct ProfilePlaceholderView: View {
             return "Users are already friends. Create request is no longer needed."
         }
 
+        if fetchError == requestNotPendingFallbackMessage {
+            return nil
+        }
+
         if fetchError.contains("request_not_pending") {
-            return "This request is no longer pending. Reload friend graph to continue."
+            return requestNotPendingFallbackMessage
         }
 
         if fetchError.contains("invalid_request") {
@@ -1130,6 +1135,14 @@ struct ProfilePlaceholderView: View {
         return requesterDraft == row.requesterUserID && receiverDraft == row.receiverUserID
     }
 
+    private func resolveFriendRequestActionErrorMessage(_ error: Error) -> String {
+        let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        if message.contains("request_not_pending") {
+            return requestNotPendingFallbackMessage
+        }
+        return message
+    }
+
     private func acceptFriendRequest(requestID: String) async {
         guard !requestID.isEmpty else {
             fetchError = "Friend request id không hợp lệ."
@@ -1162,7 +1175,7 @@ struct ProfilePlaceholderView: View {
 
             statusMessage = "Friend request accepted. accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(delta.pendingInboundCount) / pending_outbound=\(delta.pendingOutboundCount)."
         } catch {
-            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            fetchError = resolveFriendRequestActionErrorMessage(error)
         }
 
         busyAcceptRequestID = nil
@@ -1200,7 +1213,7 @@ struct ProfilePlaceholderView: View {
 
             statusMessage = "Friend request rejected. accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(delta.pendingInboundCount) / pending_outbound=\(delta.pendingOutboundCount)."
         } catch {
-            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            fetchError = resolveFriendRequestActionErrorMessage(error)
         }
 
         busyRejectRequestID = nil
@@ -1392,6 +1405,10 @@ private struct FriendGraphAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 201 else {
+            if readErrorCode(from: data) == "request_not_pending" {
+                throw APIError.requestFailed("request_not_pending")
+            }
+
             throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Friend request accept failed"))
         }
 
@@ -1410,6 +1427,10 @@ private struct FriendGraphAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 200 else {
+            if readErrorCode(from: data) == "request_not_pending" {
+                throw APIError.requestFailed("request_not_pending")
+            }
+
             throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Friend request reject failed"))
         }
 
@@ -1486,6 +1507,18 @@ private struct FriendGraphAPIClient {
             throw APIError.invalidResponse
         }
         return httpResponse
+    }
+
+    private func readErrorCode(from data: Data) -> String? {
+        guard let payload = try? JSONDecoder().decode(BackendErrorPayload.self, from: data) else {
+            return nil
+        }
+
+        guard let code = payload.error?.code, !code.isEmpty else {
+            return nil
+        }
+
+        return code
     }
 
     private func readErrorMessage(from data: Data, statusCode: Int, prefix: String) -> String {
