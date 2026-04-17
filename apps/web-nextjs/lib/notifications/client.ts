@@ -1,5 +1,13 @@
 import { apiRequest } from "@/lib/api/client";
 
+type ApiErrorPayload = {
+  detail?: string;
+  error?: {
+    code?: string;
+    message?: string;
+  };
+};
+
 export type NotificationItem = {
   id: string;
   user_id: string;
@@ -41,9 +49,33 @@ function toNotificationListQueryString(query?: NotificationListQuery): string {
   return queryString ? `?${queryString}` : "";
 }
 
+async function readApiErrorCode(response: Response): Promise<string | null> {
+  try {
+    const payload = (await response.json()) as ApiErrorPayload;
+    const normalizedCode = payload.error?.code?.trim();
+    if (normalizedCode) {
+      return normalizedCode;
+    }
+
+    const normalizedDetail = payload.detail?.trim();
+    if (normalizedDetail) {
+      return normalizedDetail;
+    }
+
+    const normalizedMessage = payload.error?.message?.trim();
+    return normalizedMessage || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function listNotifications(userId: string, query?: NotificationListQuery): Promise<NotificationListPayload> {
   const response = await apiRequest(`/notifications/${encodeURIComponent(userId)}${toNotificationListQueryString(query)}`);
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`notifications_list_failed:${response.status}`);
   }
 
@@ -83,6 +115,10 @@ export async function createNotification(input: {
   });
 
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`notification_create_failed:${response.status}`);
   }
 
@@ -94,6 +130,10 @@ export async function markNotificationRead(notificationId: string): Promise<Noti
     method: "PATCH",
   });
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`notification_mark_read_failed:${response.status}`);
   }
 
@@ -105,6 +145,10 @@ export async function markNotificationUnread(notificationId: string): Promise<No
     method: "PATCH",
   });
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`notification_mark_unread_failed:${response.status}`);
   }
 
@@ -116,6 +160,10 @@ export async function deleteNotification(notificationId: string): Promise<Notifi
     method: "DELETE",
   });
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`notification_delete_failed:${response.status}`);
   }
 

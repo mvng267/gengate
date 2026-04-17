@@ -23,6 +23,47 @@ const initialForm = {
   payloadJson: '{"message":"Demo notification"}',
 };
 
+const notificationNotFoundFallbackMessage = "Notification no longer exists. Reload notifications and retry on a fresh notification row.";
+const userNotFoundFallbackMessage = "A referenced user was not found. Verify user UUID and retry load/create action.";
+const validationErrorFallbackMessage = "Request payload is invalid. Re-check user/type/payload JSON and retry.";
+const notificationUserRequiredFallbackMessage = "Provide a user UUID before loading or creating notifications.";
+const notificationTypeRequiredFallbackMessage = "Provide a notification type before creating a notification.";
+const notificationPayloadJsonInvalidFallbackMessage = "Payload JSON must be a valid object. Fix JSON format then retry create.";
+const sessionUserMissingFallbackMessage =
+  "Current session user is missing. Sign in first or manually provide user UUID for quick apply actions.";
+
+function resolveNotificationErrorHint(message: string): string | null {
+  if (message.includes("notification_not_found")) {
+    return notificationNotFoundFallbackMessage;
+  }
+
+  if (message.includes("user_not_found")) {
+    return userNotFoundFallbackMessage;
+  }
+
+  if (message.includes("validation_error")) {
+    return validationErrorFallbackMessage;
+  }
+
+  if (message.includes("notification_user_id_required")) {
+    return notificationUserRequiredFallbackMessage;
+  }
+
+  if (message.includes("notification_type_required")) {
+    return notificationTypeRequiredFallbackMessage;
+  }
+
+  if (message.includes("notification_payload_json_invalid")) {
+    return notificationPayloadJsonInvalidFallbackMessage;
+  }
+
+  if (message.includes("session_user_missing_for_quick_apply")) {
+    return sessionUserMissingFallbackMessage;
+  }
+
+  return null;
+}
+
 type NotificationLoadWindow = {
   userId: string;
   limit: number;
@@ -167,6 +208,8 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
         ? "Window hint: current user/page/filter differs from the last loaded window. Reload to sync the list and summary."
         : "Window hint: current user/page/filter is in sync with the last loaded window.";
 
+  const notificationErrorHint = resolveNotificationErrorHint(status);
+
   const quickUnreadSummaryLine = listMeta
     ? `current_page_unread=${listMeta.unread_count} / total_unread_count=${listMeta.total_unread_count}`
     : "current_page_unread=(none) / total_unread_count=(none)";
@@ -283,9 +326,20 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       return;
     }
 
+    const trimmedNotificationType = form.notificationType.trim();
+    if (!trimmedNotificationType) {
+      setStatus("notification_type_required");
+      return;
+    }
+
     let payloadJson: Record<string, unknown>;
     try {
-      payloadJson = JSON.parse(form.payloadJson) as Record<string, unknown>;
+      const parsedPayload = JSON.parse(form.payloadJson) as unknown;
+      if (!parsedPayload || typeof parsedPayload !== "object" || Array.isArray(parsedPayload)) {
+        setStatus("notification_payload_json_invalid");
+        return;
+      }
+      payloadJson = parsedPayload as Record<string, unknown>;
     } catch {
       setStatus("notification_payload_json_invalid");
       return;
@@ -297,7 +351,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     try {
       const created = await createNotification({
         userId,
-        notificationType: form.notificationType.trim(),
+        notificationType: trimmedNotificationType,
         payloadJson,
       });
 
@@ -686,6 +740,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       </p>
       <p>{status}</p>
       <p>{pendingWindowHint}</p>
+      {notificationErrorHint ? <p>Hint: {notificationErrorHint}</p> : null}
       <p>
         Current session user_id: <code>{currentSessionUserId || "(missing)"}</code>
       </p>
