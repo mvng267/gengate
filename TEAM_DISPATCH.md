@@ -12,9 +12,33 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 403
-- Trục công việc: iOS inbox first-unread quick-copy parity — align first-unread-jump quick-copy failure handling with web tokens.
-- Trạng thái: batch403_complete_ios_first_unread_jump_quick_copy_failure_tokens_parity.
+- Batch workflow chính thức hiện tại: 405
+- Trục công việc: iOS friend graph quick-copy parity — align last-action summary bundle quick-copy failure handling with web tokens.
+- Trạng thái: batch405_complete_ios_friend_last_action_bundle_quick_copy_failure_tokens_parity.
+
+## Batch 405 handoff (closed)
+- Batch vừa xong: **405**
+- Commit đã chốt:
+  - `acd49c3` — `batch405: harden ios friend last-action bundle quick-copy failures`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (3.47s)`)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **406**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS friend graph parity micro-slice: align quick-copy failure token handling cho line/action còn lại hoặc chuyển backend/web friend-graph contract polish.
+
+## Batch 404 handoff (closed)
+- Batch vừa xong: **404**
+- Commit đã chốt:
+  - `87c184c` — `batch404: harden ios first-unread guard quick-copy failures`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (15.77s)`)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **405**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chuyển từ iOS inbox micro-parity sang seam web/backend có giá trị MVP cao hơn (ưu tiên feed/friend-graph contract visibility).
 
 ## Batch 403 handoff (closed)
 - Batch vừa xong: **403**

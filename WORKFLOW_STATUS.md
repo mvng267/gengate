@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 403
+- Batch: 405
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 403 iOS inbox first-unread quick-copy parity — align first-unread-jump quick-copy failure handling with web tokens.
+- Scope: batch 405 iOS friend graph quick-copy parity — align last-action summary bundle quick-copy failure handling with web tokens.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,14 +16,23 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
+  - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (14.61s)`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (3.47s)`)
 - Git:
-  - latest feature commit: `2527b08` — `batch403: harden ios first-unread jump quick-copy failures`
+  - latest feature commit: `acd49c3` — `batch405: harden ios friend last-action bundle quick-copy failures`
   - working tree: clean
 - Blocker: none
-- Next: open batch404 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox first-unread-guard quick-copy failure token parity với web `first_unread_guard_quick_copy_failed`).
+- Next: open batch406 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS friend graph quick-copy parity còn lại hoặc chuyển backend/web friend graph contract polish).
+- Batch 405 handoff:
+  - commit: `acd49c3` — `batch405: harden ios friend last-action bundle quick-copy failures`
+  - Updated iOS Profile friend-graph last-action summary bundle quick copy in `ProfilePlaceholderView`: added clipboard-unavailable guard (`quick_copy_clipboard_unavailable`) and write-failure token (`friend_request_last_action_bundle_quick_copy_failed`) before success status, aligned with web quick-copy failure semantics.
+  - Added shared clipboard helpers `isClipboardAvailableForQuickCopy` + `writeToClipboard` and wired `copyToClipboard` through the new write helper for consistent behavior.
+  - Verify pass: iOS `swift build` (`Build complete! (3.47s)`).
+- Batch 404 handoff:
+  - commit: `87c184c` — `batch404: harden ios first-unread guard quick-copy failures`
+  - Updated iOS inbox first-unread-guard quick copy in `InboxPlaceholderView`: added clipboard-unavailable guard (`quick_copy_clipboard_unavailable`) and write-failure token (`first_unread_guard_quick_copy_failed`) before success status, matching web quick-copy failure semantics.
+  - Verify pass: iOS `swift build` (`Build complete! (15.77s)`).
 - Batch 403 handoff:
   - commit: `2527b08` — `batch403: harden ios first-unread jump quick-copy failures`
   - Updated iOS inbox first-unread-jump quick copy in `InboxPlaceholderView`: added clipboard-unavailable guard (`quick_copy_clipboard_unavailable`) and write-failure token (`first_unread_jump_quick_copy_failed`) before success status, matching web quick-copy failure semantics.
