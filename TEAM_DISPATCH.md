@@ -12,9 +12,24 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 406
-- Trục công việc: iOS friend graph quick-copy parity — align remaining friend quick-copy failure handling tokens with web.
-- Trạng thái: batch406_complete_ios_friend_quick_copy_failure_tokens_parity.
+- Batch workflow chính thức hiện tại: 407
+- Trục công việc: friend-graph contract polish — align `request_not_pending` fallback semantics across web + iOS Profile friend-request actions.
+- Trạng thái: batch407_complete_friend_request_not_pending_fallback_parity.
+
+## Batch 407 handoff (closed)
+- Batch vừa xong: **407**
+- Commit đã chốt:
+  - `51673dc` — `batch407: polish web friend-request not-pending fallback`
+  - `ba79212` — `batch407: align ios friend-request not-pending fallback parity`
+- Test/verify cuối:
+  - Web: `cd apps/web-nextjs && npm run typecheck` ✅
+  - Backend friendships API targeted verify: `cd apps/backend-python && pytest -q tests/test_friendships_api.py` ⚠️ (`zsh:1: command not found: pytest`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (3.49s)`)
+- Blocker/rủi ro còn lại:
+  - env: thiếu `pytest` trong môi trường hiện tại khi chạy targeted backend friendships API test.
+- Batch kế tiếp: **408**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - backend/web moments/feed contract polish (1 micro-slice) và tiếp tục giữ parity semantics giữa web/iOS khi có lỗi action tương ứng.
 
 ## Batch 406 handoff (closed)
 - Batch vừa xong: **406**
