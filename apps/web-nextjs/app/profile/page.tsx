@@ -14,13 +14,20 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const params = searchParams ? await searchParams : undefined;
   const selectedUserId = params?.user?.trim() ?? "";
   const selectedPeerUserId = params?.userB?.trim() ?? "";
+  const selectedFeedViewerUserId = selectedPeerUserId || selectedUserId;
   const shouldAutoloadSnapshot = params?.autoload === "1";
-  const feedHref = selectedUserId ? `/feed?author=${encodeURIComponent(selectedUserId)}&viewer=${encodeURIComponent(selectedUserId)}` : "/feed";
+  const feedHref = selectedUserId
+    ? `/feed?author=${encodeURIComponent(selectedUserId)}&viewer=${encodeURIComponent(selectedFeedViewerUserId)}`
+    : "/feed";
   const inboxHref = selectedUserId
     ? `/inbox?userA=${encodeURIComponent(selectedUserId)}&userB=${encodeURIComponent(selectedPeerUserId || selectedUserId)}&sender=${encodeURIComponent(selectedUserId)}`
     : "/inbox";
   const notificationsHref = selectedUserId ? `/notifications?user=${encodeURIComponent(selectedUserId)}` : "/notifications";
-  const locationHref = selectedUserId ? `/location?owner=${encodeURIComponent(selectedUserId)}` : "/location";
+  const locationHref = selectedUserId
+    ? selectedPeerUserId
+      ? `/location?owner=${encodeURIComponent(selectedUserId)}&allowed=${encodeURIComponent(selectedPeerUserId)}`
+      : `/location?owner=${encodeURIComponent(selectedUserId)}`
+    : "/location";
 
   return (
     <section>

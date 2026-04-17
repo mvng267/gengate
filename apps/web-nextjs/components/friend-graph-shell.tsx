@@ -78,10 +78,13 @@ export function FriendGraphShell({
 
   const normalizedTargetUserId = targetUserId.trim();
   const selectedPendingPairModeLabel = pendingPairMode ? ` · pending pair mode: ${pendingPairMode}` : "";
-  const feedHref = `/feed?author=${encodeURIComponent(userId)}&viewer=${encodeURIComponent(userId)}`;
-  const inboxHref = `/inbox?userA=${encodeURIComponent(userId)}&userB=${encodeURIComponent(normalizedTargetUserId || userId)}&sender=${encodeURIComponent(userId)}`;
+  const selectedPeerUserId = normalizedTargetUserId || userId;
+  const feedHref = `/feed?author=${encodeURIComponent(userId)}&viewer=${encodeURIComponent(selectedPeerUserId)}`;
+  const inboxHref = `/inbox?userA=${encodeURIComponent(userId)}&userB=${encodeURIComponent(selectedPeerUserId)}&sender=${encodeURIComponent(userId)}`;
   const notificationsHref = `/notifications?user=${encodeURIComponent(userId)}`;
-  const locationHref = `/location?owner=${encodeURIComponent(userId)}`;
+  const locationHref = normalizedTargetUserId
+    ? `/location?owner=${encodeURIComponent(userId)}&allowed=${encodeURIComponent(normalizedTargetUserId)}`
+    : `/location?owner=${encodeURIComponent(userId)}`;
   const pendingDirectionSummary = snapshot
     ? snapshot.pendingRequests.reduce(
         (acc, request) => {

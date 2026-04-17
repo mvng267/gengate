@@ -12,9 +12,35 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 430
-- Trục công việc: web notifications parity — harden copied-feedback context lines cho quick unread/page meta/page cursor/mutation/create-result/lifecycle copy actions và clear context khi load/create/mutation/delete refresh.
-- Trạng thái: batch430_complete_web_notifications_quick_copy_copied_feedback_parity.
+- Batch workflow chính thức hiện tại: 432
+- Trục công việc: web friend graph pivot parity — carry selected peer context vào Feed/Location pivots sau pending-pair quick-apply để cross-seam MVP run giữ nguyên user pair.
+- Trạng thái: batch432_complete_web_friend_graph_pending_pair_quick_apply_controls.
+
+## Batch 432 handoff (closed)
+- Batch vừa xong: **432**
+- Commit đã chốt:
+  - `145b293` — `batch432: add web friend-request pending-pair quick-apply controls`
+- Test/verify cuối:
+  - Web: `cd apps/web-nextjs && npm run typecheck` ✅ (`tsc --noEmit`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.55s`)
+- Blocker/rủi ro còn lại:
+  - none.
+- Batch kế tiếp: **433**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS parity micro-slice cho friend-request pending-pair status token + cross-seam pivot context.
+
+## Batch 431 handoff (closed)
+- Batch vừa xong: **431**
+- Commit đã chốt:
+  - `d0be9e7` — `batch431: clear ios notifications quick-copy copied-feedback on mutation refresh`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (3.41s)`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.59s`)
+- Blocker/rủi ro còn lại:
+  - none.
+- Batch kế tiếp: **432**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - micro-slice follow-up cho notifications/location/feed parity (ưu tiên gap rõ nhất còn lại), giữ verify tối thiểu `make test-friendships`.
 
 ## Batch 430 handoff (closed)
 - Batch vừa xong: **430**
