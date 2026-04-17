@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 415
+- Batch: 416
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 415 iOS notifications UX parity — surface deterministic error hints from tokenized notification failures.
+- Scope: batch 416 web notifications parity — map deterministic error hints + token-first error-code propagation for notifications client/shell.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,17 +16,22 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
+  - apps/web-nextjs/lib/notifications/client.ts
+  - apps/web-nextjs/components/notification-shell.tsx
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (5.99s)`)
+  - Web: `cd apps/web-nextjs && npm run typecheck` ✅
   - Backend targeted verify blocked env:
     - `cd apps/backend-python && pytest -q tests/test_friendships_api.py` ⚠️ (`zsh:1: command not found: pytest`)
 - Git:
   - latest feature commit:
-    - `61e9901` — `batch415: add ios notifications error-hint parity`
+    - `0544a30` — `batch416: add web notifications error-hint token parity`
   - working tree: clean
 - Blocker: env (backend test runner/runtime): thiếu `pytest` trong môi trường hiện tại khi chạy backend targeted tests.
-- Next: mở batch416 với 1 micro-slice notifications parity phía web (map deterministic notification error hints) để giữ UX/web/iOS contract đồng nhất.
+- Next: mở batch417 với 1 micro-slice backend env/runtime để unblock `pytest` targeted verify path.
+- Batch 416 handoff:
+  - commit: `0544a30` — `batch416: add web notifications error-hint token parity`
+  - scope: web notifications client ưu tiên backend tokenized error (`error.code`/`detail`) trước fallback status token; web notifications shell thêm deterministic `Hint:` mapping cho `notification_not_found`, `user_not_found`, `validation_error`, `notification_user_id_required`, `notification_type_required`, `notification_payload_json_invalid`, `session_user_missing_for_quick_apply`; create flow guard reject payload JSON không phải object.
+  - verify: web typecheck ✅, backend pytest ⚠️ thiếu `pytest`.
 - Batch 413 handoff:
   - commit: `1e344f5` — `batch413: add dm error-hint parity in web inbox shell`
   - scope: web inbox shell map deterministic hint lines cho tokenized direct-message failures (`user_not_found`, `conversation_not_found`, `conversation_member_not_found`, `message_not_found`, `device_not_found`, `device_user_mismatch`, `message_device_key_exists`, `validation_error`, `attachment_target_message_required`, `message_delete_target_required`, `open_thread_first`).

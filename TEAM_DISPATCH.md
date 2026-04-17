@@ -12,9 +12,22 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 415
-- Trục công việc: iOS notifications UX parity — surface deterministic error hints from tokenized notification failures.
-- Trạng thái: batch415_complete_ios_notifications_error_hint_parity.
+- Batch workflow chính thức hiện tại: 416
+- Trục công việc: web notifications parity — map deterministic error hints + token-first error-code propagation for notifications client/shell.
+- Trạng thái: batch416_complete_web_notifications_error_hint_token_parity.
+
+## Batch 416 handoff (closed)
+- Batch vừa xong: **416**
+- Commit đã chốt:
+  - `0544a30` — `batch416: add web notifications error-hint token parity`
+- Test/verify cuối:
+  - Web: `cd apps/web-nextjs && npm run typecheck` ✅
+  - Backend targeted verify: `cd apps/backend-python && pytest -q tests/test_friendships_api.py` ⚠️ (`zsh:1: command not found: pytest`)
+- Blocker/rủi ro còn lại:
+  - env: thiếu `pytest` trong môi trường hiện tại khi chạy targeted backend API tests.
+- Batch kế tiếp: **417**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - backend env/runtime micro-slice để unblock `pytest` targeted verify path.
 
 ## Batch 415 handoff (closed)
 - Batch vừa xong: **415**
