@@ -1,9 +1,9 @@
 # GenGate Workflow Status
 
-- Batch: 385
+- Batch: 386
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 385 iOS location shell parity hardening — add audience-remove parity summary line + copy action for deterministic quick-check payload.
-- Status: complete
+- Scope: batch 386 web notifications micro-polish parity — add quick lifecycle snapshot audit copied-feedback line to match iOS quick-copy UX.
+- Status: verify
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
@@ -16,14 +16,14 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift
+  - apps/web-nextjs/components/notification-shell.tsx
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅
+  - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` ✅ (`TYPECHECK_OK`)
 - Git:
-  - latest feature commit: `96064f9` — `batch385: add ios location audience-remove parity summary copy`
-  - working tree: dirty (workflow docs syncing)
+  - latest feature commit: (pending this batch commit)
+  - working tree: dirty (batch386 web notifications + workflow docs)
 - Blocker: none
-- Next: open batch386 with one narrow parity slice outside DM polish (prefer notifications micro-polish).
+- Next: commit batch386 (web notifications micro-polish) and sync checklist/dispatch handoff to move to next narrow MVP seam.
 - Batch 385 handoff:
   - commit: `96064f9` — `batch385: add ios location audience-remove parity summary copy`
   - Added iOS location shell quick parity surface for remove-audience flow: new line `Quick audience remove parity summary: share_id=... / removed_audience_id=... / audience_count=...` + one-tap copy action + guard markers when share/removed audience context is missing.

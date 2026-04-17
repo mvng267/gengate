@@ -83,6 +83,8 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
   const [lastCreateResultDelta, setLastCreateResultDelta] = useState<NotificationCreateResultDelta | null>(null);
   const [lastDeleteResultDelta, setLastDeleteResultDelta] = useState<NotificationDeleteResultDelta | null>(null);
   const [lastLifecyclePair, setLastLifecyclePair] = useState<NotificationLifecyclePair | null>(null);
+  const [lastQuickLifecycleSnapshotAuditCopiedText, setLastQuickLifecycleSnapshotAuditCopiedText] = useState("");
+  const [quickLifecycleSnapshotAuditCopiedAt, setQuickLifecycleSnapshotAuditCopiedAt] = useState<number | null>(null);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
 
   useEffect(() => {
@@ -99,6 +101,8 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     setLastCreateResultDelta(null);
     setLastDeleteResultDelta(null);
     setLastLifecyclePair(null);
+    setLastQuickLifecycleSnapshotAuditCopiedText("");
+    setQuickLifecycleSnapshotAuditCopiedAt(null);
   }, [initialUserId]);
 
   useEffect(() => {
@@ -257,6 +261,19 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     ` / unread_summary(${quickUnreadSummaryLine})` +
     ` / window(limit=${cursorWindow.limit},offset=${cursorWindow.offset},filter_mode=${cursorWindow.unreadOnly ? "unread_only" : "all"})`;
 
+  const quickLifecycleSnapshotAuditCopiedFeedbackText = (() => {
+    if (quickLifecycleSnapshotAuditCopiedAt === null) {
+      return null;
+    }
+
+    const elapsedSeconds = Math.floor((Date.now() - quickLifecycleSnapshotAuditCopiedAt) / 1000);
+    if (elapsedSeconds < 0 || elapsedSeconds >= 6) {
+      return null;
+    }
+
+    return `Copied quick lifecycle snapshot audit (${elapsedSeconds}s ago): ${lastQuickLifecycleSnapshotAuditCopiedText}`;
+  })();
+
   async function submitNotificationCreateFlow(input?: NotificationCreateFlowInput) {
     const userId = (input?.userIdOverride ?? form.userId).trim();
     const normalizedStatusPrefix = input?.statusPrefix?.trim();
@@ -305,6 +322,8 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       setLastCreateResultDelta(createResultDelta);
       setLastDeleteResultDelta(null);
       setLastLifecyclePair(null);
+      setQuickLifecycleSnapshotAuditCopiedAt(null);
+      setLastQuickLifecycleSnapshotAuditCopiedText("");
 
       setForm((current) => ({
         ...current,
@@ -426,6 +445,8 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       setItems((current) => current.map((entry) => (entry.id === updated.id ? updated : entry)));
       setLastLoadedWindow(null);
       setLastDeleteResultDelta(null);
+      setQuickLifecycleSnapshotAuditCopiedAt(null);
+      setLastQuickLifecycleSnapshotAuditCopiedText("");
 
       const mutationDelta: NotificationMutationDelta = {
         notificationId: updated.id,
@@ -483,6 +504,8 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       setLastMutationDelta(null);
       setLastCreateResultDelta((current) => (current && current.notificationId === deleted.id ? null : current));
       setLastLifecyclePair(null);
+      setQuickLifecycleSnapshotAuditCopiedAt(null);
+      setLastQuickLifecycleSnapshotAuditCopiedText("");
 
       const deleteResultDelta: NotificationDeleteResultDelta = {
         notificationId: deleted.id,
@@ -637,6 +660,9 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       "quick_lifecycle_snapshot_audit_missing",
       "quick_lifecycle_snapshot_audit_copy_failed",
     );
+
+    setLastQuickLifecycleSnapshotAuditCopiedText(quickLifecycleSnapshotAuditLine);
+    setQuickLifecycleSnapshotAuditCopiedAt(Date.now());
   }
 
   async function handleCopyQuickDeleteResultSummary() {
@@ -747,6 +773,7 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
           Copy quick lifecycle snapshot audit
         </button>
       </p>
+      {quickLifecycleSnapshotAuditCopiedFeedbackText ? <p>{quickLifecycleSnapshotAuditCopiedFeedbackText}</p> : null}
       <p>
         Quick delete result summary: <code>{quickDeleteResultSummaryLine}</code>
       </p>
