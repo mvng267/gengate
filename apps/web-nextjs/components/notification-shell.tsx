@@ -585,23 +585,25 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     setDeletingId(null);
   }
 
-  async function copyToClipboard(text: string, statusPrefix: string, emptyCode: string, failedCode: string) {
+  async function copyToClipboard(text: string, statusPrefix: string, emptyCode: string, failedCode: string): Promise<boolean> {
     const normalizedText = text.trim();
     if (!normalizedText) {
       setStatus(emptyCode);
-      return;
+      return false;
     }
 
     if (typeof navigator === "undefined" || typeof navigator.clipboard?.writeText !== "function") {
       setStatus("quick_copy_clipboard_unavailable");
-      return;
+      return false;
     }
 
     try {
       await navigator.clipboard.writeText(normalizedText);
       setStatus(`${statusPrefix} (${normalizedText}).`);
+      return true;
     } catch {
       setStatus(failedCode);
+      return false;
     }
   }
 
@@ -708,12 +710,18 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
       return;
     }
 
-    await copyToClipboard(
+    const copied = await copyToClipboard(
       quickLifecycleSnapshotAuditLine,
       "Copied quick lifecycle snapshot audit to clipboard",
       "quick_lifecycle_snapshot_audit_missing",
       "quick_lifecycle_snapshot_audit_copy_failed",
     );
+
+    if (!copied) {
+      setLastQuickLifecycleSnapshotAuditCopiedText("");
+      setQuickLifecycleSnapshotAuditCopiedAt(null);
+      return;
+    }
 
     setLastQuickLifecycleSnapshotAuditCopiedText(quickLifecycleSnapshotAuditLine);
     setQuickLifecycleSnapshotAuditCopiedAt(Date.now());

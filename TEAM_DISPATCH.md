@@ -12,9 +12,48 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 416
-- Trục công việc: web notifications parity — map deterministic error hints + token-first error-code propagation for notifications client/shell.
-- Trạng thái: batch416_complete_web_notifications_error_hint_token_parity.
+- Batch workflow chính thức hiện tại: 419
+- Trục công việc: web notifications parity — gate lifecycle snapshot copied-feedback state on successful quick-copy only.
+- Trạng thái: batch419_complete_web_notifications_lifecycle_snapshot_copy_feedback_gate.
+
+## Batch 419 handoff (closed)
+- Batch vừa xong: **419**
+- Commit đã chốt:
+  - `613c3d4` — `batch419: gate web notifications lifecycle snapshot copied-feedback on successful copy`
+- Test/verify cuối:
+  - Web: `cd apps/web-nextjs && npm run typecheck` ✅
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.45s`)
+- Blocker/rủi ro còn lại:
+  - none.
+- Batch kế tiếp: **420**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - micro-slice follow-up cho notifications/location/feed parity (ưu tiên gap rõ nhất còn lại), giữ verify tối thiểu `make test-friendships`.
+
+## Batch 418 handoff (closed)
+- Batch vừa xong: **418**
+- Commit đã chốt:
+  - `17be67b` — `batch418: harden ios notifications quick-copy failure tokens`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (21.44s)`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.51s`)
+- Blocker/rủi ro còn lại:
+  - none.
+- Batch kế tiếp: **419**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - micro-slice follow-up cho notifications/location/feed parity (ưu tiên gap rõ nhất còn lại), giữ verify tối thiểu `make test-friendships`.
+
+## Batch 417 handoff (closed)
+- Batch vừa xong: **417**
+- Commit đã chốt:
+  - `27de141` — `batch417: add backend venv-backed friendships verify target`
+- Test/verify cuối:
+  - Backend: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.51s`)
+  - Backend sanity: `cd apps/backend-python && ./.venv/bin/pytest -q tests/test_friendships_api.py` ✅ (`8 passed in 0.55s`)
+- Blocker/rủi ro còn lại:
+  - none cho targeted friendships verify path.
+- Batch kế tiếp: **418**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - product seam follow-up nhỏ (ưu tiên notifications/location/feed parity) + giữ verify bằng `make test-friendships`.
 
 ## Batch 416 handoff (closed)
 - Batch vừa xong: **416**
