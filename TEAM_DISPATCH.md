@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 386
-- Trục công việc: web notifications micro-polish parity — added copied-feedback line for `Copy quick lifecycle snapshot audit`.
-- Trạng thái: batch386_complete_web_notifications_lifecycle_snapshot_copied_feedback.
+- Batch workflow chính thức hiện tại: 387
+- Trục công việc: web friend-graph micro-polish parity — added copied-feedback line for `Copy quick friend-request last-action summary bundle` and reset copied-feedback state when bundle payload changes.
+- Trạng thái: batch387_complete_web_friend_request_last_action_copy_feedback.
+
+## Batch 387 handoff (closed)
+- Batch vừa xong: **387**
+- Commit đã chốt:
+  - `0104ce7` — `batch387: add web friend-request last-action copy feedback`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` ✅ (`TYPECHECK_OK`)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **388**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chọn 1 slice hẹp tiếp theo theo MVP seam ưu tiên (friend graph / moments-feed / DM / location / notifications), tránh metadata-only churn.
 
 ## Batch 386 handoff (closed)
 - Batch vừa xong: **386**
