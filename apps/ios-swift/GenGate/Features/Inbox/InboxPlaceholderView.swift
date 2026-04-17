@@ -2926,7 +2926,16 @@ use_when=\(useWhenText)
             return
         }
 
-        writeToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            sendStatusHint = "quick_copy_clipboard_unavailable"
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            sendStatusHint = "sender_keep_pair_send_bundle_quick_copy_failed"
+            return
+        }
+
         sendStatusHint = "Copied sender keep-pair + send result bundle quick copy to clipboard (\(normalizedText))."
     }
 
