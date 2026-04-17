@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 421
+- Batch: 422
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 421 iOS location parity — clear quick location-state copied feedback and emit deterministic copy-failure tokens.
+- Scope: batch 422 iOS location parity — harden audience-remove quick-copy with deterministic failure tokens + copied-feedback reset.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -18,14 +18,18 @@
 - Files:
   - apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift
 - Test:
-  - iOS targeted verify: `cd apps/ios-swift && swift build` ✅ (`Build complete! (2.53s)`)
-  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.46s`)
+  - iOS targeted verify: `cd apps/ios-swift && swift build` ✅ (`Build complete! (1.73s)`)
+  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.45s`)
 - Git:
   - latest feature commit:
-    - `6360a70` — `batch421: harden ios location state quick-copy failure feedback`
-  - working tree: dirty (workflow docs đang cập nhật trong nhịp hiện tại)
+    - `c737103` — `batch422: harden ios location audience-remove quick-copy failure feedback`
+  - working tree: clean
 - Blocker: none.
-- Next: mở batch422 với 1 micro-slice product seam (ưu tiên notifications/location/feed parity follow-up nhỏ) + giữ verify tối thiểu `make test-friendships`.
+- Next: mở batch423 với 1 micro-slice product seam (ưu tiên notifications/location/feed parity follow-up nhỏ) + giữ verify tối thiểu `make test-friendships`.
+- Batch 422 handoff:
+  - commit: `c737103` — `batch422: harden ios location audience-remove quick-copy failure feedback`
+  - scope: iOS location `copyQuickAudienceRemoveParitySummaryToClipboard` nay clear copied-feedback state trên missing-share/missing-removed-audience/empty/clipboard-unavailable/copy-failed paths; thêm deterministic token `quick_audience_remove_parity_summary_copy_failed`; tái dùng shared clipboard helpers để parity với quick-copy semantics batch421/web.
+  - verify: iOS swift build ✅, backend make test-friendships ✅.
 - Batch 421 handoff:
   - commit: `6360a70` — `batch421: harden ios location state quick-copy failure feedback`
   - scope: iOS location `copyQuickLocationStateSummaryToClipboard` nay clear copied-feedback state khi empty/clipboard unavailable/copy failed; thêm deterministic token `quick_location_state_summary_copy_failed`; dùng shared clipboard helpers (`isClipboardAvailableForQuickCopy` + bool-return `writeToClipboard`) để parity với web quick-copy semantics.

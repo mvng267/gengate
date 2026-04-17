@@ -12,9 +12,22 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 421
-- Trục công việc: iOS location parity — clear quick location-state copied feedback marker on copy failure/unavailable paths.
-- Trạng thái: batch421_complete_ios_location_quick_copy_failure_feedback_hardening.
+- Batch workflow chính thức hiện tại: 422
+- Trục công việc: iOS location parity — harden audience-remove quick-copy failure/unavailable semantics + copied-feedback reset.
+- Trạng thái: batch422_complete_ios_location_audience_remove_copy_failure_feedback_hardening.
+
+## Batch 422 handoff (closed)
+- Batch vừa xong: **422**
+- Commit đã chốt:
+  - `c737103` — `batch422: harden ios location audience-remove quick-copy failure feedback`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (1.73s)`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.45s`)
+- Blocker/rủi ro còn lại:
+  - none.
+- Batch kế tiếp: **423**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - micro-slice follow-up cho notifications/location/feed parity (ưu tiên gap rõ nhất còn lại), giữ verify tối thiểu `make test-friendships`.
 
 ## Batch 421 handoff (closed)
 - Batch vừa xong: **421**
