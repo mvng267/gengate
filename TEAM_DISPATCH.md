@@ -12,9 +12,22 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 428
-- Trục công việc: web notifications parity — reset quick-copy context bundles khi load window refresh để tránh stale markers sau đổi user/offset/filter.
-- Trạng thái: batch428_complete_web_notifications_quick_copy_context_reset_on_load.
+- Batch workflow chính thức hiện tại: 429
+- Trục công việc: iOS notifications parity — reset quick-copy context bundles khi load window refresh để tránh stale markers sau đổi user/offset/filter.
+- Trạng thái: batch429_complete_ios_notifications_quick_copy_context_reset_on_load.
+
+## Batch 429 handoff (closed)
+- Batch vừa xong: **429**
+- Commit đã chốt:
+  - `63e801c` — `batch429: reset ios notifications quick-copy context on load`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (3.82s)`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.47s`)
+- Blocker/rủi ro còn lại:
+  - none.
+- Batch kế tiếp: **430**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - micro-slice follow-up cho notifications/location/feed parity (ưu tiên gap rõ nhất còn lại), giữ verify tối thiểu `make test-friendships`.
 
 ## Batch 428 handoff (closed)
 - Batch vừa xong: **428**
