@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 395
+- Batch: 396
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 395 iOS inbox delete-message parity — align delete quick-copy failure token with web (`delete_result_quick_copy_failed`).
+- Scope: batch 396 iOS inbox delete-message parity — align delete quick-copy clipboard-unavailable token with web (`quick_copy_clipboard_unavailable`).
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -18,12 +18,16 @@
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (16.21s)`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (16.52s)`)
 - Git:
-  - latest feature commit: `8bc8dc7` — `batch395: align ios dm delete quick-copy failure token`
+  - latest feature commit: `b0e4518` — `batch396: align ios dm delete quick-copy clipboard token`
   - working tree: clean
 - Blocker: none
-- Next: open batch396 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox delete quick-copy clipboard unavailable parity token).
+- Next: open batch397 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox delete quick-copy success status prefix parity với web `Copied delete-result quick copy to clipboard`).
+- Batch 396 handoff:
+  - commit: `b0e4518` — `batch396: align ios dm delete quick-copy clipboard token`
+  - Updated iOS inbox delete quick-copy flow in `InboxPlaceholderView`: added explicit clipboard-availability guard before write and emit web-aligned token `quick_copy_clipboard_unavailable` when unavailable; still emits `delete_result_quick_copy_failed` on write failure.
+  - Verify pass: iOS `swift build` (`Build complete! (16.52s)`).
 - Batch 395 handoff:
   - commit: `8bc8dc7` — `batch395: align ios dm delete quick-copy failure token`
   - Updated iOS inbox delete quick-copy path in `InboxPlaceholderView`: `writeToClipboard` now returns success boolean and delete quick-copy action now emits `delete_result_quick_copy_failed` when clipboard write fails, matching web failure-token behavior.

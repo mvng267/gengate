@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 395
-- Trục công việc: iOS inbox delete-message parity — align delete quick-copy failure token with web (`delete_result_quick_copy_failed`).
-- Trạng thái: batch395_complete_ios_dm_delete_quick_copy_failure_token_parity.
+- Batch workflow chính thức hiện tại: 396
+- Trục công việc: iOS inbox delete-message parity — align delete quick-copy clipboard-unavailable token with web (`quick_copy_clipboard_unavailable`).
+- Trạng thái: batch396_complete_ios_dm_delete_quick_copy_clipboard_unavailable_token_parity.
+
+## Batch 396 handoff (closed)
+- Batch vừa xong: **396**
+- Commit đã chốt:
+  - `b0e4518` — `batch396: align ios dm delete quick-copy clipboard token`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (16.52s)`)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **397**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS inbox parity micro-slice: align delete quick-copy success status prefix with web (`Copied delete-result quick copy to clipboard`).
 
 ## Batch 395 handoff (closed)
 - Batch vừa xong: **395**
