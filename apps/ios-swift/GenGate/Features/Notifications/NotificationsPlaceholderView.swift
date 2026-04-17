@@ -969,6 +969,8 @@ struct NotificationsPlaceholderView: View {
             return
         }
         userIDDraft = currentSessionUserID
+        clearQuickLifecycleSnapshotAuditCopiedFeedback()
+        clearQuickDeleteResultSummaryCopiedFeedback()
     }
 
     private func useCurrentSessionUserAndLoad() async {
@@ -1029,6 +1031,8 @@ struct NotificationsPlaceholderView: View {
         lastCreateResultDelta = nil
         lastDeleteResultDelta = nil
         lastLifecyclePair = nil
+        clearQuickLifecycleSnapshotAuditCopiedFeedback()
+        clearQuickDeleteResultSummaryCopiedFeedback()
 
         let normalizedStatusPrefix = statusPrefix?.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedUserID = (forcedUserID ?? userIDDraft).trimmingCharacters(in: .whitespacesAndNewlines)
@@ -1207,6 +1211,8 @@ struct NotificationsPlaceholderView: View {
             return
         }
 
+        clearQuickLifecycleSnapshotAuditCopiedFeedback()
+        clearQuickDeleteResultSummaryCopiedFeedback()
         isCreatingNotification = true
         fetchError = nil
         statusMessage = normalizedStatusPrefix.map { "\($0) Creating notification shell item..." } ?? "Creating notification shell item..."
@@ -1319,6 +1325,8 @@ struct NotificationsPlaceholderView: View {
                 totalUnreadCount: nextMeta?.totalUnreadCount
             )
             lastDeleteResultDelta = nil
+            clearQuickLifecycleSnapshotAuditCopiedFeedback()
+            clearQuickDeleteResultSummaryCopiedFeedback()
             lastMutationDelta = mutationDelta
             if let lastCreateResultDelta, lastCreateResultDelta.notificationID == updated.id {
                 lastLifecyclePair = NotificationLifecyclePair(
@@ -1384,6 +1392,8 @@ struct NotificationsPlaceholderView: View {
                 lastCreateResultDelta = nil
             }
             lastLifecyclePair = nil
+            clearQuickLifecycleSnapshotAuditCopiedFeedback()
+            clearQuickDeleteResultSummaryCopiedFeedback()
 
             let deleteResultDelta = NotificationDeleteResultDelta(
                 notificationID: deleted.id,
@@ -1629,23 +1639,27 @@ struct NotificationsPlaceholderView: View {
 
     private func copyQuickLifecycleSnapshotAuditLine() {
         guard lastCreateResultDelta != nil || (lastLifecyclePair?.mutationDelta ?? lastMutationDelta) != nil else {
+            clearQuickLifecycleSnapshotAuditCopiedFeedback()
             statusMessage = "quick_lifecycle_snapshot_audit_missing"
             return
         }
 
         let normalizedText = quickLifecycleSnapshotAuditLine.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
+            clearQuickLifecycleSnapshotAuditCopiedFeedback()
             statusMessage = "quick_lifecycle_snapshot_audit_missing"
             return
         }
 
         guard isClipboardAvailableForQuickCopy else {
+            clearQuickLifecycleSnapshotAuditCopiedFeedback()
             statusMessage = "quick_copy_clipboard_unavailable"
             fetchError = nil
             return
         }
 
         guard writeToClipboard(normalizedText) else {
+            clearQuickLifecycleSnapshotAuditCopiedFeedback()
             statusMessage = "quick_lifecycle_snapshot_audit_copy_failed"
             fetchError = nil
             return
@@ -1659,23 +1673,27 @@ struct NotificationsPlaceholderView: View {
 
     private func copyQuickDeleteResultSummaryLine() {
         guard lastDeleteResultDelta != nil else {
+            clearQuickDeleteResultSummaryCopiedFeedback()
             statusMessage = "quick_delete_result_summary_missing"
             return
         }
 
         let normalizedText = quickDeleteResultSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
+            clearQuickDeleteResultSummaryCopiedFeedback()
             statusMessage = "quick_delete_result_summary_missing"
             return
         }
 
         guard isClipboardAvailableForQuickCopy else {
+            clearQuickDeleteResultSummaryCopiedFeedback()
             statusMessage = "quick_copy_clipboard_unavailable"
             fetchError = nil
             return
         }
 
         guard writeToClipboard(normalizedText) else {
+            clearQuickDeleteResultSummaryCopiedFeedback()
             statusMessage = "quick_delete_result_summary_copy_failed"
             fetchError = nil
             return
@@ -1685,6 +1703,16 @@ struct NotificationsPlaceholderView: View {
         quickDeleteResultSummaryCopiedAt = Date()
         statusMessage = "Copied quick delete result summary to clipboard (\(normalizedText))."
         fetchError = nil
+    }
+
+    private func clearQuickLifecycleSnapshotAuditCopiedFeedback() {
+        lastQuickLifecycleSnapshotAuditCopiedText = ""
+        quickLifecycleSnapshotAuditCopiedAt = nil
+    }
+
+    private func clearQuickDeleteResultSummaryCopiedFeedback() {
+        lastQuickDeleteResultSummaryCopiedText = ""
+        quickDeleteResultSummaryCopiedAt = nil
     }
 
     private var isClipboardAvailableForQuickCopy: Bool {
