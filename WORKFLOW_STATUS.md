@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 429
+- Batch: 430
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 429 iOS notifications parity — reset quick-copy context bundles on load window refresh to avoid stale create/mutation/delete markers after window changes.
+- Scope: batch 430 web notifications parity — harden copied-feedback context lines for quick unread/page/meta/mutation/create/lifecycle copy actions and clear them on window/create/mutation/delete refresh.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,16 +16,20 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/ios-swift/GenGate/Features/Notifications/NotificationsPlaceholderView.swift
+  - apps/web-nextjs/components/notification-shell.tsx
 - Test:
-  - iOS targeted verify: `cd apps/ios-swift && swift build` ✅ (`Build complete! (3.82s)`)
-  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.47s`)
+  - Web targeted verify: `cd apps/web-nextjs && npm run typecheck` ✅ (`tsc --noEmit`)
+  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.69s`)
 - Git:
   - latest feature commit:
-    - `63e801c` — `batch429: reset ios notifications quick-copy context on load`
-  - working tree: dirty (workflow docs đang cập nhật để sync batch429)
+    - `9375b17` — `batch430: harden web notifications quick-copy copied-feedback parity`
+  - working tree: dirty (workflow docs chưa commit)
 - Blocker: none.
-- Next: mở batch430 với 1 micro-slice product seam (ưu tiên notifications/location/feed parity follow-up nhỏ) + giữ verify tối thiểu `make test-friendships`.
+- Next: mở batch431 với 1 micro-slice product seam (ưu tiên notifications/location/feed parity follow-up nhỏ) + giữ verify tối thiểu `make test-friendships`.
+- Batch 430 handoff:
+  - commit: `9375b17` — `batch430: harden web notifications quick-copy copied-feedback parity`
+  - scope: Web notifications shell nay thêm copied-feedback state + feedback line cho quick unread/page meta/page cursor/mutation/create-result/lifecycle pair/lifecycle pair mutation/unread lifecycle bundle; đồng thời clear toàn bộ copied-feedback context khi load window đổi và sau create/mutation/delete để tránh stale “Copied ...” marker drift.
+  - verify: web typecheck ✅, backend make test-friendships ✅.
 - Batch 429 handoff:
   - commit: `63e801c` — `batch429: reset ios notifications quick-copy context on load`
   - scope: iOS notifications shell nay reset toàn bộ quick-copy copied-feedback context bundles (unread/page meta/page cursor/mutation/create/lifecycle pair/lifecycle mutation/unread lifecycle bundle + lifecycle snapshot/delete summary) ngay khi `Load notifications` chạy, để tránh giữ marker copied cũ khi người dùng đổi load window (user/offset/filter).
