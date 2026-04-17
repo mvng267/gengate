@@ -308,6 +308,12 @@ struct NotificationsPlaceholderView: View {
                         .font(.footnote)
                         .foregroundStyle(hasPendingWindowChange ? .orange : .secondary)
 
+                    if let notificationErrorHint {
+                        Text("Hint: \(notificationErrorHint)")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     if let fetchError {
                         Text("Fetch error: \(fetchError)")
                             .font(.footnote)
@@ -895,6 +901,59 @@ struct NotificationsPlaceholderView: View {
         }
 
         return "Copied quick delete result summary (\(Int(elapsed))s ago): \(lastQuickDeleteResultSummaryCopiedText)"
+    }
+
+    private var notificationErrorHint: String? {
+        resolveNotificationErrorHint(
+            statusMessage: statusMessage,
+            fetchError: fetchError
+        )
+    }
+
+    private func resolveNotificationErrorHint(statusMessage: String?, fetchError: String?) -> String? {
+        if let normalizedFetchError = fetchError?.trimmingCharacters(in: .whitespacesAndNewlines),
+           let mapped = notificationErrorHintMessage(for: normalizedFetchError) {
+            return mapped
+        }
+
+        if let normalizedStatusMessage = statusMessage?.trimmingCharacters(in: .whitespacesAndNewlines),
+           let mapped = notificationErrorHintMessage(for: normalizedStatusMessage) {
+            return mapped
+        }
+
+        return nil
+    }
+
+    private func notificationErrorHintMessage(for message: String) -> String? {
+        if message.contains("notification_not_found") {
+            return "Notification này không tồn tại hoặc đã bị xoá. Reload list để đồng bộ lại trạng thái mới nhất."
+        }
+
+        if message.contains("user_not_found") {
+            return "Không tìm thấy user cho notifications flow. Kiểm tra lại user UUID rồi thử load/create lại."
+        }
+
+        if message.contains("validation_error") {
+            return "Payload chưa hợp lệ theo backend contract. Kiểm tra user/type/payload rồi thử lại."
+        }
+
+        if message.contains("notification_user_id_required") {
+            return "Cần nhập user UUID trước khi load hoặc create notification."
+        }
+
+        if message.contains("notification_type_required") {
+            return "Cần nhập notification type trước khi create notification."
+        }
+
+        if message.contains("notification_payload_json_invalid") {
+            return "Payload JSON chưa đúng định dạng object hợp lệ."
+        }
+
+        if message.contains("session_user_missing_for_quick_apply") {
+            return "Chưa có current session user. Đăng nhập trước hoặc nhập thủ công user UUID."
+        }
+
+        return nil
     }
 
     private func prefillFromCurrentSessionUserIfNeeded() {
@@ -1710,6 +1769,12 @@ private struct NotificationsAPIClient {
     }
 
     private struct BackendErrorPayload: Decodable {
+        struct ErrorDetail: Decodable {
+            let code: String?
+            let message: String?
+        }
+
+        let error: ErrorDetail?
         let detail: String?
     }
 
@@ -1742,7 +1807,13 @@ private struct NotificationsAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 200 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Notifications fetch failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Notifications fetch failed"
+                )
+            )
         }
 
         do {
@@ -1782,7 +1853,13 @@ private struct NotificationsAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 201 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Notification create failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Notification create failed"
+                )
+            )
         }
 
         do {
@@ -1802,7 +1879,13 @@ private struct NotificationsAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 200 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Notification mutation failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Notification mutation failed"
+                )
+            )
         }
 
         do {
@@ -1821,7 +1904,13 @@ private struct NotificationsAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 200 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Notification delete failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Notification delete failed"
+                )
+            )
         }
 
         do {
@@ -1869,11 +1958,42 @@ private struct NotificationsAPIClient {
         return httpResponse
     }
 
+    private func resolveRequestFailureMessage(from data: Data, statusCode: Int, prefix: String) -> String {
+        if let errorCode = readErrorCode(from: data) {
+            return errorCode
+        }
+
+        return readErrorMessage(from: data, statusCode: statusCode, prefix: prefix)
+    }
+
+    private func readErrorCode(from data: Data) -> String? {
+        guard let payload = try? JSONDecoder().decode(BackendErrorPayload.self, from: data) else {
+            return nil
+        }
+
+        if let code = payload.error?.code?.trimmingCharacters(in: .whitespacesAndNewlines), !code.isEmpty {
+            return code
+        }
+
+        if let detail = payload.detail?.trimmingCharacters(in: .whitespacesAndNewlines), !detail.isEmpty {
+            return detail
+        }
+
+        return nil
+    }
+
     private func readErrorMessage(from data: Data, statusCode: Int, prefix: String) -> String {
-        if let payload = try? JSONDecoder().decode(BackendErrorPayload.self, from: data),
-           let detail = payload.detail,
-           !detail.isEmpty {
-            return "\(prefix): \(statusCode) (\(detail))"
+        if let payload = try? JSONDecoder().decode(BackendErrorPayload.self, from: data) {
+            if let detail = payload.detail?.trimmingCharacters(in: .whitespacesAndNewlines), !detail.isEmpty {
+                return "\(prefix): \(statusCode) (\(detail))"
+            }
+
+            if let error = payload.error {
+                let errorCode = error.code?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "http_error"
+                let errorMessage = error.message?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                let resolvedMessage = errorMessage.isEmpty ? errorCode : errorMessage
+                return "\(prefix): \(statusCode) (\(errorCode): \(resolvedMessage))"
+            }
         }
 
         return "\(prefix): \(statusCode)"
