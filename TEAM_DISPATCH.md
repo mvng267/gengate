@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 389
-- Trục công việc: web moments-feed reaction parity — wire reaction create/list flows + quick summary copy feedback in `moment-compose-shell`.
-- Trạng thái: batch389_complete_web_moment_reaction_shell_wiring.
+- Batch workflow chính thức hiện tại: 390
+- Trục công việc: iOS moments-feed reaction parity — wire reaction create/list + quick summary copy feedback in `FeedPlaceholderView`.
+- Trạng thái: batch390_complete_ios_moment_reaction_shell_parity.
+
+## Batch 390 handoff (closed)
+- Batch vừa xong: **390**
+- Commit đã chốt:
+  - `d0518ef` — `batch390: add ios feed reaction quick summary copy parity`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (5.36s)`)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **391**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chọn 1 seam hẹp ngoài moments reaction parity (ưu tiên DM/location/notifications) để tiếp tục tăng MVP breadth.
 
 ## Batch 389 handoff (closed)
 - Batch vừa xong: **389**
