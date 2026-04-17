@@ -38,6 +38,13 @@ export type MomentDeleteResult = {
   deleted_at: string | null;
 };
 
+export type MomentReactionItem = {
+  id: string;
+  moment_id: string;
+  user_id: string;
+  reaction_type: string;
+};
+
 export async function createMomentWithImage(input: MomentComposeInput): Promise<MomentListItem> {
   const createMomentResponse = await apiRequest("/moments", {
     method: "POST",
@@ -130,4 +137,41 @@ export async function deleteMoment(momentId: string): Promise<MomentDeleteResult
   }
 
   return (await response.json()) as MomentDeleteResult;
+}
+
+export async function createMomentReaction(input: {
+  momentId: string;
+  userId: string;
+  reactionType: string;
+}): Promise<MomentReactionItem> {
+  const response = await apiRequest(`/moments/${encodeURIComponent(input.momentId)}/reactions`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      user_id: input.userId,
+      reaction_type: input.reactionType,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`moment_reaction_create_failed:${response.status}`);
+  }
+
+  return (await response.json()) as MomentReactionItem;
+}
+
+export async function listMomentReactions(momentId: string): Promise<MomentReactionItem[]> {
+  const response = await apiRequest(`/moments/${encodeURIComponent(momentId)}/reactions`);
+  if (!response.ok) {
+    throw new Error(`moment_reaction_list_failed:${response.status}`);
+  }
+
+  const payload = (await response.json()) as {
+    count: number;
+    items: MomentReactionItem[];
+  };
+
+  return payload.items;
 }

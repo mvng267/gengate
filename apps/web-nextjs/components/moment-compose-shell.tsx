@@ -4,12 +4,15 @@ import { useEffect, useState } from "react";
 
 import { readPersistedAuthSession } from "@/lib/auth/client";
 import {
+  createMomentReaction,
   createMomentWithImage,
   deleteMoment,
+  listMomentReactions,
   listMomentsForAuthor,
   listPrivateFeed,
   type MomentDeleteResult,
   type MomentListItem,
+  type MomentReactionItem,
 } from "@/lib/moments/client";
 type MomentComposeShellProps = {
   initialAuthorUserId?: string;
@@ -19,6 +22,7 @@ type MomentComposeShellProps = {
 type FeedGateSnapshotSource = "create_flow" | "reload_flow" | "delete_flow";
 type DeleteSnapshotSource = "manual_input" | "preset_row" | "first_authored_quick_pick";
 type DeleteSummaryCopySource = "quick_delete_parity" | "last_delete_result" | "copied_feedback";
+type ReactionQuickCopySource = "create_reaction" | "list_reactions";
 
 const deleteSummaryCopySources: DeleteSummaryCopySource[] = [
   "quick_delete_parity",
@@ -47,13 +51,19 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoadingList, setIsLoadingList] = useState(false);
   const [isLoadingFeed, setIsLoadingFeed] = useState(false);
+  const [isCreatingReaction, setIsCreatingReaction] = useState(false);
+  const [isLoadingReactions, setIsLoadingReactions] = useState(false);
   const [items, setItems] = useState<MomentListItem[]>([]);
   const [feedItems, setFeedItems] = useState<MomentListItem[]>([]);
+  const [reactionItems, setReactionItems] = useState<MomentReactionItem[]>([]);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
   const [lastCreateFeedVisibilityDeltaLine, setLastCreateFeedVisibilityDeltaLine] = useState<string | null>(null);
   const [lastCreateFeedGateSummaryLine, setLastCreateFeedGateSummaryLine] = useState<string | null>(null);
   const [lastDeletedMomentSummaryLine, setLastDeletedMomentSummaryLine] = useState<string | null>(null);
   const [deleteMomentIdDraft, setDeleteMomentIdDraft] = useState("");
+  const [reactionMomentIdDraft, setReactionMomentIdDraft] = useState("");
+  const [reactionUserIdDraft, setReactionUserIdDraft] = useState("");
+  const [reactionTypeDraft, setReactionTypeDraft] = useState("heart");
   const [lastCopiedFeedVisibilityDeltaLine, setLastCopiedFeedVisibilityDeltaLine] = useState<string | null>(null);
   const [lastCopiedCreateFeedGateBundleLine, setLastCopiedCreateFeedGateBundleLine] = useState<string | null>(null);
   const [lastCopiedLastCreateFeedGateBundleLine, setLastCopiedLastCreateFeedGateBundleLine] = useState<string | null>(null);
@@ -65,6 +75,8 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     useState<string | null>(null);
   const [lastDeleteCopyAuditSourceStateSnapshotSourceLine, setLastDeleteCopyAuditSourceStateSnapshotSourceLine] =
     useState<string | null>(null);
+  const [lastReactionQuickCopyLine, setLastReactionQuickCopyLine] = useState<string | null>(null);
+  const [lastReactionQuickCopySource, setLastReactionQuickCopySource] = useState<ReactionQuickCopySource | null>(null);
   const [deleteCopyAuditSourceDraft, setDeleteCopyAuditSourceDraft] = useState<DeleteSummaryCopySource>("quick_delete_parity");
   const [feedVisibilityGateSnapshotSource, setFeedVisibilityGateSnapshotSource] =
     useState<FeedGateSnapshotSource>("reload_flow");
@@ -103,6 +115,14 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   const deleteMomentId = deleteMomentIdDraft.trim();
   const quickFeedVisibilityGate = buildFeedVisibilityGateSummary(viewerUserId, feedItems, feedVisibilityGateSnapshotSource);
   const quickFeedVisibilityDeltaLine = `viewer=${viewerUserId || "(empty)"} / feed_count=${feedItems.length} / first_moment_id=${feedItems[0]?.id ?? "(none)"}`;
+  const reactionMomentId = reactionMomentIdDraft.trim();
+  const reactionUserId = reactionUserIdDraft.trim();
+  const reactionType = reactionTypeDraft.trim();
+  const quickReactionSummaryLine =
+    `reaction_target_moment_id=${reactionMomentId || "(empty)"}` +
+    ` / reaction_user_id=${reactionUserId || "(empty)"}` +
+    ` / reaction_type=${reactionType || "(empty)"}` +
+    ` / loaded_reaction_count=${reactionItems.length}`;
   const quickFeedVisibilityGateSummaryLine = quickFeedVisibilityGate.summaryLine;
   const quickCreateFeedGateBundleLine =
     `moment_create_marker={${momentPayloadQuickCopy}} | ` +
@@ -153,6 +173,10 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       .map(({ source, hasValue }) => `${source}:${hasValue ? "ready" : "missing"}`)
       .join("/") +
     `/ready_count=${deleteCopyAuditReadyCount}/total=${deleteSummaryCopySources.length}`;
+  const lastReactionQuickCopyFeedbackLine =
+    lastReactionQuickCopyLine && lastReactionQuickCopySource
+      ? `Last copied reaction quick summary (${lastReactionQuickCopySource}): ${lastReactionQuickCopyLine}`
+      : "";
 
   useEffect(() => {
     setForm((current) => ({
@@ -162,6 +186,12 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     }));
     setItems([]);
     setFeedItems([]);
+    setReactionItems([]);
+    setReactionMomentIdDraft("");
+    setReactionUserIdDraft("");
+    setReactionTypeDraft("heart");
+    setLastReactionQuickCopyLine(null);
+    setLastReactionQuickCopySource(null);
     setFeedVisibilityGateSnapshotSource("reload_flow");
   }, [initialAuthorUserId, initialViewerUserId]);
 
@@ -503,6 +533,122 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     );
   }
 
+  async function handleCopyQuickReactionSummary() {
+    await copyToClipboard(
+      quickReactionSummaryLine,
+      "Copied quick reaction summary to clipboard",
+      "quick_reaction_summary_empty",
+      "quick_reaction_summary_copy_failed",
+      (normalizedText) => {
+        setLastReactionQuickCopyLine(normalizedText);
+        setLastReactionQuickCopySource("list_reactions");
+      },
+    );
+  }
+
+  async function handleCopyLastReactionQuickSummaryFeedback() {
+    await copyToClipboard(
+      lastReactionQuickCopyFeedbackLine,
+      "Copied last reaction quick summary feedback to clipboard",
+      "last_reaction_quick_summary_feedback_missing",
+      "last_reaction_quick_summary_feedback_copy_failed",
+    );
+  }
+
+  async function handleUseCurrentSessionUserAsReactionUser() {
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      setStatus("session_reaction_user_missing_for_quick_apply");
+      return;
+    }
+
+    setReactionUserIdDraft(sessionUserId);
+    setStatus("Applied current session user as reaction user (reaction_user_source=session_user).");
+  }
+
+  async function handleCreateReaction() {
+    const trimmedMomentId = reactionMomentIdDraft.trim();
+    const trimmedUserId = reactionUserIdDraft.trim();
+    const trimmedReactionType = reactionTypeDraft.trim();
+
+    if (!trimmedMomentId) {
+      setStatus("moment_reaction_target_required");
+      return;
+    }
+
+    if (!trimmedUserId) {
+      setStatus("moment_reaction_user_required");
+      return;
+    }
+
+    if (!trimmedReactionType) {
+      setStatus("moment_reaction_type_required");
+      return;
+    }
+
+    setIsCreatingReaction(true);
+    setStatus(`Creating reaction \"${trimmedReactionType}\" on moment ${trimmedMomentId}...`);
+
+    try {
+      const createdReaction = await createMomentReaction({
+        momentId: trimmedMomentId,
+        userId: trimmedUserId,
+        reactionType: trimmedReactionType,
+      });
+
+      setReactionMomentIdDraft(createdReaction.moment_id);
+      setReactionUserIdDraft(createdReaction.user_id);
+      setReactionTypeDraft(createdReaction.reaction_type);
+
+      const loadedReactions = await listMomentReactions(createdReaction.moment_id);
+      setReactionItems(loadedReactions);
+
+      const reactionSummaryLine =
+        `reaction_target_moment_id=${createdReaction.moment_id}` +
+        ` / reaction_user_id=${createdReaction.user_id}` +
+        ` / reaction_type=${createdReaction.reaction_type}` +
+        ` / loaded_reaction_count=${loadedReactions.length}`;
+
+      setLastReactionQuickCopyLine(reactionSummaryLine);
+      setLastReactionQuickCopySource("create_reaction");
+      setStatus(
+        `Created moment reaction ${createdReaction.id}. Reloaded ${loadedReactions.length} reaction(s). Quick summary: ${reactionSummaryLine}.`,
+      );
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "moment_reaction_create_failed");
+    }
+
+    setIsCreatingReaction(false);
+  }
+
+  async function handleLoadReactions() {
+    const trimmedMomentId = reactionMomentIdDraft.trim();
+    if (!trimmedMomentId) {
+      setStatus("moment_reaction_target_required");
+      return;
+    }
+
+    setIsLoadingReactions(true);
+    setStatus(`Loading reactions for moment ${trimmedMomentId}...`);
+
+    try {
+      const loadedReactions = await listMomentReactions(trimmedMomentId);
+      setReactionItems(loadedReactions);
+      const reactionSummaryLine =
+        `reaction_target_moment_id=${trimmedMomentId}` +
+        ` / reaction_user_id=${reactionUserIdDraft.trim() || "(empty)"}` +
+        ` / reaction_type=${reactionTypeDraft.trim() || "(empty)"}` +
+        ` / loaded_reaction_count=${loadedReactions.length}`;
+      setLastReactionQuickCopyLine(reactionSummaryLine);
+      setLastReactionQuickCopySource("list_reactions");
+      setStatus(`Loaded ${loadedReactions.length} reaction(s) for moment ${trimmedMomentId}. Quick summary: ${reactionSummaryLine}.`);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "moment_reaction_list_failed");
+    }
+
+    setIsLoadingReactions(false);
+  }
+
   async function submitMomentCreateFlow(
     authorUserId: string,
     sourceStatusPrefix?: string,
@@ -632,6 +778,10 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
       const deleteGateSummary = buildFeedVisibilityGateSummary(form.viewerUserId.trim(), nextFeedItems, "delete_flow").summaryLine;
 
       setDeleteMomentIdDraft(deleted.id);
+      if (reactionMomentIdDraft.trim() === deleted.id) {
+        setReactionMomentIdDraft("");
+        setReactionItems([]);
+      }
       setDeleteSnapshotSource("manual_input");
       setFeedVisibilityGateSnapshotSource("delete_flow");
       setLastDeletedMomentSummaryLine(deletedSummary);
@@ -667,7 +817,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
   return (
     <section>
       <p>
-        <strong>Status:</strong> moment posting shell now wires caption + image metadata to backend contracts.
+        <strong>Status:</strong> moment posting shell now wires caption + image metadata + reaction create/list to backend contracts.
       </p>
       <p>{status}</p>
       <p>
@@ -863,6 +1013,27 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         </>
       ) : null}
 
+      <p>
+        Quick reaction summary: <code>{quickReactionSummaryLine}</code>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickReactionSummary()}>
+          Copy quick reaction summary
+        </button>
+      </p>
+      {lastReactionQuickCopyLine ? (
+        <>
+          <p>
+            Last reaction quick summary ({lastReactionQuickCopySource ?? "unknown"}): <code>{lastReactionQuickCopyLine}</code>
+          </p>
+          <p>
+            <button type="button" onClick={() => void handleCopyLastReactionQuickSummaryFeedback()}>
+              Copy last reaction quick summary feedback
+            </button>
+          </p>
+        </>
+      ) : null}
+
       <form onSubmit={(event) => void handleCreate(event)}>
         <label>
           Author user UUID
@@ -963,6 +1134,52 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         <button type="button" onClick={() => void handleDeleteMoment()} disabled={isDeleting || deleteMomentId.length === 0}>
           {isDeleting ? "Deleting moment..." : "Delete moment (web parity)"}
         </button>
+
+        <label>
+          Reaction target moment UUID
+          <input
+            value={reactionMomentIdDraft}
+            onChange={(event) => setReactionMomentIdDraft(event.target.value)}
+            placeholder="paste moment id for /moments/{id}/reactions"
+          />
+        </label>
+        <label>
+          Reaction user UUID
+          <input
+            value={reactionUserIdDraft}
+            onChange={(event) => setReactionUserIdDraft(event.target.value)}
+            placeholder="paste user uuid for reaction actor"
+          />
+        </label>
+        <button
+          type="button"
+          onClick={() => void handleUseCurrentSessionUserAsReactionUser()}
+          disabled={currentSessionUserId.trim().length === 0 || isCreatingReaction || isLoadingReactions}
+        >
+          Use current session user for reaction user
+        </button>
+        <label>
+          Reaction type
+          <input
+            value={reactionTypeDraft}
+            onChange={(event) => setReactionTypeDraft(event.target.value)}
+            placeholder="heart"
+          />
+        </label>
+        <button
+          type="button"
+          onClick={() => void handleCreateReaction()}
+          disabled={isCreatingReaction || isLoadingReactions || reactionMomentId.length === 0 || reactionUserId.length === 0 || reactionType.length === 0}
+        >
+          {isCreatingReaction ? "Creating reaction..." : "Create reaction"}
+        </button>
+        <button
+          type="button"
+          onClick={() => void handleLoadReactions()}
+          disabled={isCreatingReaction || isLoadingReactions || reactionMomentId.length === 0}
+        >
+          {isLoadingReactions ? "Loading reactions..." : "Load reactions"}
+        </button>
       </form>
 
       <h2>Authored moments</h2>
@@ -980,6 +1197,16 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
               disabled={!items[0] || isDeleting}
             >
               Use first authored moment as delete target
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setReactionMomentIdDraft(items[0]?.id ?? "");
+                setStatus("Applied first authored moment as reaction target (reaction_target_source=first_authored_quick_pick).");
+              }}
+              disabled={!items[0] || isCreatingReaction || isLoadingReactions}
+            >
+              Use first authored moment as reaction target
             </button>
           </p>
           <ul>
@@ -1010,6 +1237,23 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
               {" · media: "}
               {item.media_items.length}
               {item.media_items[0] ? ` · first image: ${item.media_items[0].storage_key}` : ""}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h2>Moment reactions</h2>
+      {reactionItems.length === 0 ? (
+        <p>No reactions loaded for this moment yet.</p>
+      ) : (
+        <ul>
+          {reactionItems.map((reaction) => (
+            <li key={reaction.id}>
+              <strong>{reaction.reaction_type}</strong>
+              {" · user: "}
+              {reaction.user_id}
+              {" · reaction_id: "}
+              {reaction.id}
             </li>
           ))}
         </ul>
