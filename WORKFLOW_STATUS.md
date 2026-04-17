@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 394
+- Batch: 395
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 394 iOS inbox delete-message parity — align delete target guard token with web (`message_delete_target_required`).
+- Scope: batch 395 iOS inbox delete-message parity — align delete quick-copy failure token with web (`delete_result_quick_copy_failed`).
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -18,12 +18,16 @@
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (14.54s)`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (16.21s)`)
 - Git:
-  - latest feature commit: `55e635e` — `batch394: align ios dm delete target guard token`
+  - latest feature commit: `8bc8dc7` — `batch395: align ios dm delete quick-copy failure token`
   - working tree: clean
 - Blocker: none
-- Next: open batch395 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox delete quick-copy failure token parity với web `delete_result_quick_copy_failed`).
+- Next: open batch396 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox delete quick-copy clipboard unavailable parity token).
+- Batch 395 handoff:
+  - commit: `8bc8dc7` — `batch395: align ios dm delete quick-copy failure token`
+  - Updated iOS inbox delete quick-copy path in `InboxPlaceholderView`: `writeToClipboard` now returns success boolean and delete quick-copy action now emits `delete_result_quick_copy_failed` when clipboard write fails, matching web failure-token behavior.
+  - Verify pass: iOS `swift build` (`Build complete! (16.21s)`).
 - Batch 394 handoff:
   - commit: `55e635e` — `batch394: align ios dm delete target guard token`
   - Updated iOS inbox delete guard in `InboxPlaceholderView`: empty/invalid delete target now emits web-aligned status token `message_delete_target_required` (instead of localized free-text) and clears stale fetch error.
