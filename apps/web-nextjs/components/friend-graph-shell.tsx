@@ -53,6 +53,8 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
       `friend_request_decision_marker={${FRIEND_REQUEST_DECISION_QUICK_COPY_EMPTY}} | ` +
       `friend_request_counts={${FRIEND_REQUEST_COUNTS_QUICK_COPY_EMPTY}}`,
   );
+  const [lastFriendRequestLastActionBundleCopiedText, setLastFriendRequestLastActionBundleCopiedText] = useState("");
+  const [friendRequestLastActionBundleCopiedAt, setFriendRequestLastActionBundleCopiedAt] = useState<number | null>(null);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
   const [hasAutoLoadedSnapshot, setHasAutoLoadedSnapshot] = useState(false);
 
@@ -87,6 +89,19 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
   const quickDeltaSummary = pendingDirectionSummary
     ? `accepted_count=${snapshot?.friendshipCount ?? 0} / pending_inbound=${pendingDirectionSummary.inbound} / pending_outbound=${pendingDirectionSummary.outbound}`
     : "accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)";
+
+  const friendRequestLastActionBundleCopiedFeedbackText = (() => {
+    if (friendRequestLastActionBundleCopiedAt === null) {
+      return null;
+    }
+
+    const elapsedSeconds = Math.floor((Date.now() - friendRequestLastActionBundleCopiedAt) / 1000);
+    if (elapsedSeconds < 0 || elapsedSeconds >= 6) {
+      return null;
+    }
+
+    return `Copied friend-request last-action summary bundle (${elapsedSeconds}s ago): ${lastFriendRequestLastActionBundleCopiedText}`;
+  })();
 
   function buildFriendRequestCreateAcceptBundleQuickCopy(input?: {
     createQuickCopy?: string;
@@ -182,24 +197,36 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
     setIsLoadingSnapshot(false);
   }
 
-  async function copyToClipboard(text: string, statusPrefix: string, emptyCode: string, failedCode: string) {
+  async function copyToClipboard(
+    text: string,
+    statusPrefix: string,
+    emptyCode: string,
+    failedCode: string,
+    options?: {
+      trackDeltaCopy?: boolean;
+    },
+  ): Promise<boolean> {
     const normalizedText = text.trim();
     if (!normalizedText) {
       setStatus(emptyCode);
-      return;
+      return false;
     }
 
     if (typeof navigator === "undefined" || typeof navigator.clipboard?.writeText !== "function") {
       setStatus("quick_copy_clipboard_unavailable");
-      return;
+      return false;
     }
 
     try {
       await navigator.clipboard.writeText(normalizedText);
-      setLastFriendGraphDeltaCopiedLine(normalizedText);
+      if (options?.trackDeltaCopy) {
+        setLastFriendGraphDeltaCopiedLine(normalizedText);
+      }
       setStatus(`${statusPrefix} (${normalizedText}).`);
+      return true;
     } catch {
       setStatus(failedCode);
+      return false;
     }
   }
 
@@ -247,6 +274,7 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
       "Copied friend graph quick delta summary to clipboard",
       "friend_graph_quick_delta_summary_empty",
       "friend_graph_quick_delta_summary_copy_failed",
+      { trackDeltaCopy: true },
     );
   }
 
@@ -256,6 +284,7 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
       "Copied friend graph action delta line to clipboard",
       "friend_graph_action_delta_missing",
       "friend_graph_action_delta_copy_failed",
+      { trackDeltaCopy: true },
     );
   }
 
@@ -305,12 +334,19 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
   }
 
   async function handleCopyFriendRequestLastActionBundleQuickCopy() {
-    await copyToClipboard(
+    const copied = await copyToClipboard(
       lastFriendRequestLastActionBundleQuickCopy,
       "Copied friend-request last-action summary bundle quick copy to clipboard",
       "friend_request_last_action_bundle_quick_copy_empty",
       "friend_request_last_action_bundle_quick_copy_failed",
     );
+
+    if (!copied) {
+      return;
+    }
+
+    setLastFriendRequestLastActionBundleCopiedText(lastFriendRequestLastActionBundleQuickCopy);
+    setFriendRequestLastActionBundleCopiedAt(Date.now());
   }
 
   async function handleApplyCurrentSessionUserAsRequesterAndLoad() {
@@ -370,6 +406,8 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
           countsQuickCopy: FRIEND_REQUEST_COUNTS_QUICK_COPY_EMPTY,
         }),
       );
+      setLastFriendRequestLastActionBundleCopiedText("");
+      setFriendRequestLastActionBundleCopiedAt(null);
       setStatus(`${input.statusPrefix} Created friend request ${created.id}. Reloading friend graph snapshot...`);
       await loadSnapshot(input.reloadedStatusMessage);
     } catch (error) {
@@ -471,6 +509,8 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
           countsQuickCopy: FRIEND_REQUEST_COUNTS_QUICK_COPY_EMPTY,
         }),
       );
+      setLastFriendRequestLastActionBundleCopiedText("");
+      setFriendRequestLastActionBundleCopiedAt(null);
       setStatus(`Created friend request ${created.id}. Reloading friend graph snapshot...`);
       await loadSnapshot("Reloading friend graph after friend-request creation...");
       setTargetUserId("");
@@ -502,6 +542,8 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
           countsQuickCopy,
         }),
       );
+      setLastFriendRequestLastActionBundleCopiedText("");
+      setFriendRequestLastActionBundleCopiedAt(null);
 
       setStatus(
         `Accepted friend request ${requestId}. ` +
@@ -535,6 +577,8 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
           countsQuickCopy,
         }),
       );
+      setLastFriendRequestLastActionBundleCopiedText("");
+      setFriendRequestLastActionBundleCopiedAt(null);
 
       setStatus(
         `Rejected friend request ${requestId}. ` +
@@ -626,6 +670,7 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
               Copy quick friend-request last-action summary bundle
             </button>
           </p>
+          {friendRequestLastActionBundleCopiedFeedbackText ? <p>{friendRequestLastActionBundleCopiedFeedbackText}</p> : null}
           {lastFriendGraphDeltaLine ? (
             <>
               <p>
