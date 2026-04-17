@@ -1112,18 +1112,59 @@ struct ProfilePlaceholderView: View {
     }
 
     private func applyPendingRequestPair(_ row: FriendRequestRow, reversed: Bool) {
-        if reversed {
-            userIDDraft = row.receiverUserID
-            receiverUserIDDraft = row.requesterUserID
-            sessionStore.friendGraphPeerUserID = row.requesterUserID
-            statusMessage = "Filled reverse pair from pending request (pending_pair_mode=reverse, peer_context_source=pending_request)."
-        } else {
-            userIDDraft = row.requesterUserID
-            receiverUserIDDraft = row.receiverUserID
-            sessionStore.friendGraphPeerUserID = row.receiverUserID
-            statusMessage = "Filled same pair from pending request (pending_pair_mode=same, peer_context_source=pending_request)."
-        }
+        let pendingPairMode = reversed ? "reverse" : "same"
+        let selectedUserAID = reversed ? row.receiverUserID : row.requesterUserID
+        let selectedUserBID = reversed ? row.requesterUserID : row.receiverUserID
+
+        userIDDraft = selectedUserAID
+        receiverUserIDDraft = selectedUserBID
+
+        let resolvedPeerContext = resolvePendingPairPeerContext(
+            selectedPeerUserID: selectedUserBID,
+            requesterUserID: row.requesterUserID,
+            receiverUserID: row.receiverUserID
+        )
+        sessionStore.friendGraphPeerUserID = resolvedPeerContext.peerUserID
+
+        let resolvedPeerLabel = resolvedPeerContext.peerUserID ?? "(none)"
+        statusMessage = "Filled \(pendingPairMode) pair from pending request (pending_pair_mode=\(pendingPairMode), peer_context_source=pending_request, peer_context_user_id=\(resolvedPeerLabel), peer_context_resolution=\(resolvedPeerContext.resolution))."
         fetchError = nil
+    }
+
+    private func resolvePendingPairPeerContext(
+        selectedPeerUserID: String,
+        requesterUserID: String,
+        receiverUserID: String
+    ) -> (peerUserID: String?, resolution: String) {
+        var orderedCandidates: [String] = []
+        for candidate in [selectedPeerUserID, requesterUserID, receiverUserID] {
+            let normalizedCandidate = candidate.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !normalizedCandidate.isEmpty else {
+                continue
+            }
+            if !orderedCandidates.contains(normalizedCandidate) {
+                orderedCandidates.append(normalizedCandidate)
+            }
+        }
+
+        guard let defaultPeerCandidate = orderedCandidates.first else {
+            return (nil, "no_peer_candidate")
+        }
+
+        guard let sessionUserID = currentSessionUserID?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !sessionUserID.isEmpty else {
+            return (defaultPeerCandidate, "session_user_missing_keep_default")
+        }
+
+        if defaultPeerCandidate != sessionUserID {
+            return (defaultPeerCandidate, "kept_default_non_session_peer")
+        }
+
+        if let nonSessionCandidate = orderedCandidates.first(where: { $0 != sessionUserID }) {
+            return (nonSessionCandidate, "swapped_from_session_self_peer")
+        }
+
+        return (defaultPeerCandidate, "all_candidates_match_session_user")
     }
 
     private func isPendingRequestPairSelected(_ row: FriendRequestRow, reversed: Bool) -> Bool {

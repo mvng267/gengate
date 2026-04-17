@@ -13,23 +13,23 @@
 
 ## Active batch
 - Batch workflow chính thức hiện tại: 433
-- Trục công việc: iOS friend graph pending-pair peer-context parity — persist selected pending-request peer vào session context và ưu tiên context đó trong inbox quick-apply direct-thread pivots.
-- Trạng thái: batch433_verify_ios_pending_pair_peer_context_pivot_parity.
+- Trục công việc: iOS friend graph pending-pair peer-context parity — persist selected pending-request peer vào session context, guard profile pending-pair peer context khỏi drift về session-self peer, và ưu tiên context đó trong inbox quick-apply direct-thread pivots.
+- Trạng thái: batch433_in_progress_followup_profile_peer_context_self_drift_guard.
 
 ## Batch 433 in progress
 - Scope đang chạy:
-  - iOS friend graph pending-pair peer-context parity: khi `Use same pair` / `Use reverse pair` ở Profile thì lưu peer vào `AppSessionStore.friendGraphPeerUserID`; Inbox quick-apply ưu tiên peer context này và phát status token có `peer_source=profile_pending_pair|thread_context`.
+  - iOS friend graph pending-pair peer-context parity: khi `Use same pair` / `Use reverse pair` ở Profile thì lưu peer vào `AppSessionStore.friendGraphPeerUserID`; nếu peer đang trùng session user thì fallback sang candidate non-session để tránh self-drift; Inbox quick-apply ưu tiên peer context này và phát status token có `peer_source=profile_pending_pair|thread_context`.
 - File chính:
   - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
   - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
   - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
 - Verify:
-  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (13.96s)`)
-  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.44s`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (2.73s)`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.43s`)
 - Blocker/rủi ro:
   - none.
 - Bước kế tiếp ngay:
-  - chốt commit batch433 + ghi handoff ngắn để mở batch434.
+  - chốt commit batch433 follow-up self-drift guard + ghi handoff ngắn để mở batch434.
 
 ## Batch 432 handoff (closed)
 - Batch vừa xong: **432**

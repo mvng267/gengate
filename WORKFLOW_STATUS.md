@@ -2,8 +2,8 @@
 
 - Batch: 433
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 433 iOS friend graph pending-pair peer-context parity — persist selected pending-request peer into session context and prioritize it in inbox quick-apply direct-thread pivots.
-- Status: verify
+- Scope: batch 433 iOS friend graph pending-pair peer-context parity — persist selected pending-request peer into session context, avoid session-self peer drift in profile pending-pair quick-apply, and prioritize that peer context in inbox quick-apply direct-thread pivots.
+- Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
   - Backend friend graph: `POST /friends/requests` -> `POST /friends/requests/{request_id}/reject` -> `GET /friends/requests?user_id=<requester|receiver>` thấy `status: rejected`.
@@ -20,14 +20,14 @@
   - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - iOS targeted verify: `cd apps/ios-swift && swift build` ✅ (`Build complete! (13.96s)`)
-  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.44s`)
+  - iOS targeted verify: `cd apps/ios-swift && swift build` ✅ (`Build complete! (2.73s)`)
+  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.43s`)
 - Git:
   - latest feature commit:
-    - `0d6f27d` — `batch432: carry selected peer context into web friend-graph pivots`
-  - working tree: dirty (batch433 iOS friend-graph pending-pair peer-context parity edits + workflow docs update)
+    - `f8d235d` — `batch433: wire ios pending-pair peer context into inbox quick-apply pivots`
+  - working tree: dirty (batch433 profile pending-pair peer-context self-drift guard + workflow docs update)
 - Blocker: none.
-- Next: commit batch433 micro-slice (`batch433: wire ios pending-pair peer context into inbox quick-apply pivots`) rồi sync checklist/dispatch để mở batch434.
+- Next: commit batch433 follow-up fix (`batch433: guard ios profile pending-pair peer context against session self-drift`) rồi mở batch434 cho micro-slice tiếp theo.
 - Batch 432 handoff:
   - commit: `145b293` — `batch432: add web friend-request pending-pair quick-apply controls`
   - scope: Web profile/friend graph nhận `userB` từ query + friend-request list có quick-apply `Use same pair / Use reverse pair` với marker `pending_pair_mode`, giúp chọn nhanh requester/receiver pair từ pending rows và pivot inbox giữ peer context.
