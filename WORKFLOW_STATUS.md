@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 396
+- Batch: 397
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 396 iOS inbox delete-message parity — align delete quick-copy clipboard-unavailable token with web (`quick_copy_clipboard_unavailable`).
+- Scope: batch 397 iOS inbox send quick-copy parity — align send-result quick-copy failure handling with web tokens.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -18,12 +18,16 @@
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (16.52s)`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (26.81s)`)
 - Git:
-  - latest feature commit: `b0e4518` — `batch396: align ios dm delete quick-copy clipboard token`
+  - latest feature commit: `ba5e9b4` — `batch397: harden ios send quick-copy failure tokens`
   - working tree: clean
 - Blocker: none
-- Next: open batch397 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox delete quick-copy success status prefix parity với web `Copied delete-result quick copy to clipboard`).
+- Next: open batch398 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox sender-keep-pair quick-copy failure token parity với web `sender_keep_pair_quick_copy_failed`).
+- Batch 397 handoff:
+  - commit: `ba5e9b4` — `batch397: harden ios send quick-copy failure tokens`
+  - Updated iOS inbox send-result quick copy in `InboxPlaceholderView`: added clipboard-unavailable guard (`quick_copy_clipboard_unavailable`) and write-failure token (`send_result_quick_copy_failed`) before success status, matching web quick-copy failure semantics.
+  - Verify pass: iOS `swift build` (`Build complete! (26.81s)`).
 - Batch 396 handoff:
   - commit: `b0e4518` — `batch396: align ios dm delete quick-copy clipboard token`
   - Updated iOS inbox delete quick-copy flow in `InboxPlaceholderView`: added explicit clipboard-availability guard before write and emit web-aligned token `quick_copy_clipboard_unavailable` when unavailable; still emits `delete_result_quick_copy_failed` on write failure.
