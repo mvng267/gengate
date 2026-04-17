@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 397
+- Batch: 398
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 397 iOS inbox send quick-copy parity — align send-result quick-copy failure handling with web tokens.
+- Scope: batch 398 iOS inbox send quick-copy parity — align sender keep-pair quick-copy failure handling with web tokens.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -18,12 +18,16 @@
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (26.81s)`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (16.57s)`)
 - Git:
-  - latest feature commit: `ba5e9b4` — `batch397: harden ios send quick-copy failure tokens`
+  - latest feature commit: `1d9114c` — `batch398: harden ios sender keep-pair quick-copy failures`
   - working tree: clean
 - Blocker: none
-- Next: open batch398 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox sender-keep-pair quick-copy failure token parity với web `sender_keep_pair_quick_copy_failed`).
+- Next: open batch399 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox sender-keep-pair + send-bundle quick-copy failure token parity với web `sender_keep_pair_send_bundle_quick_copy_failed`).
+- Batch 398 handoff:
+  - commit: `1d9114c` — `batch398: harden ios sender keep-pair quick-copy failures`
+  - Updated iOS inbox sender keep-pair quick copy in `InboxPlaceholderView`: added clipboard-unavailable guard (`quick_copy_clipboard_unavailable`) and write-failure token (`sender_keep_pair_quick_copy_failed`) before success status, matching web quick-copy failure semantics.
+  - Verify pass: iOS `swift build` (`Build complete! (16.57s)`).
 - Batch 397 handoff:
   - commit: `ba5e9b4` — `batch397: harden ios send quick-copy failure tokens`
   - Updated iOS inbox send-result quick copy in `InboxPlaceholderView`: added clipboard-unavailable guard (`quick_copy_clipboard_unavailable`) and write-failure token (`send_result_quick_copy_failed`) before success status, matching web quick-copy failure semantics.
