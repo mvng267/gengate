@@ -22,6 +22,9 @@ struct LocationPlaceholderView: View {
     @State private var statusMessage: String?
     @State private var lastCopiedLocationStateSummary: String = ""
     @State private var quickLocationStateCopiedAt: Date?
+    @State private var lastRemovedAudienceID: String?
+    @State private var lastCopiedAudienceRemoveParitySummary: String = ""
+    @State private var quickAudienceRemoveParityCopiedAt: Date?
     @State private var isLoading = false
     @State private var isCreatingShare = false
     @State private var isCreatingAudience = false
@@ -207,6 +210,22 @@ struct LocationPlaceholderView: View {
                             .foregroundStyle(.secondary)
                     }
 
+                    Text("Quick audience remove parity summary: \(quickAudienceRemoveParitySummaryLine)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+
+                    Button("Copy quick audience remove parity summary") {
+                        copyQuickAudienceRemoveParitySummaryToClipboard()
+                    }
+                    .buttonStyle(.bordered)
+
+                    if let quickAudienceRemoveParityCopiedFeedbackText {
+                        Text(quickAudienceRemoveParityCopiedFeedbackText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     if let fetchError {
                         Text("Fetch error: \(fetchError)")
                             .font(.footnote)
@@ -346,6 +365,35 @@ struct LocationPlaceholderView: View {
         return "Copied location state summary (\(Int(elapsed))s ago): \(lastCopiedLocationStateSummary)"
     }
 
+    private var quickAudienceRemoveParitySummaryLine: String {
+        let normalizedShareID = effectiveShareID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedRemovedAudienceID = lastRemovedAudienceID?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let normalizedAudienceCount: String
+
+        if normalizedShareID.isEmpty {
+            normalizedAudienceCount = "0"
+        } else {
+            normalizedAudienceCount = audienceCount.map(String.init) ?? "(not_loaded)"
+        }
+
+        return "share_id=\(normalizedShareID.isEmpty ? "(none)" : normalizedShareID) / " +
+            "removed_audience_id=\(normalizedRemovedAudienceID.isEmpty ? "(none)" : normalizedRemovedAudienceID) / " +
+            "audience_count=\(normalizedAudienceCount)"
+    }
+
+    private var quickAudienceRemoveParityCopiedFeedbackText: String? {
+        guard let quickAudienceRemoveParityCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(quickAudienceRemoveParityCopiedAt)
+        guard elapsed < 8 else {
+            return nil
+        }
+
+        return "Copied audience remove parity summary (\(Int(elapsed))s ago): \(lastCopiedAudienceRemoveParitySummary)"
+    }
+
     private func copyQuickLocationStateSummaryToClipboard() {
         let summaryLine = quickLocationStateSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !summaryLine.isEmpty else {
@@ -359,6 +407,40 @@ struct LocationPlaceholderView: View {
         lastCopiedLocationStateSummary = summaryLine
         quickLocationStateCopiedAt = Date()
         statusMessage = "Copied quick location state summary to clipboard."
+        fetchError = nil
+#else
+        statusMessage = "quick_copy_clipboard_unavailable"
+        fetchError = nil
+#endif
+    }
+
+    private func copyQuickAudienceRemoveParitySummaryToClipboard() {
+        let trimmedShareID = effectiveShareID.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedShareID.isEmpty else {
+            statusMessage = "quick_audience_remove_parity_summary_missing_share"
+            fetchError = nil
+            return
+        }
+
+        let trimmedRemovedAudienceID = (lastRemovedAudienceID ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedRemovedAudienceID.isEmpty else {
+            statusMessage = "quick_audience_remove_parity_summary_missing_removed_audience"
+            fetchError = nil
+            return
+        }
+
+        let summaryLine = quickAudienceRemoveParitySummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !summaryLine.isEmpty else {
+            statusMessage = nil
+            fetchError = "quick_audience_remove_parity_summary_empty"
+            return
+        }
+
+#if canImport(UIKit)
+        UIPasteboard.general.string = summaryLine
+        lastCopiedAudienceRemoveParitySummary = summaryLine
+        quickAudienceRemoveParityCopiedAt = Date()
+        statusMessage = "Copied quick audience remove parity summary to clipboard."
         fetchError = nil
 #else
         statusMessage = "quick_copy_clipboard_unavailable"
@@ -483,6 +565,9 @@ struct LocationPlaceholderView: View {
             shareSharingMode = createdShare.sharingMode
             createdAudienceID = nil
             audienceIDDraft = ""
+            lastRemovedAudienceID = nil
+            lastCopiedAudienceRemoveParitySummary = ""
+            quickAudienceRemoveParityCopiedAt = nil
             statusMessage = "Created location share \(createdShare.id). Reloading status..."
             await loadLocationStatus()
         } catch {
@@ -571,6 +656,7 @@ struct LocationPlaceholderView: View {
 
         do {
             try await LocationStatusAPIClient().removeShareAudience(shareID: trimmedShareID, audienceID: trimmedAudienceID)
+            lastRemovedAudienceID = trimmedAudienceID
             if createdAudienceID == trimmedAudienceID {
                 createdAudienceID = nil
             }
