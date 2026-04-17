@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 401
+- Batch: 402
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 401 iOS inbox read-cursor quick-copy parity — align read-cursor-apply quick-copy failure handling with web tokens.
+- Scope: batch 402 iOS inbox read-cursor quick-copy parity — align read-cursor-triage quick-copy failure handling with web tokens.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -18,12 +18,16 @@
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (17.43s)`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (15.12s)`)
 - Git:
-  - latest feature commit: `9619af6` — `batch401: harden ios read-cursor apply quick-copy failures`
+  - latest feature commit: `a7e772d` — `batch402: harden ios read-cursor triage quick-copy failures`
   - working tree: clean
 - Blocker: none
-- Next: open batch402 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox read-cursor-triage quick-copy failure token parity với web `read_cursor_triage_quick_copy_failed`).
+- Next: open batch403 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox first-unread-jump quick-copy failure token parity với web `first_unread_jump_quick_copy_failed`).
+- Batch 402 handoff:
+  - commit: `a7e772d` — `batch402: harden ios read-cursor triage quick-copy failures`
+  - Updated iOS inbox read-cursor-triage quick copy in `InboxPlaceholderView`: added clipboard-unavailable guard (`quick_copy_clipboard_unavailable`) and write-failure token (`read_cursor_triage_quick_copy_failed`) before success status, matching web quick-copy failure semantics.
+  - Verify pass: iOS `swift build` (`Build complete! (15.12s)`).
 - Batch 401 handoff:
   - commit: `9619af6` — `batch401: harden ios read-cursor apply quick-copy failures`
   - Updated iOS inbox read-cursor-apply quick copy in `InboxPlaceholderView`: added clipboard-unavailable guard (`quick_copy_clipboard_unavailable`) and write-failure token (`read_cursor_apply_quick_copy_failed`) before success status, matching web quick-copy failure semantics.

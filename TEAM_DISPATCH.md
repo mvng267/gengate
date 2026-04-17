@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 401
-- Trục công việc: iOS inbox read-cursor quick-copy parity — align read-cursor-apply quick-copy failure handling with web tokens.
-- Trạng thái: batch401_complete_ios_read_cursor_apply_quick_copy_failure_tokens_parity.
+- Batch workflow chính thức hiện tại: 402
+- Trục công việc: iOS inbox read-cursor quick-copy parity — align read-cursor-triage quick-copy failure handling with web tokens.
+- Trạng thái: batch402_complete_ios_read_cursor_triage_quick_copy_failure_tokens_parity.
+
+## Batch 402 handoff (closed)
+- Batch vừa xong: **402**
+- Commit đã chốt:
+  - `a7e772d` — `batch402: harden ios read-cursor triage quick-copy failures`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (15.12s)`)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **403**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS inbox parity micro-slice: align first-unread-jump quick-copy failure token with web (`first_unread_jump_quick_copy_failed`).
 
 ## Batch 401 handoff (closed)
 - Batch vừa xong: **401**
