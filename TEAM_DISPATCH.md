@@ -12,9 +12,22 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 426
-- Trục công việc: iOS notifications parity — reset stale quick-copy feedback cho lifecycle snapshot audit + delete result summary khi notification state/window context đổi.
-- Trạng thái: batch426_complete_ios_notifications_quick_copy_feedback_reset_on_state_refresh.
+- Batch workflow chính thức hiện tại: 427
+- Trục công việc: web notifications parity — clear stale quick-delete copied feedback khi delete-summary context đổi + add deterministic copied feedback line.
+- Trạng thái: batch427_complete_web_notifications_delete_summary_quick_copy_feedback_hardening.
+
+## Batch 427 handoff (closed)
+- Batch vừa xong: **427**
+- Commit đã chốt:
+  - `11c998f` — `batch427: harden web notifications delete summary quick-copy feedback`
+- Test/verify cuối:
+  - Web: `cd apps/web-nextjs && npm run typecheck` ✅
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.47s`)
+- Blocker/rủi ro còn lại:
+  - none.
+- Batch kế tiếp: **428**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - micro-slice follow-up cho notifications/location/feed parity (ưu tiên gap rõ nhất còn lại), giữ verify tối thiểu `make test-friendships`.
 
 ## Batch 426 handoff (closed)
 - Batch vừa xong: **426**
