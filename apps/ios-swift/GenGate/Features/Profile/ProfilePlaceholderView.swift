@@ -631,7 +631,18 @@ struct ProfilePlaceholderView: View {
             return
         }
 
-        copyToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = nil
+            fetchError = "quick_copy_clipboard_unavailable"
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = nil
+            fetchError = "friend_request_create_quick_copy_failed"
+            return
+        }
+
         lastFriendGraphActionDeltaCopiedText = normalizedText
         lastFriendGraphActionDeltaCopiedAt = Date()
         statusMessage = "Copied friend-request create quick copy to clipboard (\(normalizedText))."
@@ -646,7 +657,18 @@ struct ProfilePlaceholderView: View {
             return
         }
 
-        copyToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = nil
+            fetchError = "quick_copy_clipboard_unavailable"
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = nil
+            fetchError = "friend_request_accept_quick_copy_failed"
+            return
+        }
+
         lastFriendGraphActionDeltaCopiedText = normalizedText
         lastFriendGraphActionDeltaCopiedAt = Date()
         statusMessage = "Copied friend-request accept quick copy to clipboard (\(normalizedText))."
@@ -661,7 +683,18 @@ struct ProfilePlaceholderView: View {
             return
         }
 
-        copyToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = nil
+            fetchError = "quick_copy_clipboard_unavailable"
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = nil
+            fetchError = "friend_request_reject_quick_copy_failed"
+            return
+        }
+
         lastFriendGraphActionDeltaCopiedText = normalizedText
         lastFriendGraphActionDeltaCopiedAt = Date()
         statusMessage = "Copied friend-request reject quick copy to clipboard (\(normalizedText))."
@@ -676,7 +709,18 @@ struct ProfilePlaceholderView: View {
             return
         }
 
-        copyToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = nil
+            fetchError = "quick_copy_clipboard_unavailable"
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = nil
+            fetchError = "friend_request_create_accept_bundle_quick_copy_failed"
+            return
+        }
+
         lastFriendGraphActionDeltaCopiedText = normalizedText
         lastFriendGraphActionDeltaCopiedAt = Date()
         statusMessage = "Copied friend-request create + accept bundle quick copy to clipboard (\(normalizedText))."
@@ -691,7 +735,18 @@ struct ProfilePlaceholderView: View {
             return
         }
 
-        copyToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = nil
+            fetchError = "quick_copy_clipboard_unavailable"
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = nil
+            fetchError = "friend_request_create_reject_bundle_quick_copy_failed"
+            return
+        }
+
         lastFriendGraphActionDeltaCopiedText = normalizedText
         lastFriendGraphActionDeltaCopiedAt = Date()
         statusMessage = "Copied friend-request create + reject bundle quick copy to clipboard (\(normalizedText))."
