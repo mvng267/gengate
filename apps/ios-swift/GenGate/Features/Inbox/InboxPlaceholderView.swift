@@ -3026,7 +3026,16 @@ use_when=\(useWhenText)
             return
         }
 
-        writeToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            sendStatusHint = "quick_copy_clipboard_unavailable"
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            sendStatusHint = "first_unread_guard_quick_copy_failed"
+            return
+        }
+
         sendStatusHint = "Copied first-unread guard quick copy to clipboard (\(normalizedText))."
     }
 
