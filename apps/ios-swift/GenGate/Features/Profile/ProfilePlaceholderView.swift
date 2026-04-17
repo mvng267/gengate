@@ -38,6 +38,8 @@ struct ProfilePlaceholderView: View {
     @State private var lastFriendRequestCreateAcceptBundleQuickCopy: String = "friend_request_create_marker={\(friendRequestCreateQuickCopyEmpty)} | friend_request_accept_marker={\(friendRequestAcceptQuickCopyEmpty)}"
     @State private var lastFriendRequestCreateRejectBundleQuickCopy: String = "friend_request_create_marker={\(friendRequestCreateQuickCopyEmpty)} | friend_request_reject_marker={\(friendRequestRejectQuickCopyEmpty)}"
     @State private var lastFriendRequestLastActionBundleQuickCopy: String = "friend_request_create_marker={\(friendRequestCreateQuickCopyEmpty)} | friend_request_decision_marker={\(friendRequestDecisionQuickCopyEmpty)} | friend_request_counts={\(friendRequestCountsQuickCopyEmpty)}"
+    @State private var lastFriendRequestLastActionBundleCopiedAt: Date?
+    @State private var lastFriendRequestLastActionBundleCopiedText: String = ""
 
     var body: some View {
         ScrollView {
@@ -275,6 +277,12 @@ struct ProfilePlaceholderView: View {
                             copyFriendRequestLastActionBundleQuickCopy()
                         }
                         .buttonStyle(.bordered)
+
+                        if let friendRequestLastActionBundleCopiedFeedbackText {
+                            Text(friendRequestLastActionBundleCopiedFeedbackText)
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
 
                         if let lastFriendGraphActionDeltaLine {
                             Text("Last action delta: \(lastFriendGraphActionDeltaLine)")
@@ -519,6 +527,19 @@ struct ProfilePlaceholderView: View {
         return "accepted_count=\(friendshipCount) / pending_inbound=\(pendingDirectionSummary.inbound) / pending_outbound=\(pendingDirectionSummary.outbound)"
     }
 
+    private var friendRequestLastActionBundleCopiedFeedbackText: String? {
+        guard let lastFriendRequestLastActionBundleCopiedAt else {
+            return nil
+        }
+
+        let elapsed = Date().timeIntervalSince(lastFriendRequestLastActionBundleCopiedAt)
+        guard elapsed < 8 else {
+            return nil
+        }
+
+        return "Copied friend-request last-action summary bundle (\(Int(elapsed))s ago): \(lastFriendRequestLastActionBundleCopiedText)"
+    }
+
     private var lastFriendGraphActionDeltaCopiedFeedbackText: String? {
         guard let lastFriendGraphActionDeltaCopiedAt else {
             return nil
@@ -686,8 +707,8 @@ struct ProfilePlaceholderView: View {
         }
 
         copyToClipboard(normalizedText)
-        lastFriendGraphActionDeltaCopiedText = normalizedText
-        lastFriendGraphActionDeltaCopiedAt = Date()
+        lastFriendRequestLastActionBundleCopiedText = normalizedText
+        lastFriendRequestLastActionBundleCopiedAt = Date()
         statusMessage = "Copied friend-request last-action summary bundle quick copy to clipboard (\(normalizedText))."
         fetchError = nil
     }
@@ -815,6 +836,8 @@ struct ProfilePlaceholderView: View {
                 decisionQuickCopy: friendRequestDecisionQuickCopyEmpty,
                 countsQuickCopy: friendRequestCountsQuickCopyEmpty
             )
+            lastFriendRequestLastActionBundleCopiedText = ""
+            lastFriendRequestLastActionBundleCopiedAt = nil
             await loadFriendGraph(
                 statusMessage: "\(statusPrefix) Friend request created. Reloading friend graph..."
             )
@@ -991,6 +1014,8 @@ struct ProfilePlaceholderView: View {
                 decisionQuickCopy: friendRequestDecisionQuickCopyEmpty,
                 countsQuickCopy: friendRequestCountsQuickCopyEmpty
             )
+            lastFriendRequestLastActionBundleCopiedText = ""
+            lastFriendRequestLastActionBundleCopiedAt = nil
             await loadFriendGraph(statusMessage: "Friend request created. Receiver kept for quick dedupe re-test. Reloading friend graph...")
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
@@ -1050,6 +1075,8 @@ struct ProfilePlaceholderView: View {
                 decisionQuickCopy: delta.decisionQuickCopy,
                 countsQuickCopy: delta.countsQuickCopy
             )
+            lastFriendRequestLastActionBundleCopiedText = ""
+            lastFriendRequestLastActionBundleCopiedAt = nil
 
             statusMessage = "Friend request accepted. accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(delta.pendingInboundCount) / pending_outbound=\(delta.pendingOutboundCount)."
         } catch {
@@ -1086,6 +1113,8 @@ struct ProfilePlaceholderView: View {
                 decisionQuickCopy: delta.decisionQuickCopy,
                 countsQuickCopy: delta.countsQuickCopy
             )
+            lastFriendRequestLastActionBundleCopiedText = ""
+            lastFriendRequestLastActionBundleCopiedAt = nil
 
             statusMessage = "Friend request rejected. accepted_count=\(snapshot.friendshipCount) / pending_inbound=\(delta.pendingInboundCount) / pending_outbound=\(delta.pendingOutboundCount)."
         } catch {
