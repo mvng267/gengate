@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 398
-- Trục công việc: iOS inbox send quick-copy parity — align sender keep-pair quick-copy failure handling with web tokens.
-- Trạng thái: batch398_complete_ios_sender_keep_pair_quick_copy_failure_tokens_parity.
+- Batch workflow chính thức hiện tại: 399
+- Trục công việc: iOS inbox send quick-copy parity — align sender keep-pair + send-bundle quick-copy failure handling with web tokens.
+- Trạng thái: batch399_complete_ios_sender_bundle_quick_copy_failure_tokens_parity.
+
+## Batch 399 handoff (closed)
+- Batch vừa xong: **399**
+- Commit đã chốt:
+  - `f9b144a` — `batch399: harden ios sender bundle quick-copy failures`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (15.18s)`)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **400**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS inbox parity micro-slice: align read-cursor quick-copy failure token with web (`read_cursor_quick_copy_failed`).
 
 ## Batch 398 handoff (closed)
 - Batch vừa xong: **398**

@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 398
+- Batch: 399
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 398 iOS inbox send quick-copy parity — align sender keep-pair quick-copy failure handling with web tokens.
+- Scope: batch 399 iOS inbox send quick-copy parity — align sender keep-pair + send-bundle quick-copy failure handling with web tokens.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -18,12 +18,16 @@
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (16.57s)`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (15.18s)`)
 - Git:
-  - latest feature commit: `1d9114c` — `batch398: harden ios sender keep-pair quick-copy failures`
+  - latest feature commit: `f9b144a` — `batch399: harden ios sender bundle quick-copy failures`
   - working tree: clean
 - Blocker: none
-- Next: open batch399 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox sender-keep-pair + send-bundle quick-copy failure token parity với web `sender_keep_pair_send_bundle_quick_copy_failed`).
+- Next: open batch400 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox read-cursor quick-copy failure token parity với web `read_cursor_quick_copy_failed`).
+- Batch 399 handoff:
+  - commit: `f9b144a` — `batch399: harden ios sender bundle quick-copy failures`
+  - Updated iOS inbox sender keep-pair + send-result bundle quick copy in `InboxPlaceholderView`: added clipboard-unavailable guard (`quick_copy_clipboard_unavailable`) and write-failure token (`sender_keep_pair_send_bundle_quick_copy_failed`) before success status, matching web quick-copy failure semantics.
+  - Verify pass: iOS `swift build` (`Build complete! (15.18s)`).
 - Batch 398 handoff:
   - commit: `1d9114c` — `batch398: harden ios sender keep-pair quick-copy failures`
   - Updated iOS inbox sender keep-pair quick copy in `InboxPlaceholderView`: added clipboard-unavailable guard (`quick_copy_clipboard_unavailable`) and write-failure token (`sender_keep_pair_quick_copy_failed`) before success status, matching web quick-copy failure semantics.
