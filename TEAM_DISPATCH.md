@@ -12,9 +12,37 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 412
-- Trục công việc: iOS inbox contract parity — prefer backend `error.code` tokens in direct-message client failures.
-- Trạng thái: batch412_complete_ios_inbox_error_code_token_parity.
+- Batch workflow chính thức hiện tại: 414
+- Trục công việc: iOS inbox UX parity — render deterministic error hints for tokenized direct-message failures.
+- Trạng thái: batch414_complete_ios_inbox_error_hint_parity.
+
+## Batch 414 handoff (closed)
+- Batch vừa xong: **414**
+- Commit đã chốt:
+  - `a002446` — `batch414: add ios dm error-hint parity in inbox shell`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (15.60s)`)
+  - Web safety check: `cd apps/web-nextjs && npm run typecheck` ✅
+  - Backend targeted verify: `cd apps/backend-python && pytest -q tests/test_friendships_api.py` ⚠️ (`zsh:1: command not found: pytest`)
+- Blocker/rủi ro còn lại:
+  - env: thiếu `pytest` trong môi trường hiện tại khi chạy targeted backend API tests.
+- Batch kế tiếp: **415**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - DM follow-up micro-slice ưu tiên notification/location seam hoặc backend/iOS token parity còn thiếu để giữ UX/web/iOS contract đồng nhất.
+
+## Batch 413 handoff (closed)
+- Batch vừa xong: **413**
+- Commit đã chốt:
+  - `1e344f5` — `batch413: add dm error-hint parity in web inbox shell`
+- Test/verify cuối:
+  - Web: `cd apps/web-nextjs && npm run typecheck` ✅
+  - iOS safety check: `cd apps/ios-swift && swift build` ✅ (`Build complete! (0.19s)`)
+  - Backend targeted verify: `cd apps/backend-python && pytest -q tests/test_friendships_api.py` ⚠️ (`zsh:1: command not found: pytest`)
+- Blocker/rủi ro còn lại:
+  - env: thiếu `pytest` trong môi trường hiện tại khi chạy targeted backend API tests.
+- Batch kế tiếp: **414**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS inbox UX parity để map cùng bộ DM error hints từ tokenized failures.
 
 ## Batch 412 handoff (closed)
 - Batch vừa xong: **412**

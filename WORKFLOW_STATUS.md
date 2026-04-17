@@ -24,7 +24,7 @@
     - `cd apps/backend-python && pytest -q tests/test_friendships_api.py` ⚠️ (`zsh:1: command not found: pytest`)
 - Git:
   - latest feature commit:
-    - `fa3cca3` — `batch414: add ios dm error-hint parity in inbox shell`
+    - `a002446` — `batch414: add ios dm error-hint parity in inbox shell`
   - working tree: clean
 - Blocker: env (backend test runner/runtime): thiếu `pytest` trong môi trường hiện tại khi chạy backend targeted tests.
 - Next: mở batch415 với 1 micro-slice DM follow-up ưu tiên notification/location seam hoặc backend/iOS token parity còn thiếu để giữ UX/web/iOS contract đồng nhất.

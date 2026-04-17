@@ -101,7 +101,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
     - `cd apps/backend-python && pytest -q tests/test_friendships_api.py` → ⚠️ `zsh:1: command not found: pytest`
 - Git mốc gần nhất:
   - commit đã chốt:
-    - `fa3cca3` — `batch414: add ios dm error-hint parity in inbox shell`
+    - `a002446` — `batch414: add ios dm error-hint parity in inbox shell`
   - working tree hiện tại: clean
 - Blocker nếu có:
   - env: thiếu `pytest` trong môi trường hiện tại khi chạy targeted backend API tests.
