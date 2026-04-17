@@ -4494,7 +4494,9 @@ use_when=\(useWhenText)
             lastDeleteResultQuickCopy = deleteSummary
             sendStatusHint = "Deleted message \(targetMessageID) (soft-delete). \(deleteSummary)"
         } catch {
-            fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            let resolvedError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            fetchError = resolvedError
+            sendStatusHint = "message_delete_failed: \(resolvedError)"
         }
 
         isDeletingMessage = false
