@@ -89,26 +89,24 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **407**
-- Scope hiện tại: friend-graph contract polish — align `request_not_pending` fallback semantics cho action accept/reject giữa web + iOS Profile.
+- Batch workflow chính thức hiện tại: **408**
+- Scope hiện tại: moments/feed contract polish — normalize web moment client error-code tokens và surface feed error-hint parity ở web compose shell.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/lib/friends/client.ts`
-  - `apps/web-nextjs/components/friend-graph-shell.tsx`
-  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
+  - `apps/web-nextjs/lib/moments/client.ts`
+  - `apps/web-nextjs/components/moment-compose-shell.tsx`
 - Test-verify:
   - `cd apps/web-nextjs && npm run typecheck` → ✅
+  - `cd apps/ios-swift && swift build` → ✅ (`Build complete! (0.18s)`)
   - `cd apps/backend-python && pytest -q tests/test_friendships_api.py` → ⚠️ `zsh:1: command not found: pytest`
-  - `cd apps/ios-swift && swift build` → ✅ (`Build complete! (3.49s)`)
 - Git mốc gần nhất:
   - commit đã chốt:
-    - `51673dc` — `batch407: polish web friend-request not-pending fallback`
-    - `ba79212` — `batch407: align ios friend-request not-pending fallback parity`
+    - `9a65676` — `batch408: normalize web moments error-code fallback hints`
   - working tree hiện tại: clean
 - Blocker nếu có:
-  - env: thiếu `pytest` trong môi trường hiện tại khi chạy targeted backend friendships API test.
+  - env: thiếu `pytest` trong môi trường hiện tại khi chạy targeted backend API tests.
 - Bước kế tiếp:
-  - mở batch408 với 1 slice hẹp kế tiếp theo MVP priority (ưu tiên seam moments/feed hoặc friend-graph/backend contract follow-up) và dùng verify command chạy được trong env hiện tại.
+  - mở batch409 với 1 micro-slice moments/feed parity kế tiếp (ưu tiên iOS error-token parity follow-up hoặc backend contract follow-up nhỏ), dùng verify command chạy được trong env hiện tại.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Quick create + feed-gate bundle: moment_create_marker={author=... | image_url=... | caption=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` + line `Last create + feed-gate bundle: last_create_feed_visibility_delta={created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Bấm `Copy quick create + feed-gate bundle` để verify one-tap create bundle payload và bấm thêm `Copy last create + feed-gate bundle` để verify deterministic payload bundle cho lần create gần nhất; sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`; bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy last copied delete summary feedback`, verify line source-state rồi bấm `Copy delete copy audit for first ready source` để one-shot copy `delete_copy_audit=source:.../value:...`; đối chiếu source được pick với line source-state.
@@ -121,6 +119,22 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - iOS Inbox: nhập User A/B -> `Load inbox thread` (hoặc bấm `Use current session user as user_a + keep peer as user_b + open direct thread` / `Use current session user as user_b (peer) + keep user_a + open direct thread`; nếu thiếu peer context thì thấy marker `session_peer_user_missing_for_quick_apply`) -> nhập message text rồi bấm `Use current session user as sender + keep user_a/user_b pair + send` và verify status có marker `user_pair_source=kept_user_a+user_b` + `sender_source=session_user` -> bấm `Copy quick sender keep-pair marker` và verify payload marker -> bấm `Copy quick sender keep-pair + send result bundle` và verify payload bundle `sender_keep_pair_marker={...} | send_result={sender=... | message_id=...}` -> thao tác mark-read/jump-first-unread -> bấm `Copy quick read-cursor triage line` và verify payload tokenized cùng format với web.
 
 ## Batch handoff note
+
+- Batch vừa xong: **408**
+- Commit cuối đã chốt:
+  - `9a65676` — `batch408: normalize web moments error-code fallback hints`
+- Test-verify cuối:
+  - Web: `cd apps/web-nextjs && npm run typecheck` → pass
+  - iOS: `cd apps/ios-swift && swift build` → pass (`Build complete! (0.18s)`)
+  - Backend friendships API targeted verify: `cd apps/backend-python && pytest -q tests/test_friendships_api.py` → blocked (`zsh:1: command not found: pytest`)
+- Blocker/rủi ro còn lại:
+  - env: thiếu `pytest` trong môi trường hiện tại.
+- Batch kế tiếp:
+  - **409**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - moments/feed parity micro-slice kế tiếp (ưu tiên iOS error-token parity follow-up hoặc backend contract follow-up nhỏ).
+
+---
 
 - Batch vừa xong: **407**
 - Commit cuối đã chốt:
