@@ -12,9 +12,22 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 424
-- Trục công việc: web location parity — reset stale quick-copy feedback khi location state/audience context đổi.
-- Trạng thái: batch424_complete_web_location_quick_copy_feedback_reset_on_state_refresh.
+- Batch workflow chính thức hiện tại: 425
+- Trục công việc: iOS location parity — reset stale quick-copy feedback khi location state/audience context đổi.
+- Trạng thái: batch425_complete_ios_location_quick_copy_feedback_reset_on_state_refresh.
+
+## Batch 425 handoff (closed)
+- Batch vừa xong: **425**
+- Commit đã chốt:
+  - `568cfe2` — `batch425: reset ios location quick-copy feedback on state refresh`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (2.05s)`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.45s`)
+- Blocker/rủi ro còn lại:
+  - none.
+- Batch kế tiếp: **426**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - micro-slice follow-up cho notifications/location/feed parity (ưu tiên gap rõ nhất còn lại), giữ verify tối thiểu `make test-friendships`.
 
 ## Batch 424 handoff (closed)
 - Batch vừa xong: **424**

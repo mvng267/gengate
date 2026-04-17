@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 424
+- Batch: 425
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 424 web location parity — reset stale quick-copy feedback when location state/audience context changes.
+- Scope: batch 425 iOS location parity — reset stale quick-copy feedback when location state/audience context changes.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,16 +16,20 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/web-nextjs/components/location-shell.tsx
+  - apps/ios-swift/GenGate/Features/Location/LocationPlaceholderView.swift
 - Test:
-  - Web targeted verify: `cd apps/web-nextjs && npm run typecheck` ✅
-  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.46s`)
+  - iOS targeted verify: `cd apps/ios-swift && swift build` ✅ (`Build complete! (2.05s)`)
+  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.45s`)
 - Git:
   - latest feature commit:
-    - `c04e21f` — `batch424: reset web location quick-copy feedback on state refresh`
-  - working tree: dirty (workflow docs đang cập nhật trong nhịp hiện tại)
+    - `568cfe2` — `batch425: reset ios location quick-copy feedback on state refresh`
+  - working tree: dirty (workflow docs đang cập nhật để sync batch425)
 - Blocker: none.
-- Next: mở batch425 với 1 micro-slice product seam (ưu tiên notifications/location/feed parity follow-up nhỏ) + giữ verify tối thiểu `make test-friendships`.
+- Next: mở batch426 với 1 micro-slice product seam (ưu tiên notifications/location/feed parity follow-up nhỏ) + giữ verify tối thiểu `make test-friendships`.
+- Batch 425 handoff:
+  - commit: `568cfe2` — `batch425: reset ios location quick-copy feedback on state refresh`
+  - scope: iOS location shell nay reset copied-feedback marker khi context đổi qua load/init/create/toggle/add/remove + apply session owner, tránh hiển thị stale “Copied ...” khi state đã drift khỏi payload copy trước đó.
+  - verify: iOS swift build ✅, backend make test-friendships ✅.
 - Batch 424 handoff:
   - commit: `c04e21f` — `batch424: reset web location quick-copy feedback on state refresh`
   - scope: web location shell nay reset copied-feedback marker khi context đổi qua load/init/create/toggle/add/remove (owner/share/audience/snapshot counters đổi), tránh hiển thị stale “Last copied ...” sau khi state đã drift khỏi payload đã copy.
