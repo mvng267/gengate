@@ -429,6 +429,7 @@ struct LocationPlaceholderView: View {
     private func copyQuickAudienceRemoveParitySummaryToClipboard() {
         let trimmedShareID = effectiveShareID.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedShareID.isEmpty else {
+            clearQuickAudienceRemoveParityCopiedFeedback()
             statusMessage = "quick_audience_remove_parity_summary_missing_share"
             fetchError = nil
             return
@@ -436,6 +437,7 @@ struct LocationPlaceholderView: View {
 
         let trimmedRemovedAudienceID = (lastRemovedAudienceID ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedRemovedAudienceID.isEmpty else {
+            clearQuickAudienceRemoveParityCopiedFeedback()
             statusMessage = "quick_audience_remove_parity_summary_missing_removed_audience"
             fetchError = nil
             return
@@ -443,26 +445,40 @@ struct LocationPlaceholderView: View {
 
         let summaryLine = quickAudienceRemoveParitySummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !summaryLine.isEmpty else {
+            clearQuickAudienceRemoveParityCopiedFeedback()
             statusMessage = nil
             fetchError = "quick_audience_remove_parity_summary_empty"
             return
         }
 
-#if canImport(UIKit)
-        UIPasteboard.general.string = summaryLine
+        guard isClipboardAvailableForQuickCopy else {
+            clearQuickAudienceRemoveParityCopiedFeedback()
+            statusMessage = "quick_copy_clipboard_unavailable"
+            fetchError = nil
+            return
+        }
+
+        guard writeToClipboard(summaryLine) else {
+            clearQuickAudienceRemoveParityCopiedFeedback()
+            statusMessage = "quick_audience_remove_parity_summary_copy_failed"
+            fetchError = nil
+            return
+        }
+
         lastCopiedAudienceRemoveParitySummary = summaryLine
         quickAudienceRemoveParityCopiedAt = Date()
         statusMessage = "Copied quick audience remove parity summary to clipboard."
         fetchError = nil
-#else
-        statusMessage = "quick_copy_clipboard_unavailable"
-        fetchError = nil
-#endif
     }
 
     private func clearQuickLocationStateCopiedFeedback() {
         lastCopiedLocationStateSummary = ""
         quickLocationStateCopiedAt = nil
+    }
+
+    private func clearQuickAudienceRemoveParityCopiedFeedback() {
+        lastCopiedAudienceRemoveParitySummary = ""
+        quickAudienceRemoveParityCopiedAt = nil
     }
 
     private var isClipboardAvailableForQuickCopy: Bool {
