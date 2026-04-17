@@ -2974,6 +2974,11 @@ use_when=\(useWhenText)
             return
         }
 
+        guard isClipboardAvailableForQuickCopy else {
+            sendStatusHint = "quick_copy_clipboard_unavailable"
+            return
+        }
+
         guard writeToClipboard(normalizedText) else {
             sendStatusHint = "delete_result_quick_copy_failed"
             return
@@ -3352,6 +3357,14 @@ use_when=\(useWhenText)
 
         lastRecipientDeviceSourceHintBranchUseWhenPreviewLiteCopyText = normalizedBranchUseWhenPreviewLiteText
         lastRecipientDeviceSourceHintBranchUseWhenPreviewLiteCopyAt = Date()
+    }
+
+    private var isClipboardAvailableForQuickCopy: Bool {
+#if os(iOS) || os(macOS)
+        true
+#else
+        false
+#endif
     }
 
     @discardableResult
