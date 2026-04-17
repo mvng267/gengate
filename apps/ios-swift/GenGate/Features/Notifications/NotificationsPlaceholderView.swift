@@ -1239,8 +1239,7 @@ struct NotificationsPlaceholderView: View {
             return
         }
 
-        clearQuickLifecycleSnapshotAuditCopiedFeedback()
-        clearQuickDeleteResultSummaryCopiedFeedback()
+        clearQuickContextCopiedFeedbackOnWindowRefresh()
         isCreatingNotification = true
         fetchError = nil
         statusMessage = normalizedStatusPrefix.map { "\($0) Creating notification shell item..." } ?? "Creating notification shell item..."
@@ -1353,8 +1352,7 @@ struct NotificationsPlaceholderView: View {
                 totalUnreadCount: nextMeta?.totalUnreadCount
             )
             lastDeleteResultDelta = nil
-            clearQuickLifecycleSnapshotAuditCopiedFeedback()
-            clearQuickDeleteResultSummaryCopiedFeedback()
+            clearQuickContextCopiedFeedbackOnWindowRefresh()
             lastMutationDelta = mutationDelta
             if let lastCreateResultDelta, lastCreateResultDelta.notificationID == updated.id {
                 lastLifecyclePair = NotificationLifecyclePair(
@@ -1420,8 +1418,7 @@ struct NotificationsPlaceholderView: View {
                 lastCreateResultDelta = nil
             }
             lastLifecyclePair = nil
-            clearQuickLifecycleSnapshotAuditCopiedFeedback()
-            clearQuickDeleteResultSummaryCopiedFeedback()
+            clearQuickContextCopiedFeedbackOnWindowRefresh()
 
             let deleteResultDelta = NotificationDeleteResultDelta(
                 notificationID: deleted.id,
