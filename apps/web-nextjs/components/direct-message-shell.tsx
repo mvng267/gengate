@@ -43,6 +43,69 @@ const initialDeleteForm = {
   targetMessageId: "",
 };
 
+const userNotFoundFallbackMessage = "A referenced user was not found. Verify User A/User B/sender IDs and retry.";
+const conversationNotFoundFallbackMessage = "Direct thread no longer exists. Re-open the conversation to refresh thread context.";
+const conversationMemberNotFoundFallbackMessage =
+  "Sender is not a member of this direct thread. Keep sender inside the current conversation member pair.";
+const messageNotFoundFallbackMessage = "Target message was not found. Reload thread messages and retry with a fresh message ID.";
+const deviceNotFoundFallbackMessage = "Recipient device was not found. Reload recipient devices and choose a valid device ID.";
+const deviceUserMismatchFallbackMessage =
+  "Recipient device does not belong to the selected recipient user. Re-check recipient user/device pairing.";
+const messageDeviceKeyExistsFallbackMessage =
+  "A message device-key already exists for this recipient device. Reuse existing key or choose a different target.";
+const validationErrorFallbackMessage = "Request payload is invalid. Re-check UUID fields and required inputs.";
+const attachmentTargetRequiredFallbackMessage = "Select a target message ID before creating or loading attachments.";
+const deleteTargetRequiredFallbackMessage = "Select a target message ID before deleting a message.";
+const openThreadFirstFallbackMessage = "Open a direct thread first, then retry this action.";
+
+function resolveDirectMessageErrorHint(message: string): string | null {
+  if (message.includes("user_not_found")) {
+    return userNotFoundFallbackMessage;
+  }
+
+  if (message.includes("conversation_not_found")) {
+    return conversationNotFoundFallbackMessage;
+  }
+
+  if (message.includes("conversation_member_not_found")) {
+    return conversationMemberNotFoundFallbackMessage;
+  }
+
+  if (message.includes("message_not_found")) {
+    return messageNotFoundFallbackMessage;
+  }
+
+  if (message.includes("device_not_found")) {
+    return deviceNotFoundFallbackMessage;
+  }
+
+  if (message.includes("device_user_mismatch")) {
+    return deviceUserMismatchFallbackMessage;
+  }
+
+  if (message.includes("message_device_key_exists")) {
+    return messageDeviceKeyExistsFallbackMessage;
+  }
+
+  if (message.includes("validation_error")) {
+    return validationErrorFallbackMessage;
+  }
+
+  if (message.includes("attachment_target_message_required")) {
+    return attachmentTargetRequiredFallbackMessage;
+  }
+
+  if (message.includes("message_delete_target_required")) {
+    return deleteTargetRequiredFallbackMessage;
+  }
+
+  if (message.includes("open_thread_first")) {
+    return openThreadFirstFallbackMessage;
+  }
+
+  return null;
+}
+
 function derivePeerUserIdFromConversation(memberUserIds: string[], userId: string): string {
   return memberUserIds.find((memberUserId) => memberUserId.trim() && memberUserId !== userId) ?? "";
 }
@@ -1182,12 +1245,15 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     );
   }
 
+  const directMessageErrorHint = resolveDirectMessageErrorHint(status);
+
   return (
     <section>
       <p>
         <strong>Status:</strong> direct messaging shell wires direct thread open/create, text send/list, and image attachment create/list.
       </p>
       <p>{status}</p>
+      {directMessageErrorHint ? <p>Hint: {directMessageErrorHint}</p> : null}
       <p>
         Quick copy conversation: <code>{conversationQuickCopy}</code>
       </p>
