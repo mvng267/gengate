@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 392
-- Trục công việc: iOS inbox delete-message parity — wire native quick delete result summary/copy flow for `DELETE /messages/{message_id}`.
-- Trạng thái: batch392_complete_ios_dm_delete_result_copy_parity.
+- Batch workflow chính thức hiện tại: 393
+- Trục công việc: iOS inbox delete-message parity — align delete failure status token with web (`message_delete_failed`).
+- Trạng thái: batch393_complete_ios_dm_delete_failure_token_parity.
+
+## Batch 393 handoff (closed)
+- Batch vừa xong: **393**
+- Commit đã chốt:
+  - `7d490ca` — `batch393: align ios dm delete failure status token`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (15.09s)`)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **394**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS inbox parity micro-slice: align delete target guard token with web (`message_delete_target_required`).
 
 ## Batch 392 handoff (closed)
 - Batch vừa xong: **392**

@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 392
+- Batch: 393
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 392 iOS inbox delete-message parity — add native quick delete result summary/copy flow for `DELETE /messages/{message_id}`.
+- Scope: batch 393 iOS inbox delete-message parity — align delete failure status token with web (`message_delete_failed`).
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -18,12 +18,16 @@
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (15.30s)`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (15.09s)`)
 - Git:
-  - latest feature commit: `f21c365` — `batch392: add ios dm delete-result quick copy parity`
+  - latest feature commit: `7d490ca` — `batch393: align ios dm delete failure status token`
   - working tree: clean
 - Blocker: none
-- Next: open batch393 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox delete failure status-token parity với web `message_delete_failed`).
+- Next: open batch394 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox delete target guard token parity với web `message_delete_target_required`).
+- Batch 393 handoff:
+  - commit: `7d490ca` — `batch393: align ios dm delete failure status token`
+  - Updated iOS inbox delete error handling in `InboxPlaceholderView`: when `DELETE /messages/{message_id}` fails, status hint now emits web-aligned token `message_delete_failed: <error>` while preserving resolved error in fetch error surface.
+  - Verify pass: iOS `swift build` (`Build complete! (15.09s)`).
 - Batch 392 handoff:
   - commit: `f21c365` — `batch392: add ios dm delete-result quick copy parity`
   - Added iOS inbox delete-message quick parity surface in `InboxPlaceholderView`: new quick-copy line `delete_result=(none) | message_id=(none) | remaining_message_count=(none)`, copy action `Copy quick delete result summary`, and delete success summary `delete_result=deleted | message_id=... | remaining_message_count=...` after soft-delete + silent thread reload.
