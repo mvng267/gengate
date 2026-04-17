@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 393
+- Batch: 394
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 393 iOS inbox delete-message parity — align delete failure status token with web (`message_delete_failed`).
+- Scope: batch 394 iOS inbox delete-message parity — align delete target guard token with web (`message_delete_target_required`).
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -18,12 +18,16 @@
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (15.09s)`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (14.54s)`)
 - Git:
-  - latest feature commit: `7d490ca` — `batch393: align ios dm delete failure status token`
+  - latest feature commit: `55e635e` — `batch394: align ios dm delete target guard token`
   - working tree: clean
 - Blocker: none
-- Next: open batch394 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox delete target guard token parity với web `message_delete_target_required`).
+- Next: open batch395 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS inbox delete quick-copy failure token parity với web `delete_result_quick_copy_failed`).
+- Batch 394 handoff:
+  - commit: `55e635e` — `batch394: align ios dm delete target guard token`
+  - Updated iOS inbox delete guard in `InboxPlaceholderView`: empty/invalid delete target now emits web-aligned status token `message_delete_target_required` (instead of localized free-text) and clears stale fetch error.
+  - Verify pass: iOS `swift build` (`Build complete! (14.54s)`).
 - Batch 393 handoff:
   - commit: `7d490ca` — `batch393: align ios dm delete failure status token`
   - Updated iOS inbox delete error handling in `InboxPlaceholderView`: when `DELETE /messages/{message_id}` fails, status hint now emits web-aligned token `message_delete_failed: <error>` while preserving resolved error in fetch error surface.
