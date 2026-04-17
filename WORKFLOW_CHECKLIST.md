@@ -98,8 +98,8 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Test-verify:
   - `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` → ✅ (`TYPECHECK_OK`)
 - Git mốc gần nhất:
-  - commit gần nhất đã chốt: `d0518ef` — `batch390: add ios feed reaction quick summary copy parity`
-  - working tree hiện tại: dirty (batch391 changes + workflow docs pending commit)
+  - commit gần nhất đã chốt: `6c28180` — `batch391: add web dm delete-message parity`
+  - working tree hiện tại: clean
 - Blocker nếu có:
   - none
 - Bước kế tiếp:
@@ -119,7 +119,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch vừa xong: **391**
 - Commit cuối đã chốt:
-  - pending local commit — `batch391: add web dm delete-message parity`
+  - `6c28180` — `batch391: add web dm delete-message parity`
 - Test-verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` → pass (`TYPECHECK_OK`)
 - Blocker/rủi ro còn lại:

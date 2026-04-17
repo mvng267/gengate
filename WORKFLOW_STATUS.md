@@ -21,12 +21,12 @@
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` ✅ (`TYPECHECK_OK`)
 - Git:
-  - latest feature commit: local batch391 commit (web DM delete-message parity)
-  - working tree: dirty (batch391 changes + workflow docs pending commit)
+  - latest feature commit: `6c28180` — `batch391: add web dm delete-message parity`
+  - working tree: clean
 - Blocker: none
 - Next: open batch392 với 1 slice hẹp tiếp theo ngoài moments reaction parity (ưu tiên iOS inbox delete-message parity để giữ DM cross-platform seam).
 - Batch 391 handoff:
-  - commit: pending local commit — `batch391: add web dm delete-message parity`
+  - commit: `6c28180` — `batch391: add web dm delete-message parity`
   - Added web inbox delete-message parity wiring: `deleteMessage(messageId)` client helper calls `DELETE /messages/{message_id}` and direct-message shell now exposes `Delete message (soft-delete)` action, target message input, and quick-copy line `delete_result=deleted | message_id=... | remaining_message_count=...` for deterministic triage/reporting.
   - Verify pass: web typecheck (`TYPECHECK_OK`).
 - Batch 390 handoff:

@@ -19,7 +19,7 @@
 ## Batch 391 handoff (closed)
 - Batch vừa xong: **391**
 - Commit đã chốt:
-  - pending local commit — `batch391: add web dm delete-message parity`
+  - `6c28180` — `batch391: add web dm delete-message parity`
 - Test/verify cuối:
   - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` ✅ (`TYPECHECK_OK`)
 - Blocker/rủi ro còn lại:
