@@ -24,6 +24,8 @@ struct FeedPlaceholderView: View {
     @State private var statusMessage: String?
     @State private var fetchError: String?
     @State private var latestQuickReactionLog: String?
+    @State private var lastReactionQuickCopyLine: String?
+    @State private var lastReactionQuickCopySource: ReactionQuickCopySource?
     @State private var lastCreateFeedVisibilityDeltaLine: String?
     @State private var lastCreateFeedGateSummaryLine: String?
     @State private var lastDeletedMomentSummaryLine: String?
@@ -55,6 +57,11 @@ struct FeedPlaceholderView: View {
     @State private var requireDeleteConfirmation = true
     @State private var quickReactionPreferMomentAuthor = false
     @State private var quickReactionRefreshMode: QuickReactionRefreshMode = .both
+
+    private enum ReactionQuickCopySource: String {
+        case createReaction = "create_reaction"
+        case listReactions = "list_reactions"
+    }
 
     private enum QuickReactionRefreshMode: String, CaseIterable, Identifiable {
         case none
@@ -594,6 +601,28 @@ struct FeedPlaceholderView: View {
                         }
                     }
 
+                    Text("Quick reaction summary: \(quickReactionSummaryLine)")
+                        .font(.footnote.monospaced())
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+
+                    Button("Copy quick reaction summary") {
+                        copyQuickReactionSummary()
+                    }
+                    .buttonStyle(.bordered)
+
+                    if let lastReactionQuickCopyLine {
+                        Text("Last reaction quick summary (\(lastReactionQuickCopySource?.rawValue ?? "unknown")): \(lastReactionQuickCopyLine)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+
+                        Button("Copy last reaction quick summary feedback") {
+                            copyLastReactionQuickSummaryFeedback()
+                        }
+                        .buttonStyle(.bordered)
+                    }
+
                     if latestQuickReactionLog != nil {
                         HStack(spacing: 8) {
                             Button {
@@ -1130,6 +1159,23 @@ struct FeedPlaceholderView: View {
         return "viewer=\(normalizedViewer) / feed_count=\(feedCount) / first_moment_id=\(firstMomentID)"
     }
 
+    private var quickReactionSummaryLine: String {
+        let targetMomentID = normalizedReactionTargetMomentIDDraft.isEmpty ? "(empty)" : normalizedReactionTargetMomentIDDraft
+        let reactionUserID = normalizedReactionUserIDDraft.isEmpty ? "(empty)" : normalizedReactionUserIDDraft
+        let reactionType = normalizedReactionTypeDraft.isEmpty ? "(empty)" : normalizedReactionTypeDraft
+
+        return "reaction_target_moment_id=\(targetMomentID) / reaction_user_id=\(reactionUserID) / reaction_type=\(reactionType) / loaded_reaction_count=\(reactionRows.count)"
+    }
+
+    private var lastReactionQuickCopyFeedbackLine: String? {
+        guard let lastReactionQuickCopyLine, let lastReactionQuickCopySource else {
+            return nil
+        }
+
+        let source = lastReactionQuickCopySource.rawValue
+        return "Last copied reaction quick summary (\(source)): \(lastReactionQuickCopyLine)"
+    }
+
     private func buildFeedVisibilityGateSummary(viewerRawID: String, rows: [PrivateFeedMomentRow], snapshotSource: String) -> (viewerAccess: String, viewerAccessReason: String, visibleCount: Int, firstMomentID: String, summaryLine: String) {
         let normalizedViewerID = viewerRawID.trimmingCharacters(in: .whitespacesAndNewlines)
         let viewerAccessReason: String
@@ -1595,6 +1641,14 @@ struct FeedPlaceholderView: View {
             statusMessage = "qr:ok moment=\(shortIdentifier(row.id)) mode=\(quickReactionRefreshMode.shortLabel) refreshing=reactions"
             latestQuickReactionLog = statusMessage
             await loadMomentReactions()
+            let reactionSummaryLine =
+                "reaction_target_moment_id=\(row.id)" +
+                " / reaction_user_id=\(quickReactionUserID)" +
+                " / reaction_type=\(trimmedReactionType)" +
+                " / loaded_reaction_count=\(reactionRows.count)"
+            lastReactionQuickCopyLine = reactionSummaryLine
+            lastReactionQuickCopySource = .createReaction
+
 
             var refreshedTargets: [String] = []
 
@@ -2028,6 +2082,43 @@ struct FeedPlaceholderView: View {
 #endif
     }
 
+    private func copyQuickReactionSummary() {
+        let normalizedText = quickReactionSummaryLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            statusMessage = nil
+            fetchError = "quick_reaction_summary_empty"
+            return
+        }
+
+        guard copyToClipboard(normalizedText) else {
+            statusMessage = nil
+            fetchError = "quick_reaction_summary_copy_failed"
+            return
+        }
+
+        lastReactionQuickCopyLine = normalizedText
+        lastReactionQuickCopySource = .listReactions
+        statusMessage = "Copied quick reaction summary to clipboard (\(normalizedText))."
+        fetchError = nil
+    }
+
+    private func copyLastReactionQuickSummaryFeedback() {
+        guard let feedbackLine = lastReactionQuickCopyFeedbackLine?.trimmingCharacters(in: .whitespacesAndNewlines), !feedbackLine.isEmpty else {
+            statusMessage = nil
+            fetchError = "last_reaction_quick_summary_feedback_missing"
+            return
+        }
+
+        guard copyToClipboard(feedbackLine) else {
+            statusMessage = nil
+            fetchError = "last_reaction_quick_summary_feedback_copy_failed"
+            return
+        }
+
+        statusMessage = "Copied last reaction quick summary feedback to clipboard (\(feedbackLine))."
+        fetchError = nil
+    }
+
     private func copyLatestQuickReactionLogToClipboard() {
         guard let latestQuickReactionLog else {
             return
@@ -2209,7 +2300,14 @@ struct FeedPlaceholderView: View {
 
         do {
             reactionRows = try await PrivateFeedAPIClient().fetchReactions(momentID: trimmedMomentID)
-            statusMessage = "Loaded \(reactionRows.count) reaction(s) for moment \(trimmedMomentID)."
+            let reactionSummaryLine =
+                "reaction_target_moment_id=\(trimmedMomentID)" +
+                " / reaction_user_id=\(normalizedReactionUserIDDraft.isEmpty ? "(empty)" : normalizedReactionUserIDDraft)" +
+                " / reaction_type=\(normalizedReactionTypeDraft.isEmpty ? "(empty)" : normalizedReactionTypeDraft)" +
+                " / loaded_reaction_count=\(reactionRows.count)"
+            lastReactionQuickCopyLine = reactionSummaryLine
+            lastReactionQuickCopySource = .listReactions
+            statusMessage = "Loaded \(reactionRows.count) reaction(s) for moment \(trimmedMomentID). Quick summary: \(reactionSummaryLine)."
         } catch {
             reactionRows = []
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
@@ -2242,13 +2340,31 @@ struct FeedPlaceholderView: View {
         fetchError = nil
 
         do {
-            _ = try await PrivateFeedAPIClient().createReaction(
+            let createdReaction = try await PrivateFeedAPIClient().createReaction(
                 momentID: trimmedMomentID,
                 userID: trimmedReactionUserID,
                 reactionType: trimmedReactionType
             )
+
+            reactionTargetMomentIDDraft = createdReaction.momentID
+            reactionUserIDDraft = createdReaction.userID
+            reactionTypeDraft = createdReaction.reactionType
+
             statusMessage = "Created reaction on moment \(trimmedMomentID). Reloading reactions..."
             await loadMomentReactions()
+
+            let createdReactionMomentID = createdReaction.momentID
+            let createdReactionUserID = createdReaction.userID
+            let createdReactionType = createdReaction.reactionType
+            let loadedReactionCount = reactionRows.count
+            let reactionSummaryLine =
+                "reaction_target_moment_id=\(createdReactionMomentID)" +
+                " / reaction_user_id=\(createdReactionUserID)" +
+                " / reaction_type=\(createdReactionType)" +
+                " / loaded_reaction_count=\(loadedReactionCount)"
+            lastReactionQuickCopyLine = reactionSummaryLine
+            lastReactionQuickCopySource = .createReaction
+            statusMessage = "Created moment reaction \(createdReaction.id). Reloaded \(reactionRows.count) reaction(s). Quick summary: \(reactionSummaryLine)."
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
@@ -2352,6 +2468,7 @@ private struct PrivateFeedMomentRow: Identifiable {
 
 private struct MomentReactionRow: Identifiable {
     let id: String
+    let momentID: String
     let userID: String
     let reactionType: String
 }
@@ -2425,12 +2542,14 @@ private struct PrivateFeedAPIClient {
 
     private struct MomentReactionItem: Decodable {
         let id: String
+        let moment_id: String
         let user_id: String
         let reaction_type: String
     }
 
     private struct MomentReactionResponse: Decodable {
         let id: String
+        let moment_id: String
         let user_id: String
         let reaction_type: String
     }
@@ -2505,7 +2624,7 @@ private struct PrivateFeedAPIClient {
         do {
             let payload = try JSONDecoder().decode(MomentReactionListResponse.self, from: data)
             return payload.items.map {
-                MomentReactionRow(id: $0.id, userID: $0.user_id, reactionType: $0.reaction_type)
+                MomentReactionRow(id: $0.id, momentID: $0.moment_id, userID: $0.user_id, reactionType: $0.reaction_type)
             }
         } catch {
             throw APIError.invalidResponse
@@ -2529,7 +2648,7 @@ private struct PrivateFeedAPIClient {
 
         do {
             let payload = try JSONDecoder().decode(MomentReactionResponse.self, from: data)
-            return MomentReactionRow(id: payload.id, userID: payload.user_id, reactionType: payload.reaction_type)
+            return MomentReactionRow(id: payload.id, momentID: payload.moment_id, userID: payload.user_id, reactionType: payload.reaction_type)
         } catch {
             throw APIError.invalidResponse
         }
