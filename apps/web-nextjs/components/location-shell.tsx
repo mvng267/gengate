@@ -95,6 +95,9 @@ export function LocationShell({
     );
     setAudienceCount(0);
     setSnapshotCount(0);
+    setLastRemovedAudienceId(null);
+    setLastCopiedLocationStateSummary("");
+    setLastCopiedAudienceRemoveParitySummary("");
   }, [initialAllowedUserId, initialOwnerUserId, initialShareId]);
 
   useEffect(() => {
@@ -122,14 +125,17 @@ export function LocationShell({
     try {
       const nextSnapshotCount = await getSnapshotCount(ownerUserId);
       setSnapshotCount(nextSnapshotCount);
+      setLastCopiedLocationStateSummary("");
 
       if (currentShareId) {
         const nextAudienceCount = await getAudienceCount(currentShareId);
         setAudienceCount(nextAudienceCount);
+        setLastCopiedAudienceRemoveParitySummary("");
         const summaryStatus = `Reloaded counts: ${nextAudienceCount} audience member(s), ${nextSnapshotCount} snapshot(s).`;
         setStatus(statusPrefix ? `${statusPrefix} ${summaryStatus}` : summaryStatus);
       } else {
         setAudienceCount(0);
+        setLastCopiedAudienceRemoveParitySummary("");
         const summaryStatus = `Reloaded counts: 0 audience member(s), ${nextSnapshotCount} snapshot(s).`;
         setStatus(statusPrefix ? `${statusPrefix} ${summaryStatus}` : summaryStatus);
       }
@@ -176,6 +182,8 @@ export function LocationShell({
       });
       setShare(created);
       setAudienceCount(0);
+      setLastRemovedAudienceId(null);
+      setLastCopiedAudienceRemoveParitySummary("");
       await reloadCounts({ shareIdOverride: created.id });
       setStatus(`Created location share ${created.id} in ${created.sharing_mode} mode.`);
     } catch (error) {
@@ -197,6 +205,7 @@ export function LocationShell({
     try {
       const updated = await updateShare(share.id, !share.is_active);
       setShare(updated);
+      setLastCopiedLocationStateSummary("");
       setStatus(`Location sharing is now ${updated.is_active ? "active" : "inactive"}.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "location_share_update_failed");
@@ -218,6 +227,7 @@ export function LocationShell({
       await createAudience(share.id, form.allowedUserId.trim());
       const nextAudienceCount = await getAudienceCount(share.id);
       setAudienceCount(nextAudienceCount);
+      setLastCopiedAudienceRemoveParitySummary("");
       setStatus(`Added audience member. Share now has ${nextAudienceCount} allowed user(s).`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "location_audience_create_failed");
@@ -246,6 +256,7 @@ export function LocationShell({
       const nextAudienceCount = await getAudienceCount(share.id);
       setAudienceCount(nextAudienceCount);
       setLastRemovedAudienceId(trimmedAudienceId);
+      setLastCopiedAudienceRemoveParitySummary("");
       setStatus(`Removed audience member ${trimmedAudienceId}. Share now has ${nextAudienceCount} allowed user(s).`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "location_audience_remove_failed");
