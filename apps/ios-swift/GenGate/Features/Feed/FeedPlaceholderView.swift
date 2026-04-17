@@ -2556,8 +2556,8 @@ private struct PrivateFeedAPIClient {
 
     private struct BackendErrorPayload: Decodable {
         struct ErrorDetail: Decodable {
-            let code: String
-            let message: String
+            let code: String?
+            let message: String?
         }
 
         let error: ErrorDetail?
@@ -2618,7 +2618,13 @@ private struct PrivateFeedAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 200 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Moment reactions fetch failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Moment reactions fetch failed"
+                )
+            )
         }
 
         do {
@@ -2643,7 +2649,13 @@ private struct PrivateFeedAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 201 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Moment reaction create failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Moment reaction create failed"
+                )
+            )
         }
 
         do {
@@ -2662,7 +2674,13 @@ private struct PrivateFeedAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 200 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Moment delete failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Moment delete failed"
+                )
+            )
         }
 
         do {
@@ -2677,7 +2695,13 @@ private struct PrivateFeedAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 200 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: prefix))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: prefix
+                )
+            )
         }
 
         do {
@@ -2710,7 +2734,13 @@ private struct PrivateFeedAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 201 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Moment create failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Moment create failed"
+                )
+            )
         }
 
         do {
@@ -2744,7 +2774,13 @@ private struct PrivateFeedAPIClient {
         let httpResponse = try requireHTTPResponse(response)
 
         guard httpResponse.statusCode == 201 else {
-            throw APIError.requestFailed(readErrorMessage(from: data, statusCode: httpResponse.statusCode, prefix: "Moment media create failed"))
+            throw APIError.requestFailed(
+                resolveRequestFailureMessage(
+                    from: data,
+                    statusCode: httpResponse.statusCode,
+                    prefix: "Moment media create failed"
+                )
+            )
         }
 
         do {
@@ -2776,6 +2812,30 @@ private struct PrivateFeedAPIClient {
         return httpResponse
     }
 
+    private func resolveRequestFailureMessage(from data: Data, statusCode: Int, prefix: String) -> String {
+        if let errorCode = readErrorCode(from: data) {
+            return errorCode
+        }
+
+        return readErrorMessage(from: data, statusCode: statusCode, prefix: prefix)
+    }
+
+    private func readErrorCode(from data: Data) -> String? {
+        guard let payload = try? JSONDecoder().decode(BackendErrorPayload.self, from: data) else {
+            return nil
+        }
+
+        if let code = payload.error?.code?.trimmingCharacters(in: .whitespacesAndNewlines), !code.isEmpty {
+            return code
+        }
+
+        if let detail = payload.detail?.trimmingCharacters(in: .whitespacesAndNewlines), !detail.isEmpty {
+            return detail
+        }
+
+        return nil
+    }
+
     private func readErrorMessage(from data: Data, statusCode: Int, prefix: String) -> String {
         if let payload = try? JSONDecoder().decode(BackendErrorPayload.self, from: data) {
             if let detail = payload.detail, !detail.isEmpty {
@@ -2783,8 +2843,10 @@ private struct PrivateFeedAPIClient {
             }
 
             if let error = payload.error {
-                let message = error.message.isEmpty ? error.code : error.message
-                return "\(prefix): \(statusCode) (\(error.code): \(message))"
+                let errorCode = error.code?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "http_error"
+                let errorMessage = error.message?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                let resolvedMessage = errorMessage.isEmpty ? errorCode : errorMessage
+                return "\(prefix): \(statusCode) (\(errorCode): \(resolvedMessage))"
             }
         }
 
