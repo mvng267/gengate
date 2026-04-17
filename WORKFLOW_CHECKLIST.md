@@ -100,7 +100,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 - Git mốc gần nhất:
   - commit đã chốt:
     - `0663937` — `batch420: clear web location copied-state feedback on copy failure`
-  - working tree hiện tại: dirty (workflow docs đang cập nhật trong nhịp hiện tại)
+  - working tree hiện tại: clean
 - Blocker nếu có:
   - none.
 - Bước kế tiếp:

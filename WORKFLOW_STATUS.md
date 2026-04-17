@@ -23,7 +23,7 @@
 - Git:
   - latest feature commit:
     - `0663937` — `batch420: clear web location copied-state feedback on copy failure`
-  - working tree: dirty (workflow docs đang cập nhật trong nhịp hiện tại)
+  - working tree: clean
 - Blocker: none.
 - Next: mở batch421 với 1 micro-slice product seam (ưu tiên notifications/location/feed parity follow-up nhỏ) + giữ verify tối thiểu `make test-friendships`.
 - Batch 420 handoff:
