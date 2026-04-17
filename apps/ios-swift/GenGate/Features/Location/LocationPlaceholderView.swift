@@ -515,6 +515,8 @@ struct LocationPlaceholderView: View {
             return
         }
         ownerUserIDDraft = currentSessionUserID
+        clearQuickLocationStateCopiedFeedback()
+        clearQuickAudienceRemoveParityCopiedFeedback()
     }
 
     private func applyCurrentSessionUserAsOwnerAndLoadLocationStatus() async {
@@ -576,6 +578,9 @@ struct LocationPlaceholderView: View {
                 audienceCount = try await apiClient.fetchAudienceCount(shareID: trimmedShareID)
             }
 
+            clearQuickLocationStateCopiedFeedback()
+            clearQuickAudienceRemoveParityCopiedFeedback()
+
             let loadedStatus = "Loaded location status counts successfully."
             if let normalizedStatusPrefix, !normalizedStatusPrefix.isEmpty {
                 statusMessage = "\(normalizedStatusPrefix) \(loadedStatus)"
@@ -589,6 +594,8 @@ struct LocationPlaceholderView: View {
             shareStateShareID = nil
             shareIsActive = nil
             shareSharingMode = nil
+            clearQuickLocationStateCopiedFeedback()
+            clearQuickAudienceRemoveParityCopiedFeedback()
             let errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             fetchError = errorMessage
             if let normalizedStatusPrefix, !normalizedStatusPrefix.isEmpty {
@@ -620,8 +627,8 @@ struct LocationPlaceholderView: View {
             createdAudienceID = nil
             audienceIDDraft = ""
             lastRemovedAudienceID = nil
-            lastCopiedAudienceRemoveParitySummary = ""
-            quickAudienceRemoveParityCopiedAt = nil
+            clearQuickLocationStateCopiedFeedback()
+            clearQuickAudienceRemoveParityCopiedFeedback()
             statusMessage = "Created location share \(createdShare.id). Reloading status..."
             await loadLocationStatus()
         } catch {
@@ -652,6 +659,7 @@ struct LocationPlaceholderView: View {
             shareStateShareID = updatedShare.id
             shareIsActive = updatedShare.isActive
             shareSharingMode = updatedShare.sharingMode
+            clearQuickLocationStateCopiedFeedback()
             statusMessage = "Updated share \(updatedShare.id): is_active=\(updatedShare.isActive ? "true" : "false"). Reloading status..."
             await loadLocationStatus()
         } catch {
@@ -682,6 +690,8 @@ struct LocationPlaceholderView: View {
             let createdAudience = try await LocationStatusAPIClient().createShareAudience(shareID: trimmedShareID, allowedUserID: trimmedAllowedUserID)
             createdAudienceID = createdAudience.id
             audienceIDDraft = createdAudience.id
+            clearQuickLocationStateCopiedFeedback()
+            clearQuickAudienceRemoveParityCopiedFeedback()
             statusMessage = "Added audience \(createdAudience.id) to share \(trimmedShareID). Reloading status..."
             await loadLocationStatus()
         } catch {
@@ -717,6 +727,8 @@ struct LocationPlaceholderView: View {
             if audienceIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == trimmedAudienceID {
                 audienceIDDraft = ""
             }
+            clearQuickLocationStateCopiedFeedback()
+            clearQuickAudienceRemoveParityCopiedFeedback()
             statusMessage = "Removed audience \(trimmedAudienceID) from share \(trimmedShareID). Reloading status..."
             await loadLocationStatus()
         } catch {
