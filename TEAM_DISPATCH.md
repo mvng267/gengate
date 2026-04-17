@@ -12,9 +12,22 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 419
-- Trục công việc: web notifications parity — gate lifecycle snapshot copied-feedback state on successful quick-copy only.
-- Trạng thái: batch419_complete_web_notifications_lifecycle_snapshot_copy_feedback_gate.
+- Batch workflow chính thức hiện tại: 420
+- Trục công việc: web location parity — clear copied location-state feedback marker when quick copy fails or clipboard is unavailable.
+- Trạng thái: batch420_complete_web_location_copied_state_feedback_failure_guard.
+
+## Batch 420 handoff (closed)
+- Batch vừa xong: **420**
+- Commit đã chốt:
+  - `b7f5fdd` — `batch420: clear web location copied-state feedback on copy failure`
+- Test/verify cuối:
+  - Web: `cd apps/web-nextjs && npm run typecheck` ✅
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.46s`)
+- Blocker/rủi ro còn lại:
+  - none.
+- Batch kế tiếp: **421**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - micro-slice follow-up cho notifications/location/feed parity (ưu tiên gap rõ nhất còn lại), giữ verify tối thiểu `make test-friendships`.
 
 ## Batch 419 handoff (closed)
 - Batch vừa xong: **419**

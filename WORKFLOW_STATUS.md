@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 419
+- Batch: 420
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 419 web notifications parity — gate quick lifecycle snapshot copied-feedback state on successful clipboard write only.
+- Scope: batch 420 web location parity — clear copied location-state feedback marker when quick copy fails or clipboard is unavailable.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,16 +16,20 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/web-nextjs/components/notification-shell.tsx
+  - apps/web-nextjs/components/location-shell.tsx
 - Test:
   - Web targeted verify: `cd apps/web-nextjs && npm run typecheck` ✅
-  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.45s`)
+  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.46s`)
 - Git:
   - latest feature commit:
-    - `e3ef49b` — `batch419: gate web notifications lifecycle snapshot copied-feedback on successful copy`
+    - `b7f5fdd` — `batch420: clear web location copied-state feedback on copy failure`
   - working tree: dirty (workflow docs đang cập nhật trong nhịp hiện tại)
 - Blocker: none.
-- Next: mở batch420 với 1 micro-slice product seam (ưu tiên notifications/location/feed parity follow-up nhỏ) + giữ verify tối thiểu `make test-friendships`.
+- Next: mở batch421 với 1 micro-slice product seam (ưu tiên notifications/location/feed parity follow-up nhỏ) + giữ verify tối thiểu `make test-friendships`.
+- Batch 420 handoff:
+  - commit: `b7f5fdd` — `batch420: clear web location copied-state feedback on copy failure`
+  - scope: web location `handleCopyQuickLocationStateSummary` giờ reset copied-summary feedback state khi gặp `quick_copy_clipboard_unavailable` hoặc `quick_location_state_summary_copy_failed`, tránh giữ stale copied marker sau copy thất bại.
+  - verify: web typecheck ✅, backend make test-friendships ✅.
 - Batch 419 handoff:
   - commit: `e3ef49b` — `batch419: gate web notifications lifecycle snapshot copied-feedback on successful copy`
   - scope: web notifications `handleCopyQuickLifecycleSnapshotAudit` chỉ set copied-feedback state khi clipboard write thành công; nếu fail/clipboard unavailable thì reset copied snapshot state để tránh stale copied marker.

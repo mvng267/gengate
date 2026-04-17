@@ -262,6 +262,7 @@ export function LocationShell({
 
     if (typeof navigator === "undefined" || typeof navigator.clipboard?.writeText !== "function") {
       setStatus("quick_copy_clipboard_unavailable");
+      setLastCopiedLocationStateSummary("");
       return;
     }
 
@@ -271,6 +272,7 @@ export function LocationShell({
       setStatus(`Copied quick location state summary to clipboard (${normalizedSummary}).`);
     } catch {
       setStatus("quick_location_state_summary_copy_failed");
+      setLastCopiedLocationStateSummary("");
     }
   }
 
