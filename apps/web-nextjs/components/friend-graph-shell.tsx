@@ -15,6 +15,7 @@ import {
 type FriendGraphShellProps = {
   userId: string;
   autoloadSnapshot?: boolean;
+  initialTargetUserId?: string;
 };
 
 const FRIEND_REQUEST_CREATE_QUICK_COPY_EMPTY =
@@ -40,10 +41,14 @@ function resolveFriendRequestActionError(error: unknown, fallbackCode: string): 
   return fallbackCode;
 }
 
-export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGraphShellProps) {
+export function FriendGraphShell({
+  userId,
+  autoloadSnapshot = false,
+  initialTargetUserId = "",
+}: FriendGraphShellProps) {
   const [snapshot, setSnapshot] = useState<FriendGraphSnapshot | null>(null);
   const [status, setStatus] = useState("Ready to load the friend graph snapshot for this profile context.");
-  const [targetUserId, setTargetUserId] = useState("");
+  const [targetUserId, setTargetUserId] = useState(() => initialTargetUserId.trim());
   const [isLoadingSnapshot, setIsLoadingSnapshot] = useState(false);
   const [isCreatingRequest, setIsCreatingRequest] = useState(false);
   const [busyRequestId, setBusyRequestId] = useState<string | null>(null);
@@ -69,9 +74,12 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
   const [friendRequestLastActionBundleCopiedAt, setFriendRequestLastActionBundleCopiedAt] = useState<number | null>(null);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
   const [hasAutoLoadedSnapshot, setHasAutoLoadedSnapshot] = useState(false);
+  const [pendingPairMode, setPendingPairMode] = useState<"same" | "reverse" | null>(null);
 
+  const normalizedTargetUserId = targetUserId.trim();
+  const selectedPendingPairModeLabel = pendingPairMode ? ` · pending pair mode: ${pendingPairMode}` : "";
   const feedHref = `/feed?author=${encodeURIComponent(userId)}&viewer=${encodeURIComponent(userId)}`;
-  const inboxHref = `/inbox?userA=${encodeURIComponent(userId)}&sender=${encodeURIComponent(userId)}`;
+  const inboxHref = `/inbox?userA=${encodeURIComponent(userId)}&userB=${encodeURIComponent(normalizedTargetUserId || userId)}&sender=${encodeURIComponent(userId)}`;
   const notificationsHref = `/notifications?user=${encodeURIComponent(userId)}`;
   const locationHref = `/location?owner=${encodeURIComponent(userId)}`;
   const pendingDirectionSummary = snapshot
@@ -164,6 +172,10 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
   }, []);
 
   useEffect(() => {
+    setTargetUserId(initialTargetUserId.trim());
+  }, [initialTargetUserId]);
+
+  useEffect(() => {
     if (!autoloadSnapshot || hasAutoLoadedSnapshot || !userId.trim()) {
       return;
     }
@@ -199,6 +211,7 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
         { inbound: 0, outbound: 0 },
       );
 
+      setPendingPairMode(null);
       setStatus(
         `Loaded friend graph: ${nextSnapshot.requestCount} pending request(s), ${nextSnapshot.friendshipCount} accepted friendship(s) · inbound: ${pendingBreakdown.inbound} · outbound: ${pendingBreakdown.outbound}.`,
       );
@@ -420,6 +433,7 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
       );
       setLastFriendRequestLastActionBundleCopiedText("");
       setFriendRequestLastActionBundleCopiedAt(null);
+      setPendingPairMode(null);
       setStatus(`${input.statusPrefix} Created friend request ${created.id}. Reloading friend graph snapshot...`);
       await loadSnapshot(input.reloadedStatusMessage);
     } catch (error) {
@@ -521,11 +535,11 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
           countsQuickCopy: FRIEND_REQUEST_COUNTS_QUICK_COPY_EMPTY,
         }),
       );
+      setPendingPairMode(null);
       setLastFriendRequestLastActionBundleCopiedText("");
       setFriendRequestLastActionBundleCopiedAt(null);
       setStatus(`Created friend request ${created.id}. Reloading friend graph snapshot...`);
       await loadSnapshot("Reloading friend graph after friend-request creation...");
-      setTargetUserId("");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "friend_request_create_failed");
     }
@@ -619,6 +633,10 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
       ) : null}
       {pendingDirectionSummary ? (
         <>
+          <p>
+            Snapshot summary: Requested user: <code>{userId}</code>
+            {selectedPendingPairModeLabel}
+          </p>
           <p>
             Pending summary: Inbound pending <strong>{pendingDirectionSummary.inbound}</strong> · Outbound pending{" "}
             <strong>{pendingDirectionSummary.outbound}</strong> · Total pending <strong>{pendingDirectionSummary.total}</strong>
@@ -761,6 +779,10 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
             const isPending = request.status === "pending";
             const canAccept = isPending && request.receiver.id === userId;
             const canReject = isPending && (request.receiver.id === userId || request.requester.id === userId);
+            const isSamePairSelected =
+              normalizedTargetUserId === request.receiver.id && userId.trim() === request.requester.id;
+            const isReversePairSelected =
+              normalizedTargetUserId === request.requester.id && userId.trim() === request.receiver.id;
 
             return (
               <li key={request.id}>
@@ -769,9 +791,30 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
                 <strong>{request.receiver.username ?? request.receiver.email}</strong>
                 {" · status: "}
                 {request.status}
-                {canAccept ? (
-                  <>
-                    {" "}
+                <div style={{ marginTop: 6, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTargetUserId(request.receiver.id);
+                      setPendingPairMode("same");
+                      setStatus("Filled same pair from pending request (pending_pair_mode=same).");
+                    }}
+                    disabled={isLoadingSnapshot || isCreatingRequest || isSamePairSelected}
+                  >
+                    {isSamePairSelected ? "Using same pair" : "Use same pair"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTargetUserId(request.requester.id);
+                      setPendingPairMode("reverse");
+                      setStatus("Filled reverse pair from pending request (pending_pair_mode=reverse).");
+                    }}
+                    disabled={isLoadingSnapshot || isCreatingRequest || isReversePairSelected}
+                  >
+                    {isReversePairSelected ? "Using reverse pair" : "Use reverse pair"}
+                  </button>
+                  {canAccept ? (
                     <button
                       type="button"
                       onClick={() => void handleAcceptRequest(request.id)}
@@ -779,11 +822,8 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
                     >
                       {busyRequestId === request.id ? "Processing..." : "Accept"}
                     </button>
-                  </>
-                ) : null}
-                {canReject ? (
-                  <>
-                    {" "}
+                  ) : null}
+                  {canReject ? (
                     <button
                       type="button"
                       onClick={() => void handleRejectRequest(request.id)}
@@ -791,8 +831,8 @@ export function FriendGraphShell({ userId, autoloadSnapshot = false }: FriendGra
                     >
                       {busyRequestId === request.id ? "Processing..." : "Reject"}
                     </button>
-                  </>
-                ) : null}
+                  ) : null}
+                </div>
               </li>
             );
           })}

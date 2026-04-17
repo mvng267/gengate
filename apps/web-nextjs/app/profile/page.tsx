@@ -5,6 +5,7 @@ import { FriendGraphShell } from "@/components/friend-graph-shell";
 type ProfilePageProps = {
   searchParams?: Promise<{
     user?: string;
+    userB?: string;
     autoload?: string;
   }>;
 };
@@ -12,9 +13,12 @@ type ProfilePageProps = {
 export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const params = searchParams ? await searchParams : undefined;
   const selectedUserId = params?.user?.trim() ?? "";
+  const selectedPeerUserId = params?.userB?.trim() ?? "";
   const shouldAutoloadSnapshot = params?.autoload === "1";
   const feedHref = selectedUserId ? `/feed?author=${encodeURIComponent(selectedUserId)}&viewer=${encodeURIComponent(selectedUserId)}` : "/feed";
-  const inboxHref = selectedUserId ? `/inbox?userA=${encodeURIComponent(selectedUserId)}&sender=${encodeURIComponent(selectedUserId)}` : "/inbox";
+  const inboxHref = selectedUserId
+    ? `/inbox?userA=${encodeURIComponent(selectedUserId)}&userB=${encodeURIComponent(selectedPeerUserId || selectedUserId)}&sender=${encodeURIComponent(selectedUserId)}`
+    : "/inbox";
   const notificationsHref = selectedUserId ? `/notifications?user=${encodeURIComponent(selectedUserId)}` : "/notifications";
   const locationHref = selectedUserId ? `/location?owner=${encodeURIComponent(selectedUserId)}` : "/location";
 
@@ -55,7 +59,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
           <p>
             Tip: these pivots now carry the active profile UUID into nearby launcher pages, so you only need to fill the second user when a seam truly requires it.
           </p>
-          <FriendGraphShell userId={selectedUserId} autoloadSnapshot={shouldAutoloadSnapshot} />
+          <FriendGraphShell
+            userId={selectedUserId}
+            autoloadSnapshot={shouldAutoloadSnapshot}
+            initialTargetUserId={selectedPeerUserId}
+          />
         </>
       ) : (
         <>
