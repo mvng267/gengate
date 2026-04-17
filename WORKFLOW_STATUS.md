@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 411
+- Batch: 412
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 411 web inbox contract parity — prefer backend `error.code` tokens in direct-message client failures.
+- Scope: batch 412 iOS inbox contract parity — prefer backend `error.code` tokens in direct-message client failures.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,18 +16,23 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/web-nextjs/lib/inbox/client.ts
+  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - Web: `cd apps/web-nextjs && npm run typecheck` ✅
-  - iOS safety check: `cd apps/ios-swift && swift build` ✅ (`Build complete! (0.19s)`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (17.71s)`)
+  - Web safety check: `cd apps/web-nextjs && npm run typecheck` ✅
   - Backend targeted verify blocked env:
     - `cd apps/backend-python && pytest -q tests/test_friendships_api.py` ⚠️ (`zsh:1: command not found: pytest`)
 - Git:
   - latest feature commit:
-    - `41d7fa3` — `batch411: prefer backend error tokens in web inbox client`
+    - `4a12b07` — `batch412: prefer backend error tokens in ios inbox client`
   - working tree: clean
 - Blocker: env (backend test runner/runtime): thiếu `pytest` trong môi trường hiện tại khi chạy backend targeted tests.
-- Next: mở batch412 với 1 micro-slice iOS inbox parity đối xứng (ưu tiên error-code token handling tương ứng với web inbox client) để giữ contract semantics đồng nhất web/iOS.
+- Next: mở batch413 với 1 micro-slice DM contract follow-up nhỏ (ưu tiên backend/web phản xạ token parity cho message device-key/attachment edge errors nếu còn lệch) và giữ semantics đồng nhất web/iOS.
+- Batch 411 handoff:
+  - commit: `41d7fa3` — `batch411: prefer backend error tokens in web inbox client`
+  - commit: `bfddae2` — `batch411: sync workflow docs after web inbox token parity`
+  - scope: web inbox client ưu tiên backend error-code token thay vì fallback `*_failed:<status>` khi có error payload.
+  - verify: web typecheck ✅, iOS swift build ✅, backend pytest ⚠️ thiếu `pytest`.
 - Batch 410 handoff:
   - commit: `3ad3b64` — `batch410: validate moment media dimensions as non-negative`
   - scope: backend moments schema guard cho width/height non-negative nhằm siết `validation_error` semantics.

@@ -12,9 +12,23 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 411
-- Trục công việc: web inbox contract parity — prefer backend `error.code` tokens in direct-message client failures.
-- Trạng thái: batch411_complete_web_inbox_error_code_token_parity.
+- Batch workflow chính thức hiện tại: 412
+- Trục công việc: iOS inbox contract parity — prefer backend `error.code` tokens in direct-message client failures.
+- Trạng thái: batch412_complete_ios_inbox_error_code_token_parity.
+
+## Batch 412 handoff (closed)
+- Batch vừa xong: **412**
+- Commit đã chốt:
+  - `4a12b07` — `batch412: prefer backend error tokens in ios inbox client`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (17.71s)`)
+  - Web safety check: `cd apps/web-nextjs && npm run typecheck` ✅
+  - Backend targeted verify: `cd apps/backend-python && pytest -q tests/test_friendships_api.py` ⚠️ (`zsh:1: command not found: pytest`)
+- Blocker/rủi ro còn lại:
+  - env: thiếu `pytest` trong môi trường hiện tại khi chạy targeted backend API tests.
+- Batch kế tiếp: **413**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - DM contract follow-up nhỏ, ưu tiên token parity cho edge errors còn lệch giữa backend/web/iOS.
 
 ## Batch 411 handoff (closed)
 - Batch vừa xong: **411**
