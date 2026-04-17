@@ -12,9 +12,35 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 422
-- Trục công việc: iOS location parity — harden audience-remove quick-copy failure/unavailable semantics + copied-feedback reset.
-- Trạng thái: batch422_complete_ios_location_audience_remove_copy_failure_feedback_hardening.
+- Batch workflow chính thức hiện tại: 424
+- Trục công việc: web location parity — reset stale quick-copy feedback khi location state/audience context đổi.
+- Trạng thái: batch424_complete_web_location_quick_copy_feedback_reset_on_state_refresh.
+
+## Batch 424 handoff (closed)
+- Batch vừa xong: **424**
+- Commit đã chốt:
+  - `c04e21f` — `batch424: reset web location quick-copy feedback on state refresh`
+- Test/verify cuối:
+  - Web: `cd apps/web-nextjs && npm run typecheck` ✅
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.46s`)
+- Blocker/rủi ro còn lại:
+  - none.
+- Batch kế tiếp: **425**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - micro-slice follow-up cho notifications/location/feed parity (ưu tiên gap rõ nhất còn lại), giữ verify tối thiểu `make test-friendships`.
+
+## Batch 423 handoff (closed)
+- Batch vừa xong: **423**
+- Commit đã chốt:
+  - `db7e9f4` — `batch423: harden web location audience-remove copied feedback on failure`
+- Test/verify cuối:
+  - Web: `cd apps/web-nextjs && npm run typecheck` ✅
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.45s`)
+- Blocker/rủi ro còn lại:
+  - none.
+- Batch kế tiếp: **424**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - micro-slice follow-up cho notifications/location/feed parity (ưu tiên gap rõ nhất còn lại), giữ verify tối thiểu `make test-friendships`.
 
 ## Batch 422 handoff (closed)
 - Batch vừa xong: **422**
