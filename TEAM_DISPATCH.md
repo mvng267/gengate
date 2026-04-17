@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 390
-- Trục công việc: iOS moments-feed reaction parity — wire reaction create/list + quick summary copy feedback in `FeedPlaceholderView`.
-- Trạng thái: batch390_complete_ios_moment_reaction_shell_parity.
+- Batch workflow chính thức hiện tại: 391
+- Trục công việc: web inbox delete-message parity — wire `DELETE /messages/{message_id}` into web inbox shell quick-delete flow.
+- Trạng thái: batch391_complete_web_dm_delete_message_parity.
+
+## Batch 391 handoff (closed)
+- Batch vừa xong: **391**
+- Commit đã chốt:
+  - pending local commit — `batch391: add web dm delete-message parity`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` ✅ (`TYPECHECK_OK`)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **392**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS inbox parity micro-slice: wire delete-message soft-delete summary/copy flow để match web batch391.
 
 ## Batch 390 handoff (closed)
 - Batch vừa xong: **390**

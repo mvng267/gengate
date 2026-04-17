@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { readPersistedAuthSession } from "@/lib/auth/client";
 import {
   createMessageAttachment,
+  deleteMessage,
   getOrCreateDirectConversation,
   listConversationMembers,
   listDirectConversationsForUser,
@@ -38,6 +39,10 @@ const initialAttachmentForm = {
   storageKey: "attachments/web-shell/demo-image.enc",
 };
 
+const initialDeleteForm = {
+  targetMessageId: "",
+};
+
 function derivePeerUserIdFromConversation(memberUserIds: string[], userId: string): string {
   return memberUserIds.find((memberUserId) => memberUserId.trim() && memberUserId !== userId) ?? "";
 }
@@ -52,6 +57,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [attachmentForm, setAttachmentForm] = useState({
     ...initialAttachmentForm,
   });
+  const [deleteForm, setDeleteForm] = useState({
+    ...initialDeleteForm,
+  });
   const [status, setStatus] = useState(
     "Provide two registered user UUIDs to open a direct thread, then send a text message from one member.",
   );
@@ -64,6 +72,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [isSending, setIsSending] = useState(false);
   const [isCreatingAttachment, setIsCreatingAttachment] = useState(false);
   const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
+  const [isDeletingMessage, setIsDeletingMessage] = useState(false);
   const [isUpdatingReadCursor, setIsUpdatingReadCursor] = useState(false);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
   const [readStatusFocusUserIdDraft, setReadStatusFocusUserIdDraft] = useState("");
@@ -91,6 +100,9 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [lastFirstUnreadGuardQuickCopy, setLastFirstUnreadGuardQuickCopy] = useState(
     "focus_user=(none) | first_unread_guard_state=unknown | candidate=(none)",
   );
+  const [lastDeleteResultQuickCopy, setLastDeleteResultQuickCopy] = useState(
+    "delete_result=(none) | message_id=(none) | remaining_message_count=(none)",
+  );
   const [isLoadingUserDirectConversations, setIsLoadingUserDirectConversations] = useState(false);
   const [loadedUserDirectConversations, setLoadedUserDirectConversations] = useState<DirectConversation[]>([]);
   const conversationQuickCopy = `user_a=${form.userAId.trim() || "(empty)"} | user_b=${form.userBId.trim() || "(empty)"} | message_count=${messages.length} | last_message_id=${messages[messages.length - 1]?.id ?? "(none)"}`;
@@ -101,6 +113,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     readCursorTargetUserIdDraft.trim() || form.userAId.trim() || currentSessionUserId.trim() || "";
   const latestLoadedMessageId = messages[messages.length - 1]?.id ?? "";
   const resolvedReadCursorTargetMessageId = readCursorTargetMessageIdDraft.trim() || latestLoadedMessageId;
+  const resolvedDeleteTargetMessageId = deleteForm.targetMessageId.trim() || latestLoadedMessageId;
 
   const firstUnreadCandidateMessageIdForFocusUser = (() => {
     if (!resolvedReadCursorFocusUserId) {
@@ -157,6 +170,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     setAttachmentItems([]);
     setConversationMembers([]);
     setAttachmentForm({ ...initialAttachmentForm });
+    setDeleteForm({ ...initialDeleteForm });
     setReadStatusFocusUserIdDraft("");
     setReadCursorTargetUserIdDraft("");
     setReadCursorTargetMessageIdDraft("");
@@ -176,6 +190,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown",
     );
     setLastFirstUnreadGuardQuickCopy("focus_user=(none) | first_unread_guard_state=unknown | candidate=(none)");
+    setLastDeleteResultQuickCopy("delete_result=(none) | message_id=(none) | remaining_message_count=(none)");
     setLoadedUserDirectConversations([]);
   }, [initialSenderUserId, initialUserAId, initialUserBId]);
 
@@ -392,9 +407,14 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       const nextAttachments = await listMessageAttachments(firstMessageId);
       setAttachmentItems(nextAttachments);
       setAttachmentForm((current) => ({ ...current, targetMessageId: firstMessageId }));
+      setDeleteForm((current) => ({
+        ...current,
+        targetMessageId: current.targetMessageId || firstMessageId,
+      }));
     } else {
       setAttachmentItems([]);
       setAttachmentForm((current) => ({ ...current, targetMessageId: "" }));
+      setDeleteForm((current) => ({ ...current, targetMessageId: "" }));
     }
 
     const loadedStatus = `Loaded direct thread ${input.conversation.id} with ${nextMessages.length} message(s).`;
@@ -451,6 +471,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       setConversationMembers(nextMembers);
       const firstMessageId = nextMessages[0]?.id ?? "";
       setAttachmentForm((current) => ({ ...current, targetMessageId: current.targetMessageId || firstMessageId }));
+      setDeleteForm((current) => ({ ...current, targetMessageId: current.targetMessageId || firstMessageId }));
       setStatus(`Reloaded ${nextMessages.length} message(s) for thread ${conversation.id}.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "message_list_failed");
@@ -524,6 +545,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       });
       setMessages((current) => [created, ...current]);
       setAttachmentForm((current) => ({ ...current, targetMessageId: current.targetMessageId || created.id }));
+      setDeleteForm((current) => ({ ...current, targetMessageId: current.targetMessageId || created.id }));
       setForm((current) => ({ ...current, payloadText: "" }));
       const sentStatus = `Sent message ${created.id} into direct thread ${conversation.id}.`;
       const sendResultQuickCopy = `sender=${senderUserId || "(empty)"} | message_id=${created.id}`;
@@ -541,6 +563,69 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     }
 
     setIsSending(false);
+  }
+
+  async function handleDeleteMessage() {
+    const targetMessageId = resolvedDeleteTargetMessageId;
+    if (!targetMessageId) {
+      setStatus("message_delete_target_required");
+      return;
+    }
+
+    setIsDeletingMessage(true);
+    setStatus(`Deleting message ${targetMessageId} (soft-delete)...`);
+
+    try {
+      await deleteMessage(targetMessageId);
+
+      const nextMessages = messages.filter((message) => message.id !== targetMessageId);
+      setMessages(nextMessages);
+
+      const nextConversationMembers = conversationMembers.map((member) =>
+        member.last_read_message_id === targetMessageId ? { ...member, last_read_message_id: null } : member,
+      );
+      setConversationMembers(nextConversationMembers);
+
+      const normalizedCurrentDeleteTarget = deleteForm.targetMessageId.trim();
+      if (!normalizedCurrentDeleteTarget || normalizedCurrentDeleteTarget === targetMessageId) {
+        setDeleteForm((current) => ({
+          ...current,
+          targetMessageId: nextMessages[0]?.id ?? "",
+        }));
+      }
+
+      setAttachmentItems((current) => current.filter((item) => item.message_id !== targetMessageId));
+      setAttachmentForm((current) => {
+        if (current.targetMessageId.trim() === targetMessageId) {
+          return {
+            ...current,
+            targetMessageId: nextMessages[0]?.id ?? "",
+          };
+        }
+
+        return current;
+      });
+      if (readCursorTargetMessageIdDraft.trim() === targetMessageId) {
+        setReadCursorTargetMessageIdDraft("");
+      }
+
+      const deleteSummary = `delete_result=deleted | message_id=${targetMessageId} | remaining_message_count=${nextMessages.length}`;
+      setLastDeleteResultQuickCopy(deleteSummary);
+      setStatus(`Deleted message ${targetMessageId} (soft-delete). ${deleteSummary}`);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "message_delete_failed");
+    }
+
+    setIsDeletingMessage(false);
+  }
+
+  async function handleCopyDeleteResultQuickCopy() {
+    await copyToClipboard(
+      lastDeleteResultQuickCopy,
+      "Copied delete result quick copy to clipboard",
+      "delete_result_quick_copy_empty",
+      "delete_result_quick_copy_failed",
+    );
   }
 
   async function handleCreateAttachment(event: React.FormEvent<HTMLFormElement>) {
@@ -1479,6 +1564,27 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
           })}
         </ul>
       )}
+
+      <h2>Message delete</h2>
+      <p>
+        Quick copy delete result summary: <code>{lastDeleteResultQuickCopy}</code>
+      </p>
+      <button type="button" onClick={() => void handleCopyDeleteResultQuickCopy()}>
+        Copy quick delete result summary
+      </button>
+      <div style={{ display: "grid", gap: 8, maxWidth: 760 }}>
+        <label>
+          Message UUID to delete (optional, defaults to latest loaded)
+          <input
+            value={deleteForm.targetMessageId}
+            onChange={(event) => setDeleteForm((current) => ({ ...current, targetMessageId: event.target.value }))}
+            placeholder="paste message id from list above"
+          />
+        </label>
+        <button type="button" onClick={() => void handleDeleteMessage()} disabled={isDeletingMessage || !conversation}>
+          {isDeletingMessage ? "Deleting..." : "Delete message (soft-delete)"}
+        </button>
+      </div>
 
       <h2>Message attachments</h2>
       <form onSubmit={(event) => void handleCreateAttachment(event)} style={{ display: "grid", gap: 8, maxWidth: 760 }}>

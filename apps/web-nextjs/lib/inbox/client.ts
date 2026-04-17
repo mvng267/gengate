@@ -15,6 +15,7 @@ export type MessageItem = {
   conversation_id: string;
   sender_user_id: string;
   payload_text: string;
+  deleted_at?: string | null;
 };
 
 export type MessageAttachmentItem = {
@@ -140,6 +141,16 @@ export async function sendMessage(input: {
   }
 
   return (await response.json()) as MessageItem;
+}
+
+export async function deleteMessage(messageId: string): Promise<void> {
+  const response = await apiRequest(`/messages/${encodeURIComponent(messageId)}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error(`message_delete_failed:${response.status}`);
+  }
 }
 
 export async function createMessageAttachment(input: {
