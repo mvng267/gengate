@@ -706,7 +706,18 @@ struct ProfilePlaceholderView: View {
             return
         }
 
-        copyToClipboard(normalizedText)
+        guard isClipboardAvailableForQuickCopy else {
+            statusMessage = nil
+            fetchError = "quick_copy_clipboard_unavailable"
+            return
+        }
+
+        guard writeToClipboard(normalizedText) else {
+            statusMessage = nil
+            fetchError = "friend_request_last_action_bundle_quick_copy_failed"
+            return
+        }
+
         lastFriendRequestLastActionBundleCopiedText = normalizedText
         lastFriendRequestLastActionBundleCopiedAt = Date()
         statusMessage = "Copied friend-request last-action summary bundle quick copy to clipboard (\(normalizedText))."
@@ -909,13 +920,29 @@ struct ProfilePlaceholderView: View {
         fetchError = nil
     }
 
-    private func copyToClipboard(_ text: String) {
-#if canImport(UIKit)
-        UIPasteboard.general.string = text
-#elseif canImport(AppKit)
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(text, forType: .string)
+    private var isClipboardAvailableForQuickCopy: Bool {
+#if os(iOS) || os(macOS)
+        true
+#else
+        false
 #endif
+    }
+
+    @discardableResult
+    private func writeToClipboard(_ text: String) -> Bool {
+#if os(iOS)
+        UIPasteboard.general.string = text
+        return true
+#elseif os(macOS)
+        NSPasteboard.general.clearContents()
+        return NSPasteboard.general.setString(text, forType: .string)
+#else
+        return false
+#endif
+    }
+
+    private func copyToClipboard(_ text: String) {
+        _ = writeToClipboard(text)
     }
 
     private func loadFriendGraph(statusMessage: String? = nil) async {
