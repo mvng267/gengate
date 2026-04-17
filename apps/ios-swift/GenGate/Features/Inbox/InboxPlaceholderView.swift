@@ -44,6 +44,7 @@ struct InboxPlaceholderView: View {
     @State private var lastReadCursorTriageQuickCopy: String = "read_cursor_triage=target_user:(none),previous:(none),applied:(none),current:(none),apply_state:unknown"
     @State private var lastFirstUnreadJumpQuickCopy: String = "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown"
     @State private var lastFirstUnreadGuardQuickCopy: String = "focus_user=(none) | first_unread_guard_state=unknown | candidate=(none)"
+    @State private var lastDeleteResultQuickCopy: String = "delete_result=(none) | message_id=(none) | remaining_message_count=(none)"
     @State private var isLoadingUserDirectConversations = false
     @State private var loadedUserDirectConversations: [DirectConversationSummary] = []
     @State private var isCreatingAttachment = false
@@ -1442,6 +1443,18 @@ struct InboxPlaceholderView: View {
                             conversationSummary == nil ||
                             (resolvedMessageToDeleteID?.isEmpty ?? true)
                         )
+                    }
+
+                    HStack(alignment: .center, spacing: 8) {
+                        Text("Quick copy delete result summary: \(lastDeleteResultQuickCopy)")
+                            .font(.footnote.monospaced())
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Button("Copy quick delete result summary") {
+                            copyDeleteResultQuickCopySummary()
+                        }
+                        .buttonStyle(.bordered)
                     }
 
                     if let currentSessionUserID {
@@ -2954,6 +2967,17 @@ use_when=\(useWhenText)
         sendStatusHint = "Copied first-unread guard quick copy to clipboard (\(normalizedText))."
     }
 
+    private func copyDeleteResultQuickCopySummary() {
+        let normalizedText = lastDeleteResultQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else {
+            sendStatusHint = "delete_result_quick_copy_empty"
+            return
+        }
+
+        writeToClipboard(normalizedText)
+        sendStatusHint = "Copied delete result quick copy to clipboard (\(normalizedText))."
+    }
+
     private func copyRecipientDeviceSourceHint(_ hintText: String) {
         let normalizedText = hintText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else {
@@ -4447,6 +4471,7 @@ use_when=\(useWhenText)
 
         isDeletingMessage = true
         fetchError = nil
+        sendStatusHint = "Deleting message \(targetMessageID) (soft-delete)..."
 
         do {
             try await InboxAPIClient().deleteMessage(messageID: targetMessageID)
@@ -4462,7 +4487,12 @@ use_when=\(useWhenText)
             if messageToDeleteIDDraft.trimmingCharacters(in: .whitespacesAndNewlines) == targetMessageID {
                 messageToDeleteIDDraft = ""
             }
-            await loadInboxThread()
+            await loadInboxThread(silent: true)
+
+            let remainingMessageCount = messageRows.count
+            let deleteSummary = "delete_result=deleted | message_id=\(targetMessageID) | remaining_message_count=\(remainingMessageCount)"
+            lastDeleteResultQuickCopy = deleteSummary
+            sendStatusHint = "Deleted message \(targetMessageID) (soft-delete). \(deleteSummary)"
         } catch {
             fetchError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
