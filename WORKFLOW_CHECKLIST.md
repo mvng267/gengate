@@ -99,7 +99,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/backend-python && make test-friendships` → ✅ (`8 passed in 0.45s`)
 - Git mốc gần nhất:
   - commit đã chốt:
-    - `613c3d4` — `batch419: gate web notifications lifecycle snapshot copied-feedback on successful copy`
+    - `e3ef49b` — `batch419: gate web notifications lifecycle snapshot copied-feedback on successful copy`
   - working tree hiện tại: dirty (workflow docs đang cập nhật trong nhịp hiện tại)
 - Blocker nếu có:
   - none.
@@ -120,7 +120,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 - Batch vừa xong: **419**
 - Commit cuối đã chốt:
-  - `613c3d4` — `batch419: gate web notifications lifecycle snapshot copied-feedback on successful copy`
+  - `e3ef49b` — `batch419: gate web notifications lifecycle snapshot copied-feedback on successful copy`
 - Test-verify cuối:
   - Web: `cd apps/web-nextjs && npm run typecheck` → pass
   - Backend guardrail: `cd apps/backend-python && make test-friendships` → pass (`8 passed in 0.45s`)

@@ -19,7 +19,7 @@
 ## Batch 419 handoff (closed)
 - Batch vừa xong: **419**
 - Commit đã chốt:
-  - `613c3d4` — `batch419: gate web notifications lifecycle snapshot copied-feedback on successful copy`
+  - `e3ef49b` — `batch419: gate web notifications lifecycle snapshot copied-feedback on successful copy`
 - Test/verify cuối:
   - Web: `cd apps/web-nextjs && npm run typecheck` ✅
   - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.45s`)

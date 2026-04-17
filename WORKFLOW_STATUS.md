@@ -22,12 +22,12 @@
   - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.45s`)
 - Git:
   - latest feature commit:
-    - `613c3d4` — `batch419: gate web notifications lifecycle snapshot copied-feedback on successful copy`
+    - `e3ef49b` — `batch419: gate web notifications lifecycle snapshot copied-feedback on successful copy`
   - working tree: dirty (workflow docs đang cập nhật trong nhịp hiện tại)
 - Blocker: none.
 - Next: mở batch420 với 1 micro-slice product seam (ưu tiên notifications/location/feed parity follow-up nhỏ) + giữ verify tối thiểu `make test-friendships`.
 - Batch 419 handoff:
-  - commit: `613c3d4` — `batch419: gate web notifications lifecycle snapshot copied-feedback on successful copy`
+  - commit: `e3ef49b` — `batch419: gate web notifications lifecycle snapshot copied-feedback on successful copy`
   - scope: web notifications `handleCopyQuickLifecycleSnapshotAudit` chỉ set copied-feedback state khi clipboard write thành công; nếu fail/clipboard unavailable thì reset copied snapshot state để tránh stale copied marker.
   - verify: web typecheck ✅, backend make test-friendships ✅.
 - Batch 418 handoff:
