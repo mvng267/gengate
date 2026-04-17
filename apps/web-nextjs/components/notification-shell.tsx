@@ -168,6 +168,15 @@ export function NotificationShell({ initialUserId = "" }: NotificationShellProps
     const window = currentLoadWindow(windowOverride);
     const normalizedStatusPrefix = statusPrefix?.trim();
 
+    setLastMutationDelta(null);
+    setLastCreateResultDelta(null);
+    setLastDeleteResultDelta(null);
+    setLastLifecyclePair(null);
+    setQuickLifecycleSnapshotAuditCopiedAt(null);
+    setLastQuickLifecycleSnapshotAuditCopiedText("");
+    setQuickDeleteResultSummaryCopiedAt(null);
+    setLastQuickDeleteResultSummaryCopiedText("");
+
     setIsLoading(true);
     setStatus(normalizedStatusPrefix ? `${normalizedStatusPrefix} Loading notifications...` : "Loading notifications...");
 
