@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class MomentAuthorSummary(BaseModel):
@@ -35,6 +35,13 @@ class MomentMediaCreateRequest(BaseModel):
     mime_type: str
     width: int | None = None
     height: int | None = None
+
+    @field_validator("width", "height")
+    @classmethod
+    def validate_non_negative_dimension(cls, value: int | None) -> int | None:
+        if value is not None and value < 0:
+            raise ValueError("validation_error")
+        return value
 
 
 class MomentMediaResponse(BaseModel):
