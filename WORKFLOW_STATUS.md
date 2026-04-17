@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 387
+- Batch: 389
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 387 web friend-graph micro-polish parity — add copied-feedback line for quick friend-request last-action summary bundle.
+- Scope: batch 389 web moments-feed reaction parity — wire reaction create/list flows and quick reaction summary copy feedback in moment compose shell.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,14 +16,23 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/web-nextjs/components/friend-graph-shell.tsx
+  - apps/web-nextjs/lib/moments/client.ts
+  - apps/web-nextjs/components/moment-compose-shell.tsx
 - Test:
   - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` ✅ (`TYPECHECK_OK`)
 - Git:
-  - latest feature commit: `0104ce7` — `batch387: add web friend-request last-action copy feedback`
-  - working tree: clean
+  - latest feature commit: `44dc8bf` — `batch389: add web moment reaction shell wiring`
+  - working tree: dirty (workflow docs only)
 - Blocker: none
-- Next: open batch388 with one narrow MVP seam slice (non-metadata), then verify + commit.
+- Next: open batch390 with one narrow iOS feed parity slice (wire moment reaction create/list + quick summary copy feedback parity with web batch389).
+- Batch 389 handoff:
+  - commit: `44dc8bf` — `batch389: add web moment reaction shell wiring`
+  - Added web moment compose/feed reaction wiring: `createMomentReaction(...)` + `listMomentReactions(...)` client calls (`POST/GET /moments/{moment_id}/reactions`) and shell controls for reaction target/user/type, create/load actions, reaction quick summary/copy feedback, first-authored quick target picker, and reaction list rendering.
+  - Verify pass: web typecheck.
+- Batch 388 handoff:
+  - commit: `a92b422` — `batch388: add ios friend-request last-action copy feedback`
+  - Added iOS friend-graph copied-feedback line `Copied friend-request last-action summary bundle (...s ago): ...` for quick bundle copy parity and reset copied-feedback state whenever create/accept/reject rewrites bundle payload.
+  - Verify pass: iOS `swift build`.
 - Batch 387 handoff:
   - commit: `0104ce7` — `batch387: add web friend-request last-action copy feedback`
   - Added web friend-graph copied-feedback line `Copied friend-request last-action summary bundle (...s ago): ...` for quick bundle copy parity and reset copied-feedback state whenever create/accept/reject rewrites bundle payload.

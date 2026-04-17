@@ -12,9 +12,33 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 387
-- Trục công việc: web friend-graph micro-polish parity — added copied-feedback line for `Copy quick friend-request last-action summary bundle` and reset copied-feedback state when bundle payload changes.
-- Trạng thái: batch387_complete_web_friend_request_last_action_copy_feedback.
+- Batch workflow chính thức hiện tại: 389
+- Trục công việc: web moments-feed reaction parity — wire reaction create/list flows + quick summary copy feedback in `moment-compose-shell`.
+- Trạng thái: batch389_complete_web_moment_reaction_shell_wiring.
+
+## Batch 389 handoff (closed)
+- Batch vừa xong: **389**
+- Commit đã chốt:
+  - `44dc8bf` — `batch389: add web moment reaction shell wiring`
+- Test/verify cuối:
+  - web: `cd apps/web-nextjs && npm run -s typecheck && echo "TYPECHECK_OK"` ✅ (`TYPECHECK_OK`)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **390**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - iOS feed parity micro-slice: wire moment reaction create/list + quick summary copy parity với web batch389.
+
+## Batch 388 handoff (closed)
+- Batch vừa xong: **388**
+- Commit đã chốt:
+  - `a92b422` — `batch388: add ios friend-request last-action copy feedback`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (4.72s)`)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **389**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chọn 1 slice hẹp tiếp theo theo MVP seam ưu tiên (friend graph / moments-feed / DM / location / notifications), tránh metadata-only churn.
 
 ## Batch 387 handoff (closed)
 - Batch vừa xong: **387**
