@@ -1,5 +1,11 @@
 import { apiRequest } from "@/lib/api/client";
 
+type ApiErrorCodePayload = {
+  error?: {
+    code?: string;
+  };
+};
+
 export type DirectConversation = {
   id: string;
   conversation_type: string;
@@ -33,6 +39,16 @@ export type ConversationMemberItem = {
   last_read_message_id: string | null;
 };
 
+async function readApiErrorCode(response: Response): Promise<string | null> {
+  try {
+    const payload = (await response.json()) as ApiErrorCodePayload;
+    const normalizedCode = payload.error?.code?.trim();
+    return normalizedCode ? normalizedCode : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function getOrCreateDirectConversation(userAId: string, userBId: string): Promise<DirectConversation> {
   const response = await apiRequest("/conversations/direct", {
     method: "POST",
@@ -46,6 +62,10 @@ export async function getOrCreateDirectConversation(userAId: string, userBId: st
   });
 
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`direct_conversation_failed:${response.status}`);
   }
 
@@ -55,6 +75,10 @@ export async function getOrCreateDirectConversation(userAId: string, userBId: st
 export async function listDirectConversationsForUser(userId: string): Promise<DirectConversation[]> {
   const response = await apiRequest(`/conversations/direct?user_id=${encodeURIComponent(userId)}`);
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`direct_conversation_list_failed:${response.status}`);
   }
 
@@ -69,6 +93,10 @@ export async function listDirectConversationsForUser(userId: string): Promise<Di
 export async function listMessages(conversationId: string): Promise<MessageItem[]> {
   const response = await apiRequest(`/messages?conversation_id=${encodeURIComponent(conversationId)}`);
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`message_list_failed:${response.status}`);
   }
 
@@ -83,6 +111,10 @@ export async function listMessages(conversationId: string): Promise<MessageItem[
 export async function listConversationMembers(conversationId: string): Promise<ConversationMemberItem[]> {
   const response = await apiRequest(`/conversations/${encodeURIComponent(conversationId)}/members`);
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`conversation_member_list_failed:${response.status}`);
   }
 
@@ -113,6 +145,10 @@ export async function updateConversationMemberReadCursor(input: {
   );
 
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`conversation_member_read_cursor_update_failed:${response.status}`);
   }
 
@@ -137,6 +173,10 @@ export async function sendMessage(input: {
   });
 
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`message_create_failed:${response.status}`);
   }
 
@@ -149,6 +189,10 @@ export async function deleteMessage(messageId: string): Promise<void> {
   });
 
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`message_delete_failed:${response.status}`);
   }
 }
@@ -172,6 +216,10 @@ export async function createMessageAttachment(input: {
   });
 
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`message_attachment_create_failed:${response.status}`);
   }
 
@@ -181,6 +229,10 @@ export async function createMessageAttachment(input: {
 export async function listMessageAttachments(messageId: string): Promise<MessageAttachmentItem[]> {
   const response = await apiRequest(`/messages/${encodeURIComponent(messageId)}/attachments`);
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`message_attachment_list_failed:${response.status}`);
   }
 
