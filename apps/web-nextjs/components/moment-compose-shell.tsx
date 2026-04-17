@@ -40,6 +40,26 @@ const initialForm = {
   imageHeight: "1350",
 };
 
+const userNotFoundFallbackMessage = "Author/viewer/reaction user was not found. Use current session user or a valid user UUID.";
+const momentNotFoundFallbackMessage = "Moment no longer exists. Reload private/authored moments and retry with a fresh moment ID.";
+const validationErrorFallbackMessage = "Request payload is invalid. Re-check UUID fields and image width/height values.";
+
+function resolveMomentErrorHint(message: string): string | null {
+  if (message.includes("user_not_found")) {
+    return userNotFoundFallbackMessage;
+  }
+
+  if (message.includes("moment_not_found")) {
+    return momentNotFoundFallbackMessage;
+  }
+
+  if (message.includes("validation_error")) {
+    return validationErrorFallbackMessage;
+  }
+
+  return null;
+}
+
 export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUserId = "" }: MomentComposeShellProps) {
   const [form, setForm] = useState({
     ...initialForm,
@@ -177,6 +197,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
     lastReactionQuickCopyLine && lastReactionQuickCopySource
       ? `Last copied reaction quick summary (${lastReactionQuickCopySource}): ${lastReactionQuickCopyLine}`
       : "";
+  const momentErrorHint = resolveMomentErrorHint(status);
 
   useEffect(() => {
     setForm((current) => ({
@@ -820,6 +841,7 @@ export function MomentComposeShell({ initialAuthorUserId = "", initialViewerUser
         <strong>Status:</strong> moment posting shell now wires caption + image metadata + reaction create/list to backend contracts.
       </p>
       <p>{status}</p>
+      {momentErrorHint ? <p>Hint: {momentErrorHint}</p> : null}
       <p>
         Quick copy payload: <code>{momentPayloadQuickCopy}</code>
       </p>

@@ -1,5 +1,11 @@
 import { apiRequest } from "@/lib/api/client";
 
+type ApiErrorCodePayload = {
+  error?: {
+    code?: string;
+  };
+};
+
 export type MomentComposeInput = {
   authorUserId: string;
   captionText: string;
@@ -45,6 +51,15 @@ export type MomentReactionItem = {
   reaction_type: string;
 };
 
+async function readApiErrorCode(response: Response): Promise<string | null> {
+  try {
+    const payload = (await response.json()) as ApiErrorCodePayload;
+    return payload.error?.code ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function createMomentWithImage(input: MomentComposeInput): Promise<MomentListItem> {
   const createMomentResponse = await apiRequest("/moments", {
     method: "POST",
@@ -58,6 +73,10 @@ export async function createMomentWithImage(input: MomentComposeInput): Promise<
   });
 
   if (!createMomentResponse.ok) {
+    const errorCode = await readApiErrorCode(createMomentResponse);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`moment_create_failed:${createMomentResponse.status}`);
   }
 
@@ -78,11 +97,19 @@ export async function createMomentWithImage(input: MomentComposeInput): Promise<
   });
 
   if (!createMediaResponse.ok) {
+    const errorCode = await readApiErrorCode(createMediaResponse);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`moment_media_create_failed:${createMediaResponse.status}`);
   }
 
   const listResponse = await apiRequest(`/moments?author_user_id=${encodeURIComponent(input.authorUserId)}`);
   if (!listResponse.ok) {
+    const errorCode = await readApiErrorCode(listResponse);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`moment_list_failed:${listResponse.status}`);
   }
 
@@ -102,6 +129,10 @@ export async function createMomentWithImage(input: MomentComposeInput): Promise<
 export async function listMomentsForAuthor(authorUserId: string): Promise<MomentListItem[]> {
   const response = await apiRequest(`/moments?author_user_id=${encodeURIComponent(authorUserId)}`);
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`moment_list_failed:${response.status}`);
   }
 
@@ -116,6 +147,10 @@ export async function listMomentsForAuthor(authorUserId: string): Promise<Moment
 export async function listPrivateFeed(viewerUserId: string): Promise<MomentListItem[]> {
   const response = await apiRequest(`/moments/feed?viewer_user_id=${encodeURIComponent(viewerUserId)}`);
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`private_feed_failed:${response.status}`);
   }
 
@@ -133,6 +168,10 @@ export async function deleteMoment(momentId: string): Promise<MomentDeleteResult
   });
 
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`moment_delete_failed:${response.status}`);
   }
 
@@ -156,6 +195,10 @@ export async function createMomentReaction(input: {
   });
 
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`moment_reaction_create_failed:${response.status}`);
   }
 
@@ -165,6 +208,10 @@ export async function createMomentReaction(input: {
 export async function listMomentReactions(momentId: string): Promise<MomentReactionItem[]> {
   const response = await apiRequest(`/moments/${encodeURIComponent(momentId)}/reactions`);
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`moment_reaction_list_failed:${response.status}`);
   }
 
