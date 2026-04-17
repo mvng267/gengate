@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 405
+- Batch: 406
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 405 iOS friend graph quick-copy parity — align last-action summary bundle quick-copy failure handling with web tokens.
+- Scope: batch 406 iOS friend graph quick-copy parity — align remaining friend quick-copy failure handling tokens with web.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -18,12 +18,16 @@
 - Files:
   - apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift
 - Test:
-  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (3.47s)`)
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (2.81s)`)
 - Git:
-  - latest feature commit: `acd49c3` — `batch405: harden ios friend last-action bundle quick-copy failures`
+  - latest feature commit: `bcb300a` — `batch406: harden ios friend quick-copy failure tokens`
   - working tree: clean
 - Blocker: none
-- Next: open batch406 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên iOS friend graph quick-copy parity còn lại hoặc chuyển backend/web friend graph contract polish).
+- Next: open batch407 với 1 slice hẹp tiếp theo theo seam MVP (ưu tiên chuyển sang backend/web friend-graph contract polish hoặc mở seam moments/feed theo priority).
+- Batch 406 handoff:
+  - commit: `bcb300a` — `batch406: harden ios friend quick-copy failure tokens`
+  - Updated iOS Profile friend-graph quick-copy actions in `ProfilePlaceholderView` (create / accept / reject / create+accept bundle / create+reject bundle): added clipboard-unavailable guard (`quick_copy_clipboard_unavailable`) and action-specific write-failure tokens (`friend_request_*_quick_copy_failed`) before success status, matching web quick-copy failure semantics.
+  - Verify pass: iOS `swift build` (`Build complete! (2.81s)`).
 - Batch 405 handoff:
   - commit: `acd49c3` — `batch405: harden ios friend last-action bundle quick-copy failures`
   - Updated iOS Profile friend-graph last-action summary bundle quick copy in `ProfilePlaceholderView`: added clipboard-unavailable guard (`quick_copy_clipboard_unavailable`) and write-failure token (`friend_request_last_action_bundle_quick_copy_failed`) before success status, aligned with web quick-copy failure semantics.

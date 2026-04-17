@@ -12,9 +12,21 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 405
-- Trục công việc: iOS friend graph quick-copy parity — align last-action summary bundle quick-copy failure handling with web tokens.
-- Trạng thái: batch405_complete_ios_friend_last_action_bundle_quick_copy_failure_tokens_parity.
+- Batch workflow chính thức hiện tại: 406
+- Trục công việc: iOS friend graph quick-copy parity — align remaining friend quick-copy failure handling tokens with web.
+- Trạng thái: batch406_complete_ios_friend_quick_copy_failure_tokens_parity.
+
+## Batch 406 handoff (closed)
+- Batch vừa xong: **406**
+- Commit đã chốt:
+  - `bcb300a` — `batch406: harden ios friend quick-copy failure tokens`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (2.81s)`)
+- Blocker/rủi ro còn lại:
+  - none
+- Batch kế tiếp: **407**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - chuyển sang backend/web friend-graph contract polish hoặc mở seam moments/feed priority slice.
 
 ## Batch 405 handoff (closed)
 - Batch vừa xong: **405**
