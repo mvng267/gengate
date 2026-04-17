@@ -12,9 +12,22 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 414
-- Trục công việc: iOS inbox UX parity — render deterministic error hints for tokenized direct-message failures.
-- Trạng thái: batch414_complete_ios_inbox_error_hint_parity.
+- Batch workflow chính thức hiện tại: 415
+- Trục công việc: iOS notifications UX parity — surface deterministic error hints from tokenized notification failures.
+- Trạng thái: batch415_complete_ios_notifications_error_hint_parity.
+
+## Batch 415 handoff (closed)
+- Batch vừa xong: **415**
+- Commit đã chốt:
+  - `61e9901` — `batch415: add ios notifications error-hint parity`
+- Test/verify cuối:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (5.99s)`)
+  - Backend targeted verify: `cd apps/backend-python && pytest -q tests/test_friendships_api.py` ⚠️ (`zsh:1: command not found: pytest`)
+- Blocker/rủi ro còn lại:
+  - env: thiếu `pytest` trong môi trường hiện tại khi chạy targeted backend API tests.
+- Batch kế tiếp: **416**
+- Scope hẹp đầu tiên của batch kế tiếp:
+  - notifications parity phía web: map deterministic notification error hints để giữ UX/web/iOS contract đồng nhất.
 
 ## Batch 414 handoff (closed)
 - Batch vừa xong: **414**
