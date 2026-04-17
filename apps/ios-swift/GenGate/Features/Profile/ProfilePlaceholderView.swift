@@ -1115,11 +1115,13 @@ struct ProfilePlaceholderView: View {
         if reversed {
             userIDDraft = row.receiverUserID
             receiverUserIDDraft = row.requesterUserID
-            statusMessage = "Filled reverse pair from pending request."
+            sessionStore.friendGraphPeerUserID = row.requesterUserID
+            statusMessage = "Filled reverse pair from pending request (pending_pair_mode=reverse, peer_context_source=pending_request)."
         } else {
             userIDDraft = row.requesterUserID
             receiverUserIDDraft = row.receiverUserID
-            statusMessage = "Filled same pair from pending request."
+            sessionStore.friendGraphPeerUserID = row.receiverUserID
+            statusMessage = "Filled same pair from pending request (pending_pair_mode=same, peer_context_source=pending_request)."
         }
         fetchError = nil
     }

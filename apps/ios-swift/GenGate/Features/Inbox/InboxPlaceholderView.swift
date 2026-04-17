@@ -3760,8 +3760,10 @@ use_when=\(useWhenText)
         let trimmedCurrentSessionUserID = currentSessionUserID.trimmingCharacters(in: .whitespacesAndNewlines)
         let currentUserAID = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let currentUserBID = userBIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let peerFromProfileContext = sessionStore.friendGraphPeerUserID?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
         let peerCandidates = [
+            peerFromProfileContext,
             currentUserAID,
             currentUserBID
         ] + conversationMembers.map { $0.userID.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -3776,7 +3778,10 @@ use_when=\(useWhenText)
         if currentUserAID == trimmedCurrentSessionUserID, currentUserBID == resolvedPeerUserID {
             pairStatus = "User A + User B already match current session + peer context (user_pair_source=session_user+peer_context)."
         } else {
-            pairStatus = "Applied current session user as User A + resolved peer as User B (user_pair_source=session_user+peer_context)."
+            let peerSource = !peerFromProfileContext.isEmpty && resolvedPeerUserID == peerFromProfileContext
+                ? "profile_pending_pair"
+                : "thread_context"
+            pairStatus = "Applied current session user as User A + resolved peer as User B (user_pair_source=session_user+peer_context, peer_source=\(peerSource))."
         }
 
         userAIDDraft = trimmedCurrentSessionUserID
@@ -3798,8 +3803,10 @@ use_when=\(useWhenText)
         let trimmedCurrentSessionUserID = currentSessionUserID.trimmingCharacters(in: .whitespacesAndNewlines)
         let currentUserAID = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let currentUserBID = userBIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let peerFromProfileContext = sessionStore.friendGraphPeerUserID?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
         let peerCandidates = [
+            peerFromProfileContext,
             currentUserAID,
             currentUserBID
         ] + conversationMembers.map { $0.userID.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -3814,7 +3821,10 @@ use_when=\(useWhenText)
         if currentUserAID == resolvedPeerUserID, currentUserBID == trimmedCurrentSessionUserID {
             pairStatus = "User A + User B already match peer context + current session (user_pair_source=peer_context+session_user)."
         } else {
-            pairStatus = "Applied resolved peer as User A + current session user as User B (user_pair_source=peer_context+session_user)."
+            let peerSource = !peerFromProfileContext.isEmpty && resolvedPeerUserID == peerFromProfileContext
+                ? "profile_pending_pair"
+                : "thread_context"
+            pairStatus = "Applied resolved peer as User A + current session user as User B (user_pair_source=peer_context+session_user, peer_source=\(peerSource))."
         }
 
         userAIDDraft = resolvedPeerUserID

@@ -127,6 +127,7 @@ final class AppSessionStore {
     var authState: AuthState = .signedOut
     var selectedTab: AppTab = .session
     var pendingProtectedTab: AppTab?
+    var friendGraphPeerUserID: String?
     var emailDraft: String = ""
     var passwordDraft: String = ""
     var backendBaseURLDraft: String = BackendEnvironment.persistedBaseURLOverride ?? ""
@@ -889,6 +890,7 @@ final class AppSessionStore {
 
     private func clearPersistedSession() {
         sessionStore.removeObject(forKey: sessionDefaultsKey)
+        friendGraphPeerUserID = nil
     }
 }
 

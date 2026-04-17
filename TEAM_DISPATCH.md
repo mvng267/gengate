@@ -12,14 +12,29 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 432
-- Trục công việc: web friend graph pivot parity — carry selected peer context vào Feed/Location pivots sau pending-pair quick-apply để cross-seam MVP run giữ nguyên user pair.
-- Trạng thái: batch432_complete_web_friend_graph_pending_pair_quick_apply_controls.
+- Batch workflow chính thức hiện tại: 433
+- Trục công việc: iOS friend graph pending-pair peer-context parity — persist selected pending-request peer vào session context và ưu tiên context đó trong inbox quick-apply direct-thread pivots.
+- Trạng thái: batch433_verify_ios_pending_pair_peer_context_pivot_parity.
+
+## Batch 433 in progress
+- Scope đang chạy:
+  - iOS friend graph pending-pair peer-context parity: khi `Use same pair` / `Use reverse pair` ở Profile thì lưu peer vào `AppSessionStore.friendGraphPeerUserID`; Inbox quick-apply ưu tiên peer context này và phát status token có `peer_source=profile_pending_pair|thread_context`.
+- File chính:
+  - `apps/ios-swift/GenGate/Core/Session/AppSessionStore.swift`
+  - `apps/ios-swift/GenGate/Features/Profile/ProfilePlaceholderView.swift`
+  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
+- Verify:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (13.96s)`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.44s`)
+- Blocker/rủi ro:
+  - none.
+- Bước kế tiếp ngay:
+  - chốt commit batch433 + ghi handoff ngắn để mở batch434.
 
 ## Batch 432 handoff (closed)
 - Batch vừa xong: **432**
 - Commit đã chốt:
-  - `145b293` — `batch432: add web friend-request pending-pair quick-apply controls`
+  - `0d6f27d` — `batch432: carry selected peer context into web friend-graph pivots`
 - Test/verify cuối:
   - Web: `cd apps/web-nextjs && npm run typecheck` ✅ (`tsc --noEmit`)
   - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.55s`)
