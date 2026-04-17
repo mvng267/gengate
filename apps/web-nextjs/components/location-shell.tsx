@@ -57,6 +57,7 @@ export function LocationShell({
   const [isRemovingAudience, setIsRemovingAudience] = useState(false);
   const [isReloadingCounts, setIsReloadingCounts] = useState(false);
   const [lastCopiedLocationStateSummary, setLastCopiedLocationStateSummary] = useState<string | null>(null);
+  const [lastRemovedAudienceId, setLastRemovedAudienceId] = useState<string | null>(null);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
 
   const draftSharingMode = form.sharingMode.trim();
@@ -69,6 +70,11 @@ export function LocationShell({
     `sharing_mode=${resolvedSharingMode} / ` +
     `audience_count=${share ? audienceCount : 0} / ` +
     `snapshot_count=${snapshotCount}`;
+
+  const quickAudienceRemoveParitySummary =
+    `share_id=${share?.id ?? "(none)"} / ` +
+    `removed_audience_id=${lastRemovedAudienceId ?? "(none)"} / ` +
+    `audience_count=${share ? audienceCount : 0}`;
 
   useEffect(() => {
     setForm((current) => ({
@@ -238,6 +244,7 @@ export function LocationShell({
       await removeAudience(share.id, trimmedAudienceId);
       const nextAudienceCount = await getAudienceCount(share.id);
       setAudienceCount(nextAudienceCount);
+      setLastRemovedAudienceId(trimmedAudienceId);
       setStatus(`Removed audience member ${trimmedAudienceId}. Share now has ${nextAudienceCount} allowed user(s).`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "location_audience_remove_failed");
@@ -264,6 +271,36 @@ export function LocationShell({
       setStatus(`Copied quick location state summary to clipboard (${normalizedSummary}).`);
     } catch {
       setStatus("quick_location_state_summary_copy_failed");
+    }
+  }
+
+  async function handleCopyQuickAudienceRemoveParitySummary() {
+    const normalizedSummary = quickAudienceRemoveParitySummary.trim();
+    if (!normalizedSummary) {
+      setStatus("quick_audience_remove_parity_summary_empty");
+      return;
+    }
+
+    if (typeof navigator === "undefined" || typeof navigator.clipboard?.writeText !== "function") {
+      setStatus("quick_copy_clipboard_unavailable");
+      return;
+    }
+
+    if (!share) {
+      setStatus("quick_audience_remove_parity_summary_missing_share");
+      return;
+    }
+
+    if (!lastRemovedAudienceId) {
+      setStatus("quick_audience_remove_parity_summary_missing_removed_audience");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(normalizedSummary);
+      setStatus(`Copied quick audience remove parity summary to clipboard (${normalizedSummary}).`);
+    } catch {
+      setStatus("quick_audience_remove_parity_summary_copy_failed");
     }
   }
 
@@ -307,6 +344,14 @@ export function LocationShell({
           Last copied location state summary: <code>{lastCopiedLocationStateSummary}</code>
         </p>
       ) : null}
+      <p>
+        Quick audience remove parity summary: <code>{quickAudienceRemoveParitySummary}</code>
+      </p>
+      <p>
+        <button type="button" onClick={() => void handleCopyQuickAudienceRemoveParitySummary()}>
+          Copy quick audience remove parity summary
+        </button>
+      </p>
 
       <div>
         <label>
