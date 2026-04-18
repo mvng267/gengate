@@ -12,9 +12,32 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 442
-- Trục công việc: backend moments privacy gate — exclude blocked friend relationships from private feed and reject blocked reaction create with deterministic token `moment_interaction_blocked`.
-- Trạng thái: batch442_complete_ready_to_open_443.
+- Batch workflow chính thức hiện tại: 444
+- Trục công việc: direct messaging guard — block `/conversations/direct` open across blocked user pairs and expose deterministic `direct_conversation_blocked` hint parity on web/iOS inbox shells.
+- Trạng thái: batch444_complete_ready_to_open_445.
+
+## Batch 444 handoff (closed)
+- Batch vừa xong: **444**
+- Scope đã chốt:
+  - Backend `POST /conversations/direct` nay reject mở thread direct khi `user_a` và `user_b` có block relationship theo cả 2 chiều, trả deterministic token `direct_conversation_blocked`.
+  - Web + iOS inbox shell nay map token `direct_conversation_blocked` thành deterministic `Hint:` fallback message, giữ parity UX khi direct-thread open bị chặn bởi block.
+- Files:
+  - `apps/backend-python/app/services/conversations.py`
+  - `apps/backend-python/app/modules/conversations/router.py`
+  - `apps/backend-python/tests/test_batch7_conversations_api.py`
+  - `apps/web-nextjs/components/direct-message-shell.tsx`
+  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
+- Verify:
+  - Backend targeted: `cd apps/backend-python && make test-contracts` ✅ (`111 passed in 2.07s`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.36s`)
+  - Web targeted: `cd apps/web-nextjs && npm run typecheck` ✅ (`tsc --noEmit`)
+  - iOS targeted: `cd apps/ios-swift && swift build` ✅ (`Build complete! (13.20s)`)
+- Blocker/rủi ro:
+  - none.
+- Commit đã chốt:
+  - `da2d75b` — `batch444: gate direct conversation open by block relationships`
+- Next:
+  - mở batch445 micro-slice web/iOS direct-thread input guard hint parity cho `invalid_direct_members`.
 
 ## Batch 442 handoff (closed)
 - Batch vừa xong: **442**

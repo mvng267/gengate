@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **442 — backend moments privacy gate now excludes blocked friendships from private feed and returns deterministic `moment_interaction_blocked` when blocked users react to moments.**
+- Batch workflow chính thức mới nhất trong checklist/status: **444 — direct messaging guard now blocks `/conversations/direct` open across blocked user pairs and surfaces deterministic `direct_conversation_blocked` hint parity on web/iOS inbox shells.**
 
 ## Reporting hard rule
 
@@ -89,24 +89,28 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **442**
-- Scope hiện tại: backend moments privacy gate — loại accepted-friend đã block khỏi private feed và chặn create reaction xuyên block bằng token deterministic.
+- Batch workflow chính thức hiện tại: **444**
+- Scope hiện tại: direct messaging guard — chặn mở direct conversation khi 2 user có block relationship và giữ tokenized hint parity `direct_conversation_blocked` trên web/iOS inbox.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/backend-python/app/repositories/blocks.py`
-  - `apps/backend-python/app/services/moments.py`
-  - `apps/backend-python/tests/test_moments_api.py`
+  - `apps/backend-python/app/services/conversations.py`
+  - `apps/backend-python/app/modules/conversations/router.py`
+  - `apps/backend-python/tests/test_batch7_conversations_api.py`
+  - `apps/web-nextjs/components/direct-message-shell.tsx`
+  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
 - Test-verify:
-  - `cd apps/backend-python && make test-contracts` → ✅ (`110 passed in 2.46s`)
-  - `cd apps/backend-python && make test-friendships` → ✅ (`8 passed in 0.39s`)
+  - `cd apps/backend-python && make test-contracts` → ✅ (`111 passed in 2.07s`)
+  - `cd apps/backend-python && make test-friendships` → ✅ (`8 passed in 0.36s`)
+  - `cd apps/web-nextjs && npm run typecheck` → ✅ (`tsc --noEmit`)
+  - `cd apps/ios-swift && swift build` → ✅ (`Build complete! (13.20s)`)
 - Git mốc gần nhất:
-  - commit đã chốt gần nhất: `67334f5` — `batch442: gate moments feed and reactions by block relationships`
-  - commit docs workflow gần nhất trước nhịp này: `cee6570` — `batch441: sync workflow docs after friend-request action error-token parity`
-  - working tree hiện tại: clean
+  - commit đã chốt gần nhất: `da2d75b` — `batch444: gate direct conversation open by block relationships`
+  - commit docs workflow gần nhất trước nhịp này: `ea6da32` — `batch442: sync workflow docs after moments block-gating backend slice`
+  - working tree hiện tại: dirty (workflow docs đang cập nhật trong nhịp này)
 - Blocker nếu có:
   - none.
 - Bước kế tiếp:
-  - mở batch443 với 1 micro-slice web/iOS moments error-token-hint parity cho `moment_interaction_blocked`.
+  - mở batch445 với 1 micro-slice web/iOS direct-thread input guard hint parity cho trạng thái invalid pair (`invalid_direct_members`) theo token deterministic.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Quick create + feed-gate bundle: moment_create_marker={author=... | image_url=... | caption=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` + line `Last create + feed-gate bundle: last_create_feed_visibility_delta={created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Bấm `Copy quick create + feed-gate bundle` để verify one-tap create bundle payload và bấm thêm `Copy last create + feed-gate bundle` để verify deterministic payload bundle cho lần create gần nhất; sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`; bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy last copied delete summary feedback`, verify line source-state rồi bấm `Copy delete copy audit for first ready source` để one-shot copy `delete_copy_audit=source:.../value:...`; đối chiếu source được pick với line source-state.
