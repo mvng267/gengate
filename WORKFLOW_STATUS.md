@@ -23,7 +23,7 @@
   - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.51s`)
 - Git:
   - latest feature commit:
-    - `8a0877a` — `batch441: preserve friend-request action error tokens with request_not_found hint`
+    - `0f08286` — `batch441: preserve friend-request action error tokens with request_not_found hint`
   - latest workflow-docs commit before this update:
     - `084f279` — `batch439: sync workflow docs after web sender bundle quick-copy parity`
   - working tree: clean
@@ -31,7 +31,7 @@
 - Next: open batch442 micro-slice.
 - Batch 441 handoff:
   - commit:
-    - `8a0877a` — `batch441: preserve friend-request action error tokens with request_not_found hint`
+    - `0f08286` — `batch441: preserve friend-request action error tokens with request_not_found hint`
   - scope: web friend client now preserves backend `error.code` for accept/reject failures (not only `request_not_pending`), and friend graph shell maps `request_not_found` into deterministic user-facing `Hint:` fallback for stale/missing request actions.
   - verify: web typecheck ✅, backend make test-friendships ✅.
 - Batch 440 handoff:

@@ -99,7 +99,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
   - `cd apps/web-nextjs && npm run typecheck` → ✅ (`tsc --noEmit`)
   - `cd apps/backend-python && make test-friendships` → ✅ (`8 passed in 0.51s`)
 - Git mốc gần nhất:
-  - commit đã chốt gần nhất: `8a0877a` — `batch441: preserve friend-request action error tokens with request_not_found hint`
+  - commit đã chốt gần nhất: `0f08286` — `batch441: preserve friend-request action error tokens with request_not_found hint`
   - commit docs workflow gần nhất trước nhịp này: `084f279` — `batch439: sync workflow docs after web sender bundle quick-copy parity`
   - working tree hiện tại: clean
 - Blocker nếu có:

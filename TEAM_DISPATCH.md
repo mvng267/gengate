@@ -30,7 +30,7 @@
 - Blocker/rủi ro:
   - none.
 - Commit đã chốt:
-  - `8a0877a` — `batch441: preserve friend-request action error tokens with request_not_found hint`
+  - `0f08286` — `batch441: preserve friend-request action error tokens with request_not_found hint`
 - Next:
   - mở batch442 micro-slice product seam kế tiếp.
 
