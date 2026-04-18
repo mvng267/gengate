@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.moment_media import MomentMedia
 from app.models.moment_reactions import MomentReaction
 from app.models.moments import Moment
+from app.repositories.blocks import block_repository
 from app.repositories.friendships import friendship_repository
 from app.repositories.moment_interactions import moment_media_repository, moment_reaction_repository
 from app.repositories.moments import moment_repository
@@ -47,6 +48,8 @@ class MomentService:
             if friendship.state != "accepted":
                 continue
             friend_id = friendship.user_b_id if friendship.user_a_id == viewer_user_id else friendship.user_a_id
+            if block_repository.exists_between_users(db, viewer_user_id, friend_id):
+                continue
             if friend_id not in feed_author_ids:
                 feed_author_ids.append(friend_id)
 
@@ -108,6 +111,9 @@ class MomentService:
         user = user_repository.get(db, user_id)
         if user is None:
             raise ValueError("user_not_found")
+
+        if block_repository.exists_between_users(db, user_id, moment.author_user_id):
+            raise ValueError("moment_interaction_blocked")
 
         existing = moment_reaction_repository.get_by_moment_and_user(db, moment_id, user_id)
         if existing is not None:

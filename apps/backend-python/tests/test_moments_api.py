@@ -222,3 +222,86 @@ def test_deleted_moment_is_hidden_from_author_list_and_private_feed() -> None:
     assert "to-delete" not in feed_captions
 
     clear_overrides()
+
+
+def test_private_feed_hides_blocked_friend_moments_bidirectionally() -> None:
+    client = create_test_client()
+
+    viewer = client.post("/auth/register", json={"email": "feed-block-viewer@example.com", "username": "feed_block_viewer"})
+    friend = client.post("/auth/register", json={"email": "feed-block-friend@example.com", "username": "feed_block_friend"})
+    viewer_id = viewer.json()["id"]
+    friend_id = friend.json()["id"]
+
+    request_response = client.post(
+        "/friends/requests",
+        json={"requester_user_id": viewer_id, "receiver_user_id": friend_id},
+    )
+    assert request_response.status_code == 201
+    accept_response = client.post(f"/friends/requests/{request_response.json()['id']}/accept")
+    assert accept_response.status_code == 201
+
+    friend_moment = client.post(
+        "/moments",
+        json={"author_user_id": friend_id, "caption_text": "blocked-friend-moment"},
+    )
+    assert friend_moment.status_code == 201
+
+    baseline_feed_response = client.get(f"/moments/feed?viewer_user_id={viewer_id}")
+    assert baseline_feed_response.status_code == 200
+    baseline_captions = [item["caption_text"] for item in baseline_feed_response.json()["items"]]
+    assert "blocked-friend-moment" in baseline_captions
+
+    block_by_viewer = client.post(
+        "/friends/blocks",
+        json={"blocker_user_id": viewer_id, "blocked_user_id": friend_id},
+    )
+    assert block_by_viewer.status_code == 201
+
+    feed_after_viewer_blocks = client.get(f"/moments/feed?viewer_user_id={viewer_id}")
+    assert feed_after_viewer_blocks.status_code == 200
+    captions_after_viewer_blocks = [item["caption_text"] for item in feed_after_viewer_blocks.json()["items"]]
+    assert "blocked-friend-moment" not in captions_after_viewer_blocks
+
+    block_by_friend = client.post(
+        "/friends/blocks",
+        json={"blocker_user_id": friend_id, "blocked_user_id": viewer_id},
+    )
+    assert block_by_friend.status_code == 201
+
+    feed_after_both_blocks = client.get(f"/moments/feed?viewer_user_id={viewer_id}")
+    assert feed_after_both_blocks.status_code == 200
+    captions_after_both_blocks = [item["caption_text"] for item in feed_after_both_blocks.json()["items"]]
+    assert "blocked-friend-moment" not in captions_after_both_blocks
+
+    clear_overrides()
+
+
+def test_create_reaction_returns_blocked_error_when_users_are_blocked() -> None:
+    client = create_test_client()
+
+    author = client.post("/auth/register", json={"email": "reaction-block-author@example.com", "username": "reaction_block_author"})
+    reactor = client.post("/auth/register", json={"email": "reaction-block-reactor@example.com", "username": "reaction_block_reactor"})
+    author_id = author.json()["id"]
+    reactor_id = reactor.json()["id"]
+
+    moment_response = client.post(
+        "/moments",
+        json={"author_user_id": author_id, "caption_text": "reaction-target"},
+    )
+    assert moment_response.status_code == 201
+    moment_id = moment_response.json()["id"]
+
+    block_response = client.post(
+        "/friends/blocks",
+        json={"blocker_user_id": author_id, "blocked_user_id": reactor_id},
+    )
+    assert block_response.status_code == 201
+
+    create_reaction_response = client.post(
+        f"/moments/{moment_id}/reactions",
+        json={"user_id": reactor_id, "reaction_type": "heart"},
+    )
+    assert create_reaction_response.status_code == 404
+    assert create_reaction_response.json()["error"]["code"] == "moment_interaction_blocked"
+
+    clear_overrides()
