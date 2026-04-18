@@ -244,6 +244,10 @@ struct InboxPlaceholderView: View {
                             handleDirectThreadIdentityChange()
                         }
 
+                    Text("Sender user UUID is inferred from current User A when sending (sender_source=user_a_form).")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+
                     Button("Use current session user for User A") {
                         fillUserAFromCurrentSession()
                     }
@@ -4362,7 +4366,7 @@ use_when=\(useWhenText)
         statusPrefix: String?,
         senderKeepPairQuickCopyPrefix: String? = nil
     ) async {
-        let trimmedUserA = senderUserIDOverride?.trimmingCharacters(in: .whitespacesAndNewlines) ?? userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let senderUserID = senderUserIDOverride?.trimmingCharacters(in: .whitespacesAndNewlines) ?? userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedPayload = messageDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let normalizedSenderKeepPairQuickCopyPrefix = senderKeepPairQuickCopyPrefix?.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -4371,8 +4375,8 @@ use_when=\(useWhenText)
             return
         }
 
-        guard !trimmedUserA.isEmpty else {
-            fetchError = "User A UUID là bắt buộc để gửi message."
+        guard !senderUserID.isEmpty else {
+            fetchError = "Sender user UUID là bắt buộc để gửi message."
             return
         }
 
@@ -4386,13 +4390,13 @@ use_when=\(useWhenText)
         if let statusPrefix {
             sendStatusHint = "\(statusPrefix) Sending direct message shell..."
         } else {
-            sendStatusHint = nil
+            sendStatusHint = "Sending direct message shell..."
         }
 
         do {
             let created = try await InboxAPIClient().createMessage(
                 conversationID: conversationID,
-                senderUserID: trimmedUserA,
+                senderUserID: senderUserID,
                 payloadText: trimmedPayload
             )
             messageDraft = ""
@@ -4400,11 +4404,13 @@ use_when=\(useWhenText)
             await loadInboxThread()
 
             let sentStatus = "Sent message \(created.id) into direct thread \(conversationID)."
-            let senderValue = trimmedUserA.isEmpty ? "(empty)" : trimmedUserA
-            lastSendQuickCopy = "sender=\(senderValue) | message_id=\(created.id)"
+            let senderValue = senderUserID.isEmpty ? "(empty)" : senderUserID
+            let sendResultQuickCopy = "sender=\(senderValue) | message_id=\(created.id)"
+            lastSendQuickCopy = sendResultQuickCopy
             if let normalizedSenderKeepPairQuickCopyPrefix,
                !normalizedSenderKeepPairQuickCopyPrefix.isEmpty {
-                lastSenderKeepPairQuickCopy = "\(normalizedSenderKeepPairQuickCopyPrefix) | message_id=\(created.id)"
+                let keepPairQuickCopy = "\(normalizedSenderKeepPairQuickCopyPrefix) | message_id=\(created.id)"
+                lastSenderKeepPairQuickCopy = keepPairQuickCopy
             }
             if let statusPrefix {
                 sendStatusHint = "\(statusPrefix) \(sentStatus)"
