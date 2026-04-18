@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 437
+- Batch: 438
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 437 iOS inbox listed-thread row pair-source parity — emit deterministic `row_pair_source=...` token in listed-row pair hint + row-apply status, aligned with web precedence tokens (`user_a_form_member` / `session_user_member` / `row_first_member_fallback` / `row_incomplete`).
+- Scope: batch 438 iOS inbox sender keep-pair + send-result bundle quick-copy parity — persist deterministic `sender_keep_pair_marker={...} | send_result={...}` snapshot after send and reset bundle state on thread reload.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -18,16 +18,23 @@
 - Files:
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - iOS targeted verify: `cd apps/ios-swift && swift build` ✅ (`Build complete! (14.05s)`)
-  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.42s`)
+  - iOS targeted verify: `cd apps/ios-swift && swift build` ✅ (`Build complete! (0.19s)`)
+  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.51s`)
 - Git:
-  - latest feature commit:
-    - `67a3591` — `batch437: align ios listed-thread row pair-source parity tokens`
-  - latest workflow-docs commit:
+  - latest feature commits:
+    - `d495e08` — `batch438: align ios inbox sender fallback status with web shell`
+    - `2d6c896` — `batch438: persist ios sender keep-pair send-result bundle quick-copy`
+  - latest workflow-docs commit before this update:
     - `183cd91` — `batch437: sync workflow docs after ios row pair-source parity`
   - working tree: clean
 - Blocker: none.
-- Next: open batch438 micro-slice.
+- Next: open batch439 micro-slice.
+- Batch 438 handoff:
+  - commits:
+    - `d495e08` — `batch438: align ios inbox sender fallback status with web shell`
+    - `2d6c896` — `batch438: persist ios sender keep-pair send-result bundle quick-copy`
+  - scope: iOS inbox now persists `sender_keep_pair_marker + send_result` bundle as dedicated state, reuses it in summary/copy action, and resets it on non-silent thread reload to avoid stale/missing composed payload.
+  - verify: iOS swift build ✅, backend make test-friendships ✅.
 - Batch 437 handoff:
   - commit:
     - `67a3591` — `batch437: align ios listed-thread row pair-source parity tokens`

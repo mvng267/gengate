@@ -12,9 +12,27 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 437
-- Trục công việc: iOS inbox listed-thread row pair-source parity — emit deterministic `row_pair_source=...` token in listed row pair hint + row-apply status, aligned with web precedence tokens (`user_a_form_member` -> `session_user_member` -> `row_first_member_fallback`, fallback `row_incomplete`).
-- Trạng thái: batch437_complete_ready_to_open_438.
+- Batch workflow chính thức hiện tại: 438
+- Trục công việc: iOS inbox sender keep-pair + send-result bundle quick-copy parity — persist deterministic `sender_keep_pair_marker={...} | send_result={...}` bundle snapshot after send and reset bundle snapshot on thread reload.
+- Trạng thái: batch438_complete_ready_to_open_439.
+
+## Batch 438 handoff (closed)
+- Batch vừa xong: **438**
+- Scope đã chốt:
+  - iOS inbox nay có state dedicated `lastSenderKeepPairAndSendResultBundleQuickCopy` để giữ payload bundle `sender_keep_pair_marker={...} | send_result={...}` thay vì suy diễn tạm từ các field có thể reset lệch nhịp.
+  - Summary/copy action cho bundle dùng trực tiếp state dedicated; thread reload (`silent=false`) reset về default deterministic để tránh stale payload carry-over.
+- Files:
+  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
+- Verify:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (0.19s)`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.51s`)
+- Blocker/rủi ro:
+  - none.
+- Commits đã chốt:
+  - `d495e08` — `batch438: align ios inbox sender fallback status with web shell`
+  - `2d6c896` — `batch438: persist ios sender keep-pair send-result bundle quick-copy`
+- Next:
+  - mở batch439 micro-slice product seam kế tiếp.
 
 ## Batch 437 handoff (closed)
 - Batch vừa xong: **437**
