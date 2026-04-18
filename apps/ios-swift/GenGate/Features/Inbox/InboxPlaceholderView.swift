@@ -360,6 +360,10 @@ struct InboxPlaceholderView: View {
                                         .foregroundStyle(.secondary)
 
                                     if rowPair.isComplete {
+                                        Text("pair_hint: \(rowPair.userAID) ↔ \(rowPair.userBID) (row_pair_source=\(rowPair.pairSource))")
+                                            .font(.caption.monospaced())
+                                            .foregroundStyle(.secondary)
+
                                         Button {
                                             Task {
                                                 await handleUseListedDirectConversation(directConversation)
@@ -371,7 +375,7 @@ struct InboxPlaceholderView: View {
                                         .buttonStyle(.bordered)
                                         .disabled(isLoading || isOpening || isLoadingUserDirectConversations)
                                     } else {
-                                        Text("Pair resolution missing for this row (direct_conversation_row_pair_incomplete)")
+                                        Text("Pair resolution missing for this row (direct_conversation_row_pair_incomplete) · row_pair_source=row_incomplete")
                                             .font(.footnote)
                                             .foregroundStyle(.orange)
                                     }
@@ -3670,13 +3674,18 @@ use_when=\(useWhenText)
         isLoadingUserDirectConversations = false
     }
 
-    private func directConversationPair(for directConversation: DirectConversationSummary) -> (userAID: String, userBID: String, isComplete: Bool) {
+    private func directConversationPair(for directConversation: DirectConversationSummary) -> (
+        userAID: String,
+        userBID: String,
+        pairSource: String,
+        isComplete: Bool
+    ) {
         let normalizedMembers = directConversation.memberUserIDs
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
 
         guard normalizedMembers.count >= 2 else {
-            return ("", "", false)
+            return ("", "", "row_incomplete", false)
         }
 
         let currentUserAID = userAIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -3684,16 +3693,20 @@ use_when=\(useWhenText)
         let fallbackUserID = normalizedMembers[0]
 
         let resolvedUserAID: String
+        let pairSource: String
         if normalizedMembers.contains(currentUserAID), !currentUserAID.isEmpty {
             resolvedUserAID = currentUserAID
+            pairSource = "user_a_form_member"
         } else if normalizedMembers.contains(sessionUserID), !sessionUserID.isEmpty {
             resolvedUserAID = sessionUserID
+            pairSource = "session_user_member"
         } else {
             resolvedUserAID = fallbackUserID
+            pairSource = "row_first_member_fallback"
         }
 
         let resolvedUserBID = normalizedMembers.first(where: { $0 != resolvedUserAID }) ?? ""
-        return (resolvedUserAID, resolvedUserBID, !resolvedUserAID.isEmpty && !resolvedUserBID.isEmpty)
+        return (resolvedUserAID, resolvedUserBID, pairSource, !resolvedUserAID.isEmpty && !resolvedUserBID.isEmpty)
     }
 
     private func handleUseListedDirectConversation(_ directConversation: DirectConversationSummary) async {
@@ -3704,16 +3717,18 @@ use_when=\(useWhenText)
             return
         }
 
+        let rowContextStatusPrefix = "Applied listed direct thread row context (row_pair_source=\(rowPair.pairSource))."
+
         isOpening = true
         fetchError = nil
         lastSendQuickCopy = "sender=(none) | message_id=(none)"
-        sendStatusHint = "Applied listed direct thread row context. Loading direct thread shell..."
+        sendStatusHint = "\(rowContextStatusPrefix) Loading direct thread shell..."
 
         await hydrateDirectThread(
             directConversation: directConversation,
             userAID: rowPair.userAID,
             userBID: rowPair.userBID,
-            statusPrefix: "Applied listed direct thread row context."
+            statusPrefix: rowContextStatusPrefix
         )
 
         isOpening = false
