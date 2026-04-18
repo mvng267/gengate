@@ -29,6 +29,14 @@ const FRIEND_REQUEST_DECISION_QUICK_COPY_EMPTY =
 const FRIEND_REQUEST_COUNTS_QUICK_COPY_EMPTY =
   "accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)";
 const REQUEST_NOT_PENDING_FALLBACK_MESSAGE = "This request is no longer pending. Reload friend graph to continue.";
+const FRIEND_REQUEST_ALREADY_PENDING_FALLBACK_MESSAGE =
+  "Pending request already exists for this pair. Accept/reject the existing request instead of creating a new one.";
+const FRIENDSHIP_ALREADY_EXISTS_FALLBACK_MESSAGE =
+  "Users are already friends. Creating a new friend request is no longer needed.";
+const FRIEND_REQUEST_USER_NOT_FOUND_FALLBACK_MESSAGE =
+  "A referenced user was not found. Verify requester/receiver user IDs and retry.";
+const FRIEND_REQUEST_VALIDATION_ERROR_FALLBACK_MESSAGE =
+  "Friend-request payload is invalid. Ensure requester/receiver IDs are present and different.";
 
 function resolveFriendRequestActionError(error: unknown, fallbackCode: string): string {
   if (error instanceof Error) {
@@ -39,6 +47,30 @@ function resolveFriendRequestActionError(error: unknown, fallbackCode: string): 
   }
 
   return fallbackCode;
+}
+
+function resolveFriendRequestErrorHint(message: string): string | null {
+  if (message.includes("friend_request_already_pending")) {
+    return FRIEND_REQUEST_ALREADY_PENDING_FALLBACK_MESSAGE;
+  }
+
+  if (message.includes("friendship_already_exists")) {
+    return FRIENDSHIP_ALREADY_EXISTS_FALLBACK_MESSAGE;
+  }
+
+  if (message.includes("request_not_pending")) {
+    return REQUEST_NOT_PENDING_FALLBACK_MESSAGE;
+  }
+
+  if (message.includes("user_not_found")) {
+    return FRIEND_REQUEST_USER_NOT_FOUND_FALLBACK_MESSAGE;
+  }
+
+  if (message.includes("invalid_request") || message.includes("validation_error")) {
+    return FRIEND_REQUEST_VALIDATION_ERROR_FALLBACK_MESSAGE;
+  }
+
+  return null;
 }
 
 export function FriendGraphShell({
@@ -113,6 +145,7 @@ export function FriendGraphShell({
   const quickDeltaSummary = pendingDirectionSummary
     ? `accepted_count=${snapshot?.friendshipCount ?? 0} / pending_inbound=${pendingDirectionSummary.inbound} / pending_outbound=${pendingDirectionSummary.outbound}`
     : "accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)";
+  const friendRequestErrorHint = resolveFriendRequestErrorHint(status);
 
   const friendRequestLastActionBundleCopiedFeedbackText = (() => {
     if (friendRequestLastActionBundleCopiedAt === null) {
@@ -683,6 +716,7 @@ export function FriendGraphShell({
         <strong>Status:</strong> friend graph MVP shell is wired to live backend contracts.
       </p>
       <p>{status}</p>
+      {friendRequestErrorHint ? <p>Hint: {friendRequestErrorHint}</p> : null}
       <p>
         <strong>User:</strong> {userId}
       </p>

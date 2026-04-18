@@ -83,7 +83,8 @@ export async function fetchFriendGraphSnapshot(userId: string): Promise<FriendGr
 async function readApiErrorCode(response: Response): Promise<string | null> {
   try {
     const payload = (await response.json()) as ApiErrorCodePayload;
-    return payload.error?.code ?? null;
+    const normalizedCode = payload.error?.code?.trim();
+    return normalizedCode ? normalizedCode : null;
   } catch {
     return null;
   }
@@ -105,6 +106,10 @@ export async function createFriendRequest(input: {
   });
 
   if (!response.ok) {
+    const errorCode = await readApiErrorCode(response);
+    if (errorCode) {
+      throw new Error(errorCode);
+    }
     throw new Error(`friend_request_create_failed:${response.status}`);
   }
 
