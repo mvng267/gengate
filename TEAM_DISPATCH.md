@@ -12,9 +12,45 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 439
-- Trục công việc: web inbox sender keep-pair + send-result bundle quick-copy parity — persist deterministic `sender_keep_pair_marker={...} | send_result={...}` bundle snapshot after send even without keep-pair prefix.
-- Trạng thái: batch439_complete_ready_to_open_440.
+- Batch workflow chính thức hiện tại: 441
+- Trục công việc: web friend-request action error-token parity — preserve backend `error.code` for accept/reject failures and extend deterministic hint mapping for `request_not_found` in friend graph shell.
+- Trạng thái: batch441_complete_ready_to_open_442.
+
+## Batch 441 handoff (closed)
+- Batch vừa xong: **441**
+- Scope đã chốt:
+  - Web friend client accept/reject flow nay preserve backend error token (`error.code`) cho mọi lỗi action, không còn chỉ special-case `request_not_pending`.
+  - Web friend graph shell nay bổ sung deterministic `Hint:` mapping cho `request_not_found` để thao tác trên request stale/missing có hướng xử lý rõ ràng.
+- Files:
+  - `apps/web-nextjs/lib/friends/client.ts`
+  - `apps/web-nextjs/components/friend-graph-shell.tsx`
+- Verify:
+  - Web: `cd apps/web-nextjs && npm run typecheck` ✅ (`tsc --noEmit`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.51s`)
+- Blocker/rủi ro:
+  - none.
+- Commit đã chốt:
+  - `8a0877a` — `batch441: preserve friend-request action error tokens with request_not_found hint`
+- Next:
+  - mở batch442 micro-slice product seam kế tiếp.
+
+## Batch 440 handoff (closed)
+- Batch vừa xong: **440**
+- Scope đã chốt:
+  - Web friend client create-request flow nay ưu tiên backend error token (`error.code`) trước fallback `friend_request_create_failed:<status>`.
+  - Web friend graph shell nay hiển thị deterministic `Hint:` mapping cho token lỗi friend-request create/action (`friend_request_already_pending`, `friendship_already_exists`, `request_not_pending`, `user_not_found`, `invalid_request`/`validation_error`).
+- Files:
+  - `apps/web-nextjs/lib/friends/client.ts`
+  - `apps/web-nextjs/components/friend-graph-shell.tsx`
+- Verify:
+  - Web: `cd apps/web-nextjs && npm run typecheck` ✅ (`tsc --noEmit`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.47s`)
+- Blocker/rủi ro:
+  - none.
+- Commit đã chốt:
+  - `03b4966` — `batch440: surface friend-request create error tokens with hint parity`
+- Next:
+  - mở batch441 micro-slice product seam kế tiếp.
 
 ## Batch 439 handoff (closed)
 - Batch vừa xong: **439**

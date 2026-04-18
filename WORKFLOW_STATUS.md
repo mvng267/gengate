@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 439
+- Batch: 441
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 439 web inbox sender keep-pair + send-result bundle quick-copy parity — persist deterministic `sender_keep_pair_marker={...} | send_result={...}` snapshot after send even when keep-pair marker prefix is absent.
+- Scope: batch 441 web friend-request action error-token parity — preserve backend `error.code` for accept/reject failures and extend deterministic friend-request hint mapping for `request_not_found`.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,18 +16,29 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/web-nextjs/components/direct-message-shell.tsx
+  - apps/web-nextjs/lib/friends/client.ts
+  - apps/web-nextjs/components/friend-graph-shell.tsx
 - Test:
   - Web targeted verify: `cd apps/web-nextjs && npm run typecheck` ✅ (`tsc --noEmit`)
-  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.58s`)
+  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.51s`)
 - Git:
   - latest feature commit:
-    - `63d25a5` — `batch439: persist web sender keep-pair send-result bundle quick-copy`
+    - `8a0877a` — `batch441: preserve friend-request action error tokens with request_not_found hint`
   - latest workflow-docs commit before this update:
-    - `88bdfd4` — `batch438: sync workflow docs after ios sender bundle quick-copy parity`
+    - `084f279` — `batch439: sync workflow docs after web sender bundle quick-copy parity`
   - working tree: clean
 - Blocker: none.
-- Next: open batch440 micro-slice.
+- Next: open batch442 micro-slice.
+- Batch 441 handoff:
+  - commit:
+    - `8a0877a` — `batch441: preserve friend-request action error tokens with request_not_found hint`
+  - scope: web friend client now preserves backend `error.code` for accept/reject failures (not only `request_not_pending`), and friend graph shell maps `request_not_found` into deterministic user-facing `Hint:` fallback for stale/missing request actions.
+  - verify: web typecheck ✅, backend make test-friendships ✅.
+- Batch 440 handoff:
+  - commit:
+    - `03b4966` — `batch440: surface friend-request create error tokens with hint parity`
+  - scope: web friend client now prefers backend error token payload (`error.code`) for create-request failures; friend graph shell shows deterministic `Hint:` mapping for friend-request create/action error tokens (`friend_request_already_pending`, `friendship_already_exists`, `request_not_pending`, `user_not_found`, `invalid_request`/`validation_error`).
+  - verify: web typecheck ✅, backend make test-friendships ✅.
 - Batch 439 handoff:
   - commit:
     - `63d25a5` — `batch439: persist web sender keep-pair send-result bundle quick-copy`

@@ -29,6 +29,7 @@ const FRIEND_REQUEST_DECISION_QUICK_COPY_EMPTY =
 const FRIEND_REQUEST_COUNTS_QUICK_COPY_EMPTY =
   "accepted_count=(none) / pending_inbound=(none) / pending_outbound=(none)";
 const REQUEST_NOT_PENDING_FALLBACK_MESSAGE = "This request is no longer pending. Reload friend graph to continue.";
+const REQUEST_NOT_FOUND_FALLBACK_MESSAGE = "Friend request not found. Reload friend graph and retry.";
 const FRIEND_REQUEST_ALREADY_PENDING_FALLBACK_MESSAGE =
   "Pending request already exists for this pair. Accept/reject the existing request instead of creating a new one.";
 const FRIENDSHIP_ALREADY_EXISTS_FALLBACK_MESSAGE =
@@ -60,6 +61,10 @@ function resolveFriendRequestErrorHint(message: string): string | null {
 
   if (message.includes("request_not_pending")) {
     return REQUEST_NOT_PENDING_FALLBACK_MESSAGE;
+  }
+
+  if (message.includes("request_not_found")) {
+    return REQUEST_NOT_FOUND_FALLBACK_MESSAGE;
   }
 
   if (message.includes("user_not_found")) {

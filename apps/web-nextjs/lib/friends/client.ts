@@ -123,7 +123,7 @@ export async function acceptFriendRequest(requestId: string): Promise<Friendship
 
   if (!response.ok) {
     const errorCode = await readApiErrorCode(response);
-    if (errorCode === "request_not_pending") {
+    if (errorCode) {
       throw new Error(errorCode);
     }
     throw new Error(`friend_request_accept_failed:${response.status}`);
@@ -139,7 +139,7 @@ export async function rejectFriendRequest(requestId: string): Promise<FriendRequ
 
   if (!response.ok) {
     const errorCode = await readApiErrorCode(response);
-    if (errorCode === "request_not_pending") {
+    if (errorCode) {
       throw new Error(errorCode);
     }
     throw new Error(`friend_request_reject_failed:${response.status}`);
