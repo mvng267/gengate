@@ -12,9 +12,26 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 434
-- Trục công việc: web friend graph pending-pair peer-context persistence parity — persist selected pending-request peer vào web auth session storage (kèm self-drift guard) và ưu tiên context đó trong web inbox quick-apply direct-thread pivots.
-- Trạng thái: batch434_complete_ready_to_open_435.
+- Batch workflow chính thức hiện tại: 435
+- Trục công việc: iOS inbox quick-apply status parity — align deterministic `peer_source=profile_pending_pair|thread_context` token for both already-matched + applied branches when resolving session+peer pair in direct-thread quick-open.
+- Trạng thái: batch435_verify_complete_commit_pending.
+
+## Batch 435 handoff (closed)
+- Batch vừa xong: **435**
+- Scope đã chốt:
+  - iOS Inbox quick-apply parity: status message ở cả nhánh already-matched và applied đều mang `peer_source=profile_pending_pair|thread_context` khi resolve session+peer pair.
+  - Giữ nguyên semantics cũ của `user_pair_source=session_user+peer_context|peer_context+session_user`, chỉ bổ sung peer source token để đồng bộ parity với web.
+- Files:
+  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
+- Verify:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (13.42s)`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.44s`)
+- Blocker/rủi ro:
+  - none.
+- Commit đã chốt:
+  - `(pending)` — `batch435: align ios inbox peer-source token on kept-pair quick-apply`
+- Next:
+  - mở batch436 micro-slice product seam kế tiếp.
 
 ## Batch 434 handoff (closed)
 - Batch vừa xong: **434**

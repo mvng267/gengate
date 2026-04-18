@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 434
+- Batch: 435
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 434 web friend-graph pending-pair peer-context persistence parity — persist selected pending-request peer with self-drift guard into web session storage and prioritize it in web inbox quick-apply direct-thread pivots.
+- Scope: batch 435 iOS inbox quick-apply status parity — emit `peer_source=profile_pending_pair|thread_context` token in both already-matched and applied paths when resolving session+peer pair for direct-thread quick-open.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,21 +16,23 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/web-nextjs/lib/auth/types.ts
-  - apps/web-nextjs/lib/auth/client.ts
-  - apps/web-nextjs/components/friend-graph-shell.tsx
-  - apps/web-nextjs/components/direct-message-shell.tsx
+  - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - Web targeted verify: `cd apps/web-nextjs && npm run typecheck` ✅ (`tsc --noEmit`)
+  - iOS targeted verify: `cd apps/ios-swift && swift build` ✅ (`Build complete! (13.42s)`)
   - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.44s`)
 - Git:
   - latest feature commit:
-    - `98323bb` — `batch434: persist web pending-pair peer context for inbox quick-apply parity`
-  - working tree: dirty (workflow docs update pending)
+    - `(this commit)` — `batch435: align ios inbox peer-source token on kept-pair quick-apply`
+  - working tree: clean (expected after committing this batch)
 - Blocker: none.
-- Next: sync workflow docs cleanly for batch434 completion, then open batch435 for next micro-slice parity seam.
+- Next: commit batch435 changes, sync workflow docs, then open batch436 micro-slice.
+- Batch 435 handoff:
+  - scope: iOS inbox quick-apply now includes deterministic `peer_source=profile_pending_pair|thread_context` token for both already-matched and applied status branches, aligning with web peer-source token semantics.
+  - verify: iOS swift build ✅, backend make test-friendships ✅.
 - Batch 434 handoff:
-  - commit: `98323bb` — `batch434: persist web pending-pair peer context for inbox quick-apply parity`
+  - commits:
+    - `98323bb` — `batch434: persist web pending-pair peer context for inbox quick-apply parity`
+    - `cf0136e` — `batch434: sync workflow docs after web pending-pair peer context parity`
   - scope: Web Profile friend-graph pending-pair quick-apply now persists selected peer context into auth session storage with self-drift guard; Web Inbox quick-apply now prioritizes persisted pending-pair peer context and exposes `peer_source=profile_pending_pair|thread_context` in status tokens.
   - verify: web typecheck ✅, backend make test-friendships ✅.
 - Batch 433 handoff:

@@ -3774,13 +3774,14 @@ use_when=\(useWhenText)
             return
         }
 
+        let peerSource = !peerFromProfileContext.isEmpty && resolvedPeerUserID == peerFromProfileContext
+            ? "profile_pending_pair"
+            : "thread_context"
+
         let pairStatus: String
         if currentUserAID == trimmedCurrentSessionUserID, currentUserBID == resolvedPeerUserID {
-            pairStatus = "User A + User B already match current session + peer context (user_pair_source=session_user+peer_context)."
+            pairStatus = "User A + User B already match current session + peer context (user_pair_source=session_user+peer_context, peer_source=\(peerSource))."
         } else {
-            let peerSource = !peerFromProfileContext.isEmpty && resolvedPeerUserID == peerFromProfileContext
-                ? "profile_pending_pair"
-                : "thread_context"
             pairStatus = "Applied current session user as User A + resolved peer as User B (user_pair_source=session_user+peer_context, peer_source=\(peerSource))."
         }
 
@@ -3817,13 +3818,14 @@ use_when=\(useWhenText)
             return
         }
 
+        let peerSource = !peerFromProfileContext.isEmpty && resolvedPeerUserID == peerFromProfileContext
+            ? "profile_pending_pair"
+            : "thread_context"
+
         let pairStatus: String
         if currentUserAID == resolvedPeerUserID, currentUserBID == trimmedCurrentSessionUserID {
-            pairStatus = "User A + User B already match peer context + current session (user_pair_source=peer_context+session_user)."
+            pairStatus = "User A + User B already match peer context + current session (user_pair_source=peer_context+session_user, peer_source=\(peerSource))."
         } else {
-            let peerSource = !peerFromProfileContext.isEmpty && resolvedPeerUserID == peerFromProfileContext
-                ? "profile_pending_pair"
-                : "thread_context"
             pairStatus = "Applied resolved peer as User A + current session user as User B (user_pair_source=peer_context+session_user, peer_source=\(peerSource))."
         }
 
