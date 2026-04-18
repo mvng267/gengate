@@ -14,7 +14,7 @@
 ## Active batch
 - Batch workflow chính thức hiện tại: 437
 - Trục công việc: iOS inbox listed-thread row pair-source parity — emit deterministic `row_pair_source=...` token in listed row pair hint + row-apply status, aligned with web precedence tokens (`user_a_form_member` -> `session_user_member` -> `row_first_member_fallback`, fallback `row_incomplete`).
-- Trạng thái: batch437_verify_complete_commit_pending.
+- Trạng thái: batch437_complete_ready_to_open_438.
 
 ## Batch 437 handoff (closed)
 - Batch vừa xong: **437**

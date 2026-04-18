@@ -23,9 +23,11 @@
 - Git:
   - latest feature commit:
     - `67a3591` — `batch437: align ios listed-thread row pair-source parity tokens`
-  - working tree: dirty (workflow docs update pending)
+  - latest workflow-docs commit:
+    - `183cd91` — `batch437: sync workflow docs after ios row pair-source parity`
+  - working tree: clean
 - Blocker: none.
-- Next: sync workflow docs cleanly for batch437, then open batch438 micro-slice.
+- Next: open batch438 micro-slice.
 - Batch 437 handoff:
   - commit:
     - `67a3591` — `batch437: align ios listed-thread row pair-source parity tokens`
