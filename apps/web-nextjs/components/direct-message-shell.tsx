@@ -45,6 +45,8 @@ const initialDeleteForm = {
 
 const userNotFoundFallbackMessage = "A referenced user was not found. Verify User A/User B/sender IDs and retry.";
 const conversationNotFoundFallbackMessage = "Direct thread no longer exists. Re-open the conversation to refresh thread context.";
+const directConversationBlockedFallbackMessage =
+  "Direct thread is blocked between these users. Use an unblocked user pair (or remove the block) before opening the thread.";
 const conversationMemberNotFoundFallbackMessage =
   "Sender is not a member of this direct thread. Keep sender inside the current conversation member pair.";
 const messageNotFoundFallbackMessage = "Target message was not found. Reload thread messages and retry with a fresh message ID.";
@@ -65,6 +67,10 @@ function resolveDirectMessageErrorHint(message: string): string | null {
 
   if (message.includes("conversation_not_found")) {
     return conversationNotFoundFallbackMessage;
+  }
+
+  if (message.includes("direct_conversation_blocked")) {
+    return directConversationBlockedFallbackMessage;
   }
 
   if (message.includes("conversation_member_not_found")) {

@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.models.conversation_members import ConversationMember
 from app.models.conversations import Conversation
 from app.models.messages import Message
+from app.repositories.blocks import block_repository
 from app.repositories.conversations import conversation_member_repository, conversation_repository
 from app.repositories.messages import message_repository
 from app.repositories.users import user_repository
@@ -56,6 +57,9 @@ class ConversationService:
         user_b = user_repository.get(db, user_b_id)
         if user_a is None or user_b is None:
             raise ValueError("user_not_found")
+
+        if block_repository.exists_between_users(db, user_a_id, user_b_id):
+            raise ValueError("direct_conversation_blocked")
 
         existing = conversation_repository.find_direct_by_members(db, user_a_id, user_b_id)
         if existing is not None:

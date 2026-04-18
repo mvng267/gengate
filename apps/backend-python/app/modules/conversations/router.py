@@ -80,7 +80,9 @@ def get_or_create_direct_conversation(
         )
     except ValueError as exc:
         code = str(exc)
-        status_code = status.HTTP_400_BAD_REQUEST if code == "invalid_direct_members" else status.HTTP_404_NOT_FOUND
+        status_code = status.HTTP_404_NOT_FOUND
+        if code in {"invalid_direct_members", "direct_conversation_blocked"}:
+            status_code = status.HTTP_400_BAD_REQUEST
         raise HTTPException(status_code=status_code, detail=code)
     return to_direct_conversation_response(conversation, members)
 

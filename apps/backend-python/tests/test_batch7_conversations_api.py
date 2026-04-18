@@ -322,6 +322,61 @@ def test_batch101_direct_member_read_cursor_contract_errors() -> None:
     app.dependency_overrides.clear()
 
 
+def test_get_or_create_direct_conversation_returns_blocked_error_when_users_are_blocked() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    user_a_response = client.post(
+        "/auth/register",
+        json={"email": "batch444-blocked-direct-a@example.com", "username": "batch444_blocked_direct_a"},
+    )
+    user_b_response = client.post(
+        "/auth/register",
+        json={"email": "batch444-blocked-direct-b@example.com", "username": "batch444_blocked_direct_b"},
+    )
+    assert user_a_response.status_code == 201
+    assert user_b_response.status_code == 201
+
+    user_a_id = user_a_response.json()["id"]
+    user_b_id = user_b_response.json()["id"]
+
+    block_response = client.post(
+        "/friends/blocks",
+        json={"blocker_user_id": user_a_id, "blocked_user_id": user_b_id},
+    )
+    assert block_response.status_code == 201
+
+    blocked_direct_response = client.post(
+        "/conversations/direct",
+        json={"user_a_id": user_a_id, "user_b_id": user_b_id},
+    )
+    assert blocked_direct_response.status_code == 400
+    assert blocked_direct_response.json() == {
+        "error": {"code": "direct_conversation_blocked", "message": "direct_conversation_blocked"}
+    }
+
+    app.dependency_overrides.clear()
+
+
 def test_deleted_message_clears_member_read_cursor_reference() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",

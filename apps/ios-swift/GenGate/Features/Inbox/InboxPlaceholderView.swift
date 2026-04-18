@@ -2899,6 +2899,10 @@ use_when=\(useWhenText)
             return "Direct thread no longer exists. Re-open the conversation to refresh thread context."
         }
 
+        if message.contains("direct_conversation_blocked") {
+            return "Direct thread is blocked between these users. Use an unblocked user pair (or remove the block) before opening the thread."
+        }
+
         if message.contains("conversation_member_not_found") {
             return "Sender is not a member of this direct thread. Keep sender inside the current conversation member pair."
         }
