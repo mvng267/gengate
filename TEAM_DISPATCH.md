@@ -12,9 +12,26 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 435
-- Trục công việc: iOS inbox quick-apply status parity — align deterministic `peer_source=profile_pending_pair|thread_context` token for both already-matched + applied branches when resolving session+peer pair in direct-thread quick-open.
-- Trạng thái: batch435_complete_ready_to_open_436.
+- Batch workflow chính thức hiện tại: 436
+- Trục công việc: web inbox listed-thread row pair parity — align deterministic row pair resolution precedence with iOS (`user_a_form_member` -> `session_user_member` -> `row_first_member_fallback`) and emit `row_pair_source=...` token in pair hint + row-apply status.
+- Trạng thái: batch436_verify_complete_commit_pending.
+
+## Batch 436 handoff (closed)
+- Batch vừa xong: **436**
+- Scope đã chốt:
+  - Web inbox listed-thread row pair resolution nay follow precedence parity với iOS: ưu tiên `user_a_form_member`, fallback `session_user_member`, rồi `row_first_member_fallback`.
+  - Row pair metadata nay được token hóa deterministic bằng `row_pair_source=...` ở cả list pair hint và row-apply status prefix để debug parity rõ ràng.
+- Files:
+  - `apps/web-nextjs/components/direct-message-shell.tsx`
+- Verify:
+  - Web: `cd apps/web-nextjs && npm run typecheck` ✅ (`tsc --noEmit`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.42s`)
+- Blocker/rủi ro:
+  - none.
+- Commit đã chốt:
+  - `b404b0a` — `batch436: align web inbox listed-thread row pair parity tokens`
+- Next:
+  - mở batch437 micro-slice product seam kế tiếp.
 
 ## Batch 435 handoff (closed)
 - Batch vừa xong: **435**
