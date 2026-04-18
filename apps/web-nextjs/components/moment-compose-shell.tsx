@@ -42,6 +42,8 @@ const initialForm = {
 
 const userNotFoundFallbackMessage = "Author/viewer/reaction user was not found. Use current session user or a valid user UUID.";
 const momentNotFoundFallbackMessage = "Moment no longer exists. Reload private/authored moments and retry with a fresh moment ID.";
+const momentInteractionBlockedFallbackMessage =
+  "Reaction is blocked between these users. Use an unblocked viewer/author pair (or remove the block) before reacting.";
 const validationErrorFallbackMessage = "Request payload is invalid. Re-check UUID fields and image width/height values.";
 
 function resolveMomentErrorHint(message: string): string | null {
@@ -51,6 +53,10 @@ function resolveMomentErrorHint(message: string): string | null {
 
   if (message.includes("moment_not_found")) {
     return momentNotFoundFallbackMessage;
+  }
+
+  if (message.includes("moment_interaction_blocked")) {
+    return momentInteractionBlockedFallbackMessage;
   }
 
   if (message.includes("validation_error")) {

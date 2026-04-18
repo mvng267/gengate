@@ -1370,6 +1370,10 @@ struct FeedPlaceholderView: View {
             return "Moment no longer exists. Reload private/authored moments and retry with a fresh moment ID."
         }
 
+        if fetchError.contains("moment_interaction_blocked") {
+            return "Reaction is blocked between these users. Use an unblocked viewer/author pair (or remove the block) before reacting."
+        }
+
         if fetchError.contains("validation_error") {
             return "Request payload is invalid. Re-check UUID fields and image width/height values."
         }
