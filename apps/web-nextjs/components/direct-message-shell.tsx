@@ -671,13 +671,17 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       const sentStatus = `Sent message ${created.id} into direct thread ${conversation.id}.`;
       const sendResultQuickCopy = `sender=${senderUserId || "(empty)"} | message_id=${created.id}`;
       setLastSendQuickCopy(sendResultQuickCopy);
+
+      let senderKeepPairAndSendResultBundleQuickCopy =
+        `sender_keep_pair_marker={(none)} | send_result={${sendResultQuickCopy}}`;
       if (senderKeepPairQuickCopyPrefix) {
         const keepPairQuickCopy = `${senderKeepPairQuickCopyPrefix} | message_id=${created.id}`;
         setLastSenderKeepPairQuickCopy(keepPairQuickCopy);
-        setLastSenderKeepPairAndSendResultBundleQuickCopy(
-          `sender_keep_pair_marker={${keepPairQuickCopy}} | send_result={${sendResultQuickCopy}}`,
-        );
+        senderKeepPairAndSendResultBundleQuickCopy =
+          `sender_keep_pair_marker={${keepPairQuickCopy}} | send_result={${sendResultQuickCopy}}`;
       }
+      setLastSenderKeepPairAndSendResultBundleQuickCopy(senderKeepPairAndSendResultBundleQuickCopy);
+
       setStatus(statusPrefix ? `${statusPrefix} ${sentStatus}` : sentStatus);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "message_create_failed");
