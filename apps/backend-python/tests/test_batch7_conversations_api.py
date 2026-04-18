@@ -322,6 +322,49 @@ def test_batch101_direct_member_read_cursor_contract_errors() -> None:
     app.dependency_overrides.clear()
 
 
+def test_get_or_create_direct_conversation_returns_invalid_direct_members_for_same_user() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+
+    def override_db_session():
+        db = testing_session_local()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    client = TestClient(app)
+
+    user_response = client.post(
+        "/auth/register",
+        json={"email": "batch445-invalid-direct-members@example.com", "username": "batch445_invalid_direct_members"},
+    )
+    assert user_response.status_code == 201
+
+    user_id = user_response.json()["id"]
+
+    invalid_pair_response = client.post(
+        "/conversations/direct",
+        json={"user_a_id": user_id, "user_b_id": user_id},
+    )
+    assert invalid_pair_response.status_code == 400
+    assert invalid_pair_response.json() == {
+        "error": {"code": "invalid_direct_members", "message": "invalid_direct_members"}
+    }
+
+    app.dependency_overrides.clear()
+
+
 def test_get_or_create_direct_conversation_returns_blocked_error_when_users_are_blocked() -> None:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
