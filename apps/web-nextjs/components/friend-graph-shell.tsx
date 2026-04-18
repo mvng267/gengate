@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { readPersistedAuthSession } from "@/lib/auth/client";
+import { readPersistedAuthSession, setPersistedFriendGraphPeerUserId } from "@/lib/auth/client";
 import {
   acceptFriendRequest,
   createFriendRequest,
@@ -73,12 +73,13 @@ export function FriendGraphShell({
   const [lastFriendRequestLastActionBundleCopiedText, setLastFriendRequestLastActionBundleCopiedText] = useState("");
   const [friendRequestLastActionBundleCopiedAt, setFriendRequestLastActionBundleCopiedAt] = useState<number | null>(null);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
+  const [persistedFriendGraphPeerUserId, setPersistedFriendGraphPeerUserIdState] = useState("");
   const [hasAutoLoadedSnapshot, setHasAutoLoadedSnapshot] = useState(false);
   const [pendingPairMode, setPendingPairMode] = useState<"same" | "reverse" | null>(null);
 
   const normalizedTargetUserId = targetUserId.trim();
   const selectedPendingPairModeLabel = pendingPairMode ? ` · pending pair mode: ${pendingPairMode}` : "";
-  const selectedPeerUserId = normalizedTargetUserId || userId;
+  const selectedPeerUserId = normalizedTargetUserId || persistedFriendGraphPeerUserId || userId;
   const feedHref = `/feed?author=${encodeURIComponent(userId)}&viewer=${encodeURIComponent(selectedPeerUserId)}`;
   const inboxHref = `/inbox?userA=${encodeURIComponent(userId)}&userB=${encodeURIComponent(selectedPeerUserId)}&sender=${encodeURIComponent(userId)}`;
   const notificationsHref = `/notifications?user=${encodeURIComponent(userId)}`;
@@ -172,7 +173,63 @@ export function FriendGraphShell({
   useEffect(() => {
     const persistedSession = readPersistedAuthSession();
     setCurrentSessionUserId(persistedSession?.session.user_id?.trim() ?? "");
+    setPersistedFriendGraphPeerUserIdState(persistedSession?.friendGraphPeerUserId?.trim() ?? "");
   }, []);
+
+  function resolvePendingPairPeerContext(input: {
+    selectedPeerUserId: string;
+    requesterUserId: string;
+    receiverUserId: string;
+  }): { peerUserId: string | null; resolution: string } {
+    const orderedCandidates = [input.selectedPeerUserId, input.requesterUserId, input.receiverUserId]
+      .map((candidate) => candidate.trim())
+      .filter((candidate, index, source) => candidate.length > 0 && source.indexOf(candidate) === index);
+
+    const defaultPeerCandidate = orderedCandidates[0];
+    if (!defaultPeerCandidate) {
+      return { peerUserId: null, resolution: "no_peer_candidate" };
+    }
+
+    const sessionUserId = currentSessionUserId.trim();
+    if (!sessionUserId) {
+      return { peerUserId: defaultPeerCandidate, resolution: "session_user_missing_keep_default" };
+    }
+
+    if (defaultPeerCandidate !== sessionUserId) {
+      return { peerUserId: defaultPeerCandidate, resolution: "kept_default_non_session_peer" };
+    }
+
+    const nonSessionCandidate = orderedCandidates.find((candidate) => candidate !== sessionUserId);
+    if (nonSessionCandidate) {
+      return { peerUserId: nonSessionCandidate, resolution: "swapped_from_session_self_peer" };
+    }
+
+    return { peerUserId: defaultPeerCandidate, resolution: "all_candidates_match_session_user" };
+  }
+
+  function applyPendingRequestPair(request: FriendGraphSnapshot["pendingRequests"][number], reversed: boolean) {
+    const pendingPairModeValue = reversed ? "reverse" : "same";
+    const selectedUserAId = reversed ? request.receiver.id : request.requester.id;
+    const selectedUserBId = reversed ? request.requester.id : request.receiver.id;
+
+    void selectedUserAId;
+    setTargetUserId(selectedUserBId);
+    setPendingPairMode(pendingPairModeValue);
+
+    const resolvedPeerContext = resolvePendingPairPeerContext({
+      selectedPeerUserId: selectedUserBId,
+      requesterUserId: request.requester.id,
+      receiverUserId: request.receiver.id,
+    });
+
+    setPersistedFriendGraphPeerUserId(resolvedPeerContext.peerUserId);
+    setPersistedFriendGraphPeerUserIdState(resolvedPeerContext.peerUserId ?? "");
+
+    const resolvedPeerLabel = resolvedPeerContext.peerUserId ?? "(none)";
+    setStatus(
+      `Filled ${pendingPairModeValue} pair from pending request (pending_pair_mode=${pendingPairModeValue}, peer_context_source=pending_request, peer_context_user_id=${resolvedPeerLabel}, peer_context_resolution=${resolvedPeerContext.resolution}).`,
+    );
+  }
 
   useEffect(() => {
     setTargetUserId(initialTargetUserId.trim());
@@ -798,9 +855,7 @@ export function FriendGraphShell({
                   <button
                     type="button"
                     onClick={() => {
-                      setTargetUserId(request.receiver.id);
-                      setPendingPairMode("same");
-                      setStatus("Filled same pair from pending request (pending_pair_mode=same).");
+                      applyPendingRequestPair(request, false);
                     }}
                     disabled={isLoadingSnapshot || isCreatingRequest || isSamePairSelected}
                   >
@@ -809,9 +864,7 @@ export function FriendGraphShell({
                   <button
                     type="button"
                     onClick={() => {
-                      setTargetUserId(request.requester.id);
-                      setPendingPairMode("reverse");
-                      setStatus("Filled reverse pair from pending request (pending_pair_mode=reverse).");
+                      applyPendingRequestPair(request, true);
                     }}
                     disabled={isLoadingSnapshot || isCreatingRequest || isReversePairSelected}
                   >

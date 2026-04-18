@@ -40,6 +40,7 @@ export type BackendSessionSnapshot = {
 export type StoredAuthSession = {
   refreshToken: string;
   session: BackendSessionSnapshot;
+  friendGraphPeerUserId?: string;
 };
 
 export type AuthLoginResult =

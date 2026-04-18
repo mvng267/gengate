@@ -131,6 +131,7 @@ function canUseBrowserStorage() {
 }
 
 export function persistAuthSession(payload: BackendLoginPayload): StoredAuthSession | null {
+  const currentStoredSession = readPersistedAuthSession();
   const session: StoredAuthSession = {
     refreshToken: payload.refresh_token,
     session: {
@@ -145,6 +146,8 @@ export function persistAuthSession(payload: BackendLoginPayload): StoredAuthSess
       local_clear_recommended: payload.local_clear_recommended,
       backend_detail: payload.backend_detail,
     },
+    friendGraphPeerUserId:
+      currentStoredSession?.session.user_id === payload.user_id ? currentStoredSession.friendGraphPeerUserId : undefined,
   };
 
   if (canUseBrowserStorage()) {
@@ -152,6 +155,29 @@ export function persistAuthSession(payload: BackendLoginPayload): StoredAuthSess
   }
 
   return session;
+}
+
+function writePersistedAuthSession(session: StoredAuthSession) {
+  if (!canUseBrowserStorage()) {
+    return;
+  }
+
+  window.localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(session));
+}
+
+export function setPersistedFriendGraphPeerUserId(peerUserId: string | null) {
+  const currentSession = readPersistedAuthSession();
+  if (!currentSession) {
+    return;
+  }
+
+  const normalizedPeerUserId = peerUserId?.trim() ?? "";
+  const nextSession: StoredAuthSession = {
+    ...currentSession,
+    friendGraphPeerUserId: normalizedPeerUserId || undefined,
+  };
+
+  writePersistedAuthSession(nextSession);
 }
 
 export function clearPersistedAuthSession() {
@@ -255,6 +281,7 @@ export function readPersistedAuthSession(): StoredAuthSession | null {
     return {
       refreshToken,
       session,
+      friendGraphPeerUserId: typeof parsed.friendGraphPeerUserId === "string" ? parsed.friendGraphPeerUserId : undefined,
     };
   } catch {
     return null;
@@ -472,10 +499,9 @@ export async function restorePersistedSession(): Promise<RestoreSessionResult> {
       const nextSession: StoredAuthSession = {
         refreshToken: stored.refreshToken,
         session: data,
+        friendGraphPeerUserId: stored.session.user_id === data.user_id ? stored.friendGraphPeerUserId : undefined,
       };
-      if (canUseBrowserStorage()) {
-        window.localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(nextSession));
-      }
+      writePersistedAuthSession(nextSession);
       return {
         ok: true,
         session: nextSession,

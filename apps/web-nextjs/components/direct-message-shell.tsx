@@ -138,6 +138,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   const [isDeletingMessage, setIsDeletingMessage] = useState(false);
   const [isUpdatingReadCursor, setIsUpdatingReadCursor] = useState(false);
   const [currentSessionUserId, setCurrentSessionUserId] = useState("");
+  const [persistedFriendGraphPeerUserId, setPersistedFriendGraphPeerUserId] = useState("");
   const [readStatusFocusUserIdDraft, setReadStatusFocusUserIdDraft] = useState("");
   const [readCursorTargetUserIdDraft, setReadCursorTargetUserIdDraft] = useState("");
   const [readCursorTargetMessageIdDraft, setReadCursorTargetMessageIdDraft] = useState("");
@@ -260,6 +261,7 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   useEffect(() => {
     const persistedSession = readPersistedAuthSession();
     setCurrentSessionUserId(persistedSession?.session.user_id?.trim() ?? "");
+    setPersistedFriendGraphPeerUserId(persistedSession?.friendGraphPeerUserId?.trim() ?? "");
   }, []);
 
   async function handleOpenThread() {
@@ -366,9 +368,12 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       return;
     }
 
-    const resolvedPeerUserId = [form.userAId, form.userBId, form.senderUserId, ...(conversation?.member_user_ids ?? [])]
+    const profilePeerCandidate = persistedFriendGraphPeerUserId.trim();
+    const fallbackPeerCandidate = [form.userAId, form.userBId, form.senderUserId, ...(conversation?.member_user_ids ?? [])]
       .map((value) => value.trim())
       .find((value) => value.length > 0 && value !== sessionUserId);
+    const resolvedPeerUserId =
+      profilePeerCandidate && profilePeerCandidate !== sessionUserId ? profilePeerCandidate : fallbackPeerCandidate;
 
     if (!resolvedPeerUserId) {
       setForm((current) => ({
@@ -380,10 +385,11 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       return;
     }
 
+    const peerSource = profilePeerCandidate && resolvedPeerUserId === profilePeerCandidate ? "profile_pending_pair" : "thread_context";
     const alreadyMatched = form.userAId.trim() === sessionUserId && form.userBId.trim() === resolvedPeerUserId;
     const pairStatus = alreadyMatched
-      ? "User A + User B already match current session + peer context (user_pair_source=session_user+peer_context)."
-      : "Applied current session user as User A + resolved peer as User B (user_pair_source=session_user+peer_context).";
+      ? `User A + User B already match current session + peer context (user_pair_source=session_user+peer_context, peer_source=${peerSource}).`
+      : `Applied current session user as User A + resolved peer as User B (user_pair_source=session_user+peer_context, peer_source=${peerSource}).`;
 
     setForm((current) => ({
       ...current,
@@ -407,9 +413,12 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       return;
     }
 
-    const resolvedPeerUserId = [form.userAId, form.userBId, form.senderUserId, ...(conversation?.member_user_ids ?? [])]
+    const profilePeerCandidate = persistedFriendGraphPeerUserId.trim();
+    const fallbackPeerCandidate = [form.userAId, form.userBId, form.senderUserId, ...(conversation?.member_user_ids ?? [])]
       .map((value) => value.trim())
       .find((value) => value.length > 0 && value !== sessionUserId);
+    const resolvedPeerUserId =
+      profilePeerCandidate && profilePeerCandidate !== sessionUserId ? profilePeerCandidate : fallbackPeerCandidate;
 
     if (!resolvedPeerUserId) {
       setForm((current) => ({
@@ -420,10 +429,11 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       return;
     }
 
+    const peerSource = profilePeerCandidate && resolvedPeerUserId === profilePeerCandidate ? "profile_pending_pair" : "thread_context";
     const alreadyMatched = form.userAId.trim() === resolvedPeerUserId && form.userBId.trim() === sessionUserId;
     const pairStatus = alreadyMatched
-      ? "User A + User B already match peer context + current session (user_pair_source=peer_context+session_user)."
-      : "Applied resolved peer as User A + current session user as User B (user_pair_source=peer_context+session_user).";
+      ? `User A + User B already match peer context + current session (user_pair_source=peer_context+session_user, peer_source=${peerSource}).`
+      : `Applied resolved peer as User A + current session user as User B (user_pair_source=peer_context+session_user, peer_source=${peerSource}).`;
 
     setForm((current) => ({
       ...current,
