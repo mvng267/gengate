@@ -12,9 +12,29 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 433
-- Trục công việc: iOS friend graph pending-pair peer-context parity — persist selected pending-request peer vào session context, guard profile pending-pair peer context khỏi drift về session-self peer, và ưu tiên context đó trong inbox quick-apply direct-thread pivots.
-- Trạng thái: batch433_complete_ready_to_open_434.
+- Batch workflow chính thức hiện tại: 434
+- Trục công việc: web friend graph pending-pair peer-context persistence parity — persist selected pending-request peer vào web auth session storage (kèm self-drift guard) và ưu tiên context đó trong web inbox quick-apply direct-thread pivots.
+- Trạng thái: batch434_complete_ready_to_open_435.
+
+## Batch 434 handoff (closed)
+- Batch vừa xong: **434**
+- Scope đã chốt:
+  - Web Profile friend-graph pending-pair quick-apply nay persist `friendGraphPeerUserId` vào auth session storage với self-drift guard token `peer_context_resolution=...`.
+  - Web Inbox quick-apply nay ưu tiên persisted pending-pair peer context trước thread context, kèm status token `peer_source=profile_pending_pair|thread_context`.
+- Files:
+  - `apps/web-nextjs/lib/auth/types.ts`
+  - `apps/web-nextjs/lib/auth/client.ts`
+  - `apps/web-nextjs/components/friend-graph-shell.tsx`
+  - `apps/web-nextjs/components/direct-message-shell.tsx`
+- Verify:
+  - Web: `cd apps/web-nextjs && npm run typecheck` ✅ (`tsc --noEmit`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.44s`)
+- Blocker/rủi ro:
+  - none.
+- Commit đã chốt:
+  - `98323bb` — `batch434: persist web pending-pair peer context for inbox quick-apply parity`
+- Next:
+  - mở batch435 micro-slice kế tiếp (ưu tiên product seam parity token còn thiếu).
 
 ## Batch 433 handoff (closed)
 - Batch vừa xong: **433**
