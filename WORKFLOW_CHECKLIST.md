@@ -89,21 +89,21 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **436**
-- Scope hiện tại: web inbox listed-thread row pair parity — align thứ tự resolve pair với iOS (`user_a_form_member` -> `session_user_member` -> `row_first_member_fallback`) và thêm token `row_pair_source=...` vào pair hint + row-apply status.
+- Batch workflow chính thức hiện tại: **437**
+- Scope hiện tại: iOS inbox listed-thread row pair-source parity — thêm token `row_pair_source=...` cho pair hint của listed row + status prefix lúc apply row context, đồng bộ với web precedence tokens (`user_a_form_member` / `session_user_member` / `row_first_member_fallback` / `row_incomplete`).
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/components/direct-message-shell.tsx`
+  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run typecheck` → ✅ (`tsc --noEmit`)
+  - `cd apps/ios-swift && swift build` → ✅ (`Build complete! (14.05s)`)
   - `cd apps/backend-python && make test-friendships` → ✅ (`8 passed in 0.42s`)
 - Git mốc gần nhất:
-  - commit đã chốt gần nhất: `b404b0a` — `batch436: align web inbox listed-thread row pair parity tokens`
+  - commit đã chốt gần nhất: `67a3591` — `batch437: align ios listed-thread row pair-source parity tokens`
   - working tree hiện tại: dirty (workflow docs update pending)
 - Blocker nếu có:
   - none.
 - Bước kế tiếp:
-  - sync workflow docs cho batch436 clean state, rồi mở batch437 với 1 micro-slice product seam kế tiếp.
+  - sync workflow docs cho batch437 clean state, rồi mở batch438 với 1 micro-slice product seam kế tiếp.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Quick create + feed-gate bundle: moment_create_marker={author=... | image_url=... | caption=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` + line `Last create + feed-gate bundle: last_create_feed_visibility_delta={created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Bấm `Copy quick create + feed-gate bundle` để verify one-tap create bundle payload và bấm thêm `Copy last create + feed-gate bundle` để verify deterministic payload bundle cho lần create gần nhất; sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`; bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy last copied delete summary feedback`, verify line source-state rồi bấm `Copy delete copy audit for first ready source` để one-shot copy `delete_copy_audit=source:.../value:...`; đối chiếu source được pick với line source-state.

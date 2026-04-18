@@ -12,9 +12,26 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 436
-- Trục công việc: web inbox listed-thread row pair parity — align deterministic row pair resolution precedence with iOS (`user_a_form_member` -> `session_user_member` -> `row_first_member_fallback`) and emit `row_pair_source=...` token in pair hint + row-apply status.
-- Trạng thái: batch436_verify_complete_commit_pending.
+- Batch workflow chính thức hiện tại: 437
+- Trục công việc: iOS inbox listed-thread row pair-source parity — emit deterministic `row_pair_source=...` token in listed row pair hint + row-apply status, aligned with web precedence tokens (`user_a_form_member` -> `session_user_member` -> `row_first_member_fallback`, fallback `row_incomplete`).
+- Trạng thái: batch437_verify_complete_commit_pending.
+
+## Batch 437 handoff (closed)
+- Batch vừa xong: **437**
+- Scope đã chốt:
+  - iOS listed direct-thread row pair resolution nay expose deterministic `pairSource` token (`user_a_form_member` / `session_user_member` / `row_first_member_fallback` / `row_incomplete`) trong helper `directConversationPair`.
+  - UI listed row nay hiện pair hint `row_pair_source=...` và status apply row context nay mang prefix `Applied listed direct thread row context (row_pair_source=...)` để parity với web diagnostics.
+- Files:
+  - `apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift`
+- Verify:
+  - iOS: `cd apps/ios-swift && swift build` ✅ (`Build complete! (14.05s)`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.42s`)
+- Blocker/rủi ro:
+  - none.
+- Commit đã chốt:
+  - `67a3591` — `batch437: align ios listed-thread row pair-source parity tokens`
+- Next:
+  - mở batch438 micro-slice product seam kế tiếp.
 
 ## Batch 436 handoff (closed)
 - Batch vừa xong: **436**
