@@ -22,10 +22,10 @@
   - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.44s`)
 - Git:
   - latest feature commit:
-    - `(this commit)` — `batch435: align ios inbox peer-source token on kept-pair quick-apply`
-  - working tree: clean (expected after committing this batch)
+    - `92c3b64` — `batch435: align ios inbox peer-source token on kept-pair quick-apply`
+  - working tree: clean
 - Blocker: none.
-- Next: commit batch435 changes, sync workflow docs, then open batch436 micro-slice.
+- Next: open batch436 micro-slice.
 - Batch 435 handoff:
   - scope: iOS inbox quick-apply now includes deterministic `peer_source=profile_pending_pair|thread_context` token for both already-matched and applied status branches, aligning with web peer-source token semantics.
   - verify: iOS swift build ✅, backend make test-friendships ✅.

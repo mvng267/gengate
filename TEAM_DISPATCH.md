@@ -14,7 +14,7 @@
 ## Active batch
 - Batch workflow chính thức hiện tại: 435
 - Trục công việc: iOS inbox quick-apply status parity — align deterministic `peer_source=profile_pending_pair|thread_context` token for both already-matched + applied branches when resolving session+peer pair in direct-thread quick-open.
-- Trạng thái: batch435_verify_complete_commit_pending.
+- Trạng thái: batch435_complete_ready_to_open_436.
 
 ## Batch 435 handoff (closed)
 - Batch vừa xong: **435**
@@ -29,7 +29,7 @@
 - Blocker/rủi ro:
   - none.
 - Commit đã chốt:
-  - `(pending)` — `batch435: align ios inbox peer-source token on kept-pair quick-apply`
+  - `92c3b64` — `batch435: align ios inbox peer-source token on kept-pair quick-apply`
 - Next:
   - mở batch436 micro-slice product seam kế tiếp.
 
