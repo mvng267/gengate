@@ -12,9 +12,28 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 441
-- Trục công việc: web friend-request action error-token parity — preserve backend `error.code` for accept/reject failures and extend deterministic hint mapping for `request_not_found` in friend graph shell.
-- Trạng thái: batch441_complete_ready_to_open_442.
+- Batch workflow chính thức hiện tại: 442
+- Trục công việc: backend moments privacy gate — exclude blocked friend relationships from private feed and reject blocked reaction create with deterministic token `moment_interaction_blocked`.
+- Trạng thái: batch442_complete_ready_to_open_443.
+
+## Batch 442 handoff (closed)
+- Batch vừa xong: **442**
+- Scope đã chốt:
+  - Backend moments private feed nay bỏ qua accepted-friend authors khi viewer/author có block hai chiều.
+  - Backend create reaction cho moment nay trả deterministic error token `moment_interaction_blocked` nếu reactor và author đang block nhau.
+- Files:
+  - `apps/backend-python/app/repositories/blocks.py`
+  - `apps/backend-python/app/services/moments.py`
+  - `apps/backend-python/tests/test_moments_api.py`
+- Verify:
+  - Backend targeted: `cd apps/backend-python && make test-contracts` ✅ (`110 passed in 2.46s`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.39s`)
+- Blocker/rủi ro:
+  - none.
+- Commit đã chốt:
+  - `67334f5` — `batch442: gate moments feed and reactions by block relationships`
+- Next:
+  - mở batch443 micro-slice web/iOS moments token-hint parity cho `moment_interaction_blocked`.
 
 ## Batch 441 handoff (closed)
 - Batch vừa xong: **441**

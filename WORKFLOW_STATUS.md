@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 441
+- Batch: 442
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 441 web friend-request action error-token parity — preserve backend `error.code` for accept/reject failures and extend deterministic friend-request hint mapping for `request_not_found`.
+- Scope: batch 442 backend moments privacy gate — hide blocked friendships from private feed and reject blocked moment reactions with deterministic token.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,19 +16,25 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/web-nextjs/lib/friends/client.ts
-  - apps/web-nextjs/components/friend-graph-shell.tsx
+  - apps/backend-python/app/repositories/blocks.py
+  - apps/backend-python/app/services/moments.py
+  - apps/backend-python/tests/test_moments_api.py
 - Test:
-  - Web targeted verify: `cd apps/web-nextjs && npm run typecheck` ✅ (`tsc --noEmit`)
-  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.51s`)
+  - Backend targeted verify: `cd apps/backend-python && make test-contracts` ✅ (`110 passed in 2.46s`)
+  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.39s`)
 - Git:
   - latest feature commit:
-    - `0f08286` — `batch441: preserve friend-request action error tokens with request_not_found hint`
+    - `67334f5` — `batch442: gate moments feed and reactions by block relationships`
   - latest workflow-docs commit before this update:
-    - `084f279` — `batch439: sync workflow docs after web sender bundle quick-copy parity`
+    - `cee6570` — `batch441: sync workflow docs after friend-request action error-token parity`
   - working tree: clean
 - Blocker: none.
-- Next: open batch442 micro-slice.
+- Next: open batch443 micro-slice (web/iOS moments token-hint parity for `moment_interaction_blocked`).
+- Batch 442 handoff:
+  - commit:
+    - `67334f5` — `batch442: gate moments feed and reactions by block relationships`
+  - scope: backend moments private feed now excludes accepted friends when either side has an active block; moment reaction create now returns deterministic `moment_interaction_blocked` when reactor/author pair is blocked.
+  - verify: backend make test-contracts ✅, backend make test-friendships ✅.
 - Batch 441 handoff:
   - commit:
     - `0f08286` — `batch441: preserve friend-request action error tokens with request_not_found hint`

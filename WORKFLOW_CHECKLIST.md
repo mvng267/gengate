@@ -48,7 +48,7 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current canonical state
 
-- Batch workflow chính thức mới nhất trong checklist/status: **441 — web friend-request action error-token parity now preserves backend `error.code` on accept/reject failures and adds deterministic `request_not_found` hint mapping in friend graph shell.**
+- Batch workflow chính thức mới nhất trong checklist/status: **442 — backend moments privacy gate now excludes blocked friendships from private feed and returns deterministic `moment_interaction_blocked` when blocked users react to moments.**
 
 ## Reporting hard rule
 
@@ -89,23 +89,24 @@ Dùng checklist này làm nguồn phối hợp chung giữa main agent và `pika
 
 ## Current batch slice
 
-- Batch workflow chính thức hiện tại: **441**
-- Scope hiện tại: web friend-request action error-token parity — giữ nguyên backend `error.code` cho accept/reject failure và bổ sung deterministic `Hint:` mapping cho `request_not_found`.
+- Batch workflow chính thức hiện tại: **442**
+- Scope hiện tại: backend moments privacy gate — loại accepted-friend đã block khỏi private feed và chặn create reaction xuyên block bằng token deterministic.
 - Trạng thái hiện tại: **complete**
 - File đã đụng:
-  - `apps/web-nextjs/lib/friends/client.ts`
-  - `apps/web-nextjs/components/friend-graph-shell.tsx`
+  - `apps/backend-python/app/repositories/blocks.py`
+  - `apps/backend-python/app/services/moments.py`
+  - `apps/backend-python/tests/test_moments_api.py`
 - Test-verify:
-  - `cd apps/web-nextjs && npm run typecheck` → ✅ (`tsc --noEmit`)
-  - `cd apps/backend-python && make test-friendships` → ✅ (`8 passed in 0.51s`)
+  - `cd apps/backend-python && make test-contracts` → ✅ (`110 passed in 2.46s`)
+  - `cd apps/backend-python && make test-friendships` → ✅ (`8 passed in 0.39s`)
 - Git mốc gần nhất:
-  - commit đã chốt gần nhất: `0f08286` — `batch441: preserve friend-request action error tokens with request_not_found hint`
-  - commit docs workflow gần nhất trước nhịp này: `084f279` — `batch439: sync workflow docs after web sender bundle quick-copy parity`
+  - commit đã chốt gần nhất: `67334f5` — `batch442: gate moments feed and reactions by block relationships`
+  - commit docs workflow gần nhất trước nhịp này: `cee6570` — `batch441: sync workflow docs after friend-request action error-token parity`
   - working tree hiện tại: clean
 - Blocker nếu có:
   - none.
 - Bước kế tiếp:
-  - mở batch442 với 1 micro-slice product seam kế tiếp (ưu tiên moment/feed wiring, tránh metadata churn).
+  - mở batch443 với 1 micro-slice web/iOS moments error-token-hint parity cho `moment_interaction_blocked`.
 - MVP-testable run/test path (latest stable):
   - Backend: tạo request qua `POST /friends/requests` -> reject qua `POST /friends/requests/{id}/reject` -> list lại `GET /friends/requests?user_id=<id>` thấy `status: rejected`.
   - Web Feed (`/feed`): set `Author user UUID` + `Feed viewer UUID` -> `Create moment + image shell` -> `Reload private friend feed` -> verify line `Quick feed visibility gate summary: viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...` + line `Quick create + feed-gate bundle: moment_create_marker={author=... | image_url=... | caption=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}` + line `Last create feed-visibility delta: created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...` + line `Last create + feed-gate bundle: last_create_feed_visibility_delta={created_moment_id=... / viewer=... / feed_count=... / first_moment_id=...} | feed_gate_summary={viewer_access=... / viewer_access_reason=... / gate_snapshot_source=... / visible_count=... / first_moment_id=...}`; status sau reload/create phải có `Gate summary: ... viewer_access_reason=... / gate_snapshot_source=...`. Bấm `Copy quick create + feed-gate bundle` để verify one-tap create bundle payload và bấm thêm `Copy last create + feed-gate bundle` để verify deterministic payload bundle cho lần create gần nhất; sau đó set `Moment ID to delete` (hoặc bấm `Use first authored moment as delete target`) -> `Delete moment (web parity)` -> verify line `Last delete result summary: delete_result=deleted / moment_id=... / author_user_id=... / deleted_at=... / author_loaded_count=... / feed_match_count=...` và line `Quick delete parity summary: delete_moment_id=... / authored_count=... / feed_count=... / gate_snapshot_source=... / delete_snapshot_source=manual_input|preset_row|first_authored_quick_pick`; bấm `Copy quick delete parity summary` + `Copy last delete result summary` + `Copy last copied delete summary feedback`, verify line source-state rồi bấm `Copy delete copy audit for first ready source` để one-shot copy `delete_copy_audit=source:.../value:...`; đối chiếu source được pick với line source-state.
