@@ -40,6 +40,7 @@ struct InboxPlaceholderView: View {
     @State private var sendStatusHint: String?
     @State private var lastSendQuickCopy: String = "sender=(none) | message_id=(none)"
     @State private var lastSenderKeepPairQuickCopy: String = "user_pair_source=(none) | sender_source=(none) | sender=(none) | user_a=(none) | user_b=(none) | message_id=(none)"
+    @State private var lastSenderKeepPairAndSendResultBundleQuickCopy: String = "sender_keep_pair_marker={(none)} | send_result={(none)}"
     @State private var lastReadCursorApplyQuickCopy: String = "target_user=(none) | previous_cursor_message=(none) | applied_message=(none) | current_member_cursor=(none) | focus_user=(none) | read_state=unknown | read_cursor_apply_state=unknown"
     @State private var lastReadCursorTriageQuickCopy: String = "read_cursor_triage=target_user:(none),previous:(none),applied:(none),current:(none),apply_state:unknown"
     @State private var lastFirstUnreadJumpQuickCopy: String = "focus_user=(none) | first_unread_candidate=(none) | applied_message=(none) | read_state=unknown"
@@ -2816,13 +2817,10 @@ use_when=\(useWhenText)
     }
 
     private var senderKeepPairAndSendResultBundleQuickCopySummary: String {
-        let normalizedSenderKeepPair = lastSenderKeepPairQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
-        let normalizedSendResult = lastSendQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        let senderKeepPairValue = normalizedSenderKeepPair.isEmpty ? "(none)" : normalizedSenderKeepPair
-        let sendResultValue = normalizedSendResult.isEmpty ? "(none)" : normalizedSendResult
-
-        return "sender_keep_pair_marker={\(senderKeepPairValue)} | send_result={\(sendResultValue)}"
+        let normalizedBundle = lastSenderKeepPairAndSendResultBundleQuickCopy.trimmingCharacters(in: .whitespacesAndNewlines)
+        return normalizedBundle.isEmpty
+            ? "sender_keep_pair_marker={(none)} | send_result={(none)}"
+            : normalizedBundle
     }
 
     private var latestLoadedMessageID: String? {
@@ -4235,6 +4233,7 @@ use_when=\(useWhenText)
             fetchError = nil
             lastSendQuickCopy = "sender=(none) | message_id=(none)"
             lastSenderKeepPairQuickCopy = "user_pair_source=(none) | sender_source=(none) | sender=(none) | user_a=(none) | user_b=(none) | message_id=(none)"
+            lastSenderKeepPairAndSendResultBundleQuickCopy = "sender_keep_pair_marker={(none)} | send_result={(none)}"
             if let normalizedStatusPrefix, !normalizedStatusPrefix.isEmpty {
                 sendStatusHint = "\(normalizedStatusPrefix) Loading inbox thread..."
             }
@@ -4407,11 +4406,16 @@ use_when=\(useWhenText)
             let senderValue = senderUserID.isEmpty ? "(empty)" : senderUserID
             let sendResultQuickCopy = "sender=\(senderValue) | message_id=\(created.id)"
             lastSendQuickCopy = sendResultQuickCopy
+
+            var senderKeepPairAndSendResultBundleQuickCopy = "sender_keep_pair_marker={(none)} | send_result={\(sendResultQuickCopy)}"
             if let normalizedSenderKeepPairQuickCopyPrefix,
                !normalizedSenderKeepPairQuickCopyPrefix.isEmpty {
                 let keepPairQuickCopy = "\(normalizedSenderKeepPairQuickCopyPrefix) | message_id=\(created.id)"
                 lastSenderKeepPairQuickCopy = keepPairQuickCopy
+                senderKeepPairAndSendResultBundleQuickCopy = "sender_keep_pair_marker={\(keepPairQuickCopy)} | send_result={\(sendResultQuickCopy)}"
             }
+            lastSenderKeepPairAndSendResultBundleQuickCopy = senderKeepPairAndSendResultBundleQuickCopy
+
             if let statusPrefix {
                 sendStatusHint = "\(statusPrefix) \(sentStatus)"
             } else {
