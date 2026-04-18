@@ -1,8 +1,8 @@
 # GenGate Workflow Status
 
-- Batch: 444
+- Batch: 445
 - Worker: team (`pikamen` backend / `pikachu-web` web / `pikame-ios` iOS)
-- Scope: batch 444 direct messaging guard — block `/conversations/direct` open when users are blocked and surface deterministic `direct_conversation_blocked` hint parity on web/iOS inbox shells.
+- Scope: batch 445 direct messaging input-guard parity — preserve deterministic `invalid_direct_members` contract (same-user direct open) and map tokenized `Hint:` fallback on web/iOS inbox shells.
 - Status: complete
 - MVP status: MVP-testable
 - MVP human test path:
@@ -16,24 +16,22 @@
   - Web Notifications (`/notifications`): nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
   - iOS Notifications: nhập user hợp lệ -> `Create notification` -> `Mark read`/`Mark unread` đúng notification vừa tạo -> verify payload có `lifecycle_pair_state=matched` + `lifecycle_pair_subject=same_notification` + `lifecycle_pair_transition=<create_state->mutation_state>` + `lifecycle_pair_transition_context=changed|unchanged`; thử toggle notification khác để thấy `lifecycle_pair_state=mismatched` + `lifecycle_pair_subject=cross_notification`; khi chưa có cặp thì `lifecycle_pair_state=missing` + `lifecycle_pair_subject=none` + `lifecycle_pair_transition=none->none` + `lifecycle_pair_transition_context=none`. Bấm `Copy quick lifecycle pair` để kiểm tra full create+mutation payload; bấm thêm `Copy quick lifecycle pair mutation` để kiểm tra payload one-tap mutation-focused gồm lifecycle state/subject/transition/context + `mutation_delta(...)`; bấm thêm `Copy quick lifecycle snapshot audit` để verify payload deterministic dạng `lifecycle_pair_state=... / lifecycle_pair_subject=... / lifecycle_pair_transition=... / lifecycle_pair_transition_context=... / create_notification_id=... / mutation_notification_id=... / unread_summary(current_page_unread=... / total_unread_count=...) / window(limit=...,offset=...,filter_mode=all|unread_only)`; sau đó bấm `Delete` ở notification cần xoá và verify line `Quick delete result summary: delete_result=deleted / notification_id=... / previous_read_state=... / current_page_count=... / current_page_unread=... / total_unread_count=... / window(limit=...,offset=...,filter_mode=all|unread_only)`; bấm `Copy quick delete result summary` để verify payload deterministic delete parity.
 - Files:
-  - apps/backend-python/app/services/conversations.py
-  - apps/backend-python/app/modules/conversations/router.py
   - apps/backend-python/tests/test_batch7_conversations_api.py
   - apps/web-nextjs/components/direct-message-shell.tsx
   - apps/ios-swift/GenGate/Features/Inbox/InboxPlaceholderView.swift
 - Test:
-  - Backend targeted verify: `cd apps/backend-python && make test-contracts` ✅ (`111 passed in 2.07s`)
-  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.36s`)
+  - Backend targeted verify: `cd apps/backend-python && make test-contracts` ✅ (`112 passed in 2.05s`)
+  - Backend guardrail verify: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.42s`)
   - Web targeted verify: `cd apps/web-nextjs && npm run typecheck` ✅ (`tsc --noEmit`)
-  - iOS targeted verify: `cd apps/ios-swift && swift build` ✅ (`Build complete! (13.20s)`)
+  - iOS targeted verify: `cd apps/ios-swift && swift build` ✅ (`Build complete! (13.93s)`)
 - Git:
   - latest feature commit:
-    - `da2d75b` — `batch444: gate direct conversation open by block relationships`
+    - `41ef561` — `batch445: align invalid direct member hint parity on web and ios`
   - latest workflow-docs commit before this update:
-    - `ea6da32` — `batch442: sync workflow docs after moments block-gating backend slice`
-  - working tree: dirty (workflow docs pending this update)
+    - `10a0bce` — `batch444: sync workflow docs after direct conversation block guard`
+  - working tree: clean
 - Blocker: none.
-- Next: open batch445 micro-slice to align web/iOS direct-thread input guard hint parity for empty/invalid pair (`invalid_direct_members`) with deterministic tokenized UX.
+- Next: open batch446 micro-slice to preflight same-user direct-thread open in web/iOS quick-apply flows (emit deterministic `invalid_direct_members` guard before network call).
 - Batch 442 handoff:
   - commit:
     - `67334f5` — `batch442: gate moments feed and reactions by block relationships`
