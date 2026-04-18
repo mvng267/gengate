@@ -4236,6 +4236,19 @@ use_when=\(useWhenText)
             return
         }
 
+        if trimmedUserA == trimmedUserB {
+            if !silent {
+                fetchError = nil
+                if let normalizedStatusPrefix,
+                   !normalizedStatusPrefix.isEmpty {
+                    sendStatusHint = "\(normalizedStatusPrefix) invalid_direct_members"
+                } else {
+                    sendStatusHint = "invalid_direct_members"
+                }
+            }
+            return
+        }
+
         isLoading = true
         if !silent {
             fetchError = nil

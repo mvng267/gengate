@@ -565,6 +565,12 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
     const senderUserId = (input?.senderUserIdOverride ?? form.senderUserId).trim();
     const statusPrefix = input?.statusPrefix?.trim();
 
+    if (userAId.length > 0 && userAId === userBId) {
+      const preflightStatus = statusPrefix ? `${statusPrefix} invalid_direct_members` : "invalid_direct_members";
+      setStatus(preflightStatus);
+      return;
+    }
+
     setIsOpening(true);
     setStatus(statusPrefix ? `${statusPrefix} Opening direct thread shell...` : "Opening direct thread shell...");
     setLastSendQuickCopy("sender=(none) | message_id=(none)");
