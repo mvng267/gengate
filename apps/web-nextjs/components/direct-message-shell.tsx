@@ -106,8 +106,53 @@ function resolveDirectMessageErrorHint(message: string): string | null {
   return null;
 }
 
-function derivePeerUserIdFromConversation(memberUserIds: string[], userId: string): string {
-  return memberUserIds.find((memberUserId) => memberUserId.trim() && memberUserId !== userId) ?? "";
+type DirectConversationPairSource =
+  | "user_a_form_member"
+  | "session_user_member"
+  | "row_first_member_fallback"
+  | "row_incomplete";
+
+function resolveDirectConversationPair(input: {
+  memberUserIds: string[];
+  currentUserAId: string;
+  sessionUserId: string;
+}): {
+  userAId: string;
+  userBId: string;
+  pairSource: DirectConversationPairSource;
+  isComplete: boolean;
+} {
+  const normalizedMembers = input.memberUserIds.map((value) => value.trim()).filter((value) => value.length > 0);
+  if (normalizedMembers.length < 2) {
+    return {
+      userAId: "",
+      userBId: "",
+      pairSource: "row_incomplete",
+      isComplete: false,
+    };
+  }
+
+  const normalizedCurrentUserAId = input.currentUserAId.trim();
+  const normalizedSessionUserId = input.sessionUserId.trim();
+
+  let resolvedUserAId = normalizedMembers[0] ?? "";
+  let pairSource: DirectConversationPairSource = "row_first_member_fallback";
+
+  if (normalizedCurrentUserAId && normalizedMembers.includes(normalizedCurrentUserAId)) {
+    resolvedUserAId = normalizedCurrentUserAId;
+    pairSource = "user_a_form_member";
+  } else if (normalizedSessionUserId && normalizedMembers.includes(normalizedSessionUserId)) {
+    resolvedUserAId = normalizedSessionUserId;
+    pairSource = "session_user_member";
+  }
+
+  const resolvedUserBId = normalizedMembers.find((memberUserId) => memberUserId !== resolvedUserAId) ?? "";
+  return {
+    userAId: resolvedUserAId,
+    userBId: resolvedUserBId,
+    pairSource,
+    isComplete: resolvedUserAId.length > 0 && resolvedUserBId.length > 0,
+  };
 }
 
 export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", initialSenderUserId = "" }: DirectMessageShellProps) {
@@ -328,34 +373,37 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
   }
 
   async function handleUseListedDirectConversation(directConversation: DirectConversation) {
-    const fallbackUserId = directConversation.member_user_ids[0]?.trim() ?? "";
-    const listContextUserId = form.userAId.trim() || currentSessionUserId.trim() || fallbackUserId;
-    const peerUserId = derivePeerUserIdFromConversation(directConversation.member_user_ids, listContextUserId);
+    const sessionUserId = currentSessionUserId.trim();
+    const rowPair = resolveDirectConversationPair({
+      memberUserIds: directConversation.member_user_ids,
+      currentUserAId: form.userAId,
+      sessionUserId,
+    });
 
-    if (!listContextUserId || !peerUserId) {
+    if (!rowPair.isComplete) {
       setStatus("direct_conversation_row_pair_incomplete");
       return;
     }
 
-    const sessionUserId = currentSessionUserId.trim();
     const senderUserId =
-      sessionUserId && directConversation.member_user_ids.includes(sessionUserId) ? sessionUserId : listContextUserId;
+      sessionUserId && directConversation.member_user_ids.includes(sessionUserId) ? sessionUserId : rowPair.userAId;
+    const rowContextStatusPrefix = `Applied listed direct thread row context (row_pair_source=${rowPair.pairSource}).`;
 
     setIsOpening(true);
     setLastSendQuickCopy("sender=(none) | message_id=(none)");
-    setStatus("Applied listed direct thread row context. Loading direct thread shell...");
+    setStatus(`${rowContextStatusPrefix} Loading direct thread shell...`);
 
     try {
       await hydrateDirectThread({
         conversation: directConversation,
-        userAId: listContextUserId,
-        userBId: peerUserId,
+        userAId: rowPair.userAId,
+        userBId: rowPair.userBId,
         senderUserId,
-        statusPrefix: "Applied listed direct thread row context.",
+        statusPrefix: rowContextStatusPrefix,
       });
     } catch (error) {
       const failureStatus = error instanceof Error ? error.message : "direct_conversation_failed";
-      setStatus(`Applied listed direct thread row context. ${failureStatus}`);
+      setStatus(`${rowContextStatusPrefix} ${failureStatus}`);
     }
 
     setIsOpening(false);
@@ -1457,9 +1505,11 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
       ) : (
         <ul>
           {loadedUserDirectConversations.map((directConversation) => {
-            const fallbackUserId = directConversation.member_user_ids[0]?.trim() ?? "";
-            const listContextUserId = form.userAId.trim() || currentSessionUserId.trim() || fallbackUserId;
-            const peerUserId = derivePeerUserIdFromConversation(directConversation.member_user_ids, listContextUserId);
+            const rowPair = resolveDirectConversationPair({
+              memberUserIds: directConversation.member_user_ids,
+              currentUserAId: form.userAId,
+              sessionUserId: currentSessionUserId,
+            });
             const latestMessageSummary =
               directConversation.latest_message_id && directConversation.latest_message_sender_user_id
                 ? `${directConversation.latest_message_sender_user_id}: ${directConversation.latest_message_preview ?? ""}`
@@ -1470,7 +1520,11 @@ export function DirectMessageShell({ initialUserAId = "", initialUserBId = "", i
                 <strong>{directConversation.id}</strong>
                 {" · members: "}
                 {directConversation.member_user_ids.join(", ")}
-                {listContextUserId && peerUserId ? <span>{` · pair_hint: ${listContextUserId} ↔ ${peerUserId}`}</span> : null}
+                {rowPair.isComplete ? (
+                  <span>{` · pair_hint: ${rowPair.userAId} ↔ ${rowPair.userBId} (row_pair_source=${rowPair.pairSource})`}</span>
+                ) : (
+                  <span>{" · row_pair_source=row_incomplete"}</span>
+                )}
                 <div>
                   latest_message_id: <code>{directConversation.latest_message_id ?? "(none)"}</code>
                   {" · "}
