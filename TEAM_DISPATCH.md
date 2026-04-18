@@ -12,9 +12,26 @@
 - Không dùng cron coordinator lặp dài dòng; chỉ dùng nhắc việc/ngòi nổ ngắn nếu thật sự cần.
 
 ## Active batch
-- Batch workflow chính thức hiện tại: 438
-- Trục công việc: iOS inbox sender keep-pair + send-result bundle quick-copy parity — persist deterministic `sender_keep_pair_marker={...} | send_result={...}` bundle snapshot after send and reset bundle snapshot on thread reload.
-- Trạng thái: batch438_complete_ready_to_open_439.
+- Batch workflow chính thức hiện tại: 439
+- Trục công việc: web inbox sender keep-pair + send-result bundle quick-copy parity — persist deterministic `sender_keep_pair_marker={...} | send_result={...}` bundle snapshot after send even without keep-pair prefix.
+- Trạng thái: batch439_complete_ready_to_open_440.
+
+## Batch 439 handoff (closed)
+- Batch vừa xong: **439**
+- Scope đã chốt:
+  - Web inbox send flow nay luôn persist bundle quick-copy sau send; nếu không có keep-pair prefix thì dùng fallback deterministic `sender_keep_pair_marker={(none)} | send_result={...}`.
+  - Tránh tình huống bundle quick-copy bị giữ default/stale khi send thành công nhưng không đi qua nhánh keep-pair prefix.
+- Files:
+  - `apps/web-nextjs/components/direct-message-shell.tsx`
+- Verify:
+  - Web: `cd apps/web-nextjs && npm run typecheck` ✅ (`tsc --noEmit`)
+  - Backend guardrail: `cd apps/backend-python && make test-friendships` ✅ (`8 passed in 0.58s`)
+- Blocker/rủi ro:
+  - none.
+- Commit đã chốt:
+  - `63d25a5` — `batch439: persist web sender keep-pair send-result bundle quick-copy`
+- Next:
+  - mở batch440 micro-slice product seam kế tiếp.
 
 ## Batch 438 handoff (closed)
 - Batch vừa xong: **438**
